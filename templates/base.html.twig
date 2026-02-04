@@ -1,17 +1,61 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
+<html lang="fr">
+  <head>
+    {# Meta #}
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-    </body>
+    <title>{% block title %}StudyFlow{% endblock %}</title>
+
+    {# Stylesheets #} {% block stylesheets %}
+    <!-- Bootstrap -->
+    <link
+      rel="stylesheet"
+      href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}"
+    />
+
+    <!-- Template CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/css/fontawesome.css') }}" />
+    <link
+      rel="stylesheet"
+      href="{{ asset('assets/css/templatemo-scholar.css') }}"
+    />
+    <link rel="stylesheet" href="{{ asset('assets/css/owl.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/animate.css') }}" />
+
+    <!-- Swiper -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/swiper@7/swiper-bundle.min.css"
+    />
+    <link rel="stylesheet" href="{{ asset('assets/admin/css/bootstrap.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/admin/vendors/css/vendors.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/admin/css/theme.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/admin/css/custom.min.css') }}">
+
+    {% endblock %}
+  </head>
+
+  <body class="homepage">
+    {% block body %}
+    
+    {% endblock %}
+
+    <!-- ======= JavaScripts ======= -->
+    {% block javascripts %}
+    <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
+
+    <script src="{{ asset('assets/js/isotope.min.js') }}"></script>
+    <script src="{{ asset('assets/js/owl-carousel.js') }}"></script>
+    <script src="{{ asset('assets/js/counter.js') }}"></script>
+    <script src="{{ asset('assets/js/custom.js') }}"></script>
+    <script src="{{ asset('assets/admin/js/vendors.min.js') }}"></script>
+<script src="{{ asset('assets/admin/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('assets/admin/js/theme.min.js') }}"></script>
+<script src="{{ asset('assets/admin/js/custom.min.js') }}"></script>
+
+    {% endblock %} {% block body_scripts %}{% endblock %}
+  </body>
 </html>
