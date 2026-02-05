@@ -24,7 +24,7 @@ class Chapitre
 
     #[ORM\ManyToOne(inversedBy: 'chapitres')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Cours $courseId = null;
+    private ?Cours $course = null;
 
     public function getId(): ?int
     {

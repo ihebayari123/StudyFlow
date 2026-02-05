@@ -27,7 +27,7 @@ class Question
 
     #[ORM\ManyToOne(inversedBy: 'questions')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Quiz $quizId = null;
+    private ?Quiz $quiz = null;
 
     public function getId(): ?int
     {

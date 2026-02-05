@@ -32,7 +32,7 @@ class Event
 
     #[ORM\ManyToOne(inversedBy: 'events')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Utilisateur $userId = null;
+    private ?Utilisateur $user = null;
 
     /**
      * @var Collection<int, Sponsor>

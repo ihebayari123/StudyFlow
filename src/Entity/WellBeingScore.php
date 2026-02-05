@@ -27,7 +27,7 @@ class WellBeingScore
 
     #[ORM\OneToOne(inversedBy: 'wellBeingScore', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?StressSurvey $surveyId = null;
+    private ?StressSurvey $survey = null;
 
     public function getId(): ?int
     {

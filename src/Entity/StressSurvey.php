@@ -25,7 +25,7 @@ class StressSurvey
 
     #[ORM\ManyToOne(inversedBy: 'stressSurveys')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Utilisateur $userId = null;
+    private ?Utilisateur $user = null;
 
     #[ORM\OneToOne(mappedBy: 'surveyId', cascade: ['persist', 'remove'])]
     private ?WellBeingScore $wellBeingScore = null;
