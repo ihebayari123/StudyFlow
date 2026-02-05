@@ -26,7 +26,7 @@ class Cours
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Utilisateur $userId = null;
+    private ?Utilisateur $user = null;
 
     
 

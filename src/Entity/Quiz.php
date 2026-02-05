@@ -26,11 +26,11 @@ class Quiz
 
     #[ORM\ManyToOne(inversedBy: 'quizzes')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Utilisateur $userId = null;
+    private ?Utilisateur $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'quizzes')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Cours $courseId = null;
+    private ?Cours $course = null;
 
     /**
      * @var Collection<int, Question>
