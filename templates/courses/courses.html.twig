@@ -1,0 +1,471 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Latest Courses{% endblock %}
+
+{% block body %}
+<!-- ======= Header ======= -->
+    <header class="header-area header-sticky">
+      <div class="container">
+        <div class="row">
+          <div class="col-12">
+            <nav class="main-nav">
+              <!-- Logo -->
+              <a href="{{ path('app_home') }}" class="logo">
+                <h1>StudyFlow</h1>
+              </a>
+
+              <!-- Menu -->
+              <ul class="nav">
+                <li class="scroll-to-section">
+                  <a href="/home" class="active">Home</a>
+                </li>
+                <li class="scroll-to-section">
+                  <a href="#services">Services</a>
+                </li>
+                <li class="scroll-to-section">
+                  <a href="/showcourses">Courses</a>
+                </li>
+                <li class="scroll-to-section">
+                  <a href="#team">Team</a>
+                </li>
+                <li class="scroll-to-section">
+                  <a href="#events">Events</a>
+                </li>
+                <li class="scroll-to-section">
+                  <a href="#contact">Register Now!</a>
+                </li>
+              </ul>
+
+              <!-- Mobile Menu -->
+              <a class="menu-trigger">
+                <span>Menu</span>
+              </a>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </header>
+
+
+
+<div class="courses-section">
+    <div class="container">
+        <div class="header-with-button">
+            <h1 class="section-title">Latest Courses</h1>
+            <a href="{{ path('app_addcours') }}" class="add-course-btn">
+                <i class="fas fa-plus-circle"></i> Add New Course
+            </a>
+        </div>
+        
+        <!-- Search Bar -->
+<div class="search-container">
+    <input type="text" id="searchInput" class="search-bar" placeholder="Search courses by name...">
+    <i class="fas fa-search search-icon"></i>
+</div>
+        <!-- Filter Buttons -->
+        <div class="filter-buttons">
+            <button class="filter-btn active">Show All</button>
+            <button class="filter-btn">Webdesign</button>
+            <button class="filter-btn">Development</button>
+            <button class="filter-btn">Wordpress</button>
+        </div>
+
+        <!-- Courses Grid -->
+        <div class="courses-grid">
+            {% for cours in listcours %}
+            <div class="course-card">
+                <div class="course-image">
+                    <img src="{{ cours.image }}" alt="{{ cours.titre }}">
+                    <span class="course-category">{{ cours.titre|upper }}</span>
+                    <span class="course-price">${{ random(100, 700) }}</span>
+                    
+                    <!-- Action Buttons -->
+                    <div class="course-actions">
+                        <a href="{{ path('app_updatecours', {'id': cours.id}) }}" class="action-btn edit-btn" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{{ path('app_deletecours', {'id': cours.id}) }}" class="action-btn delete-btn" 
+                           onclick="return confirm('Are you sure you want to delete this course?')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="course-content">
+                    <p class="course-author">{{ cours.user.nom }} {{ cours.user.prenom }}</p>
+                    <h3 class="course-title">{{ cours.description }}</h3>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* Gradient background that works with white navbar text */
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    /* Keep navbar text white and make navbar background semi-transparent */
+    .header-area {
+        background: rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(10px);
+    }
+
+    .header-area .logo h1,
+    .header-area .nav a,
+    .header-area .menu-trigger span,
+    nav, .navbar, nav *, .navbar *, .nav-link {
+        color: white !important;
+    }
+
+    .courses-section {
+        padding: 120px 20px 60px 20px;
+        background-color: transparent;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Header with Add Button */
+    .header-with-button {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start; /* Changed from center to flex-start */
+        margin-bottom: 50px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .section-title {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #ffffff;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        margin: 0;
+    }
+
+    /* Add Course Button */
+    .add-course-btn {
+        padding: 15px 35px;
+        background: white;
+        color: #667eea;
+        text-decoration: none;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+        margin-top: 30px; /* Added margin-top to push it down */
+    }
+
+    .add-course-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(255, 255, 255, 0.4);
+        background: linear-gradient(135deg, #ffffff 0%, #f0f0ff 100%);
+    }
+
+    .add-course-btn i {
+        font-size: 1.3rem;
+    }
+
+    /* Filter Buttons */
+    .filter-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 60px;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 12px 30px;
+        border: none;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: 30px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        background-color: white;
+        color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Courses Grid */
+    .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+    }
+
+    .course-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .course-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .course-image {
+        position: relative;
+        height: 350px;
+        overflow: hidden;
+    }
+
+    .course-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .course-card:hover .course-image img {
+        transform: scale(1.05);
+    }
+
+    .course-category {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: white;
+        color: #7b68ee;
+        padding: 10px 25px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .course-price {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #7b68ee 0%, #a78bfa 100%);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 1.5rem;
+    }
+
+    /* Action Buttons */
+    .course-actions {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .course-card:hover .course-actions {
+        opacity: 1;
+    }
+
+    .action-btn {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .edit-btn {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white;
+    }
+
+    .edit-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
+    }
+
+    .delete-btn {
+        background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
+        color: white;
+    }
+
+    .delete-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 15px rgba(244, 67, 54, 0.4);
+    }
+
+    .course-content {
+        padding: 25px 30px 30px;
+        background: white;
+    }
+
+    .course-author {
+        color: #7b68ee;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .course-title {
+        color: #1a1a1a;
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1.4;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .header-with-button {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .add-course-btn {
+            width: 100%;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .courses-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .filter-btn {
+            width: 200px;
+        }
+
+        .course-actions {
+            opacity: 1;
+        }
+
+        
+    }
+
+    /* Search Bar */
+.search-container {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto 40px auto;
+}
+
+.search-bar {
+    width: 100%;
+    padding: 15px 50px 15px 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 30px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.search-bar::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.search-bar:focus {
+    outline: none;
+    background: white;
+    color: #333;
+    border-color: white;
+    box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+}
+
+.search-bar:focus::placeholder {
+    color: #999;
+}
+
+.search-icon {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.2rem;
+    pointer-events: none;
+}
+
+.search-bar:focus + .search-icon {
+    color: #667eea;
+}
+</style>
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+    // Filter functionality
+    document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const courseCards = document.querySelectorAll('.course-card');
+
+        courseCards.forEach(card => {
+            const courseTitle = card.querySelector('.course-category').textContent.toLowerCase();
+            const courseDescription = card.querySelector('.course-title').textContent.toLowerCase();
+            
+            if (courseTitle.includes(searchValue) || courseDescription.includes(searchValue)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

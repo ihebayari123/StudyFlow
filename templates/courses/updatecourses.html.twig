@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Update Course{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h2>Update Course</h2>
+        </div>
+        <div class="card-body">
+            {{ form_start(f) }}
+                {{ form_row(f.titre) }}
+                {{ form_row(f.description) }}
+                {{ form_row(f.image) }}
+                {{ form_row(f.user) }}
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Update Course
+                    </button>
+                    <a href="{{ path('app_showcourses') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            {{ form_end(f) }}
+        </div>
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 800px;
+    }
+    
+    .card {
+        border-radius: 10px;
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+</style>
+{% endblock %}

@@ -33,13 +33,13 @@ class Cours
     /**
      * @var Collection<int, Chapitre>
      */
-    #[ORM\OneToMany(targetEntity: Chapitre::class, mappedBy: 'courseId', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Chapitre::class, mappedBy: 'course', orphanRemoval: true)]
     private Collection $chapitres;
 
     /**
      * @var Collection<int, Quiz>
      */
-    #[ORM\OneToMany(targetEntity: Quiz::class, mappedBy: 'courseId', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Quiz::class, mappedBy: 'course', orphanRemoval: true)]
     private Collection $quizzes;
 
     public function __construct()
@@ -89,14 +89,14 @@ class Cours
         return $this;
     }
 
-    public function getUserId(): ?Utilisateur
+    public function getUser(): ?Utilisateur
     {
-        return $this->userId;
+        return $this->user;
     }
 
-    public function setUserId(?Utilisateur $userId): static
+    public function setUser(?Utilisateur $user): static
     {
-        $this->userId = $userId;
+        $this->user = $user;
 
         return $this;
     }

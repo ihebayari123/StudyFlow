@@ -36,31 +36,31 @@ class Utilisateur
     /**
      * @var Collection<int, Cours>
      */
-    #[ORM\OneToMany(targetEntity: Cours::class, mappedBy: 'userId', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Cours::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $cours;
 
     /**
      * @var Collection<int, Quiz>
      */
-    #[ORM\OneToMany(targetEntity: Quiz::class, mappedBy: 'userId', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Quiz::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $quizzes;
 
     /**
      * @var Collection<int, Event>
      */
-    #[ORM\OneToMany(targetEntity: Event::class, mappedBy: 'userId', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Event::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $events;
 
     /**
      * @var Collection<int, Produit>
      */
-    #[ORM\OneToMany(targetEntity: Produit::class, mappedBy: 'userId', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Produit::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $produits;
 
     /**
      * @var Collection<int, StressSurvey>
      */
-    #[ORM\OneToMany(targetEntity: StressSurvey::class, mappedBy: 'userId', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: StressSurvey::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $stressSurveys;
 
     public function __construct()
@@ -161,7 +161,7 @@ class Utilisateur
     {
         if (!$this->cours->contains($cour)) {
             $this->cours->add($cour);
-            $cour->setUserId($this);
+            $cour->setUser($this);
         }
 
         return $this;
@@ -171,8 +171,8 @@ class Utilisateur
     {
         if ($this->cours->removeElement($cour)) {
             // set the owning side to null (unless already changed)
-            if ($cour->getUserId() === $this) {
-                $cour->setUserId(null);
+            if ($cour->getUser() === $this) {
+                $cour->setUser(null);
             }
         }
 
@@ -221,7 +221,7 @@ class Utilisateur
     {
         if (!$this->events->contains($event)) {
             $this->events->add($event);
-            $event->setUserId($this);
+            $event->setUser($this);
         }
 
         return $this;
@@ -231,8 +231,8 @@ class Utilisateur
     {
         if ($this->events->removeElement($event)) {
             // set the owning side to null (unless already changed)
-            if ($event->getUserId() === $this) {
-                $event->setUserId(null);
+            if ($event->getUser() === $this) {
+                $event->setUser(null);
             }
         }
 
