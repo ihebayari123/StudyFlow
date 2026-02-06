@@ -44,24 +44,24 @@ final class WellBeingScoreController extends AbstractController
         return $this->redirectToRoute('app_showscore');
     }
 
-#[Route('/add_well_being_score', name: 'app_add_well_being_score')]
-    public function addWellBeingScore(ManagerRegistry $m, Request $request): Response
-    {
-        $em = $m->getManager();
-        $wellBeingScore = new WellBeingScore();
-        $form = $this->createForm(WellBeingScoreType::class, $wellBeingScore);
-        $form->handleRequest($request);
+//#[Route('/add_well_being_score', name: 'app_add_well_being_score')]
+    //public function addWellBeingScore(ManagerRegistry $m, Request $request): Response
+    //{
+        //$em = $m->getManager();
+        //$wellBeingScore = new WellBeingScore();
+        //$form = $this->createForm(WellBeingScoreType::class, $wellBeingScore);
+        //$form->handleRequest($request);
         
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em->persist($wellBeingScore);
-            $em->flush();
-            return $this->redirectToRoute('app_showscore');
-        }
-        
-        return $this->render('well_being_score/addform.html.twig', [
-            'form' => $form->createView(),
-        ]);
-    }
+        //if ($form->isSubmitted() && $form->isValid()) {
+            //$em->persist($wellBeingScore);
+            //$em->flush();
+          //  return $this->redirectToRoute('app_showscore');
+        //}
+        //
+        //return $this->render('well_being_score/addform.html.twig', [
+      //      'form' => $form->createView(),
+    /////    ]);
+  //  }
 
 
 
@@ -129,5 +129,54 @@ final class WellBeingScoreController extends AbstractController
             'calculated_score' => $calculatedScore,
         ]);
     }
+
+
+    
+
+    #[Route('/update_score/{id}', name: 'app_update_score', methods: ['GET', 'POST'])]
+public function updateScore($id, ManagerRegistry $m, Request $request, WellBeingScoreRepository $repo): Response
+{
+    $em = $m->getManager();
+    $wellBeingScore = $repo->find($id);
+    
+    // Vérifier si l'objet existe
+    if (!$wellBeingScore) {
+        throw $this->createNotFoundException('Le score avec l\'id '.$id.' n\'existe pas');
+    }
+    
+    // Créer le formulaire avec les données existantes
+    $form = $this->createForm(WellBeingScoreType::class, $wellBeingScore);
+    $form->handleRequest($request);
+    
+    if ($form->isSubmitted() && $form->isValid()) {
+        // Pas besoin de persist() pour une mise à jour, juste flush()
+        $em->flush();
+        
+        $this->addFlash('success', 'Score mis à jour avec succès !');
+        return $this->redirectToRoute('app_showscore');
+    }
+    
+    return $this->render('well_being_score/updateform.html.twig', [
+        'form' => $form->createView(),
+        'wellBeingScore' => $wellBeingScore,
+    ]);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
