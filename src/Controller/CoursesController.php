@@ -118,7 +118,7 @@ public function updatecours($id, Request $req, ManagerRegistry $m, CoursReposito
         $del=$coursrepo->find($id);
         $em->remove($del);
         $em->flush();
-        return $this->redirectToRoute('app_showcourses');
+        return $this->redirectToRoute('app_showcoursesback');
     }
 
     #[Route('/updatecoursback/{id}', name: 'app_updatecoursback')]
