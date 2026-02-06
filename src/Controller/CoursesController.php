@@ -131,10 +131,10 @@ public function updatecoursback($id, Request $req, ManagerRegistry $m, CoursRepo
 
     if($form->isSubmitted() && $form->isValid()) {
         $em->flush();  // No need for persist on existing entity
-        return $this->redirectToRoute('app_showcourses');
+        return $this->redirectToRoute('app_showcoursesback');
     }
     
-    return $this->render('courses/updatecourses.html.twig', [
+    return $this->render('courses/updatecoursesback.html.twig', [
         'f' => $form,
     ]);
 }
