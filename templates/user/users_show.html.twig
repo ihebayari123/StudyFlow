@@ -1,0 +1,52 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block admin_content %}
+<div style="padding-top: 100px; padding-left: 50px; padding-right: 50px;">
+    <h1>Liste des utilisateurs</h1>
+
+    <a href="{{ path('app_useradd') }}" style="margin-bottom: 10px; display:inline-block;">
+        <button>Ajouter un utilisateur</button>
+    </a>
+
+    <table border="1" cellpadding="5" cellspacing="0" style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="background-color: #f2f2f2;">
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.nom }}</td>
+                <td>{{ user.prenom }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.role }}</td>
+                <td>{{ user.statutCompte }}</td>
+                <td>
+                    <!-- Bouton Modifier -->
+                    <a href="{{ path('app_user_edit', { id: user.id }) }}">
+                        <button>Modifier</button>
+                    </a>
+
+                    <!-- Bouton Supprimer avec confirmation -->
+                    <form method="post" action="{{ path('app_user_delete', {'id': user.id}) }}" style="display:inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer cet utilisateur ?');">
+                        <button type="submit">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align:center;">Aucun utilisateur trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

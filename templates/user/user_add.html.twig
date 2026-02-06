@@ -1,0 +1,22 @@
+{# templates/user/user_add.html.twig #} {% extends 'admin/base_admin.html.twig'
+%} {% block admin_content %}
+<div style="padding-top: 100px; padding-left: 300px">
+  <h1>Ajouter un utilisateur</h1>
+
+  {{ form_start(form) }}
+  {{ form_row(form.nom) }}
+  {{ form_row(form.prenom) }}
+  {{ form_row(form.email) }}
+  {{ form_row(form.motDePasse) }}
+  {{ form_row(form.role) }}
+  {{ form_row(form.statutCompte) }}
+
+  <button type="submit">Ajouter</button>
+  {{ form_end(form) }}
+
+  <hr />
+
+  <h2>Liste des utilisateurs</h2>
+  {# Ici plus tard on mettra la liste dynamique #}
+</div>
+{% endblock %}
