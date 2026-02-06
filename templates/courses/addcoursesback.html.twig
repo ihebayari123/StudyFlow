@@ -1,0 +1,96 @@
+{# templates/courses/addcoursesback.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Add Course - Admin{% endblock %}
+
+{% block admin_content %}
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h2><i class="fas fa-plus-circle"></i> Add New Course</h2>
+        </div>
+        <div class="card-body">
+            {{ form_start(f) }}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            {{ form_label(f.titre, 'Course Title') }}
+                            {{ form_widget(f.titre, {'attr': {'class': 'form-control', 'placeholder': 'Enter course title'}}) }}
+                            {{ form_errors(f.titre) }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            {{ form_label(f.image, 'Image URL') }}
+                            {{ form_widget(f.image, {'attr': {'class': 'form-control', 'placeholder': 'https://example.com/image.jpg'}}) }}
+                            {{ form_errors(f.image) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    {{ form_label(f.description, 'Description') }}
+                    {{ form_widget(f.description, {'attr': {'class': 'form-control', 'placeholder': 'Enter course description', 'rows': '4'}}) }}
+                    {{ form_errors(f.description) }}
+                </div>
+
+                <div class="form-group mb-3">
+                    {{ form_label(f.user, 'Instructor') }}
+                    {{ form_widget(f.user, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(f.user) }}
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Create Course
+                    </button>
+                    <a href="{{ path('app_showcoursesback') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            {{ form_end(f) }}
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Push content away from sidebar */
+    .container {
+    margin-left: 280px; /* Away from sidebar */
+    max-width: calc(100% - 320px);
+    padding-top: 100px; /* Push below navbar - adjust as needed */
+}
+
+    .card {
+        border-radius: 10px;
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    .btn {
+        padding: 10px 25px;
+        border-radius: 5px;
+    }
+
+    /* Responsive - remove margin on mobile */
+    @media (max-width: 768px) {
+        .container {
+            margin-left: 0;
+            max-width: 100%;
+        }
+    }
+</style>
+
+
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
