@@ -1,0 +1,133 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Stress Surveys{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Liste des Stress Surveys
+                    </h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-light text-primary">{{ liststresse|length }} entrées</span>
+
+                        {# Bouton Trier par Sleep Hours #}
+                        <a href="{{ path('app_showstresse_sort_sleep') }}"
+                           class="btn btn-sm btn-light text-primary ms-2">
+                            <i class="fas fa-sort-amount-down me-1"></i> Trier par sommeil
+                        </a>
+
+                        {# Bouton Trier par Date #}
+                        <a href="{{ path('app_showstresse_sort_date') }}"
+                           class="btn btn-sm btn-light text-primary">
+                            <i class="fas fa-calendar-alt me-1"></i> Trier par date
+                        </a>
+
+                        {# Formulaire de recherche par date #}
+                        <form method="get" action="{{ path('app_showstresse_recherche') }}" class="d-flex ms-2">
+                            <input type="date" name="date" class="form-control form-control-sm me-1" placeholder="Rechercher par date">
+                            <button type="submit" class="btn btn-sm btn-light text-primary">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th scope="col" class="text-center">#ID</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col" class="text-center">
+                                        <i class="fas fa-bed me-1"></i>Heures de sommeil
+                                    </th>
+                                    <th scope="col" class="text-center">
+                                        <i class="fas fa-book me-1"></i>Heures d'étude
+                                    </th>
+                                    <th scope="col">
+                                        <i class="fas fa-user me-1"></i>Utilisateur
+                                    </th>
+                                    <th scope="col" class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for item in liststresse %}
+                                    <tr>
+                                        <td class="text-center fw-bold">{{ item.id }}</td>
+                                        <td>{{ item.date|date('d/m/Y') }}</td>
+
+                                        <td class="text-center">
+                                            <span class="badge bg-info">{{ item.sleepHours }}h</span>
+                                        </td>
+
+                                        <td class="text-center">
+                                            <span class="badge bg-warning text-dark">{{ item.studyHours }}h</span>
+                                        </td>
+
+                                        <td>
+                                            {% if item.user %}
+                                                <span class="text-muted">#{{ item.user.id }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Non assigné</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td class="text-center">
+                                            <a href="{{ path('app_updatestresse', {'id': item.id}) }}"
+                                               class="btn btn-sm btn-outline-primary me-1">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{{ path('app_delete_user', {'id': item.id}) }}" 
+                                               class="btn btn-sm btn-outline-danger me-1"
+                                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette entrée ?');">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                            <a href="{{ path('app_showscore_recherche', {'survey_id': item.id}) }}" 
+                                               class="btn btn-sm btn-success"
+                                               title="Calculer le score de bien-être">
+                                                <i class="fas fa-calculator"></i> Score
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4 text-muted">
+                                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                                            <p class="mb-0">Aucune donnée disponible</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-light">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Dernière mise à jour : {{ "now"|date('d/m/Y H:i') }}
+                    </small>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {# Bouton Ajouter centré en bas #}
+    <div class="text-center mt-4">
+        <a href="{{ path('app_add_stresse') }}"
+           class="btn btn-success btn-lg">
+            <i class="fas fa-plus me-1"></i> Ajouter
+        </a>
+    </div>
+    
+
+</div>
+{% endblock %}

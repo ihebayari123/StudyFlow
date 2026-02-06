@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Sondage Stress{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark d-flex align-items-center">
+                    <i class="fas fa-edit me-2 fs-5"></i>
+                    <h5 class="mb-0">Modifier le Sondage Stress</h5>
+                </div>
+                <div class="card-body p-4">
+                    {{ form_start(f, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                        
+                        <div class="row g-3">
+                            {# Date Field #}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(f.date, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="fas fa-calendar-alt text-primary"></i>
+                                        </span>
+                                        {{ form_widget(f.date, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    {{ form_errors(f.date) }}
+                                </div>
+                            </div>
+
+                            {# User Field #}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(f.user, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="fas fa-user text-primary"></i>
+                                        </span>
+                                        {{ form_widget(f.user, {'attr': {'class': 'form-select'}}) }}
+                                    </div>
+                                    {{ form_errors(f.user) }}
+                                </div>
+                            </div>
+
+                            {# Sleep Hours Field #}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(f.sleepHours, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="fas fa-bed text-info"></i>
+                                        </span>
+                                        {{ form_widget(f.sleepHours, {'attr': {'class': 'form-control'}}) }}
+                                        <span class="input-group-text">heures</span>
+                                    </div>
+                                    {{ form_errors(f.sleepHours) }}
+                                    <small class="text-muted">Nombre d'heures de sommeil par nuit (0-24)</small>
+                                </div>
+                            </div>
+
+                            {# Study Hours Field #}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(f.studyHours, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="fas fa-book text-warning"></i>
+                                        </span>
+                                        {{ form_widget(f.studyHours, {'attr': {'class': 'form-control'}}) }}
+                                        <span class="input-group-text">heures</span>
+                                    </div>
+                                    {{ form_errors(f.studyHours) }}
+                                    <small class="text-muted">Nombre d'heures d'étude par jour (0-24)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        {# Buttons #}
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ path('app_showstresse') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                            </a>
+                            <div>
+                                {{ form_widget(f.enregistrer, {'attr': {'class': 'btn btn-warning text-dark px-4'}}) }}
+                            </div>
+                        </div>
+
+                    {{ form_end(f) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

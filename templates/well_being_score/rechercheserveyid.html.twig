@@ -1,0 +1,147 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recherche par Survey ID{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient bg-success text-white d-flex align-items-center py-3">
+                    <div class="rounded-circle bg-white bg-opacity-25 p-2 me-3">
+                        <i class="fas fa-search fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold">Recherche de Scores de Bien-être</h5>
+                        <small class="text-white-50">Rechercher par ID de sondage</small>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    {# Formulaire de recherche #}
+                    <form method="get" action="{{ path('app_showscore_recherche') }}" class="mb-4">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-6">
+                                <label for="survey_id" class="form-label fw-semibold text-success">
+                                    <i class="fas fa-poll me-2"></i>ID du sondage (Survey ID)
+                                </label>
+                                <input type="number" 
+                                       id="survey_id" 
+                                       name="survey_id" 
+                                       class="form-control form-control-lg" 
+                                       value="{{ survey_id }}"
+                                       placeholder="Entrez l'ID du sondage"
+                                       required>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-success btn-lg w-100 text-white">
+                                    <i class="fas fa-search me-2"></i>Rechercher
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{{ path('app_showscore') }}" class="btn btn-outline-secondary btn-lg w-100">
+                                    <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    {# Résultats de la recherche #}
+                    {% if survey_id %}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">
+                                <i class="fas fa-list me-2 text-success"></i>Résultats pour le Survey ID : <span class="fw-bold">{{ survey_id }}</span>
+                            </h6>
+                            <span class="badge bg-success">{{ results|length }} résultat(s)</span>
+                        </div>
+
+                        {% if results|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th class="text-center">#ID</th>
+                                            <th><i class="fas fa-lightbulb me-1 text-warning"></i>Recommandation</th>
+                                            <th><i class="fas fa-tasks me-1 text-info"></i>Plan d'action</th>
+                                            <th><i class="fas fa-comment me-1 text-secondary"></i>Commentaire</th>
+                                            <th class="text-center"><i class="fas fa-star me-1 text-warning"></i>Score</th>
+                                            <th class="text-center"><i class="fas fa-poll me-1 text-primary"></i>Survey</th>
+                                            <th class="text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in results %}
+                                            <tr>
+                                                <td class="text-center fw-bold text-primary">{{ item.id }}</td>
+                                                <td>
+                                                    <span class="d-inline-block text-truncate" style="max-width: 150px;" title="{{ item.recommendation }}">
+                                                        {{ item.recommendation|default('N/A') }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="d-inline-block text-truncate" style="max-width: 150px;" title="{{ item.actionPlan }}">
+                                                        {{ item.actionPlan|default('N/A') }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="d-inline-block text-truncate" style="max-width: 150px;" title="{{ item.comment }}">
+                                                        {{ item.comment|default('N/A') }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    {% set scoreClass = 'bg-secondary' %}
+                                                    {% if item.score >= 80 %}
+                                                        {% set scoreClass = 'bg-success' %}
+                                                    {% elseif item.score >= 60 %}
+                                                        {% set scoreClass = 'bg-info' %}
+                                                    {% elseif item.score >= 40 %}
+                                                        {% set scoreClass = 'bg-warning' %}
+                                                    {% else %}
+                                                        {% set scoreClass = 'bg-danger' %}
+                                                    {% endif %}
+                                                    <span class="badge {{ scoreClass }}">{{ item.score }}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    {% if item.survey %}
+                                                        <span class="badge bg-primary">#{{ item.survey.id }}</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">N/A</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-center">
+                                                    <a href="{{ path('app_delete_score', {'id': item.id }) }}" 
+                                                       class="btn btn-sm btn-outline-danger"
+                                                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce score ?');">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning d-flex align-items-center" role="alert">
+                                <i class="fas fa-exclamation-triangle me-3 fs-4"></i>
+                                <div>
+                                    <strong>Aucun résultat trouvé</strong><br>
+                                    <span class="text-muted">Aucun score de bien-être n'est associé au sondage avec l'ID "{{ survey_id }}".</span>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <i class="fas fa-info-circle me-3 fs-4"></i>
+                            <div>
+                                <strong>Recherche</strong><br>
+                                <span class="text-muted">Entrez un ID de sondage pour rechercher les scores de bien-être associés.</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
