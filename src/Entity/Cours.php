@@ -115,7 +115,7 @@ class Cours
     {
         if (!$this->chapitres->contains($chapitre)) {
             $this->chapitres->add($chapitre);
-            $chapitre->setCourseId($this);
+            $chapitre->setCourse($this);
         }
 
         return $this;
@@ -125,8 +125,8 @@ class Cours
     {
         if ($this->chapitres->removeElement($chapitre)) {
             // set the owning side to null (unless already changed)
-            if ($chapitre->getCourseId() === $this) {
-                $chapitre->setCourseId(null);
+            if ($chapitre->getCourse() === $this) {
+                $chapitre->setCourse(null);
             }
         }
 
@@ -145,7 +145,7 @@ class Cours
     {
         if (!$this->quizzes->contains($quiz)) {
             $this->quizzes->add($quiz);
-            $quiz->setCourseId($this);
+            $quiz->setCourse($this);
         }
 
         return $this;
@@ -155,8 +155,8 @@ class Cours
     {
         if ($this->quizzes->removeElement($quiz)) {
             // set the owning side to null (unless already changed)
-            if ($quiz->getCourseId() === $this) {
-                $quiz->setCourseId(null);
+            if ($quiz->getCourse() === $this) {
+                $quiz->setCourse(null);
             }
         }
 

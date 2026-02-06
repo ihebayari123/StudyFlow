@@ -85,7 +85,7 @@ public function updatecours($id, Request $req, ManagerRegistry $m, CoursReposito
        // $a=$authorrepo->trieDescUsername();
         //$a=$coursrepo->trieAcsUsername();
         
-        return $this->render('courses/courses.html.twig', [
+        return $this->render('courses/coursesback.html.twig', [
             'listcours' => $a,
         ]);
     }
@@ -103,7 +103,7 @@ public function updatecours($id, Request $req, ManagerRegistry $m, CoursReposito
      if($form->isSubmitted() && $form->isValid()){
         $em->persist($cours);
         $em->flush();
-        return $this->redirectToRoute('app_showcourses');
+        return $this->redirectToRoute('app_showcoursesback');
      }
          return $this->render('courses/addcoursesback.html.twig', [
             'f' => $form,
