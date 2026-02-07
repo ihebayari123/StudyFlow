@@ -24,19 +24,22 @@
         <li class="nxl-item nxl-caption">
           <label>Navigation</label>
         </li>
-        <ul class="sidebar-menu">
-          <li>
-            <a href="{{ path('app_useradd') }}">
-              <i class="icon-plus"></i> Ajouter un utilisateur
-            </a>
-          </li>
-          <li>
-            <a href="{{ path('app_users_show') }}">
-              <i class="icon-list"></i> Liste des utilisateurs
-            </a>
-          </li>
-          <!-- Autres liens existants -->
-        </ul>
+       
+        <li class="nxl-item nxl-hasmenu">
+          <a href="javascript:void(0);" class="nxl-link">
+            <span class="nxl-micon"><i class="feather-users"></i></span>
+            <span class="nxl-mtext">Utilisateurs</span
+            ><span class="nxl-arrow"
+              ><i class="feather-chevron-right"></i
+            ></span>
+          </a>
+          <ul class="nxl-submenu">
+            <li class="nxl-item"><a class="nxl-link" href="{{ path('app_users_show') }}">Liste des utilisateurs</a></li>
+            <li class="nxl-item">
+              <a class="nxl-link" href="{{ path('app_useradd') }}">Ajouter un utilisateur</a>
+            </li>
+          </ul>
+        </li>
         <li class="nxl-item nxl-hasmenu">
           <a href="javascript:void(0);" class="nxl-link">
             <span class="nxl-micon"><i class="feather-airplay"></i></span>
