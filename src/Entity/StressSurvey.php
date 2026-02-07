@@ -27,7 +27,7 @@ class StressSurvey
     #[ORM\JoinColumn(nullable: false)]
     private ?Utilisateur $user = null;
 
-    #[ORM\OneToOne(mappedBy: 'survey', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'survey', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private ?WellBeingScore $wellBeingScore = null;
 
     public function getId(): ?int

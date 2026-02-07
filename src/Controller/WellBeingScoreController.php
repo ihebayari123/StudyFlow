@@ -162,6 +162,72 @@ final class WellBeingScoreController extends AbstractController
         ]);
     }
 
+    #[Route('/well-being/notifications', name: 'app_well_being_notifications')]
+    public function notifications(WellBeingScoreRepository $repo): Response
+    {
+        $allScores = $repo->findAll();
+        $lowScoreNotifications = [];
+        
+        foreach ($allScores as $score) {
+            if ($score->getScore() < 20) {
+                $survey = $score->getSurvey();
+                $lowScoreNotifications[] = [
+                    'score' => $score,
+                    'survey' => $survey,
+                    'user' => $survey ? $survey->getUser() : null,
+                    'alertLevel' => $score->getScore() < 10 ? 'critical' : 'warning',
+                    'message' => $this->generateAlertMessage($score->getScore()),
+                    'recommendations' => $this->generateRecommendations($score->getScore()),
+                ];
+            }
+        }
+        
+        // Trier par score croissant (les plus bas en premier)
+        usort($lowScoreNotifications, function($a, $b) {
+            return $a['score']->getScore() <=> $b['score']->getScore();
+        });
+        
+        return $this->render('well_being_score/notification.html.twig', [
+            'notifications' => $lowScoreNotifications,
+            'totalAlerts' => count($lowScoreNotifications),
+            'criticalCount' => count(array_filter($lowScoreNotifications, fn($n) => $n['alertLevel'] === 'critical')),
+            'warningCount' => count(array_filter($lowScoreNotifications, fn($n) => $n['alertLevel'] === 'warning')),
+        ]);
+    }
+    
+    private function generateAlertMessage(int $score): string
+    {
+        if ($score < 10) {
+            return 'Niveau de bien-être critique détecté. Intervention immédiate recommandée.';
+        } elseif ($score < 15) {
+            return 'Niveau de bien-être très bas. Suivi rapproché nécessaire.';
+        } else {
+            return 'Niveau de bien-être bas. Recommandations à suivre.';
+        }
+    }
+    
+    private function generateRecommendations(int $score): array
+    {
+        $recommendations = [
+            'Consulter un professionnel de santé dans les plus brefs délais',
+            'Prendre du temps pour soi et pratiquer des activités relaxantes',
+            'Maintenir une routine de sommeil régulière (7-9 heures)',
+        ];
+        
+        if ($score < 10) {
+            $recommendations[] = 'Contacter le service de soutien psychologique de l\'établissement';
+            $recommendations[] = 'En parler à un proche ou un membre de la famille';
+        } elseif ($score < 15) {
+            $recommendations[] = 'Envisager une consultation avec un conseiller d\'orientation';
+            $recommendations[] = 'Réduire temporairement la charge de travail si possible';
+        } else {
+            $recommendations[] = 'Participer à des activités de groupe ou des ateliers de gestion du stress';
+            $recommendations[] = 'Pratiquer une activité physique régulière';
+        }
+        
+        return $recommendations;
+    }
+
 
 
 

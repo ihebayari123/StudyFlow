@@ -111,14 +111,36 @@
                     <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-layout"></i></span>
-                            <span class="nxl-mtext">Widgets</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                            <span class="nxl-mtext">Gestionnaire_Stresse</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="widgets-lists.html">Lists</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="widgets-tables.html">Tables</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="widgets-charts.html">Charts</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="widgets-statistics.html">Statistics</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="widgets-miscellaneous.html">Miscellaneous</a></li>
+                            <li class="nxl-item">
+    <a class="nxl-link" href="{{ path('app_showstresse') }}">
+        Voir les Étudiants
+    </a>
+</li>
+
+<li class="nxl-item">
+    <a class="nxl-link" href="{{ path('app_add_stresse') }}">
+        Ajouter Étudiant
+    </a>
+</li>
+</li>
+<li class="nxl-item">
+    <a class="nxl-link" href="{{ path('app_showscore') }}">
+        Suivi des Scores
+    </a>
+</li>
+
+<li class="nxl-item {{ app.request.attributes.get('_route') == 'app_stresse_statistiques' ? 'active' : '' }}">
+    <a class="nxl-link" href="{{ path('app_stresse_statistiques') }}">
+        Statistics
+    </a>
+</li>
+<li class="nxl-item">
+    <a class="nxl-link" href="{{ path('app_showstresse_recherche') }}">
+        Recherche Par Date
+    </a>
                         </ul>
                     </li>
                     <li class="nxl-item nxl-hasmenu">

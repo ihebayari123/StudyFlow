@@ -60,10 +60,7 @@ class WellBeingScoreType extends AbstractType
                 'label' => 'Sondage associé',
                 'attr' => ['class' => 'form-select']
             ])
-            ->add('enregistrer', SubmitType::class, [
-                'label' => 'Enregistrer',
-                'attr' => ['class' => 'btn btn-success btn-lg px-5']
-            ])
+            
         ;
     }
 

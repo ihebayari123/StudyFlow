@@ -1,8 +1,11 @@
-{% extends 'base.html.twig' %}
+{# templates/stresse/updaieformstresse.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
 
-{% block title %}Modifier Sondage Stress{% endblock %}
+{% block title %}Manage stresse - Admin{% endblock %}
 
-{% block body %}
+{% block admin_content %}
+ <div style="padding: 60px; margin-left: 210px; overflow-x: auto;">
+ 
 <div class="container-fluid py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-xl-6">
@@ -49,7 +52,7 @@
 
                 <!-- Corps du formulaire -->
                 <div class="card-body p-4 p-lg-5">
-                    {{ form_start(f, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                    {{ form_start(f, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate', 'method': 'POST'}}) }}
                         
                         <!-- Grille améliorée avec espacement moderne -->
                         <div class="row g-4">
@@ -191,12 +194,9 @@
                                 <a href="{{ path('app_showstresse') }}" class="btn btn-lg btn-outline-dark px-4 rounded-pill">
                                     <i class="fas fa-times me-2"></i>Annuler
                                 </a>
-                                {{ form_widget(f.enregistrer, {
-                                    'attr': {
-                                        'class': 'btn btn-lg btn-warning px-5 rounded-pill shadow-sm fw-semibold',
-                                        'data-loading': 'true'
-                                    }
-                                }) }}
+                                <button type="submit" name="enregistrer" class="btn btn-lg btn-warning px-5 rounded-pill shadow-sm fw-semibold" data-loading="true">
+                                    <i class="fas fa-save me-2"></i>Enregistrer
+                                </button>
                             </div>
                         </div>
 

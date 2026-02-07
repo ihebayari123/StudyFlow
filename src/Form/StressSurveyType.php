@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class StressSurveyType extends AbstractType
 {
@@ -20,7 +21,13 @@ class StressSurveyType extends AbstractType
             ->add('date', DateType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date',
-                'attr' => ['class' => 'form-control']
+                'attr' => ['class' => 'form-control'],
+                'constraints' => [
+                    new Assert\LessThanOrEqual([
+                        'value' => 'today',
+                        'message' => 'La date ne peut pas être dans le futur.'
+                    ]),
+                ]
             ])
             ->add('sleepHours', IntegerType::class, [
                 'label' => 'Heures de sommeil',
@@ -28,6 +35,16 @@ class StressSurveyType extends AbstractType
                     'class' => 'form-control',
                     'min' => 0,
                     'max' => 24
+                ],
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'Le nombre d\'heures de sommeil est obligatoire.'
+                    ]),
+                    new Assert\Range([
+                        'min' => 0,
+                        'max' => 24,
+                        'notInRangeMessage' => 'Les heures de sommeil doivent être entre {{ min }} et {{ max }} heures.'
+                    ]),
                 ]
             ])
             ->add('studyHours', IntegerType::class, [
@@ -36,6 +53,16 @@ class StressSurveyType extends AbstractType
                     'class' => 'form-control',
                     'min' => 0,
                     'max' => 24
+                ],
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'Le nombre d\'heures d\'étude est obligatoire.'
+                    ]),
+                    new Assert\Range([
+                        'min' => 0,
+                        'max' => 24,
+                        'notInRangeMessage' => 'Les heures d\'étude doivent être entre {{ min }} et {{ max }} heures.'
+                    ]),
                 ]
             ])
             ->add('user', EntityType::class, [
@@ -44,10 +71,17 @@ class StressSurveyType extends AbstractType
                     return $user->getNom() . ' ' . $user->getPrenom() . ' (#' . $user->getId() . ')';
                 },
                 'label' => 'Utilisateur',
-                'attr' => ['class' => 'form-select']
+                'attr' => ['class' => 'form-select'],
+                'constraints' => [
+                    new Assert\NotNull([
+                        'message' => 'Veuillez sélectionner un utilisateur.'
+                    ]),
+                ]
             ])
-           
-             
+            ->add('enregistrer', SubmitType::class, [
+                'label' => 'Enregistrer',
+                'attr' => ['class' => 'btn btn-primary']
+            ])
         ;
     }
 

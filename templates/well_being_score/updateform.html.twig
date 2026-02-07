@@ -1,149 +1,159 @@
-{% extends 'base.html.twig' %}
+{# templates/well_being_score/showscore.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+{% block title %}Manage showscore - Admin{% endblock %}
 
-{% block title %}Modifier le Score{% endblock %}
-
-{% block body %}
+{% block admin_content %}
+<div style="padding: 60px; margin-left: 210px; overflow-x: auto;">
 <div class="container py-5">
+
     <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <!-- Header avec navigation -->
-            <div class="d-flex align-items-center justify-content-between mb-4">
-                <div>
-                    <a href="{{ path('app_showscore') }}" class="text-decoration-none text-muted d-flex align-items-center gap-2 mb-2">
-                        <i class="fas fa-arrow-left"></i>
-                        <span>Retour aux scores</span>
-                    </a>
-                    <h1 class="h3 fw-bold mb-0">Modifier le score #{{ wellBeingScore.id }}</h1>
-                </div>
+
+        <div class="col-lg-8 col-md-10">
+
+            <!-- Header -->
+            <div class="mb-4 text-center">
+                <h2 class="fw-bold text-primary">
+                    ✏️ Modifier le Score
+                </h2>
+                <p class="text-muted">
+                    Mettre à jour les informations du bien-être
+                </p>
             </div>
 
-            <!-- Formulaire -->
-            <div class="card border-0 shadow-sm">
+            <!-- Card -->
+            <div class="card shadow-lg border-0">
+
                 <div class="card-body p-4">
-                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
-                    
-                    <!-- Section principale -->
-                    <div class="row g-4">
-                        <!-- Score et Sondage -->
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                {{ form_widget(form.score, {
-                                    'attr': {
-                                        'class': 'form-control',
-                                        'placeholder': ' ',
-                                        'min': 0,
-                                        'max': 100,
-                                        'style': 'height: calc(3.5rem + 2px)'
-                                    }
-                                }) }}
-                                {{ form_label(form.score, 'Score (0-100)', {
-                                    'label_attr': {'class': 'form-label'}
-                                }) }}
-                            </div>
-                            <div class="form-text mt-1">Veuillez saisir un score entre 0 et 100</div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                {{ form_widget(form.survey, {
-                                    'attr': {
-                                        'class': 'form-control',
-                                        'placeholder': ' ',
-                                        'style': 'height: calc(3.5rem + 2px)'
-                                    }
-                                }) }}
-                                {{ form_label(form.survey, 'Sondage associé', {
-                                    'label_attr': {'class': 'form-label'}
-                                }) }}
-                            </div>
-                        </div>
+
+                    {{ form_start(form) }}
+
+                    <!-- Score -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Score
+                        </label>
+                        {{ form_widget(form.score, {
+                            'attr': {
+                                'class': 'form-control',
+                                'placeholder': 'Entrer le score'
+                            }
+                        }) }}
                     </div>
 
-                    <!-- Recommandation -->
-                    <div class="mt-4">
-                        <label class="form-label fw-semibold mb-2">Recommandation</label>
+                    <!-- Survey -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Sondage
+                        </label>
+                        {{ form_widget(form.survey, {
+                            'attr': {
+                                'class': 'form-control'
+                            }
+                        }) }}
+                    </div>
+
+                    <!-- Recommendation -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Recommandation
+                        </label>
                         {{ form_widget(form.recommendation, {
                             'attr': {
                                 'class': 'form-control',
-                                'rows': 4,
-                                'placeholder': 'Saisissez les recommandations...'
+                                'rows': 3
                             }
                         }) }}
                     </div>
 
-                    <!-- Plan d'action -->
-                    <div class="mt-4">
-                        <label class="form-label fw-semibold mb-2">Plan d'action</label>
+                    <!-- Action Plan -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Plan d'action
+                        </label>
                         {{ form_widget(form.actionPlan, {
                             'attr': {
                                 'class': 'form-control',
-                                'rows': 4,
-                                'placeholder': 'Décrivez le plan d\'action...'
+                                'rows': 3
                             }
                         }) }}
                     </div>
 
-                    <!-- Commentaire -->
-                    <div class="mt-4">
-                        <label class="form-label fw-semibold mb-2">Commentaire</label>
+                    <!-- Comment -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            Commentaire
+                        </label>
                         {{ form_widget(form.comment, {
                             'attr': {
                                 'class': 'form-control',
-                                'rows': 2,
-                                'placeholder': 'Ajoutez un commentaire si nécessaire...'
+                                'rows': 2
                             }
                         }) }}
                     </div>
 
-                    <!-- Actions Footer -->
-                    <div class="border-top pt-4 mt-4">
-                        <div class="d-flex justify-content-end gap-3">
-                            <a href="{{ path('app_showscore') }}" class="btn btn-outline-secondary px-4">
-                                <i class="fas fa-times me-2"></i>Annuler
-                            </a>
-                            <button type="submit" class="btn btn-primary px-4">
-                                <i class="fas fa-check me-2"></i>Enregistrer les modifications
-                            </button>
-                        </div>
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-between">
+
+                        <a href="{{ path('app_showscore') }}"
+                           class="btn btn-outline-secondary">
+                            ⬅ Retour
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-primary px-4">
+                            💾 Enregistrer
+                        </button>
+
                     </div>
-                    
+
                     {{ form_end(form) }}
+
                 </div>
+
             </div>
 
-            <!-- Note d'information -->
-            <div class="alert alert-light border mt-3">
-                <div class="d-flex align-items-start">
-                    <i class="fas fa-info-circle text-primary mt-1 me-2"></i>
-                    <div class="small">
-                        <strong>Information :</strong> Les modifications seront appliquées immédiatement après l'enregistrement.
-                    </div>
-                </div>
-            </div>
         </div>
+
     </div>
+
 </div>
 
-<!-- Style additionnel -->
+
+<!-- STYLE -->
 <style>
-    .form-control:focus {
-        border-color: #4361ee;
-        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
-    }
-    .form-floating > .form-control {
-        height: calc(3.5rem + 2px);
-        padding: 1rem 0.75rem;
-    }
-    .form-floating > label {
-        padding: 1rem 0.75rem;
-    }
-    .btn-primary {
-        background-color: #4361ee;
-        border-color: #4361ee;
-    }
-    .btn-primary:hover {
-        background-color: #3a56d4;
-        border-color: #3a56d4;
-    }
+
+body {
+    background: linear-gradient(135deg,#667eea,#764ba2);
+    min-height:100vh;
+}
+
+/* Card */
+.card{
+    border-radius:16px;
+    background:#fff;
+}
+
+/* Inputs */
+.form-control{
+    border-radius:10px;
+}
+
+/* Focus */
+.form-control:focus{
+    border-color:#667eea;
+    box-shadow:0 0 0 0.2rem rgba(102,126,234,.25);
+}
+
+/* Buttons */
+.btn-primary{
+    background:#667eea;
+    border:none;
+}
+
+.btn-primary:hover{
+    background:#5a6fe0;
+}
+
 </style>
+
 {% endblock %}

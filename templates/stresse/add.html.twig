@@ -1,8 +1,11 @@
-{% extends 'base.html.twig' %}
+{# templates/stresse/add.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
 
-{% block title %}Ajouter Sondage Stress{% endblock %}
+{% block title %}Manage add - Admin{% endblock %}
 
-{% block body %}
+{% block admin_content %}
+
+ <div style="padding: 60px; margin-left: 210px; overflow-x: auto;">
 <div class="container-fluid py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">
@@ -89,9 +92,7 @@
                             <a href="{{ path('app_showstresse') }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-times me-2"></i>Annuler
                             </a>
-                            <button type="submit" class="btn btn-primary btn-lg px-5">
-                                <i class="fas fa-save me-2"></i>Enregistrer
-                            </button>
+                            {{ form_widget(form.enregistrer, {'attr': {'class': 'btn btn-primary btn-lg px-5'}}) }}
                         </div>
 
                     {{ form_end(form) }}

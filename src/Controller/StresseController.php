@@ -101,6 +101,108 @@ final class StresseController extends AbstractController
         ]);
     }
 
+    #[Route('/plan-education/{id}', name: 'app_plan_education')]
+    public function planEducation(int $id, StressSurveyRepository $repo): Response
+    {
+        $survey = $repo->find($id);
+
+        if (!$survey) {
+            throw $this->createNotFoundException('Survey not found');
+        }
+
+        $sleepHours = $survey->getSleepHours();
+        $studyHours = $survey->getStudyHours();
+
+        // Generate education plan based on stress indicators
+        $plan = [];
+
+        // Sleep recommendations
+        if ($sleepHours < 6) {
+            $plan['sleep'] = [
+                'status' => 'critical',
+                'title' => 'Sommeil insuffisant',
+                'recommendations' => [
+                    'Établir une heure de coucher fixe et la respecter chaque jour',
+                    'Éviter les écrans (téléphone, ordinateur) 1 heure avant le coucher',
+                    'Créer une routine de détente (lecture, méditation, musique douce)',
+                    'Limiter la caféine après 14h',
+                    'Aim pour 7-9 heures de sommeil par nuit',
+                ],
+            ];
+        } elseif ($sleepHours < 7) {
+            $plan['sleep'] = [
+                'status' => 'warning',
+                'title' => 'Sommeil à améliorer',
+                'recommendations' => [
+                    'Essayer d\'ajouter 30-60 minutes de sommeil',
+                    'Maintenir un environnement de sommeil calme et sombre',
+                    'Éviter les repas lourds avant le coucher',
+                ],
+            ];
+        } else {
+            $plan['sleep'] = [
+                'status' => 'good',
+                'title' => 'Sommeil adéquat',
+                'recommendations' => [
+                    'Continuez à maintenir vos bonnes habitudes de sommeil',
+                    'Utilisez votre énergie pour des activités productives',
+                ],
+            ];
+        }
+
+        // Study recommendations
+        if ($studyHours > 10) {
+            $plan['study'] = [
+                'status' => 'critical',
+                'title' => 'Charge de travail élevée',
+                'recommendations' => [
+                    'Prendre des pauses régulières (technique Pomodoro: 25min travail, 5min pause)',
+                    'Répartir la charge de travail sur plusieurs jours',
+                    'Prioriser les tâches les plus importantes',
+                    'Demander de l\'aide si nécessaire (tuteurs, camarades)',
+                    'Prévoir du temps pour des activités relaxantes',
+                ],
+            ];
+        } elseif ($studyHours > 8) {
+            $plan['study'] = [
+                'status' => 'warning',
+                'title' => 'Charge de travail importante',
+                'recommendations' => [
+                    'Planifier des pauses actives toutes les heures',
+                    'Alterner entre différentes matières pour éviter la fatigue',
+                    'S\'assurer de prendre du temps pour soi',
+                ],
+            ];
+        } else {
+            $plan['study'] = [
+                'status' => 'good',
+                'title' => 'Charge de travail équilibrée',
+                'recommendations' => [
+                    'Maintenir un bon équilibre travail-repos',
+                    'Utiliser le temps libre pour des activités enrichissantes',
+                ],
+            ];
+        }
+
+        // General wellness recommendations
+        $plan['wellness'] = [
+            'status' => 'info',
+            'title' => 'Conseils généraux de bien-être',
+            'recommendations' => [
+                'Pratiquer une activité physique régulière (30 min par jour)',
+                'Maintenir une alimentation équilibrée',
+                'Prendre le temps de socialiser avec amis et famille',
+                'Apprendre des techniques de gestion du stress (respiration, méditation)',
+                'Ne pas hésiter à consulter un professionnel de santé si le stress persiste',
+            ],
+        ];
+
+        return $this->render('stresse/plan_education.html.twig', [
+            'survey' => $survey,
+            'plan' => $plan,
+        ]);
+    }
+
     #[Route('/showstresse/sort/date', name: 'app_showstresse_sort_date')]
     public function showstresseSortByDate(StressSurveyRepository $bookrepo): Response
     {
@@ -218,6 +320,102 @@ final class StresseController extends AbstractController
             'chartLabels' => json_encode($chartLabels),
             'chartData' => json_encode($chartData),
             'chartColors' => json_encode($chartColors),
+        ]);
+    }
+
+    #[Route('/stresse/avance', name: 'app_stresse_avance')]
+    public function stresseAvance(StressSurveyRepository $surveyRepo): Response
+    {
+        $surveys = $surveyRepo->findAll();
+        
+        // Analyse avancée des données de stress
+        $advancedAnalysis = [
+            'totalSurveys' => count($surveys),
+            'highRiskUsers' => [],
+            'stressTrends' => [],
+            'recommendations' => [],
+        ];
+        
+        // Identifier les utilisateurs à haut risque
+        foreach ($surveys as $survey) {
+            $riskScore = 0;
+            $sleepHours = $survey->getSleepHours();
+            $studyHours = $survey->getStudyHours();
+            $wellBeingScore = $survey->getWellBeingScore();
+            
+            // Calcul du score de risque
+            if ($sleepHours < 6) {
+                $riskScore += 3;
+            } elseif ($sleepHours < 7) {
+                $riskScore += 1;
+            }
+            
+            if ($studyHours > 10) {
+                $riskScore += 3;
+            } elseif ($studyHours > 8) {
+                $riskScore += 1;
+            }
+            
+            if ($wellBeingScore && $wellBeingScore->getScore() < 5) {
+                $riskScore += 2;
+            }
+            
+            if ($riskScore >= 5) {
+                $advancedAnalysis['highRiskUsers'][] = [
+                    'user' => $survey->getUser(),
+                    'riskScore' => $riskScore,
+                    'sleepHours' => $sleepHours,
+                    'studyHours' => $studyHours,
+                ];
+            }
+        }
+        
+        // Générer des recommandations personnalisées
+        $highRiskCount = count($advancedAnalysis['highRiskUsers']);
+        if ($highRiskCount > 0) {
+            $advancedAnalysis['recommendations'][] = [
+                'priority' => 'high',
+                'message' => $highRiskCount . ' utilisateur(s) identifié(s) avec un niveau de stress élevé. Intervention recommandée.',
+            ];
+        }
+        
+        // Calculer les tendances
+        $totalSleep = 0;
+        $totalStudy = 0;
+        $count = count($surveys);
+        
+        foreach ($surveys as $survey) {
+            $totalSleep += $survey->getSleepHours();
+            $totalStudy += $survey->getStudyHours();
+        }
+        
+        $avgSleep = $count > 0 ? $totalSleep / $count : 0;
+        $avgStudy = $count > 0 ? $totalStudy / $count : 0;
+        
+        $advancedAnalysis['stressTrends'] = [
+            'averageSleep' => round($avgSleep, 2),
+            'averageStudy' => round($avgStudy, 2),
+            'sleepStatus' => $avgSleep < 7 ? 'insuffisant' : 'adéquat',
+            'studyStatus' => $avgStudy > 8 ? 'élevé' : 'normal',
+        ];
+        
+        // Recommandations basées sur les tendances
+        if ($avgSleep < 7) {
+            $advancedAnalysis['recommendations'][] = [
+                'priority' => 'medium',
+                'message' => 'La moyenne de sommeil est insuffisante (' . round($avgSleep, 1) . 'h). Organiser des ateliers sur l\'hygiène du sommeil.',
+            ];
+        }
+        
+        if ($avgStudy > 8) {
+            $advancedAnalysis['recommendations'][] = [
+                'priority' => 'medium',
+                'message' => 'Charge d\'étude élevée en moyenne (' . round($avgStudy, 1) . 'h). Proposer des sessions de gestion du temps.',
+            ];
+        }
+        
+        return $this->render('stresse/stresse_avance.html.twig', [
+            'analysis' => $advancedAnalysis,
         ]);
     }
 }

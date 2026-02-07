@@ -1,0 +1,110 @@
+{# templates/well_being_score/showscore.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+{% block title %}Manage showscore - Admin{% endblock %}
+
+{% block admin_content %}
+<div style="padding: 60px; margin-left: 210px; overflow-x: auto;">
+<div class="container mt-5">
+    <h1 class="mb-4">
+        <i class="fas fa-bell text-warning"></i> Notifications de Bien-être
+    </h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h3>{{ criticalCount }}</h3>
+                    <p class="mb-0">Alertes Critiques</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <h3>{{ warningCount }}</h3>
+                    <p class="mb-0">Alertes de Prévention</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3>{{ totalAlerts }}</h3>
+                    <p class="mb-0">Total des Alertes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if notifications|length > 0 %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4>Liste des Notifications</h4>
+                    </div>
+                    <div class="card-body">
+                        {% for notification in notifications %}
+                            <div class="alert alert-{{ notification.alertLevel == 'critical' ? 'danger' : 'warning' }} mb-4">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="alert-heading">
+                                            <i class="fas fa-{{ notification.alertLevel == 'critical' ? 'exclamation-circle' : 'exclamation-triangle' }}"></i>
+                                            Score: {{ notification.score.score }}/100
+                                        </h5>
+                                        <p class="mb-2">
+                                            <strong>Utilisateur:</strong> 
+                                            {% if notification.user %}
+                                                {{ notification.user.nom }} {{ notification.user.prenom }}
+                                            {% else %}
+                                                Non spécifié
+                                            {% endif %}
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Sondage du:</strong> 
+                                            {% if notification.survey %}
+                                                {{ notification.survey.date|date('d/m/Y') }}
+                                            {% else %}
+                                                Non disponible
+                                            {% endif %}
+                                        </p>
+                                        <hr>
+                                        <p class="mb-2"><strong>Message:</strong> {{ notification.message }}</p>
+                                        <p class="mb-1"><strong>Recommandations:</strong></p>
+                                        <ul class="mb-0">
+                                            {% for rec in notification.recommendations %}
+                                                <li>{{ rec }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <span class="badge bg-{{ notification.alertLevel == 'critical' ? 'danger' : 'warning' }} fs-6">
+                                        {{ notification.alertLevel == 'critical' ? 'CRITIQUE' : 'ATTENTION' }}
+                                    </span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="alert alert-success text-center">
+                    <i class="fas fa-check-circle fa-3x mb-3"></i>
+                    <h4>Aucune notification</h4>
+                    <p>Tous les scores de bien-être sont au-dessus du seuil critique (≥20).</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row mt-4">
+        <div class="col-md-12 text-center">
+            <a href="{{ path('app_showstresse') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-arrow-left"></i> Retour à la liste des stress
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
