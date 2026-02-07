@@ -1,0 +1,76 @@
+<div class="form-container">
+    {{ form_start(f, {'attr': {'class': 'custom-form'}}) }}
+
+   
+
+    {% for field in f %}
+        {% if field.vars.name != 'save' %} {# skip the submit button #}
+            <div class="form-group">
+                {{ form_label(field) }}
+                {{ form_widget(field, {'attr': {'class': 'form-input'}}) }}
+                {{ form_errors(field) }}
+            </div>
+        {% endif %}
+    {% endfor %}
+
+   
+    <div class="form-group">
+        {{ form_widget(f.save, {'attr': {'class': 'form-submit'}}) }}
+    </div>
+
+   
+
+    {{ form_end(f) }}
+</div>
+
+<style>
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 25px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.custom-form .form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.custom-form label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.custom-form .form-input {
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.custom-form .form-input:focus {
+    border-color: #4f46e5;
+    outline: none;
+    box-shadow: 0 0 5px rgba(79,70,229,0.3);
+}
+
+.form-submit {
+    padding: 10px 20px;
+    background-color: #4f46e5;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.form-submit:hover {
+    background-color: #3730a3;
+}
+</style>

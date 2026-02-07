@@ -1,0 +1,150 @@
+{% set newOrder = order == 'ASC' ? 'DESC' : 'ASC' %}
+
+<div class="admin-page">
+
+    <!-- Formulaire de recherche -->
+    <form method="get" class="search-form">
+        <input
+            type="text"
+            name="q"
+            placeholder="Recherche par titre..."
+            value="{{ app.request.get('q') }}"
+        >
+        <button type="submit">🔍</button>
+    </form>
+
+    <!-- Table des Quiz -->
+    <div class="table-container">
+        <table class="quiz-table">
+            <thead>
+                <tr>
+                    <th><a href="{{ path('admin_show_quiz', { q: app.request.get('q'), sort: 'id', order: newOrder }) }}">ID</a></th>
+                    <th><a href="{{ path('admin_show_quiz', { q: app.request.get('q'), sort: 'titre', order: newOrder }) }}">Titre</a></th>
+                    <th><a href="{{ path('admin_show_quiz', { q: app.request.get('q'), sort: 'duree', order: newOrder }) }}">Durée</a></th>
+                    <th><a href="{{ path('admin_show_quiz', { q: app.request.get('q'), sort: 'dateCreation', order: newOrder }) }}">Date création</a></th>
+                    <th>Cours</th>
+                    <th>Questions</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for quiz in listQuiz %}
+                <tr>
+                    <td>{{ quiz.id }}</td>
+                    <td>{{ quiz.titre }}</td>
+                    <td>{{ quiz.duree }}</td>
+                    <td>{{ quiz.dateCreation ? quiz.dateCreation|date('Y-m-d') : '—' }}</td>
+                    <td>{{ quiz.course.titre }}</td>
+                    <td><a href="{{ path('app_quiz_questions', {id: quiz.id}) }}">Voir Questions</a></td>
+                    <td>
+                        <a href="{{ path('app_updateformquiz', {id: quiz.id}) }}" onclick="return confirm('Update ?')">✏</a>
+                        |
+                        <a href="{{ path('app_deletequiz', {id: quiz.id}) }}" onclick="return confirm('Supprimer ?')">🗑</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7" class="no-result">Aucun résultat</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="add-btn">
+        <a href="{{ path('app_addformquiz') }}">➕ Ajouter un Quiz</a>
+    </div>
+
+</div>
+
+<!-- Styles CSS -->
+<style>
+.admin-page {
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f8;
+}
+
+.search-form {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.search-form input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.search-form button {
+    padding: 8px 12px;
+    border: none;
+    background-color: #4f46e5;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.table-container {
+    overflow-x: auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.quiz-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.quiz-table th, .quiz-table td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.quiz-table thead {
+    background-color: #4f46e5;
+    color: #1a000a;
+}
+
+.quiz-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.quiz-table tbody tr:hover {
+    background-color: #e0e7ff;
+}
+
+.quiz-table a {
+    color: #1a000a;
+    text-decoration: none;
+}
+
+.quiz-table a:hover {
+    text-decoration: underline;
+}
+
+.no-result {
+    text-align: center;
+    color: #999;
+}
+
+.add-btn {
+    margin-top: 15px;
+}
+
+.add-btn a {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #10b981;
+    color: #fff;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.add-btn a:hover {
+    background-color: #059669;
+}
+</style>

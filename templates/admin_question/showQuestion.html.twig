@@ -1,0 +1,168 @@
+{% set newOrder = order == 'ASC' ? 'DESC' : 'ASC' %}
+
+<div class="admin-page">
+
+    <!-- Formulaire de recherche -->
+    <form method="get" class="search-form">
+        <input
+            type="text"
+            name="q"
+            placeholder="Recherche par texte ou choix..."
+            value="{{ app.request.get('q') }}"
+        >
+        <button type="submit">🔍</button>
+    </form>
+
+    <!-- Table des Questions -->
+    <div class="table-container">
+        <table class="quiz-table">
+            <thead>
+                <tr>
+                    {% for column, label in {
+                        'id':'ID',
+                        'texte':'Texte',
+                        'choixA':'Choix A',
+                        'choixB':'Choix B',
+                        'choixC':'Choix C',
+                        'choixD':'Choix D',
+                        'bonneReponse':'Bonne Réponse',
+                        'indice':'Indice',
+                        'quiz':'Quiz'
+                    } %}
+                        <th>
+                            {% if column != 'quiz' %}
+                                <a href="{{ path('app_showquestion', { q: app.request.get('q'), sort: column, order: newOrder }) }}">
+                                    {{ label }}
+                                </a>
+                            {% else %}
+                                {{ label }}
+                            {% endif %}
+                        </th>
+                    {% endfor %}
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for question in listQuestion %}
+                    <tr>
+                        <td>{{ question.id }}</td>
+                        <td>{{ question.texte }}</td>
+                        <td>{{ question.choixA }}</td>
+                        <td>{{ question.choixB }}</td>
+                        <td>{{ question.choixC }}</td>
+                        <td>{{ question.choixD }}</td>
+                        <td>{{ question.bonneReponse }}</td>
+                        <td>{{ question.indice ?: 'N/A' }}</td>
+                        <td>{{ question.quiz ? question.quiz.titre : 'N/A' }}</td>
+                        <td>
+                            <a href="{{ path('app_updateformquestion', {'id': question.id}) }}">✏</a>
+                            |
+                            <a href="{{ path('app_deletequestion', {'id': question.id}) }}" onclick="return confirm('Supprimer ?')">🗑</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="10" class="no-result">Aucun résultat</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="add-btn">
+        <a href="{{ path('app_addformquestion') }}">➕ Ajouter une Question</a>
+    </div>
+
+</div>
+
+<!-- Styles CSS -->
+<style>
+.admin-page {
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f8;
+}
+
+.search-form {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.search-form input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.search-form button {
+    padding: 8px 12px;
+    border: none;
+    background-color: #4821be;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.table-container {
+    overflow-x: auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.quiz-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.quiz-table th, .quiz-table td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.quiz-table thead {
+    background-color: #4f46e5;
+    color: #1a000a;
+}
+
+.quiz-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.quiz-table tbody tr:hover {
+    background-color: #e0e7ff;
+}
+
+.quiz-table a {
+    color: #1a000a;
+    text-decoration: none;
+}
+
+.quiz-table a:hover {
+    text-decoration: underline;
+}
+
+.no-result {
+    text-align: center;
+    color: #999;
+}
+
+.add-btn {
+    margin-top: 15px;
+}
+
+.add-btn a {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #10b981;
+    color: #fff;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.add-btn a:hover {
+    background-color: #059669;
+}
+</style>
