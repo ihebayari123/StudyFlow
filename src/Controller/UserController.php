@@ -10,9 +10,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 final class UserController extends AbstractController
 {
+    private $em;
+    private $passwordHasher;
+
     #[Route('/user', name: 'app_user')]
     public function index(): Response
     {
@@ -91,6 +96,30 @@ public function deleteUser($id, ManagerRegistry $m, UtilisateurRepository $repo)
 
     // Redirection vers la liste
     return $this->redirectToRoute('app_users_show');
+}
+
+public function __construct(EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher)
+{
+    $this->em = $em;
+    $this->passwordHasher = $passwordHasher;
+}
+#[Route('/admin/hash-password/{id}', name: 'hash_password')]
+public function hashPasswordForExistingUser($id)
+{
+    $user = $this->em->getRepository(Utilisateur::class)->find($id);
+
+    if (!$user) {
+        throw $this->createNotFoundException('Utilisateur non trouvé');
+    }
+
+    // Hasher le mot de passe que tu veux
+    $hashed = $this->passwordHasher->hashPassword($user, 'aaaa'); // mot de passe voulu
+    $user->setMotDePasse($hashed);
+    $this->em->flush();
+
+    return $this->json([
+        'message' => 'Mot de passe hashé pour '.$user->getEmail()
+    ]);
 }
 
 
