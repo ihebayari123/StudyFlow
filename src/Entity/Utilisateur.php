@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
@@ -20,15 +21,29 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank(message: "Le nom est obligatoire.")]
+    #[Assert\Regex(
+        pattern: "/^[a-zA-ZÀ-ÿ '-]+$/",
+        message: "Le nom ne peut contenir que des lettres, espaces, apostrophes ou tirets."
+    )]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
+    #[Assert\NotBlank(message: "Le prénom est obligatoire.")]
+    #[Assert\Regex(
+        pattern: "/^[a-zA-ZÀ-ÿ '-]+$/",
+        message: "Le prénom ne peut contenir que des lettres, espaces, apostrophes ou tirets."
+    )]
     #[ORM\Column(length: 255)]
     private ?string $prenom = null;
 
+    #[Assert\NotBlank(message: "L'email est obligatoire.")]
+    #[Assert\Email(message: "Veuillez saisir un email valide.")]
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 
+    #[Assert\NotBlank(message: "Le mot de passe est obligatoire.")]
+    #[Assert\Length(min: 6, minMessage: "Votre mot de passe doit contenir au moins {{ limit }} caractères.")]
     #[ORM\Column(length: 255)]
     private ?string $motDePasse = null;
 

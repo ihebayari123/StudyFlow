@@ -13,6 +13,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
+
 final class UserController extends AbstractController
 {
     private $em;
@@ -27,7 +28,7 @@ final class UserController extends AbstractController
     }
 
     #[Route('/useradd', name: 'app_useradd')]
-    public function addformuser(Request $request, ManagerRegistry $m): Response
+    public function addformuser(Request $request, ManagerRegistry $m,  UserPasswordHasherInterface $passwordHasher): Response
     {
         $em = $m->getManager();
         $utilisateur = new Utilisateur();
@@ -36,10 +37,15 @@ final class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $plainPassword = $form->get('motDePasse')->getData();
+            $hashedPassword = $passwordHasher->hashPassword($utilisateur, $plainPassword);
+            $utilisateur->setMotDePasse($hashedPassword);
+
             $em->persist($utilisateur);
             $em->flush();
 
-            return $this->redirectToRoute('app_useradd');
+            return $this->redirectToRoute('app_users_show');
         }
 
         return $this->render('user/user_add.html.twig', [
