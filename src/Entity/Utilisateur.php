@@ -47,9 +47,11 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $motDePasse = null;
 
+    #[Assert\NotBlank(message: "Le role est obligatoire.")]
     #[ORM\Column(length: 255)]
     private ?string $role = null;
 
+    #[Assert\NotBlank(message: "L'etat du compte est obligatoire.")]
     #[ORM\Column(length: 255)]
     private ?string $statutCompte = null;
 
@@ -94,17 +96,17 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getId(): ?int { return $this->id; }
     public function getNom(): ?string { return $this->nom; }
-    public function setNom(string $nom): static { $this->nom = $nom; return $this; }
+    public function setNom(?string $nom): static { $this->nom = $nom; return $this; }
     public function getPrenom(): ?string { return $this->prenom; }
-    public function setPrenom(string $prenom): static { $this->prenom = $prenom; return $this; }
+    public function setPrenom(?string $prenom): static { $this->prenom = $prenom; return $this; }
     public function getEmail(): ?string { return $this->email; }
-    public function setEmail(string $email): static { $this->email = $email; return $this; }
+    public function setEmail(?string $email): static { $this->email = $email; return $this; }
     public function getMotDePasse(): ?string { return $this->motDePasse; }
-    public function setMotDePasse(string $motDePasse): static { $this->motDePasse = $motDePasse; return $this; }
+    public function setMotDePasse(?string $motDePasse): static { $this->motDePasse = $motDePasse; return $this; }
     public function getRole(): ?string { return $this->role; }
-    public function setRole(string $role): static { $this->role = $role; return $this; }
+    public function setRole(?string $role): static { $this->role = $role; return $this; }
     public function getStatutCompte(): ?string { return $this->statutCompte; }
-    public function setStatutCompte(string $statutCompte): static { $this->statutCompte = $statutCompte; return $this; }
+    public function setStatutCompte(?string $statutCompte): static { $this->statutCompte = $statutCompte; return $this; }
 
     public function getCours(): Collection { return $this->cours; }
     public function addCour(Cours $cour): static {

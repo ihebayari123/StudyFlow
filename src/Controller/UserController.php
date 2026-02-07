@@ -63,7 +63,7 @@ final class UserController extends AbstractController
         ]);
     }
     #[Route('/user/edit/{id}', name: 'app_user_edit')]
-    public function updateUser($id, Request $request, ManagerRegistry $m, UtilisateurRepository $repo): Response
+    public function updateUser($id, Request $request, ManagerRegistry $m, UtilisateurRepository $repo, UserPasswordHasherInterface $passwordHasher): Response
     {
         $em = $m->getManager();
         $utilisateur = $repo->find($id);
@@ -76,6 +76,12 @@ final class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $plainPassword = $form->get('motDePasse')->getData();
+            $hashedPassword = $passwordHasher->hashPassword($utilisateur, $plainPassword);
+            $utilisateur->setMotDePasse($hashedPassword);
+
+            
             $em->flush(); // persist pas nécessaire pour une entité existante
 
             return $this->redirectToRoute('app_users_show');
