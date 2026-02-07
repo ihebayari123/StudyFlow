@@ -46,7 +46,7 @@ class StressSurveyType extends AbstractType
                 'label' => 'Utilisateur',
                 'attr' => ['class' => 'form-select']
             ])
-            ->add('enregistrer', SubmitType::class)
+           
              
         ;
     }

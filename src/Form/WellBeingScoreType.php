@@ -60,11 +60,6 @@ class WellBeingScoreType extends AbstractType
                 'label' => 'Sondage associé',
                 'attr' => ['class' => 'form-select']
             ])
-            ->add('enabled', CheckboxType::class, [
-                'label' => 'Actif',
-                'required' => false,
-                'attr' => ['class' => 'form-check-input']
-            ])
             ->add('enregistrer', SubmitType::class, [
                 'label' => 'Enregistrer',
                 'attr' => ['class' => 'btn btn-success btn-lg px-5']

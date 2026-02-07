@@ -1,0 +1,290 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques des Niveaux de Stress par Heures d'Étude{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-4">
+    <!-- En-tête principal -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-5 pt-4">
+        <div>
+            <h1 class="display-6 fw-bold text-dark mb-2">Statistiques des Niveaux de Stress</h1>
+            <p class="text-muted mb-0">Analyse par nombre d'heures d'étude</p>
+        </div>
+        
+        <!-- Bouton retour -->
+        <a href="{{ path('app_showstresse') }}" 
+           class="btn btn-outline-primary d-flex align-items-center gap-2 px-4 rounded-3 fw-medium shadow-sm">
+            <i class="fas fa-arrow-left"></i>
+            Retour aux Surveys
+        </a>
+    </div>
+
+    <!-- Statistiques générales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-primary text-white">
+                <div class="card-body p-4 text-center">
+                    <i class="fas fa-database fa-2x mb-3 opacity-75"></i>
+                    <h3 class="fw-bold mb-1">{{ totalSurveys }}</h3>
+                    <p class="mb-0 opacity-75">Total Surveys</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-info text-white">
+                <div class="card-body p-4 text-center">
+                    <i class="fas fa-book fa-2x mb-3 opacity-75"></i>
+                    <h3 class="fw-bold mb-1">{{ avgStudyHours }}</h3>
+                    <p class="mb-0 opacity-75">Moy. Heures d'Étude</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-warning text-dark">
+                <div class="card-body p-4 text-center">
+                    <i class="fas fa-bed fa-2x mb-3 opacity-75"></i>
+                    <h3 class="fw-bold mb-1">{{ avgSleepHours }}</h3>
+                    <p class="mb-0 opacity-75">Moy. Heures de Sommeil</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-success text-white">
+                <div class="card-body p-4 text-center">
+                    <i class="fas fa-heart fa-2x mb-3 opacity-75"></i>
+                    <h3 class="fw-bold mb-1">{{ avgWellBeingScore }}</h3>
+                    <p class="mb-0 opacity-75">Score Bien-être Moy.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="fas fa-chart-pie text-primary me-2"></i>
+                        Répartition par Heures d'Étude
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <canvas id="studyHoursPieChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="fas fa-chart-bar text-success me-2"></i>
+                        Score de Bien-être Moyen par Tranche
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <canvas id="wellBeingBarChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau détaillé -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="fas fa-table text-info me-2"></i>
+                        Détails par Tranche d'Heures d'Étude
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="fw-semibold">Tranche d'Heures</th>
+                                    <th class="fw-semibold text-center">Nombre d'Étudiants</th>
+                                    <th class="fw-semibold text-center">Pourcentage</th>
+                                    <th class="fw-semibold text-center">Score Bien-être Moyen</th>
+                                    <th class="fw-semibold">Interprétation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for range, stats in studyHoursStats %}
+                                    {% if stats.count > 0 %}
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-primary rounded-pill px-3 py-2">{{ range }} heures</span>
+                                            </td>
+                                            <td class="text-center fw-bold">{{ stats.count }}</td>
+                                            <td class="text-center">
+                                                {% set percentage = totalSurveys > 0 ? (stats.count / totalSurveys * 100)|round(1) : 0 %}
+                                                <div class="d-flex align-items-center justify-content-center gap-2">
+                                                    <div class="progress flex-grow-1" style="height: 8px; max-width: 100px;">
+                                                        <div class="progress-bar bg-primary" style="width: {{ percentage }}%"></div>
+                                                    </div>
+                                                    <span class="small text-muted">{{ percentage }}%</span>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                {% if stats.avgScore >= 80 %}
+                                                    <span class="badge bg-success rounded-pill px-3 py-2">{{ stats.avgScore }}</span>
+                                                {% elseif stats.avgScore >= 60 %}
+                                                    <span class="badge bg-warning rounded-pill px-3 py-2">{{ stats.avgScore }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger rounded-pill px-3 py-2">{{ stats.avgScore }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if stats.avgScore >= 80 %}
+                                                    <span class="text-success"><i class="fas fa-smile me-1"></i> Excellent bien-être</span>
+                                                {% elseif stats.avgScore >= 60 %}
+                                                    <span class="text-warning"><i class="fas fa-meh me-1"></i> Bien-être modéré</span>
+                                                {% else %}
+                                                    <span class="text-danger"><i class="fas fa-frown me-1"></i> Stress élevé</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analyse et conclusions -->
+    <div class="row mt-4 mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 bg-light">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-dark mb-3">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        Analyse et Recommandations
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold text-primary mb-2">Observations clés :</h6>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Les étudiants étudiant moins de 5 heures ont généralement un meilleur score de bien-être.</li>
+                                <li class="mb-2"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Plus de 8 heures d'étude quotidienne peut indiquer un niveau de stress élevé.</li>
+                                <li class="mb-0"><i class="fas fa-info-circle text-info me-2"></i>L'équilibre entre étude et sommeil est crucial pour le bien-être.</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold text-success mb-2">Recommandations :</h6>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2"><i class="fas fa-star text-warning me-2"></i>Encourager des pauses régulières pendant les sessions d'étude.</li>
+                                <li class="mb-2"><i class="fas fa-star text-warning me-2"></i>Maintenir un minimum de 7 heures de sommeil par nuit.</li>
+                                <li class="mb-0"><i class="fas fa-star text-warning me-2"></i>Utiliser des techniques de gestion du stress (méditation, sport).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Graphique en camembert - Répartition par heures d'étude
+    const pieCtx = document.getElementById('studyHoursPieChart').getContext('2d');
+    new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ chartLabels|raw }},
+            datasets: [{
+                data: {{ chartData|raw }},
+                backgroundColor: {{ chartColors|raw }},
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true,
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return label + ': ' + value + ' étudiants (' + percentage + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Graphique en barres - Score de bien-être moyen
+    const barCtx = document.getElementById('wellBeingBarChart').getContext('2d');
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ chartLabels|raw }},
+            datasets: [{
+                label: 'Score de Bien-être Moyen',
+                data: [
+                    {% for range, stats in studyHoursStats %}
+                        {% if stats.count > 0 %}
+                            {{ stats.avgScore }}{% if not loop.last %},{% endif %}
+                        {% endif %}
+                    {% endfor %}
+                ],
+                backgroundColor: {{ chartColors|raw }},
+                borderWidth: 0,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + ' pts';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Score moyen: ' + context.parsed.y + ' points';
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
