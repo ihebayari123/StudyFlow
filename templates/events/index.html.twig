@@ -1,0 +1,96 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Liste des événements - Admin{% endblock %}
+
+{% block admin_content %}
+{# Spacer pour navbar fixe #}
+<div style="height: 80px;"></div> {# Ajuster la hauteur selon ton navbar #}
+
+<div class="container py-5 d-flex flex-column align-items-center">
+
+    <h1 class="mb-5 text-primary fw-bold text-center">Événements</h1>
+
+    {# Messages flash #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm w-100" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {# Formulaire de recherche et tri combiné #}
+    <form method="get" action="{{ path('app_events') }}" class="row mb-4 g-3 w-100 justify-content-center">
+        <div class="col-md-5">
+            <input type="text" name="search" class="form-control shadow-sm rounded-3" placeholder="Rechercher par titre ou type" value="{{ search }}">
+        </div>
+        <div class="col-md-4">
+            <select name="sort" class="form-select shadow-sm rounded-3" onchange="this.form.submit()">
+                <option value="">Trier par date</option>
+                <option value="asc" {% if sort == 'asc' %}selected{% endif %}>Du plus ancien au plus récent</option>
+                <option value="desc" {% if sort == 'desc' %}selected{% endif %}>Du plus récent au plus ancien</option>
+            </select>
+        </div>
+        <div class="col-md-2 text-end">
+            <button class="btn btn-outline-primary w-100 shadow-sm rounded-3">Appliquer</button>
+        </div>
+    </form>
+
+    {% if events is empty %}
+        <div class="alert alert-secondary text-center shadow-sm rounded-3 w-100">
+            Aucun événement trouvé.
+        </div>
+    {% else %}
+        <div class="row g-4 w-100 justify-content-center">
+            {% for event in events %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-sm border-0 h-100 rounded-4 overflow-hidden">
+                        {% if event.image %}
+                            <img src="{{ asset('uploads/' ~ event.image) }}" class="card-img-top" style="height: 180px; object-fit: cover;" alt="{{ event.titre }}">
+                        {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                                <span class="text-muted">Aucune image</span>
+                            </div>
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">{{ event.titre }}</h5>
+                            <p class="card-text text-truncate">{{ event.description }}</p>
+                            <p class="mb-2">
+                                <small class="text-muted">Créé le {{ event.dateCreation|date('d/m/Y H:i') }}</small>
+                            </p>
+                            <div class="mb-3">
+                                {% if event.type == 'Conférence' %}
+                                    <span class="badge bg-primary">{{ event.type }}</span>
+                                {% elseif event.type == 'Atelier' %}
+                                    <span class="badge bg-success">{{ event.type }}</span>
+                                {% elseif event.type == 'Séminaire' %}
+                                    <span class="badge bg-info text-dark">{{ event.type }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ event.type }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="mt-auto d-flex justify-content-between">
+                                <a href="{{ path('event_edit', {'id': event.id}) }}" class="btn btn-warning btn-sm rounded-3 shadow-sm flex-grow-1 me-1">
+                                    Modifier
+                                </a>
+                                <form method="post" action="{{ path('event_delete', {'id': event.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?');" class="flex-grow-1 ms-1">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ event.id) }}">
+                                    <button class="btn btn-danger btn-sm rounded-3 shadow-sm w-100">Supprimer</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="mt-5 text-center w-100">
+        <a href="{{ path('event_create') }}" class="btn btn-primary btn-lg shadow-sm rounded-3">
+            Ajouter un nouvel événement
+        </a>
+    </div>
+
+</div>
+{% endblock %}

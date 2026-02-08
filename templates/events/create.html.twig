@@ -1,0 +1,47 @@
+{# templates/admin/event_create_admin.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Créer un événement - Admin{% endblock %}
+
+{% block admin_content %}
+{# Ajout d'un padding-top pour éviter que la navbar chevauche le titre #}
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+
+            <div class="card shadow-sm rounded-4 border-0">
+                <div class="card-body p-5">
+                    <h1 class="mb-4 text-primary fw-bold text-center">Créer un événement</h1>
+
+                    {# Messages flash #}
+                    {% for label, messages in app.flashes %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+
+                    {# Formulaire #}
+                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
+
+                        {{ form_row(form.titre, {'attr': {'class': 'form-control rounded-3 shadow-sm mb-3', 'placeholder': 'Titre de l\'événement'}}) }}
+                        {{ form_row(form.description, {'attr': {'class': 'form-control rounded-3 shadow-sm mb-3', 'placeholder': 'Description'}}) }}
+                        {{ form_row(form.dateCreation, {'attr': {'class': 'form-control rounded-3 shadow-sm mb-3'}}) }}
+                        {{ form_row(form.type, {'attr': {'class': 'form-select rounded-3 shadow-sm mb-3'}}) }}
+                        {{ form_row(form.image, {'attr': {'class': 'form-control rounded-3 shadow-sm mb-4', 'accept': 'image/*'}}) }}
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm">Créer l'événement</button>
+                        </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

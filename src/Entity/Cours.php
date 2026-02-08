@@ -37,8 +37,8 @@ class Cours
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: "L'image est obligatoire")]
-    #[Assert\Url(message: "Veuillez entrer une URL valide")]
+    //#[Assert\NotBlank(message: "L'image est obligatoire")]
+    //#[Assert\Url(message: "Veuillez entrer une URL valide")]
     private ?string $image = null;
 
     #[ORM\ManyToOne(inversedBy: 'cours')]

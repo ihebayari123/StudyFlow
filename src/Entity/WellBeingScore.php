@@ -29,6 +29,8 @@ class WellBeingScore
     #[ORM\JoinColumn(nullable: false)]
     private ?StressSurvey $survey = null;
 
+    // LE CHAMP ENABLED A ÉTÉ SUPPRIMÉ ICI POUR RÉGLER L'ERREUR SQL
+
     public function getId(): ?int
     {
         return $this->id;
@@ -42,8 +44,7 @@ class WellBeingScore
     public function setRecommendation(string $recommendation): static
     {
         $this->recommendation = $recommendation;
-
-        return $this;
+         return $this;
     }
 
     public function getActionPlan(): ?string
@@ -53,8 +54,7 @@ class WellBeingScore
 
     public function setActionPlan(string $actionPlan): static
     {
-        $this->actionPlan = $actionPlan;
-
+         $this->actionPlan = $actionPlan;
         return $this;
     }
 
@@ -65,8 +65,7 @@ class WellBeingScore
 
     public function setComment(string $comment): static
     {
-        $this->comment = $comment;
-
+          $this->comment = $comment;
         return $this;
     }
 
@@ -78,19 +77,17 @@ class WellBeingScore
     public function setScore(int $score): static
     {
         $this->score = $score;
+           return $this;
+    }
 
+    public function getSurvey(): ?StressSurvey
+    {
+        return $this->survey;
+    }
+
+    public function setSurvey(StressSurvey $survey): static
+    {
+        $this->survey = $survey;
         return $this;
     }
-
-    public function getSurveyId(): ?StressSurvey
-    {
-        return $this->surveyId;
-    }
-
-    public function setSurveyId(StressSurvey $surveyId): static
-    {
-        $this->surveyId = $surveyId;
-
-        return $this;
-    }
-}
+}   

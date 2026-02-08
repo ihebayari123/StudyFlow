@@ -21,8 +21,8 @@ class Event
     #[ORM\Column(length: 255)]
     private ?string $description = null;
 
-    #[ORM\Column]
-    private ?\DateTime $dateCreation = null;
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTimeInterface $dateCreation = null;
 
     #[ORM\Column(length: 255)]
     private ?string $type = null;
@@ -45,10 +45,14 @@ class Event
         $this->sponsors = new ArrayCollection();
     }
 
+    // ================= ID =================
+
     public function getId(): ?int
     {
         return $this->id;
     }
+
+    // ================= TITRE =================
 
     public function getTitre(): ?string
     {
@@ -58,9 +62,10 @@ class Event
     public function setTitre(string $titre): static
     {
         $this->titre = $titre;
-
         return $this;
     }
+
+    // ================= DESCRIPTION =================
 
     public function getDescription(): ?string
     {
@@ -70,21 +75,23 @@ class Event
     public function setDescription(string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
-    public function getDateCreation(): ?\DateTime
+    // ================= DATE =================
+
+    public function getDateCreation(): ?\DateTimeInterface
     {
         return $this->dateCreation;
     }
 
-    public function setDateCreation(\DateTime $dateCreation): static
+    public function setDateCreation(\DateTimeInterface $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
-
         return $this;
     }
+
+    // ================= TYPE =================
 
     public function getType(): ?string
     {
@@ -94,9 +101,10 @@ class Event
     public function setType(string $type): static
     {
         $this->type = $type;
-
         return $this;
     }
+
+    // ================= IMAGE =================
 
     public function getImage(): ?string
     {
@@ -106,9 +114,10 @@ class Event
     public function setImage(string $image): static
     {
         $this->image = $image;
-
         return $this;
     }
+
+    // ================= USER =================
 
     public function getUser(): ?Utilisateur
     {
@@ -118,9 +127,10 @@ class Event
     public function setUser(?Utilisateur $user): static
     {
         $this->user = $user;
-
         return $this;
     }
+
+    // ================= SPONSORS =================
 
     /**
      * @return Collection<int, Sponsor>
@@ -143,7 +153,6 @@ class Event
     public function removeSponsor(Sponsor $sponsor): static
     {
         if ($this->sponsors->removeElement($sponsor)) {
-            // set the owning side to null (unless already changed)
             if ($sponsor->getEventTitre() === $this) {
                 $sponsor->setEventTitre(null);
             }

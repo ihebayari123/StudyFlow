@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Produits{% endblock %}
+
+{% block body %}
+<style>
+    body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; margin: 0; padding: 0; }
+    .header-banner { background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%); padding: 20px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 40px; }
+    .header-banner h1 { text-align: center; color: white; font-size: 2.8em; margin: 0; font-weight: 700; letter-spacing: 2px; }
+    .header-banner h1 span { background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 20px 40px; }
+    h2 { text-align: center; color: white; font-size: 2em; margin-bottom: 30px; }
+    .actions-bar { max-width: 600px; margin: 0 auto 30px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .btn { padding: 12px 25px; border: none; border-radius: 50px; cursor: pointer; font-weight: 600; font-size: 14px; text-decoration: none; display: inline-block; transition: all 0.3s; color: white; }
+    .btn-add { background: #4CAF50; box-shadow: 0 4px 15px rgba(76,175,80,0.3); }
+    .btn-add:hover { background: #45a049; transform: translateY(-2px); }
+    .btn-cart { background: #FF9800; box-shadow: 0 4px 15px rgba(255,152,0,0.3); }
+    .btn-cart:hover { background: #F57C00; transform: translateY(-2px); }
+    .table-wrap { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 18px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; text-align: left; font-weight: 600; text-transform: uppercase; font-size: 13px; }
+    td { padding: 15px 18px; border-bottom: 1px solid #eee; }
+    tr:hover { background: #f8f9ff; }
+    .badge { padding: 5px 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 15px; font-size: 12px; font-weight: 600; }
+    .price { color: #667eea; font-weight: 700; font-size: 17px; }
+    .action-link { color: #667eea; text-decoration: none; font-weight: 600; margin: 0 5px; transition: all 0.3s; }
+    .action-link:hover { color: #764ba2; text-decoration: underline; }
+    .delete { color: #f44336; }
+    .delete:hover { color: #d32f2f; }
+</style>
+
+<div class="header-banner">
+    <h1>📚 <span>StudyFlow</span> 📚</h1>
+</div>
+
+<div class="container">
+    <h2>🛍️ Gestion des Produits</h2>
+    
+    <div class="actions-bar">
+        <a href="{{ path('app_addproduit') }}" class="btn btn-add">➕ Ajouter un Produit</a>
+       
+    </div>
+    
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Produit</th>
+                    <th>Description</th>
+                    <th>Prix</th>
+                    <th>Image</th>
+                    <th>Catégorie</th>
+                    <th>User</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for produit in listproduit %}
+                <tr>
+                    <td><strong>#{{ produit.id }}</strong></td>
+                    <td><strong>{{ produit.nom }}</strong></td>
+                    <td>{{ produit.description }}</td>
+                    <td class="price">{{ produit.prix }} DT</td>
+                    <td>{{ produit.image }}</td>
+                    <td><span class="badge">{{ produit.typeCategorie.nomCategorie }}</span></td>
+                    <td>{{ produit.user.role }}</td>
+                    <td>
+                        <a href="{{ path('app_updateproduit', {id: produit.id}) }}" class="action-link">✏️ Modifier</a>
+                        <a href="{{ path('app_deleteproduit', {id: produit.id}) }}" class="action-link delete" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')">🗑️ Supprimer</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 40px;">📭 Aucun produit trouvé</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
