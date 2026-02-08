@@ -82,14 +82,14 @@ class Question
         return $this;
     }
 
-    public function getQuizId(): ?Quiz
+    public function getQuiz(): ?Quiz
     {
-        return $this->quizId;
+        return $this->quiz;
     }
 
-    public function setQuizId(?Quiz $quizId): static
+    public function setQuiz(?Quiz $quiz): static
     {
-        $this->quizId = $quizId;
+        $this->quiz = $quiz;
 
         return $this;
     }

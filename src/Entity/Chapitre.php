@@ -67,14 +67,14 @@ class Chapitre
         return $this;
     }
 
-    public function getCourseId(): ?Cours
+    public function getCourse(): ?Cours
     {
-        return $this->courseId;
+        return $this->course;
     }
 
-    public function setCourseId(?Cours $courseId): static
+    public function setCourse(?Cours $course): static
     {
-        $this->courseId = $courseId;
+        $this->course = $course;
 
         return $this;
     }
