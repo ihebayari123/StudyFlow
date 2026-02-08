@@ -1,0 +1,194 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - StudyFlow{% endblock %}
+
+{% block body %}
+<!-- ======= Header ======= -->
+<header class="header-area header-sticky">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <nav class="main-nav">
+          <!-- Logo -->
+          <a href="{{ path('app_home') }}" class="logo">
+            <h1 class="logo-text">StudyFlow</h1>
+          </a>
+
+          <!-- Menu -->
+          <ul class="nav">
+            <li class="scroll-to-section"><a href="#top" class="active">Home</a></li>
+            <li class="scroll-to-section"><a href="#services">Services</a></li>
+            <li class="scroll-to-section"><a href="#courses">Courses</a></li>
+            <li class="scroll-to-section"><a href="#team">Team</a></li>
+            <li class="scroll-to-section"><a href="#events">Events</a></li>
+            <li class="scroll-to-section"><a href="#contact">Register Now!</a></li>
+          </ul>
+
+          <!-- Mobile Menu -->
+          <a class="menu-trigger"><span>Menu</span></a>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ======= Hero Section ======= -->
+<main>{% block content %}{% endblock %}</main>
+
+<div id="top"></div>
+<div class="vignette"></div>
+
+{% for i in 0..12 %}
+    <img src="{{ asset('assets/images/' ~ i ~ '.png') }}" class="bg-{{ i }}">
+{% endfor %}
+
+<div class="text parallax" data-speedx="0.3" data-speedy="0.3">
+    <h1 class="hero-title">StudyFlow</h1>
+</div>
+<div class="text2">
+    <h1 class="hero-subtitle">Your study journey, simplified.</h1>
+</div>
+<div class="text3">
+    <h2 class="hero-description">All your lessons, quizzes, and progress — in one intelligent platform.</h2>
+</div>
+
+<a href="#" class="sparkle-btn">
+    <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M93.781 51.578C95 50.969 96 49.359 96 48c0-1.375-1-2.969-2.219-3.578
+        0 0-22.868-1.514-31.781-10.422-8.915-8.91-10.438-31.781-10.438-31.781
+        C50.969 1 49.375 0 48 0s-2.969 1-3.594 2.219
+        c0 0-1.5 22.87-10.406 31.781-8.908 8.913-31.781 10.422-31.781 10.422
+        C1 45.031 0 46.625 0 48c0 1.359 1 2.969 2.219 3.578
+        0 0 22.873 1.51 31.781 10.422 8.906 8.911 10.406 31.781 10.406 31.781
+        C45.031 95 46.625 96 48 96s2.969-1 3.562-2.219
+        c0 0 1.523-22.871 10.438-31.781 8.913-8.908 31.781-10.422 31.781-10.422Z"
+        fill="#000"/>
+    </svg>
+    <span>Begin Your Journey</span>
+    <span aria-hidden="true">Begin Your Journey</span>
+</a>
+
+<!-- ======= Events Section ======= -->
+<div class="section events py-5" id="events" style="background: #f8f9fa;">
+  <div class="container">
+    <div class="row mb-4">
+      <div class="col-lg-12 text-center">
+        <div class="section-heading">
+          <h6 class="text-uppercase text-secondary fw-bold" style="letter-spacing:2px;">Schedule</h6>
+          <h2 class="display-5 fw-bold" style="font-family: 'Poppins', sans-serif; letter-spacing:1px;">Upcoming Events</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" id="events-container">
+      {% if events is empty %}
+        <div class="col-12 text-center mt-4">
+          <div class="alert alert-secondary">Aucun événement disponible.</div>
+        </div>
+      {% else %}
+        {% for event in events %}
+          <div class="col-lg-4 col-md-6 mb-4 event-item">
+            <div class="card event-card shadow-sm border-0 position-relative">
+              {% if event.image %}
+                <img src="{{ asset('uploads/' ~ event.image) }}" class="card-img-top" alt="{{ event.titre }}">
+              {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height:200px;">
+                  <span class="text-muted">Aucune image</span>
+                </div>
+              {% endif %}
+
+              <div class="card-body">
+                <span class="badge bg-primary mb-2">{{ event.type }}</span>
+                <h5 class="card-title fw-bold">{{ event.titre }}</h5>
+                <p class="card-text text-muted mb-1"><i class="bi bi-calendar-event"></i> {{ event.dateCreation ? event.dateCreation|date('d M Y') : '' }}</p>
+                <p class="card-text">{{ event.description|length > 100 ? event.description|slice(0,100) ~ '...' : event.description }}</p>
+
+                <p class="mb-2">
+                  <strong>Sponsors:</strong>
+                  {% if event.getSponsors() is not empty %}
+                    {% for sponsor in event.getSponsors() %}
+                      <span class="badge bg-info text-dark">{{ sponsor.nomSponsor }}</span>
+                    {% endfor %}
+                  {% else %}
+                    Aucun sponsor
+                  {% endif %}
+                </p>
+
+                <!-- Compteur à rebours -->
+                <p class="countdown" data-date="{{ event.dateCreation ? event.dateCreation|date('Y-m-d H:i:s') : '' }}"></p>
+
+                <!-- Coeur dynamique -->
+                <span class="heart-icon" data-event-id="{{ event.id }}">
+                  <i class="bi bi-heart" style="font-size:1.5rem; cursor:pointer;"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- ======= Styles ======= -->
+<style>
+.header-area { position: sticky; top: 0; z-index: 999; background-color: transparent; transition: background-color 0.3s, color 0.3s; padding:15px 0;}
+.header-area.scrolled { background-color:#8a2be2; }
+.header-area .nav a { color:white; transition: color 0.3s;}
+.header-area.scrolled .nav a { color:#fff; }
+.header-area .logo-text { color:#fff; transition: color 0.3s;}
+.header-area.scrolled .logo-text { color:#ffd700; }
+
+.event-card { border-radius: 15px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;}
+.event-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.15);}
+.event-card .card-title { font-family: 'Poppins', sans-serif; color: #333;}
+.event-card .card-text { font-size:0.95rem;}
+.heart-icon i { color:#ccc; transition: color 0.3s, transform 0.3s;}
+.heart-icon.liked i { color:#8a2be2; transform: scale(1.2);}
+.countdown { font-weight:bold; color:#8a2be2; margin-top:5px; font-family:'Poppins', sans-serif;}
+</style>
+
+<!-- ======= Scripts ======= -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Navbar scroll
+    const header = document.querySelector('.header-area');
+    window.addEventListener('scroll', function() {
+        header.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // Coeurs dynamiques
+    const hearts = document.querySelectorAll('.heart-icon');
+    hearts.forEach(heart => {
+        const id = heart.dataset.eventId;
+        if(localStorage.getItem('heart_' + id) === 'liked') heart.classList.add('liked');
+        heart.addEventListener('click', function(){
+            heart.classList.toggle('liked');
+            if(heart.classList.contains('liked')) localStorage.setItem('heart_' + id,'liked');
+            else localStorage.removeItem('heart_' + id);
+        });
+    });
+
+    // Compteur à rebours
+    const countdowns = document.querySelectorAll('.countdown');
+    function updateCountdown(){
+        const now = new Date().getTime();
+        countdowns.forEach(cd=>{
+            const dateStr = cd.dataset.date;
+            if(!dateStr) return;
+            const eventTime = new Date(dateStr).getTime();
+            const diff = eventTime - now;
+            if(diff>0){
+                const d=Math.floor(diff/(1000*60*60*24));
+                const h=Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+                const m=Math.floor((diff%(1000*60*60))/(1000*60));
+                const s=Math.floor((diff%60000)/1000);
+                cd.textContent = `Starts in ${d}d ${h}h ${m}m ${s}s`;
+            } else cd.textContent='Event started';
+        });
+    }
+    setInterval(updateCountdown,1000);
+    updateCountdown();
+});
+</script>
+{% endblock %}

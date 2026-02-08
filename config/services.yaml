@@ -1,18 +1,21 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
+# config/services.yaml
 
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+# ---------------------------------------------------
+# Paramètres globaux de l'application
+# ---------------------------------------------------
 parameters:
+    images_directory: '%kernel.project_dir%/public/uploads'  # dossier pour stocker les images uploadées
 
+# ---------------------------------------------------
+# Configuration par défaut des services
+# ---------------------------------------------------
 services:
-    # default configuration for services in *this* file
+    # Configuration par défaut pour tous les services
     _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        autowire: true      # Injection automatique des dépendances
+        autoconfigure: true # Enregistre automatiquement les services comme commandes, event subscribers, etc.
 
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
+    # Rendre toutes les classes dans src/ disponibles en tant que services
     App\:
         resource: '../src/'
         exclude:
@@ -20,5 +23,5 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    # Ajouter ici d'autres services personnalisés si nécessaire
+    # Remarque : les dernières définitions remplacent toujours les précédentes

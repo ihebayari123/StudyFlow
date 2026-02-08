@@ -1,0 +1,74 @@
+{# templates/admin/event_edit_admin.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Modifier l'événement - Admin{% endblock %}
+
+{% block admin_content %}
+{# Spacer pour navbar fixe - ajuster la hauteur selon ton navbar #}
+<div style="height: 80px;"></div>
+
+<div class="container py-5">
+
+    <h1 class="mb-4 text-primary fw-bold text-center">Modifier l'événement</h1>
+
+    {# Messages flash #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="row g-4">
+        {# Partie gauche : image actuelle #}
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0">
+                {% if event.image and event.image != 'default.png' %}
+                    <img src="{{ asset('uploads/' ~ event.image) }}" 
+                         class="card-img-top rounded-top" 
+                         alt="{{ event.titre }}" 
+                         style="object-fit: cover; height: 250px;">
+                    <div class="card-body text-center">
+                        <p class="card-text fw-semibold">Image actuelle</p>
+                    </div>
+                {% else %}
+                    <div class="card-body text-center bg-light border rounded">
+                        <p class="text-muted fw-medium mb-0">Aucune image disponible</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Partie droite : formulaire #}
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 p-4">
+                {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
+
+                {% for field in ['titre', 'description', 'dateCreation', 'type'] %}
+                    <div class="mb-3">
+                        {{ form_label(attribute(form, field), null, {'label_attr': {'class': 'form-label fw-bold text-secondary'}}) }}
+                        {{ form_widget(attribute(form, field), {'attr': {'class': 'form-control rounded-3 shadow-sm'}}) }}
+                        {{ form_errors(attribute(form, field)) }}
+                    </div>
+                {% endfor %}
+
+                <div class="mb-4">
+                    {{ form_label(form.image, 'Nouvelle image (optionnel)', {'label_attr': {'class': 'form-label fw-bold text-secondary'}}) }}
+                    {{ form_widget(form.image, {'attr': {'class': 'form-control rounded-3 shadow-sm', 'accept': 'image/*'}}) }}
+                    {{ form_errors(form.image) }}
+                    <small class="text-muted d-block mt-1">Laissez vide pour conserver l'image actuelle.</small>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg shadow-sm">Mettre à jour</button>
+                    <a href="{{ path('app_events') }}" class="btn btn-outline-secondary btn-lg shadow-sm">Annuler</a>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
