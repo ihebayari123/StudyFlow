@@ -16,6 +16,27 @@ class TypeCategorieRepository extends ServiceEntityRepository
         parent::__construct($registry, TypeCategorie::class);
     }
 
+
+    public function triByNomCategorie(): array
+    {
+        $em = $this->getEntityManager();
+        
+        $dql = "SELECT c FROM App\Entity\TypeCategorie c 
+                ORDER BY c.nomCategorie ASC";
+        
+        $query = $em->createQuery($dql);
+        
+        return $query->getResult();
+    }
+
+
+
+
+
+
+
+
+
     //    /**
     //     * @return TypeCategorie[] Returns an array of TypeCategorie objects
     //     */

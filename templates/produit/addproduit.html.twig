@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un Produit{% endblock %}
+
+{% block body %}
+<style>
+    .form-container { 
+        max-width: 600px; 
+        margin: 30px auto; 
+        padding: 25px; 
+        background: white; 
+        border-radius: 8px; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+    }
+    .form-title { 
+        text-align: center; 
+        color: #333; 
+        margin-bottom: 20px; 
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    label { 
+        display: block; 
+        margin: 15px 0 5px; 
+        font-weight: 600; 
+        color: #333;
+    }
+    input, textarea, select { 
+        width: 100%; 
+        padding: 10px; 
+        border: 2px solid #ddd; 
+        border-radius: 5px; 
+        font-size: 14px;
+    }
+    input:focus, textarea:focus, select:focus { 
+        outline: none; 
+        border-color: #5b4caf; 
+    }
+    .error {
+        color: red;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    button { 
+        width: 100%; 
+        padding: 12px; 
+        margin-top: 20px; 
+        background: #4c4faf; 
+        color: white; 
+        border: none; 
+        border-radius: 5px; 
+        font-size: 16px; 
+        cursor: pointer; 
+    }
+    button:hover { 
+        background: #3d3f8f; 
+    }
+</style>
+
+<div class="form-container">
+    <h1 class="form-title">➕ Créer un Nouveau Produit</h1>
+    
+    {# Désactivation du contrôle HTML5 #}
+    {{ form_start(ff, {'attr': {'novalidate': 'novalidate'}}) }}
+    
+    <div class="form-group">
+        {{ form_label(ff.nom, "Nom du Produit") }}
+        {{ form_widget(ff.nom) }}
+        {{ form_errors(ff.nom) }}
+    </div>
+    
+    <div class="form-group">
+        {{ form_label(ff.description, "Description") }}
+        {{ form_widget(ff.description) }}
+        {{ form_errors(ff.description) }}
+    </div>
+    
+    <div class="form-group">
+        {{ form_label(ff.prix, "Prix (DT)") }}
+        {{ form_widget(ff.prix) }}
+        {{ form_errors(ff.prix) }}
+    </div>
+    
+    <div class="form-group">
+        {{ form_label(ff.image, "URL de l'image") }}
+        {{ form_widget(ff.image) }}
+        {{ form_errors(ff.image) }}
+    </div>
+    
+    <div class="form-group">
+        {{ form_label(ff.typeCategorie, "Catégorie") }}
+        {{ form_widget(ff.typeCategorie) }}
+        {{ form_errors(ff.typeCategorie) }}
+    </div>
+    
+    <div class="form-group">
+        {{ form_label(ff.user, "Utilisateur") }}
+        {{ form_widget(ff.user) }}
+        {{ form_errors(ff.user) }}
+    </div>
+    
+    {{ form_rest(ff) }}
+    
+    {{ form_end(ff) }}
+</div>
+
+{% endblock %}

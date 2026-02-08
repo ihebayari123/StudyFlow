@@ -1,0 +1,165 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Plan d'Éducation - Gestion du Stress{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-4">
+    <!-- En-tête -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-5 pt-4">
+        <div>
+            <h1 class="display-6 fw-bold text-dark mb-2">
+                <i class="fas fa-graduation-cap text-primary me-2"></i>
+                Plan d'Éducation Personnalisé
+            </h1>
+            <p class="text-muted mb-0">Recommandations pour améliorer votre bien-être étudiant</p>
+        </div>
+        
+        <!-- Bouton retour -->
+        <a href="{{ path('app_showstresse') }}" class="btn btn-outline-primary d-flex align-items-center gap-2 px-4 rounded-3 fw-medium">
+            <i class="fas fa-arrow-left"></i>
+            Retour à la liste
+        </a>
+    </div>
+
+    <!-- Informations de l'étudiant -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-semibold mb-3 text-dark">
+                        <i class="fas fa-user text-info me-2"></i>
+                        Informations de l'étudiant
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p class="mb-1"><strong>Nom:</strong> {{ survey.user.nom }} {{ survey.user.prenom }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <p class="mb-1"><strong>Email:</strong> {{ survey.user.email }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <p class="mb-1"><strong>Date du survey:</strong> {{ survey.date|date('d/m/Y') }}</p>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-primary fs-6">{{ survey.sleepHours }} heures</span>
+                                <span class="text-muted">de sommeil</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-info fs-6">{{ survey.studyHours }} heures</span>
+                                <span class="text-muted">d'étude</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plan d'éducation -->
+    <div class="row g-4">
+        <!-- Sommeil -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header border-0 bg-transparent pt-4 px-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-{% if plan.sleep.status == 'critical' %}danger{% elseif plan.sleep.status == 'warning' %}warning{% else %}success{% endif %} bg-opacity-10 p-3 rounded-3">
+                            <i class="fas fa-bed fs-4 text-{% if plan.sleep.status == 'critical' %}danger{% elseif plan.sleep.status == 'warning' %}warning{% else %}success{% endif %}"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">{{ plan.sleep.title }}</h5>
+                            <span class="badge bg-{% if plan.sleep.status == 'critical' %}danger{% elseif plan.sleep.status == 'warning' %}warning{% else %}success{% endif %}">
+                                {% if plan.sleep.status == 'critical' %}Critique{% elseif plan.sleep.status == 'warning' %}Attention{% else %}Bon{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <h6 class="fw-semibold mb-3">Recommandations:</h6>
+                    <ul class="list-unstyled mb-0">
+                        {% for recommendation in plan.sleep.recommendations %}
+                            <li class="mb-2 d-flex align-items-start gap-2">
+                                <i class="fas fa-check-circle text-{% if plan.sleep.status == 'critical' %}danger{% elseif plan.sleep.status == 'warning' %}warning{% else %}success{% endif %} mt-1"></i>
+                                <span>{{ recommendation }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Étude -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header border-0 bg-transparent pt-4 px-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-{% if plan.study.status == 'critical' %}danger{% elseif plan.study.status == 'warning' %}warning{% else %}success{% endif %} bg-opacity-10 p-3 rounded-3">
+                            <i class="fas fa-book fs-4 text-{% if plan.study.status == 'critical' %}danger{% elseif plan.study.status == 'warning' %}warning{% else %}success{% endif %}"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">{{ plan.study.title }}</h5>
+                            <span class="badge bg-{% if plan.study.status == 'critical' %}danger{% elseif plan.study.status == 'warning' %}warning{% else %}success{% endif %}">
+                                {% if plan.study.status == 'critical' %}Critique{% elseif plan.study.status == 'warning' %}Attention{% else %}Bon{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <h6 class="fw-semibold mb-3">Recommandations:</h6>
+                    <ul class="list-unstyled mb-0">
+                        {% for recommendation in plan.study.recommendations %}
+                            <li class="mb-2 d-flex align-items-start gap-2">
+                                <i class="fas fa-check-circle text-{% if plan.study.status == 'critical' %}danger{% elseif plan.study.status == 'warning' %}warning{% else %}success{% endif %} mt-1"></i>
+                                <span>{{ recommendation }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bien-être général -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header border-0 bg-transparent pt-4 px-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-info bg-opacity-10 p-3 rounded-3">
+                            <i class="fas fa-heart fs-4 text-info"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">{{ plan.wellness.title }}</h5>
+                            <span class="badge bg-info">Conseils</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        {% for recommendation in plan.wellness.recommendations %}
+                            <div class="col-md-6 mb-2">
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="fas fa-star text-info mt-1"></i>
+                                    <span>{{ recommendation }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bouton retour en bas -->
+    <div class="row mt-5 mb-5">
+        <div class="col-12 text-center">
+            <a href="{{ path('app_showstresse') }}" class="btn btn-primary btn-lg d-inline-flex align-items-center gap-2 px-5 rounded-3 fw-medium shadow-sm">
+                <i class="fas fa-arrow-left"></i>
+                Retour à la liste des stress surveys
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

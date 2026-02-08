@@ -27,7 +27,7 @@ class StressSurvey
     #[ORM\JoinColumn(nullable: false)]
     private ?Utilisateur $user = null;
 
-    #[ORM\OneToOne(mappedBy: 'surveyId', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'survey', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private ?WellBeingScore $wellBeingScore = null;
 
     public function getId(): ?int
@@ -71,14 +71,14 @@ class StressSurvey
         return $this;
     }
 
-    public function getUserId(): ?Utilisateur
+    public function getUser(): ?Utilisateur
     {
-        return $this->userId;
+        return $this->user;
     }
 
-    public function setUserId(?Utilisateur $userId): static
+    public function setUser(?Utilisateur $user): static
     {
-        $this->userId = $userId;
+        $this->user = $user;
 
         return $this;
     }
@@ -91,8 +91,8 @@ class StressSurvey
     public function setWellBeingScore(WellBeingScore $wellBeingScore): static
     {
         // set the owning side of the relation if necessary
-        if ($wellBeingScore->getSurveyId() !== $this) {
-            $wellBeingScore->setSurveyId($this);
+        if ($wellBeingScore->getSurvey() !== $this) {
+            $wellBeingScore->setSurvey($this);
         }
 
         $this->wellBeingScore = $wellBeingScore;

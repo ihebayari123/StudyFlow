@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Catégories{% endblock %}
+
+{% block body %}
+<style>
+    body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; margin: 0; padding: 0; }
+    .header-banner { background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%); padding: 20px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 40px; }
+    .header-banner h1 { text-align: center; color: white; font-size: 2.8em; margin: 0; font-weight: 700; letter-spacing: 2px; }
+    .header-banner h1 span { background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px 40px; }
+    h2 { text-align: center; color: white; font-size: 2em; margin-bottom: 30px; }
+    .actions-bar { max-width: 900px; margin: 0 auto 30px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; }
+    .search-box { flex: 1; min-width: 300px; display: flex; background: white; padding: 5px; border-radius: 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    .search-box input { flex: 1; padding: 10px 20px; border: none; border-radius: 50px; font-size: 14px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 50px; cursor: pointer; font-weight: 600; font-size: 14px; text-decoration: none; display: inline-block; transition: all 0.3s; }
+    .btn-search { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+    .btn-search:hover { transform: scale(1.05); }
+    .btn-add { background: #4CAF50; color: white; box-shadow: 0 4px 15px rgba(76,175,80,0.3); }
+    .btn-add:hover { background: #45a049; transform: translateY(-2px); }
+    .btn-tri { background: #2196F3; color: white; box-shadow: 0 4px 15px rgba(33,150,243,0.3); }
+    .btn-tri:hover { background: #0b7dda; transform: translateY(-2px); }
+    .btn-reset { background: #ff9800; color: white; }
+    .btn-reset:hover { background: #f57c00; }
+    .table-wrap { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 18px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; text-align: left; font-weight: 600; text-transform: uppercase; font-size: 13px; }
+    td { padding: 15px 18px; border-bottom: 1px solid #eee; }
+    tr:hover { background: #f8f9ff; }
+    .action-link { color: #667eea; text-decoration: none; font-weight: 600; margin: 0 5px; transition: all 0.3s; }
+    .action-link:hover { color: #764ba2; text-decoration: underline; }
+    .delete { color: #f44336; }
+    .delete:hover { color: #d32f2f; }
+</style>
+
+<div class="header-banner">
+    <h1>📚 <span>StudyFlow</span> 📚</h1>
+</div>
+
+<div class="container">
+    <h2>📂 Gestion des Catégories</h2>
+    
+    <div class="actions-bar">
+        <form method="get" class="search-box">
+            <input type="text" name="search" placeholder="🔍 Rechercher par nom..." value="{{ search|default('') }}">
+            <button type="submit" class="btn btn-search">Rechercher</button>
+        </form>
+        
+        <a href="{{ path('app_addcategorie') }}" class="btn btn-add">➕ Ajouter</a>
+        <a href="{{ path('app_showcategorie', {tri: 'nom'}) }}" class="btn btn-tri">📊 Trier A-Z</a>
+        <a href="{{ path('app_showcategorie') }}" class="btn btn-reset">🔄 Réinitialiser</a>
+    </div>
+    
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom Catégorie</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for categorie in listcategorie %}
+                <tr>
+                    <td><strong>#{{ categorie.id }}</strong></td>
+                    <td><strong>{{ categorie.nomCategorie }}</strong></td>
+                    <td>{{ categorie.description }}</td>
+                    <td>
+                        <a href="{{ path('app_updatecategorie', {id: categorie.id}) }}" class="action-link">✏️ Modifier</a>
+                        <a href="{{ path('app_deletecategorie', {id: categorie.id}) }}" class="action-link delete" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')">🗑️ Supprimer</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 40px;">📭 Aucune catégorie trouvée</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

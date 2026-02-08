@@ -27,6 +27,21 @@
                         </ul>
                     </li>
                     <li class="nxl-item nxl-hasmenu">
+          <a href="javascript:void(0);" class="nxl-link">
+            <span class="nxl-micon"><i class="feather-users"></i></span>
+            <span class="nxl-mtext">Utilisateurs</span
+            ><span class="nxl-arrow"
+              ><i class="feather-chevron-right"></i
+            ></span>
+          </a>
+          <ul class="nxl-submenu">
+            <li class="nxl-item"><a class="nxl-link"  >Liste des utilisateurs</a></li>
+            <li class="nxl-item">
+              <a class="nxl-link" href="{{ path('app_useradd') }}">Ajouter un utilisateur</a>
+            </li>
+          </ul>
+        </li>
+                    <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-cast"></i></span>
                             <span class="nxl-mtext">Cours</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
@@ -40,28 +55,48 @@
                     </li>
                     <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-send"></i></span>
-                            <span class="nxl-mtext">events</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                            <span class="nxl-micon"><i class="feather-users"></i></span>
+                            <span class="nxl-mtext">Quiz&Question</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="apps-chat.html">Chat</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="apps-email.html">Email</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="apps-tasks.html">Tasks</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="apps-notes.html">Notes</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="apps-storage.html">Storage</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="apps-calendar.html">Calendar</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ path('admin_show_quiz') }}">show Quiz</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ path('app_addformquiz') }}">add form quiz</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ path('app_showquestion') }}">showQuestion</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ path('app_addformquestion') }}">add form question</a></li>
                         </ul>
                     </li>
                     <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-at-sign"></i></span>
-                            <span class="nxl-mtext">Proposal</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                            <span class="nxl-micon"><i class="feather-layout"></i></span>
+                            <span class="nxl-mtext">Gestionnaire_Stresse</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="proposal.html">Proposal</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="proposal-view.html">Proposal View</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="proposal-edit.html">Proposal Edit</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="proposal-create.html">Proposal Create</a></li>
+                            <li class="nxl-item">
+                     <a class="nxl-link" href="{{ path('app_showstresse') }}">
+                         Voir les Étudiants
+                     </a>
+                     <a class="nxl-link" href="{{ path('app_add_stresse') }}">
+                         Ajouter Étudiant
+                        </a>
+                        <a class="nxl-link" href="{{ path('app_showscore') }}">
+                            Suivi des Scores
+                         </a>
+                          <a class="nxl-link" href="{{ path('app_stresse_statistiques') }}">
+                     Statistics
+                      </a>
+                       <a class="nxl-link" href="{{ path('app_showstresse_recherche') }}">
+                         Recherche Par Date
+                     </a>
+                     </ul>
+                    </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-at-sign"></i></span>
+                            <span class="nxl-mtext">Produits</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="{{ path('app_showproduit') }}">Produits</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ path('app_showcategorie') }}">Categories</a></li>
                         </ul>
                     </li>
                     <li class="nxl-item nxl-hasmenu">

@@ -1,0 +1,115 @@
+{# templates/stresse/stresse_avance.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Manage stresse - Admin{% endblock %}
+
+{% block admin_content %}
+ <div style="padding: 60px; margin-left: 210px; overflow-x: auto;">
+
+<div class="container mt-5">
+    <h1 class="mb-4">Analyse Avancée du Stress</h1>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3>Vue d'ensemble</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Nombre total de sondages:</strong> {{ analysis.totalSurveys }}</p>
+                    <p><strong>Utilisateurs à haut risque:</strong> {{ analysis.highRiskUsers|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4>Tendances du Stress</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <strong>Moyenne de sommeil:</strong> {{ analysis.stressTrends.averageSleep }} heures
+                            <span class="badge bg-{{ analysis.stressTrends.sleepStatus == 'insuffisant' ? 'danger' : 'success' }}">
+                                {{ analysis.stressTrends.sleepStatus }}
+                            </span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Moyenne d'étude:</strong> {{ analysis.stressTrends.averageStudy }} heures
+                            <span class="badge bg-{{ analysis.stressTrends.studyStatus == 'élevé' ? 'warning' : 'success' }}">
+                                {{ analysis.stressTrends.studyStatus }}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h4>Recommandations</h4>
+                </div>
+                <div class="card-body">
+                    {% if analysis.recommendations|length > 0 %}
+                        <ul class="list-group">
+                            {% for rec in analysis.recommendations %}
+                                <li class="list-group-item list-group-item-{{ rec.priority == 'high' ? 'danger' : 'warning' }}">
+                                    <strong>{{ rec.priority == 'high' ? 'Priorité haute' : 'Priorité moyenne' }}:</strong> {{ rec.message }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-success">Aucune recommandation spécifique. Les niveaux de stress semblent sous contrôle.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if analysis.highRiskUsers|length > 0 %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h4>Utilisateurs à Haut Risque</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Utilisateur</th>
+                                <th>Score de Risque</th>
+                                <th>Heures de Sommeil</th>
+                                <th>Heures d'Étude</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in analysis.highRiskUsers %}
+                                <tr>
+                                    <td>{{ user.user.nom }} {{ user.user.prenom }}</td>
+                                    <td><span class="badge bg-danger">{{ user.riskScore }}</span></td>
+                                    <td>{{ user.sleepHours }}</td>
+                                    <td>{{ user.studyHours }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row mt-4">
+        <div class="col-md-12 text-center">
+            <a href="{{ path('app_showstresse') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

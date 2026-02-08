@@ -1,0 +1,542 @@
+{# templates/well_being_score/showscore.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+{% block title %}Manage showscore - Admin{% endblock %}
+
+{% block admin_content %}
+<div style="padding: 60px; margin-left: 210px; overflow-x: auto;">
+<div class="container-fluid px-4 py-4">
+    <!-- En-tête principal avec bouton retour -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <div class="d-flex align-items-center gap-3 mb-3 mb-md-0">
+            <div class="bg-success bg-opacity-10 p-3 rounded-3">
+                <i class="fas fa-chart-line text-success fs-2"></i>
+            </div>
+            <div>
+                <h1 class="fw-bold text-dark mb-1">Scores de Bien-être</h1>
+                <p class="text-muted mb-0">Analyse et gestion des scores de santé</p>
+            </div>
+        </div>
+        
+        <!-- BOUTON AJOUTÉ : Retour vers app_showstresse -->
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ path('app_showstresse') }}" 
+               class="btn btn-outline-primary d-flex align-items-center gap-2 px-4 rounded-3">
+                <i class="fas fa-arrow-left me-1"></i>
+                <span>Retour aux Surveys</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Carte principale -->
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+        <!-- Header -->
+        <div class="card-header bg-white border-0 py-4 px-5">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h3 class="fw-bold text-dark mb-2">Tous les scores</h3>
+                    <p class="text-muted mb-0">Vue d'ensemble des indicateurs de bien-être</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="d-flex align-items-center gap-3 justify-content-end">
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
+                            <i class="fas fa-database me-1"></i>
+                            {{ listwellbeingscore|length }} entrées
+                        </span>
+                        <a href="{{ path('app_showscore_sort_score') }}" 
+                           class="btn btn-outline-success btn-sm d-flex align-items-center gap-2 px-3 rounded-3">
+                            <i class="fas fa-sort-amount-up"></i>
+                            <span>Trier</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Table Content #}
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="border-bottom border-light-subtle">
+                        <tr>
+                            <th class="ps-4 py-3 text-uppercase small fw-semibold text-muted text-center">
+                                <i class="fas fa-hashtag me-2"></i>ID
+                            </th>
+                            <th class="py-3 text-uppercase small fw-semibold text-muted">
+                                <i class="fas fa-lightbulb me-2 text-warning"></i>Recommandation
+                            </th>
+                            <th class="py-3 text-uppercase small fw-semibold text-muted">
+                                <i class="fas fa-tasks me-2 text-info"></i>Plan d'action
+                            </th>
+                            <th class="py-3 text-uppercase small fw-semibold text-muted">
+                                <i class="fas fa-comment me-2 text-secondary"></i>Commentaire
+                            </th>
+                            <th class="py-3 text-uppercase small fw-semibold text-muted text-center">
+                                <i class="fas fa-star me-2 text-warning"></i>Score
+                            </th>
+                            <th class="py-3 text-uppercase small fw-semibold text-muted text-center">
+                                <i class="fas fa-poll me-2 text-primary"></i>Survey
+                            </th>
+                            <th class="pe-4 py-3 text-uppercase small fw-semibold text-muted text-center">
+                                <i class="fas fa-cogs me-2"></i>Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in listwellbeingscore %}
+                            <tr class="border-bottom border-light-subtle">
+                                <td class="ps-4 py-3 text-center">
+                                    <div class="fw-bold text-primary">#{{ i.id }}</div>
+                                </td>
+                                <td class="py-3">
+                                    <div class="d-inline-block" style="max-width: 200px;">
+                                        <div class="text-truncate" title="{{ i.recommendation|default('N/A') }}">
+                                            {{ i.recommendation|default('N/A') }}
+                                        </div>
+                                        {% if i.recommendation and i.recommendation|length > 50 %}
+                                            <small class="text-muted cursor-pointer" data-bs-toggle="tooltip" title="{{ i.recommendation }}">
+                                                ...voir plus
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="py-3">
+                                    <div class="d-inline-block" style="max-width: 200px;">
+                                        <div class="text-truncate" title="{{ i.actionPlan|default('N/A') }}">
+                                            {{ i.actionPlan|default('N/A') }}
+                                        </div>
+                                        {% if i.actionPlan and i.actionPlan|length > 50 %}
+                                            <small class="text-muted cursor-pointer" data-bs-toggle="tooltip" title="{{ i.actionPlan }}">
+                                                ...voir plus
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="py-3">
+                                    <div class="d-inline-block" style="max-width: 150px;">
+                                        <div class="text-truncate" title="{{ i.comment|default('N/A') }}">
+                                            {{ i.comment|default('N/A') }}
+                                        </div>
+                                        {% if i.comment and i.comment|length > 40 %}
+                                            <small class="text-muted cursor-pointer" data-bs-toggle="tooltip" title="{{ i.comment }}">
+                                                ...voir plus
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="py-3 text-center">
+                                    {% set scoreClass = 'bg-secondary' %}
+                                    {% if i.score >= 80 %}
+                                        {% set scoreClass = 'bg-success' %}
+                                    {% elseif i.score >= 60 %}
+                                        {% set scoreClass = 'bg-info' %}
+                                    {% elseif i.score >= 40 %}
+                                        {% set scoreClass = 'bg-warning' %}
+                                    {% elseif i.score >= 20 %}
+                                        {% set scoreClass = 'bg-danger' %}
+                                    {% endif %}
+                                    <div class="score-indicator {{ scoreClass }} text-white rounded-pill d-inline-flex align-items-center justify-content-center" 
+                                         style="width: 60px; height: 60px; font-weight: 700; font-size: 1.2rem;">
+                                        {{ i.score }}
+                                    </div>
+                                </td>
+                                <td class="py-3 text-center">
+                                    {% if i.survey %}
+                                        <a href="#" class="survey-badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 text-decoration-none d-inline-block"
+                                           data-bs-toggle="tooltip" title="Survey #{{ i.survey.id }}">
+                                            <i class="fas fa-poll me-1"></i>
+                                            #{{ i.survey.id }}
+                                        </a>
+                                    {% else %}
+                                        <span class="badge bg-secondary bg-opacity-25 text-secondary rounded-pill px-3 py-2">
+                                            <i class="fas fa-times me-1"></i>
+                                            N/A
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="pe-4 py-3 text-center">
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <a href="{{ path('app_update_score', {'id': i.id}) }}"
+                                           class="btn btn-sm btn-outline-primary d-flex align-items-center gap-2 px-3 rounded-3"
+                                           data-bs-toggle="tooltip" title="Modifier ce score">
+                                            <i class="fas fa-edit"></i>
+                                            <span class="d-none d-md-inline">Modifier</span>
+                                        </a>
+                                        <a href="{{ path('app_delete_score', {'id': i.id}) }}" 
+                                           class="btn btn-sm btn-outline-danger d-flex align-items-center gap-2 px-3 rounded-3"
+                                           onclick="return confirmDelete('{{ i.id }}');"
+                                           data-bs-toggle="tooltip" title="Supprimer ce score">
+                                            <i class="fas fa-trash"></i>
+                                            <span class="d-none d-md-inline">Supprimer</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <div class="empty-state">
+                                        <div class="mb-4">
+                                            <i class="fas fa-chart-line fa-4x text-muted opacity-25"></i>
+                                        </div>
+                                        <h4 class="fw-semibold text-dark mb-3">Aucun score disponible</h4>
+                                        <p class="text-muted mb-4">Les données apparaîtront ici une fois ajoutées</p>
+                                        <!-- BOUTON AJOUTÉ DANS L'ÉTAT VIDE -->
+                                        <a href="{{ path('app_showstresse') }}" 
+                                           class="btn btn-outline-primary d-flex align-items-center gap-2 px-4 rounded-3 mx-auto" style="width: fit-content;">
+                                            <i class="fas fa-arrow-left me-1"></i>
+                                            <span>Retourner aux Surveys</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# Footer #}
+        <div class="card-footer bg-white border-0 py-3">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <div class="text-muted small">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Dernière mise à jour : {{ "now"|date('d/m/Y H:i') }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <span class="badge bg-success rounded-pill px-3 py-2">Excellent (80+)</span>
+                        <span class="badge bg-info rounded-pill px-3 py-2">Bon (60-79)</span>
+                        <span class="badge bg-warning rounded-pill px-3 py-2">Moyen (40-59)</span>
+                        <span class="badge bg-danger rounded-pill px-3 py-2">Faible (<40)</span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <!-- BOUTON AJOUTÉ DANS LE FOOTER -->
+                    <a href="{{ path('app_showstresse') }}" 
+                       class="btn btn-sm btn-outline-primary d-flex align-items-center gap-2 px-3 rounded-3">
+                        <i class="fas fa-external-link-alt me-1"></i>
+                        <span>Voir les Surveys</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Styles modernes -->
+<style>
+:root {
+    --primary-color: #4361ee;
+    --success-color: #06d6a0;
+    --warning-color: #ffd166;
+    --danger-color: #ef476f;
+    --info-color: #118ab2;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Layout général */
+body {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+}
+
+/* Carte principale */
+.card {
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+/* Table */
+.table {
+    --bs-table-hover-bg: rgba(67, 97, 238, 0.02);
+}
+
+.table-hover tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--bs-table-hover-bg);
+    transform: translateX(4px);
+}
+
+/* Indicateurs de score */
+.score-indicator {
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.score-indicator:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Badges */
+.badge, .survey-badge {
+    transition: all 0.3s ease;
+}
+
+.survey-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+}
+
+/* Boutons */
+.btn {
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+}
+
+.btn-outline-success {
+    border: 2px solid var(--success-color);
+    color: var(--success-color);
+}
+
+.btn-outline-success:hover {
+    background: var(--success-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);
+}
+
+.btn-outline-danger:hover {
+    background: var(--danger-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* États vides */
+.empty-state {
+    padding: 2rem;
+}
+
+/* Animation d'entrée */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card, .table-hover tbody tr {
+    animation: fadeInUp 0.5s ease forwards;
+    opacity: 0;
+}
+
+.card { animation-delay: 0.1s; }
+.table-hover tbody tr:nth-child(1) { animation-delay: 0.2s; }
+.table-hover tbody tr:nth-child(2) { animation-delay: 0.3s; }
+.table-hover tbody tr:nth-child(3) { animation-delay: 0.4s; }
+.table-hover tbody tr:nth-child(4) { animation-delay: 0.5s; }
+
+/* Bordures arrondies */
+.rounded-3 {
+    border-radius: 12px !important;
+}
+
+.rounded-4 {
+    border-radius: 16px !important;
+}
+
+/* Tooltips */
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* Text truncation */
+.text-truncate {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 1rem !important;
+    }
+    
+    .card-body {
+        padding: 0.5rem !important;
+    }
+    
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    .score-indicator {
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 1rem !important;
+    }
+    
+    .btn span:not(.fa) {
+        display: none;
+    }
+    
+    .btn {
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .d-flex.flex-wrap.gap-2 {
+        justify-content: center;
+        margin: 0.5rem 0;
+    }
+    
+    .row.align-items-center .col-md-4 {
+        margin-bottom: 1rem;
+        text-align: center !important;
+    }
+}
+
+/* Hover effects */
+.bg-opacity-10 {
+    opacity: 0.1;
+}
+
+.bg-opacity-25 {
+    opacity: 0.25;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser les tooltips
+    var tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltips.map(function(element) {
+        return new bootstrap.Tooltip(element);
+    });
+
+    // Fonction de confirmation de suppression améliorée
+    window.confirmDelete = function(id) {
+        return new Promise((resolve) => {
+            const modalHtml = `
+                <div class="modal fade" id="deleteModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content rounded-3">
+                            <div class="modal-header border-0">
+                                <h5 class="modal-title fw-semibold text-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Confirmer la suppression
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body py-4">
+                                <div class="text-center mb-4">
+                                    <div class="mb-3">
+                                        <i class="fas fa-trash-alt fa-3x text-danger opacity-75"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-2">Supprimer le score #${id} ?</h6>
+                                    <p class="text-muted">Cette action est irréversible. Toutes les données associées seront perdues.</p>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>
+                                    Annuler
+                                </button>
+                                <button type="button" class="btn btn-danger rounded-3" id="confirmDeleteBtn">
+                                    <i class="fas fa-trash me-2"></i>
+                                    Supprimer définitivement
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+            
+            document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+                modal.hide();
+                resolve(true);
+            });
+            
+            document.getElementById('deleteModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+                resolve(false);
+            });
+        });
+    };
+
+    // Remplacer les confirmations standard
+    document.querySelectorAll('a[onclick*="confirm"]').forEach(link => {
+        const originalOnclick = link.getAttribute('onclick');
+        if (originalOnclick && originalOnclick.includes('confirm')) {
+            link.removeAttribute('onclick');
+            
+            link.addEventListener('click', async function(e) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+                const id = href.split('/').pop();
+                
+                const confirmed = await confirmDelete(id);
+                if (confirmed) {
+                    window.location.href = href;
+                }
+            });
+        }
+    });
+
+    // Animation au survol des lignes
+    const tableRows = document.querySelectorAll('.table-hover tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(4px)';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+
+    // Animation pour les boutons de retour
+    const returnButtons = document.querySelectorAll('a[href*="app_showstresse"]');
+    returnButtons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.style.transform = 'translateX(-3px)';
+                icon.style.transition = 'transform 0.3s ease';
+            }
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.style.transform = 'translateX(0)';
+            }
+        });
+    });
+});
+</script>
+ {% endblock %}

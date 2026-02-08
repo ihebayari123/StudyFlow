@@ -16,6 +16,35 @@ class ProduitRepository extends ServiceEntityRepository
         parent::__construct($registry, Produit::class);
     }
 
+
+
+    ///////////////////////////////////////////////////////
+    public function findByCategorieName(?string $categorieName): array
+    {
+        $em = $this->getEntityManager();
+        
+        if ($categorieName) {
+            $dql = "SELECT p FROM App\Entity\Produit p 
+                    INNER JOIN p.typeCategorie c 
+                    WHERE c.nomCategorie LIKE :nom";
+            
+            $query = $em->createQuery($dql);
+            $query->setParameter('nom', '%' . $categorieName . '%');
+        } else {
+            $dql = "SELECT p FROM App\Entity\Produit p 
+                    INNER JOIN p.typeCategorie c";
+            
+            $query = $em->createQuery($dql);
+        }
+        
+        return $query->getResult();
+    }
+
+
+
+
+
+
     //    /**
     //     * @return Produit[] Returns an array of Produit objects
     //     */

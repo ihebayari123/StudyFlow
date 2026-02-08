@@ -35,7 +35,7 @@ class Quiz
     /**
      * @var Collection<int, Question>
      */
-    #[ORM\OneToMany(targetEntity: Question::class, mappedBy: 'quizId', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Question::class, mappedBy: 'quiz', orphanRemoval: true)]
     private Collection $questions;
 
     public function __construct()
@@ -84,26 +84,26 @@ class Quiz
         return $this;
     }
 
-    public function getUserId(): ?Utilisateur
+    public function getUser(): ?Utilisateur
     {
         return $this->userId;
     }
 
-    public function setUserId(?Utilisateur $userId): static
+    public function setUser(?Utilisateur $user): static
     {
-        $this->userId = $userId;
+        $this->user = $user;
 
         return $this;
     }
 
-    public function getCourseId(): ?Cours
+    public function getCourse(): ?Cours
     {
-        return $this->courseId;
+        return $this->course;
     }
 
-    public function setCourseId(?Cours $courseId): static
+    public function setCourse(?Cours $course): static
     {
-        $this->courseId = $courseId;
+        $this->course = $course;
 
         return $this;
     }
@@ -120,7 +120,7 @@ class Quiz
     {
         if (!$this->questions->contains($question)) {
             $this->questions->add($question);
-            $question->setQuizId($this);
+            $question->setQuiz($this);
         }
 
         return $this;
@@ -130,8 +130,8 @@ class Quiz
     {
         if ($this->questions->removeElement($question)) {
             // set the owning side to null (unless already changed)
-            if ($question->getQuizId() === $this) {
-                $question->setQuizId(null);
+            if ($question->getQuiz() === $this) {
+                $question->setQuiz(null);
             }
         }
 

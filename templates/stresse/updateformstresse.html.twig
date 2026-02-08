@@ -1,0 +1,339 @@
+{# templates/stresse/updaieformstresse.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Manage stresse - Admin{% endblock %}
+
+{% block admin_content %}
+ <div style="padding: 60px; margin-left: 210px; overflow-x: auto;">
+ 
+<div class="container-fluid py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <!-- En-tête amélioré avec navigation -->
+            <div class="mb-5">
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="{{ path('app_showstresse') }}" class="text-decoration-none text-muted">
+                                <i class="fas fa-chart-bar me-2"></i>Sondages Stress
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            <i class="fas fa-edit me-2"></i>Modification
+                        </li>
+                    </ol>
+                </nav>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-gradient-warning p-3 rounded-circle shadow-sm">
+                        <i class="fas fa-brain text-white fs-4"></i>
+                    </div>
+                    <div>
+                        <h1 class="h2 fw-bold mb-2">Modifier le Sondage Stress</h1>
+                        <p class="text-muted mb-0">Mettez à jour les informations du suivi de bien-être</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carte principale avec design moderne -->
+            <div class="card border-0 shadow-lg rounded-3 overflow-hidden mb-4">
+                <!-- En-tête de carte avec gradient -->
+                <div class="card-header bg-gradient-warning text-dark py-4 border-0">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="h4 fw-bold mb-1">Détails du sondage</h2>
+                            <p class="mb-0 opacity-75">Révision et mise à jour des données</p>
+                        </div>
+                        <div class="badge bg-dark text-white fs-6 px-3 py-2 rounded-pill">
+                            <i class="fas fa-clock me-1"></i>Édition
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Corps du formulaire -->
+                <div class="card-body p-4 p-lg-5">
+                    {{ form_start(f, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate', 'method': 'POST'}}) }}
+                        
+                        <!-- Grille améliorée avec espacement moderne -->
+                        <div class="row g-4">
+                            {# Date Field - Version moderne #}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        {{ form_label(f.date, null, {
+                                            'label_attr': {'class': 'form-label fw-semibold text-dark'}
+                                        }) }}
+                                        <span class="badge bg-light text-dark border">
+                                            <i class="fas fa-calendar-day me-1"></i>Date
+                                        </span>
+                                    </div>
+                                    <div class="input-group input-group-lg shadow-sm">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fas fa-calendar-alt text-warning"></i>
+                                        </span>
+                                        {{ form_widget(f.date, {
+                                            'attr': {
+                                                'class': 'form-control border-start-0 rounded-end',
+                                                'data-datepicker': 'true'
+                                            }
+                                        }) }}
+                                    </div>
+                                    {{ form_errors(f.date) }}
+                                </div>
+                            </div>
+
+                            {# User Field - Version moderne #}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        {{ form_label(f.user, null, {
+                                            'label_attr': {'class': 'form-label fw-semibold text-dark'}
+                                        }) }}
+                                        <span class="badge bg-light text-dark border">
+                                            <i class="fas fa-user-tag me-1"></i>Utilisateur
+                                        </span>
+                                    </div>
+                                    <div class="input-group input-group-lg shadow-sm">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fas fa-user text-warning"></i>
+                                        </span>
+                                        {{ form_widget(f.user, {
+                                            'attr': {
+                                                'class': 'form-select border-start-0 rounded-end',
+                                                'data-select2': 'true'
+                                            }
+                                        }) }}
+                                    </div>
+                                    {{ form_errors(f.user) }}
+                                </div>
+                            </div>
+
+                            {# Sleep Hours Field - Version moderne #}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        {{ form_label(f.sleepHours, null, {
+                                            'label_attr': {'class': 'form-label fw-semibold text-dark'}
+                                        }) }}
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info">
+                                            <i class="fas fa-moon me-1"></i>Sommeil
+                                        </span>
+                                    </div>
+                                    <div class="input-group input-group-lg shadow-sm">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fas fa-bed text-info"></i>
+                                        </span>
+                                        {{ form_widget(f.sleepHours, {
+                                            'attr': {
+                                                'class': 'form-control border-start-0',
+                                                'min': 0,
+                                                'max': 24
+                                            }
+                                        }) }}
+                                        <span class="input-group-text bg-light">heures</span>
+                                    </div>
+                                    {{ form_errors(f.sleepHours) }}
+                                    <div class="form-text mt-2">
+                                        <small class="text-muted d-flex align-items-center">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Recommandé : 7-9 heures par nuit
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Study Hours Field - Version moderne #}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        {{ form_label(f.studyHours, null, {
+                                            'label_attr': {'class': 'form-label fw-semibold text-dark'}
+                                        }) }}
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success">
+                                            <i class="fas fa-graduation-cap me-1"></i>Étude
+                                        </span>
+                                    </div>
+                                    <div class="input-group input-group-lg shadow-sm">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fas fa-book text-success"></i>
+                                        </span>
+                                        {{ form_widget(f.studyHours, {
+                                            'attr': {
+                                                'class': 'form-control border-start-0',
+                                                'min': 0,
+                                                'max': 24
+                                            }
+                                        }) }}
+                                        <span class="input-group-text bg-light">heures</span>
+                                    </div>
+                                    {{ form_errors(f.studyHours) }}
+                                    <div class="form-text mt-2">
+                                        <small class="text-muted d-flex align-items-center">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Maximum recommandé : 8 heures par jour
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Séparateur décoratif -->
+                        <div class="position-relative my-5">
+                            <hr class="opacity-10">
+                            <div class="position-absolute top-50 start-50 translate-middle bg-white px-3">
+                                <i class="fas fa-ellipsis-h text-muted"></i>
+                            </div>
+                        </div>
+
+                        <!-- Actions améliorées -->
+                        <div class="d-flex justify-content-between align-items-center pt-3">
+                            <a href="{{ path('app_showstresse') }}" class="btn btn-outline-secondary px-4 rounded-pill">
+                                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                            </a>
+                            <div class="d-flex gap-3">
+                                <a href="{{ path('app_showstresse') }}" class="btn btn-lg btn-outline-dark px-4 rounded-pill">
+                                    <i class="fas fa-times me-2"></i>Annuler
+                                </a>
+                                <button type="submit" name="enregistrer" class="btn btn-lg btn-warning px-5 rounded-pill shadow-sm fw-semibold" data-loading="true">
+                                    <i class="fas fa-save me-2"></i>Enregistrer
+                                </button>
+                            </div>
+                        </div>
+
+                    {{ form_end(f) }}
+                </div>
+            </div>
+
+            <!-- Widget d'information contextuelle -->
+            <div class="card border-0 shadow-sm bg-gradient-light">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-shield-alt text-warning fs-4"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h5 class="fw-bold mb-2">Sécurité des données</h5>
+                                    <p class="mb-0 text-muted">
+                                        Toutes les modifications sont sécurisées et tracées. Vos données sont protégées conformément au RGPD.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="badge bg-white text-dark border py-2 px-3">
+                                <i class="fas fa-lock me-1"></i>Données sécurisées
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Styles inline pour une présentation moderne -->
+<style>
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+    }
+    
+    .bg-gradient-light {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+    }
+    
+    .input-group-lg > .form-control,
+    .input-group-lg > .form-select,
+    .input-group-lg > .input-group-text {
+        padding: 0.875rem 1rem;
+        border-radius: 0.5rem;
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+    
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #ffc107;
+        box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+    }
+    
+    .btn-lg {
+        padding: 0.875rem 2rem;
+        font-weight: 500;
+    }
+    
+    .rounded-pill {
+        border-radius: 50rem !important;
+    }
+    
+    .badge {
+        font-size: 0.85em;
+        padding: 0.5em 1em;
+    }
+    
+    hr.opacity-10 {
+        opacity: 0.1;
+    }
+    
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+        }
+    }
+    
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #212529;
+    }
+    
+    .btn-warning:hover {
+        background-color: #ffca2c;
+        border-color: #ffca2c;
+        color: #212529;
+    }
+</style>
+
+<!-- Scripts pour améliorer l'expérience utilisateur -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation sur le bouton d'enregistrement
+        const saveButton = document.querySelector('[name="enregistrer"]');
+        if (saveButton) {
+            saveButton.addEventListener('click', function() {
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enregistrement...';
+                this.classList.add('disabled');
+            });
+        }
+        
+        // Validation en temps réel
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    });
+</script>
+ {% endblock %}

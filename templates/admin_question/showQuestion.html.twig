@@ -1,0 +1,231 @@
+{% set newOrder = order == 'ASC' ? 'DESC' : 'ASC' %}
+
+<div class="admin-layout">
+
+    <!-- Sidebar -->
+    {% include 'admin/Partials/sidebar.html.twig' %}
+
+    <!-- Navbar -->
+    {% include 'admin/partials/navbar.html.twig' %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <div class="admin-page">
+
+            <!-- Formulaire de recherche -->
+            <form method="get" class="search-form">
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Recherche par texte ou choix..."
+                    value="{{ app.request.get('q') }}"
+                >
+                <button type="submit">🔍</button>
+            </form>
+
+            <!-- Table -->
+            <div class="table-container">
+                <table class="quiz-table">
+                    <thead>
+                        <tr>
+                            {% for column, label in {
+                                'id':'ID',
+                                'texte':'Texte',
+                                'choixA':'Choix A',
+                                'choixB':'Choix B',
+                                'choixC':'Choix C',
+                                'choixD':'Choix D',
+                                'bonneReponse':'Bonne Réponse',
+                                'indice':'Indice',
+                                'quiz':'Quiz'
+                            } %}
+                                <th>
+                                    {% if column != 'quiz' %}
+                                        <a href="{{ path('app_showquestion', {
+                                            q: app.request.get('q'),
+                                            sort: column,
+                                            order: newOrder
+                                        }) }}">
+                                            {{ label }}
+                                        </a>
+                                    {% else %}
+                                        {{ label }}
+                                    {% endif %}
+                                </th>
+                            {% endfor %}
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for question in listQuestion %}
+                            <tr>
+                                <td>{{ question.id }}</td>
+                                <td>{{ question.texte }}</td>
+                                <td>{{ question.choixA }}</td>
+                                <td>{{ question.choixB }}</td>
+                                <td>{{ question.choixC }}</td>
+                                <td>{{ question.choixD }}</td>
+                                <td>{{ question.bonneReponse }}</td>
+                                <td>{{ question.indice ?: 'N/A' }}</td>
+                                <td>{{ question.quiz ? question.quiz.titre : 'N/A' }}</td>
+                                <td>
+                                    <a href="{{ path('app_updateformquestion', {'id': question.id}) }}">✏</a>
+                                    |
+                                    <a href="{{ path('app_deletequestion', {'id': question.id}) }}"
+                                       onclick="return confirm('Supprimer ?')">🗑</a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="10" class="no-result">Aucun résultat</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Add button -->
+            <div class="add-btn">
+                <a href="{{ path('app_addformquestion') }}">➕ Ajouter une Question</a>
+            </div>
+
+        </div>
+
+    </main>
+</div>
+
+<!-- Styles CSS -->
+<style>
+.admin-layout {
+    display: flex;
+}
+
+/* المحتوى الرئيسي */
+.main-content {
+    margin-left: 260px;        /* عرض sidebar */
+    margin-top: 70px;          /* ارتفاع navbar */
+    padding: 25px;
+    width: calc(100% - 260px);
+    background-color: #f4f6f8;
+    min-height: 100vh;
+}
+
+/* الصفحة */
+.admin-page {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* البحث */
+.search-form {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.search-form input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.search-form button {
+    padding: 8px 12px;
+    border: none;
+    background-color: #4821be;
+    color: #fff;
+    border-radius: 6px;
+}
+
+/* الجدول */
+.table-container {
+    overflow-x: auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.quiz-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.quiz-table th,
+.quiz-table td {
+    padding: 12px 15px;
+}
+
+.quiz-table thead {
+    background-color: #4f46e5;
+    color: #fff;
+}
+
+.quiz-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.quiz-table tbody tr:hover {
+    background-color: #e0e7ff;
+}
+
+.quiz-table a {
+    color: #1a000a;
+    text-decoration: none;
+}
+
+/* زر الإضافة */
+.add-btn {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.add-btn a {
+    padding: 10px 15px;
+    background-color: #10b981;
+    color: #fff;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+</style>
+
+{% block stylesheets %}
+    
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="" />
+    <meta name="keyword" content="" />
+    <meta name="author" content="flexilecode" />
+    <!--! BEGIN: Favicon-->
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets2/images/favicon.ico') }}" />
+    <!--! END: Favicon-->
+    <!--! BEGIN: Bootstrap CSS-->
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/bootstrap.min.css') }}" />
+    <!--! END: Bootstrap CSS-->
+    <!--! BEGIN: Vendors CSS-->
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/vendors/css/vendors.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/vendors/css/daterangepicker.min.css') }}" />
+    <!--! END: Vendors CSS-->
+    <!--! BEGIN: Custom CSS-->
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/theme.min.css') }}" />
+    <!--! END: Custom CSS-->
+    <!--! HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries !-->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+{% endblock %}
+
+{% block javascripts %}
+    
+    <script src="{{ asset('assets2/vendors/js/vendors.min.js') }}"></script>
+    <script src="{{ asset('assets2/vendors/js/daterangepicker.min.js') }}"></script>
+    <script src="{{ asset('assets2/vendors/js/apexcharts.min.js') }}"></script>
+    <script src="{{ asset('assets2/vendors/js/circle-progress.min.js') }}"></script>
+    <script src="{{ asset('assets2/js/common-init.min.js') }}"></script>
+    <script src="{{ asset('assets2/js/dashboard-init.min.js') }}"></script>
+    {% block admin_javascripts %}{% endblock %}
+    <script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
+{% endblock %}

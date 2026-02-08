@@ -1,0 +1,71 @@
+{# templates/admin/sponsor_create_admin.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Ajouter un sponsor - Admin{% endblock %}
+
+{% block admin_content %}
+
+{# Spacer pour navbar fixe #}
+<div style="height: 80px;"></div>
+
+<div class="container py-5 d-flex flex-column align-items-center">
+
+    <h1 class="mb-5 text-primary fw-bold text-center">
+        Ajouter un sponsor
+    </h1>
+
+    <div class="card shadow-sm border-0 rounded-4 p-4 w-100" style="max-width: 700px;">
+
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+        <div class="mb-3">
+            {{ form_label(form.nomSponsor, 'Nom du sponsor', {'label_attr': {'class': 'fw-bold text-secondary'}}) }}
+            {{ form_widget(form.nomSponsor, {'attr': {
+                'class': 'form-control rounded-3 shadow-sm',
+                'placeholder': 'Ex: MonSponsor'
+            }}) }}
+            {{ form_errors(form.nomSponsor) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.type, 'Type de sponsor', {'label_attr': {'class': 'fw-bold text-secondary'}}) }}
+            {{ form_widget(form.type, {'attr': {
+                'class': 'form-select rounded-3 shadow-sm'
+            }}) }}
+            {{ form_errors(form.type) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.montant, 'Montant', {'label_attr': {'class': 'fw-bold text-secondary'}}) }}
+            {{ form_widget(form.montant, {'attr': {
+                'class': 'form-control rounded-3 shadow-sm',
+                'placeholder': 'Ex: 1000'
+            }}) }}
+            {{ form_errors(form.montant) }}
+        </div>
+
+        <div class="mb-4">
+            {{ form_label(form.eventTitre, 'Événement associé', {'label_attr': {'class': 'fw-bold text-secondary'}}) }}
+            {{ form_widget(form.eventTitre, {'attr': {
+                'class': 'form-select rounded-3 shadow-sm'
+            }}) }}
+            {{ form_errors(form.eventTitre) }}
+        </div>
+
+        <div class="d-flex gap-3 justify-content-end flex-wrap">
+            <button type="submit" class="btn btn-success btn-lg shadow-sm rounded-3">
+                Enregistrer
+            </button>
+
+            <a href="{{ path('sponsor_index') }}"
+               class="btn btn-outline-secondary btn-lg shadow-sm rounded-3">
+                Retour à la liste
+            </a>
+        </div>
+
+        {{ form_end(form) }}
+
+    </div>
+
+</div>
+{% endblock %}
