@@ -125,7 +125,7 @@ public function hashPasswordForExistingUser($id)
     }
 
     // Hasher le mot de passe que tu veux
-    $hashed = $this->passwordHasher->hashPassword($user, 'bbbbb'); // mot de passe voulu
+    $hashed = $this->passwordHasher->hashPassword($user, 'oussema123'); // mot de passe voulu
     $user->setMotDePasse($hashed);
     $this->em->flush();
 

@@ -3,18 +3,55 @@
 {% block title %}Register{% endblock %}
 
 {% block body %}
-    <h1>Register</h1>
+<div style="padding-left: 550px; padding-top:100px;">
+  <h1>Register</h1>
 
-    {{ form_errors(registrationForm) }}
+  {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate'}}) }}
 
-    {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate'}}) }}
-    {{ form_row(registrationForm.nom) }}
-{{ form_row(registrationForm.prenom) }}
-{{ form_row(registrationForm.email) }}
-{{ form_row(registrationForm.plainPassword) }}
-{{ form_row(registrationForm.agreeTerms) }}
+  {# Afficher les erreurs globales du formulaire #}
+  {% if registrationForm.vars.errors|length > 0 %}
+    <div class="alert alert-danger">
+      {{ form_errors(registrationForm) }}
+    </div>
+  {% endif %}
 
+  <table>
+    <tbody>
+      <tr>
+        <td>{{ form_label(registrationForm.nom) }}</td>
+        <td>{{ form_widget(registrationForm.nom) }}</td>
+        <td style="color: red;">{{ form_errors(registrationForm.nom) }}</td>
+      </tr>
 
-        <button type="submit" class="btn">Register</button>
-    {{ form_end(registrationForm) }}
+      <tr>
+        <td>{{ form_label(registrationForm.prenom) }}</td>
+        <td>{{ form_widget(registrationForm.prenom) }}</td>
+        <td style="color: red;">{{ form_errors(registrationForm.prenom) }}</td>
+      </tr>
+
+      <tr>
+        <td>{{ form_label(registrationForm.email) }}</td>
+        <td>{{ form_widget(registrationForm.email) }}</td>
+        <td style="color: red;">{{ form_errors(registrationForm.email) }}</td>
+      </tr>
+
+      <tr>
+        <td>{{ form_label(registrationForm.plainPassword) }}</td>
+        <td>{{ form_widget(registrationForm.plainPassword) }}</td>
+        <td style="color: red;">{{ form_errors(registrationForm.plainPassword) }}</td>
+      </tr>
+
+      <tr>
+        <td>{{ form_label(registrationForm.agreeTerms) }}</td>
+        <td>{{ form_widget(registrationForm.agreeTerms) }}</td>
+        <td style="color: red;">{{ form_errors(registrationForm.agreeTerms) }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <br />
+  <button type="submit" class="btn">Register</button>
+
+  {{ form_end(registrationForm) }}
+</div>
 {% endblock %}

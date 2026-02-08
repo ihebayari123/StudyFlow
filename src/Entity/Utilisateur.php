@@ -12,8 +12,13 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
+
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
-#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
+#[UniqueEntity(
+    fields: ['email'], 
+    message: 'Cet email est déjà utilisé.',
+    groups: ['registration', 'admin']  // Ajoutez les groupes si nécessaire
+)]
 class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -21,39 +26,54 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Assert\NotBlank(message: "Le nom est obligatoire.")]
+    #[Assert\NotBlank(message: "Le nom est obligatoire.", groups: ['registration', 'admin'])]
     #[Assert\Regex(
         pattern: "/^[a-zA-ZÀ-ÿ '-]+$/",
-        message: "Le nom ne peut contenir que des lettres, espaces, apostrophes ou tirets."
+        message: "Le nom ne peut contenir que des lettres, espaces, apostrophes ou tirets.",
+        groups: ['registration', 'admin']
     )]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[Assert\NotBlank(message: "Le prénom est obligatoire.")]
+    #[Assert\NotBlank(message: "Le prénom est obligatoire.", groups: ['registration', 'admin'])]
     #[Assert\Regex(
         pattern: "/^[a-zA-ZÀ-ÿ '-]+$/",
-        message: "Le prénom ne peut contenir que des lettres, espaces, apostrophes ou tirets."
+        message: "Le prénom ne peut contenir que des lettres, espaces, apostrophes ou tirets.",
+        groups: ['registration', 'admin']
     )]
     #[ORM\Column(length: 255)]
     private ?string $prenom = null;
 
-    #[Assert\NotBlank(message: "L'email est obligatoire.")]
-    #[Assert\Email(message: "Veuillez saisir un email valide.")]
+    #[Assert\NotBlank(message: "L'email est obligatoire.", groups: ['registration', 'admin'])]
+    #[Assert\Email(message: "Veuillez saisir un email valide.", groups: ['registration', 'admin'])]
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 
-    #[Assert\NotBlank(message: "Le mot de passe est obligatoire.")]
-    #[Assert\Length(min: 6, minMessage: "Votre mot de passe doit contenir au moins {{ limit }} caractères.")]
+
+    #[Assert\NotBlank(message: "Le mot de passe est obligatoire.", groups: ['admin'])]
+    #[Assert\Length(
+        min: 6,
+        minMessage: "Le mot de passe doit faire au moins {{ limit }} caractères",
+        max: 4096,
+        groups: ['admin']
+    )]
+    #[Assert\Regex(
+        pattern: "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/",
+        message: "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.",
+        groups: ['admin']
+    )]
     #[ORM\Column(length: 255)]
     private ?string $motDePasse = null;
 
-    #[Assert\NotBlank(message: "Le role est obligatoire.")]
+    // Contrainte seulement pour l'admin, pas pour l'inscription
+    #[Assert\NotBlank(message: "Le rôle est obligatoire.", groups: ['admin'])]
     #[ORM\Column(length: 255)]
     private ?string $role = null;
 
-    #[Assert\NotBlank(message: "L'etat du compte est obligatoire.")]
+    // Contrainte seulement pour l'admin, pas pour l'inscription
+    #[Assert\NotBlank(message: "L'etat du compte est obligatoire.", groups: ['admin'])]
     #[ORM\Column(length: 255)]
-    private ?string $statutCompte = null;
+    private ?string $statutCompte = null;   
 
     /**
      * @var Collection<int, Cours>

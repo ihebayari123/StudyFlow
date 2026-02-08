@@ -17,6 +17,8 @@ class RegistrationController extends AbstractController
     public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
     {
         $user = new Utilisateur();
+        $user->setRole('ROLE_ETUDIANT');
+        $user->setStatutCompte('ACTIF');  
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
@@ -26,8 +28,8 @@ class RegistrationController extends AbstractController
 
             // encode the plain password
             $user->setMotDePasse($userPasswordHasher->hashPassword($user, $plainPassword));
-            $user->setRole('ROLE_ETUDIANT');
-            $user->setStatutCompte('ACTIF');   
+            #$user->setRole('ROLE_ETUDIANT');
+            #$user->setStatutCompte('ACTIF');   
             $entityManager->persist($user);
             $entityManager->flush();
 

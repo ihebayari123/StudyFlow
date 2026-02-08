@@ -7,7 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-
+use Symfony\Component\Form\Extension\Core\Type\PasswordType; // Ajoutez cette lign
 class UtilisateurType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -16,7 +16,11 @@ class UtilisateurType extends AbstractType
             ->add('nom')
             ->add('prenom')
             ->add('email')
-            ->add('motDePasse')
+            ->add('motDePasse', PasswordType::class, [
+                'required' => false,
+                'label' => 'Mot de passe',
+                'attr' => ['autocomplete' => 'new-password']
+            ])
             ->add('role', ChoiceType::class, [
                 'choices' => [
                     'Admin' => 'ROLE_ADMIN',
@@ -32,14 +36,14 @@ class UtilisateurType extends AbstractType
                     'Bloqué' => 'BLOQUE',
                 ],
                 'placeholder' => 'Statut du compte',
-            ])
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Utilisateur::class,
+            'validation_groups' => ['admin'], // Utilise uniquement le groupe 'admin'
         ]);
     }
 }
