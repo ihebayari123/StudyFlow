@@ -110,14 +110,14 @@ class Event
         return $this;
     }
 
-    public function getUserId(): ?Utilisateur
+    public function getUser(): ?Utilisateur
     {
-        return $this->userId;
+        return $this->user;
     }
 
-    public function setUserId(?Utilisateur $userId): static
+    public function setUser(?Utilisateur $user): static
     {
-        $this->userId = $userId;
+        $this->user = $user;
 
         return $this;
     }

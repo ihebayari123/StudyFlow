@@ -13,6 +13,16 @@ use App\Form\CoursesType;
 
 final class CoursesController extends AbstractController
 {
+
+    #[Route('/admin/courses', name: 'app_coursesback')]
+    public function listCourses(CoursRepository $coursRepository): Response
+    {
+        $listcours = $coursRepository->findAll();
+        
+        return $this->render('courses/coursesback.html.twig', [
+            'listcours' => $listcours,
+        ]);
+    }
     
 
      #[Route('/showcourses', name: 'app_showcourses')]
