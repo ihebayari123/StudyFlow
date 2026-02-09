@@ -39,17 +39,41 @@
                 </div>
             {% else %}
                 {% for chapitre in chapitres|sort((a, b) => a.ordre <=> b.ordre) %}
-                <div class="chapter-card">
+                <div class="chapter-card" data-chapter-id="{{ chapitre.id }}">
                     <div class="chapter-number">
                         <span>{{ chapitre.ordre }}</span>
                     </div>
                     <div class="chapter-content">
+                        {% if chapitre.imageUrl %}
+                        <div class="chapter-thumbnail">
+                            <img src="{{ chapitre.imageUrl }}" alt="{{ chapitre.titre }}">
+                        </div>
+                        {% endif %}
+                        
                         <h3 class="chapter-title">{{ chapitre.titre }}</h3>
-                        <p class="chapter-description">{{ chapitre.contenu }}</p>
+                        
+                        <!-- Content Type Badges -->
+                        <div class="content-badges">
+    {% if chapitre.videoUrl %}
+        <span class="badge badge-video"><i class="fas fa-video"></i> Video</span>
+    {% endif %}
+    {% if chapitre.fileName %}
+        <span class="badge badge-file"><i class="fas fa-file-pdf"></i> Document</span>
+    {% endif %}
+    {% if chapitre.links %}
+        <span class="badge badge-link"><i class="fas fa-link"></i> Resources</span>
+    {% endif %}
+    {% if chapitre.durationMinutes %}
+        <span class="badge badge-duration"><i class="fas fa-clock"></i> {{ chapitre.durationMinutes }} min</span>
+    {% endif %}
+</div>
+                        
+                        <p class="chapter-description">{{ chapitre.contenu|length > 150 ? chapitre.contenu|slice(0, 150) ~ '...' : chapitre.contenu }}</p>
+                        
                         <div class="chapter-footer">
-                            <a href="#" class="view-btn">
+                            <button class="view-btn" onclick="openChapterModal({{ chapitre.id }})">
                                 <i class="fas fa-play-circle"></i> Start Chapter
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -58,6 +82,37 @@
         </div>
     </div>
 </div>
+
+<!-- Chapter Modal -->
+<div id="chapterModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle"></h2>
+            <span class="close-modal" onclick="closeChapterModal()">&times;</span>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Content will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<!-- Hidden chapter data for JavaScript -->
+<script>
+    const chaptersData = {
+        {% for chapitre in chapitres %}
+        {{ chapitre.id }}: {
+            titre: {{ chapitre.titre|json_encode|raw }},
+            contenu: {{ chapitre.contenu|json_encode|raw }},
+            contentType: {{ chapitre.contentType|json_encode|raw }},
+            videoUrl: {{ chapitre.videoUrl|json_encode|raw }},
+            fileName: {{ chapitre.fileName|json_encode|raw }},
+            imageUrl: {{ chapitre.imageUrl|json_encode|raw }},
+            links: {{ chapitre.links|json_encode|raw }},
+            durationMinutes: {{ chapitre.durationMinutes|json_encode|raw }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    };
+</script>
 
 <style>
     * {
@@ -237,12 +292,68 @@
         flex-direction: column;
     }
 
+    .chapter-thumbnail {
+        width: 100%;
+        height: 180px;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 15px;
+    }
+
+    .chapter-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
     .chapter-title {
         color: #1a1a1a;
         font-size: 1.5rem;
         font-weight: 700;
         margin-bottom: 15px;
         line-height: 1.4;
+    }
+
+    /* Content Badges */
+    .content-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .badge i {
+        font-size: 0.9rem;
+    }
+
+    .badge-video {
+        background: #ff6b6b;
+        color: white;
+    }
+
+    .badge-file {
+        background: #4ecdc4;
+        color: white;
+    }
+
+    .badge-link {
+        background: #95e1d3;
+        color: #333;
+    }
+
+    .badge-duration {
+        background: #f7b731;
+        color: white;
     }
 
     .chapter-description {
@@ -266,15 +377,190 @@
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         text-decoration: none;
+        border: none;
         border-radius: 30px;
         font-weight: 600;
+        cursor: pointer;
         transition: all 0.3s ease;
         box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        font-size: 1rem;
     }
 
     .view-btn:hover {
         transform: translateY(-3px);
         box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        background: white;
+        margin: 3% auto;
+        padding: 0;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 1200px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 20px 20px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 2rem;
+    }
+
+    .close-modal {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        line-height: 1;
+    }
+
+    .close-modal:hover {
+        transform: scale(1.2);
+    }
+
+    .modal-body {
+        padding: 40px;
+    }
+
+    /* Video Container */
+    .video-container {
+        position: relative;
+        padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        height: 0;
+        overflow: hidden;
+        margin-bottom: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .video-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 15px;
+    }
+
+    /* PDF Viewer */
+    .pdf-container {
+        margin-bottom: 30px;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .pdf-container iframe {
+        width: 100%;
+        height: 600px;
+        border: none;
+    }
+
+    /* Content Section */
+    .content-section {
+        margin-bottom: 30px;
+    }
+
+    .content-section h3 {
+        color: #667eea;
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .content-text {
+        color: #333;
+        line-height: 1.8;
+        font-size: 1.1rem;
+    }
+
+    /* Resources Links */
+    .resources-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .resources-list li {
+        margin-bottom: 15px;
+    }
+
+    .resource-link {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+
+    .resource-link:hover {
+        background: #667eea;
+        color: white;
+        transform: translateX(5px);
+    }
+
+    .resource-link i {
+        font-size: 1.5rem;
+        color: #667eea;
+    }
+
+    .resource-link:hover i {
+        color: white;
+    }
+
+    .resource-link strong {
+        font-size: 1.1rem;
     }
 
     /* No Chapters State */
@@ -328,6 +614,23 @@
             padding: 30px;
             font-size: 2rem;
         }
+
+        .modal-content {
+            width: 95%;
+            margin: 5% auto;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .pdf-container iframe {
+            height: 400px;
+        }
     }
 </style>
 
@@ -350,6 +653,170 @@
                 card.style.display = 'none';
             }
         });
+    });
+
+    // Modal Functions
+    // Modal Functions
+function openChapterModal(chapterId) {
+    const chapter = chaptersData[chapterId];
+    console.log('Opening chapter:', chapterId);
+    console.log('Chapter data:', chapter);
+    
+    if (!chapter) {
+        console.error('Chapter not found!');
+        return;
+    }
+
+    const modal = document.getElementById('chapterModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+
+    modalTitle.textContent = chapter.titre;
+    
+    let bodyContent = '';
+
+    // Add Video if exists
+    if (chapter.videoUrl) {
+        console.log('Video URL found:', chapter.videoUrl);
+        const videoId = extractVideoId(chapter.videoUrl);
+        if (videoId) {
+            bodyContent += `
+                <div class="content-section">
+                    <h3><i class="fas fa-video"></i> Video Lecture</h3>
+                    <div class="video-container">
+                        ${videoId}
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // Add PDF/File if exists
+    console.log('Checking fileName:', chapter.fileName);
+    if (chapter.fileName) {
+        const fileUrl = `/uploads/chapters/${chapter.fileName}`;
+        const fileExt = chapter.fileName.split('.').pop().toLowerCase();
+        
+        console.log('File URL:', fileUrl);
+        console.log('File Extension:', fileExt);
+        
+        bodyContent += `
+            <div class="content-section">
+                <h3><i class="fas fa-file-pdf"></i> Course Material</h3>
+        `;
+        
+        // If it's a PDF, show viewer
+        if (fileExt === 'pdf') {
+            bodyContent += `
+                <div class="pdf-container">
+                    <iframe src="${fileUrl}"></iframe>
+                </div>
+            `;
+        } else {
+            // For other files, just show download button
+            bodyContent += `
+                <div style="text-align: center; padding: 40px;">
+                    <i class="fas fa-file fa-5x" style="color: #667eea; margin-bottom: 20px;"></i>
+                    <p style="font-size: 1.2rem; color: #333;"><strong>${chapter.fileName}</strong></p>
+                </div>
+            `;
+        }
+        
+        bodyContent += `
+                <a href="${fileUrl}" download class="view-btn" style="margin-top: 15px;">
+                    <i class="fas fa-download"></i> Download File
+                </a>
+            </div>
+        `;
+    } else {
+        console.log('No fileName found in chapter data');
+    }
+
+    // Add Content/Description
+    if (chapter.contenu) {
+        bodyContent += `
+            <div class="content-section">
+                <h3><i class="fas fa-book-open"></i> Chapter Content</h3>
+                <div class="content-text">${chapter.contenu}</div>
+            </div>
+        `;
+    }
+
+    // Add Resources/Links
+    if (chapter.links && chapter.links.length > 0) {
+        bodyContent += `
+            <div class="content-section">
+                <h3><i class="fas fa-link"></i> Additional Resources</h3>
+                <ul class="resources-list">
+        `;
+        chapter.links.forEach(link => {
+            bodyContent += `
+                <li>
+                    <a href="${link.url}" target="_blank" class="resource-link">
+                        <i class="fas fa-external-link-alt"></i>
+                        <div>
+                            <strong>${link.title}</strong><br>
+                            <small>${link.url}</small>
+                        </div>
+                    </a>
+                </li>
+            `;
+        });
+        bodyContent += `
+                </ul>
+            </div>
+        `;
+    }
+
+    console.log('Final body content:', bodyContent);
+    modalBody.innerHTML = bodyContent;
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+    function closeChapterModal() {
+        const modal = document.getElementById('chapterModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Extract video ID and create embed code
+    function extractVideoId(url) {
+        if (!url) return null;
+
+        // YouTube
+        let youtubeMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+        if (youtubeMatch) {
+            return `<iframe src="https://www.youtube.com/embed/${youtubeMatch[1]}" allowfullscreen></iframe>`;
+        }
+
+        // Vimeo
+        let vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+        if (vimeoMatch) {
+            return `<iframe src="https://player.vimeo.com/video/${vimeoMatch[1]}" allowfullscreen></iframe>`;
+        }
+
+        // Direct video link
+        if (url.match(/\.(mp4|webm|ogg)$/i)) {
+            return `<video controls style="width: 100%; border-radius: 15px;"><source src="${url}"></video>`;
+        }
+
+        return null;
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('chapterModal');
+        if (event.target == modal) {
+            closeChapterModal();
+        }
+    }
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeChapterModal();
+        }
     });
 </script>
 {% endblock %}

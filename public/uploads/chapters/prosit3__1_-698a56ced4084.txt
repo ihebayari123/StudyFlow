@@ -1,0 +1,51 @@
+CREATE TABLE Tseq(a number, b varchar2(5));
+CREATE SEQUENCE seq increment by 5 start with -10 minvalue -20 maxvalue 5 cache 2 cycle;
+INSERT INTO Tseq values (seq.nextval, 'a')
+SELECT * FROM Tseq; 
+SELECT seq.currval FROM dual;
+DROP SEQUENCE sequence1;
+ALTER TABLE VEHICULES ADD(prix_demande int NOT NULL ); 
+ALTER TABLE VEHICULES Modify(prix_demande number) ;
+INSERT INTO MODELS VALUES('PCC', '206cc', 'Peugeot', '5CH');
+INSERT INTO MODELS VALUES('FPE' ,'Punto Evo' ,'Fiat', '4CH');
+INSERT INTO MODELS VALUES('FF', 'Fiesta', 'Ford' ,'6CH');
+
+INSERT INTO Personnes VALUES('03645148' ,'Masmoudi', 'Ahmed', 'Ahmed.masmoudi@gmail.com', 70983123);
+INSERT INTO Personnes (CIN, Nom, Prenom, Email) VALUES('07498662', 'Ayadi', 'Omar', 'Omar.ayadi@gmail.com');
+INSERT INTO Personnes (CIN, Nom, Prenom, Email) VALUES('07895624' ,'Ben Chaabane', 'Mariem', 'Mariem.benchaabane@yahoo.fr');
+INSERT INTO Personnes VALUES('06784512', 'Bali', 'Imen', 'Imen.bali@gmail.com', 72145870);
+INSERT INTO Personnes VALUES('04456641', 'Salhi',  'Ali', 'Ali.salhi@outlook.fr', 70983145);
+
+
+
+INSERT INTO Vehicules(Immatriculation, Ref_Model, Date_Mise_Circulation, Kilometrage, Prix_demande)VALUES('1245Tunis99', 'RC', TO_DATE('14/01/2021', 'DD/MM/YYYY'),155000, 10200);
+INSERT INTO Vehicules(Immatriculation, Ref_Model, Date_Mise_Circulation, Kilometrage, Prix_demande)VALUES('264Tunis142', 'FF', TO_DATE('11/02/2020', 'DD/MM/YYYY'), 75000, 19500);
+INSERT INTO Vehicules(Immatriculation, Ref_Model, Date_Mise_Circulation, Kilometrage, Prix_demande)VALUES('569Tunis122', 'PCC', TO_DATE('02/10/2022', 'DD/MM/YYYY'), 85250, 15200);
+INSERT INTO Vehicules(Immatriculation, Ref_Model, Date_Mise_Circulation, Kilometrage, Prix_demande)VALUES('1713Tunis154', 'FPE', TO_DATE('10/10/2021', 'DD/MM/YYYY'), 106000, 21000
+
+
+
+
+INSERT INTO Acquisitions(Immatriculation, CIN, Date_Debut, Date_Fin)VALUES('1245Tunis99', '03645148', TO_DATE('20/06/2021', 'DD/MM/YYYY'), TO_DATE('17/09/2022', 'DD/MM/YYYY'));
+INSERT INTO Acquisitions(Immatriculation, CIN, Date_Debut, Date_Fin)VALUES('264Tunis142', '07895624', TO_DATE('11/01/2020', 'DD/MM/YYYY'), TO_DATE('23/10/2022', 'DD/MM/YYYY'));
+INSERT INTO Acquisitions(Immatriculation, CIN, Date_Debut, Date_Fin)VALUES('1713Tunis154', '04456641', TO_DATE('03/01/2022', 'DD/MM/YYYY'), TO_DATE('02/01/2023', 'DD/MM/YYYY'));
+INSERT INTO Acquisitions(Immatriculation, CIN, Date_Debut, Date_Fin)VALUES('1245Tunis99', '07498662' , TO_DATE('18/08/2021', 'DD/MM/YYYY'), TO_DATE('15/09/2021', 'DD/MM/YYYY'));
+
+
+INSERT INTO Contrat_Vente(Ref_Contrat, CIN, Immatriculation, Date_Vente, Prix_Vente)VALUES('C104', '03645148', '1245Tunis99', TO_DATE('20/06/2021', 'DD/MM/YYYY'), 9600);
+INSERT INTO Contrat_Vente(Ref_Contrat, CIN, Immatriculation, Prix_Vente)VALUES('C105', '07895624', '264Tunis142', 19000);
+INSERT INTO Contrat_Vente(Ref_Contrat, CIN, Immatriculation, Prix_Vente)VALUES('C106', '04456641', '1713Tunis154', 20800);
+INSERT INTO Contrat_Vente(Ref_Contrat, CIN, Immatriculation, Date_Vente, Prix_Vente)VALUES('C107', '07498662', '1245Tunis99', TO_DATE('18/09/2021', 'DD/MM/YYYY'), 8500);
+
+
+ALTER TABLE Vehicules ADD Couleur VARCHAR2(10);
+
+UPDATE Vehicules
+SET Couleur = 'BLEU'
+WHERE Immatriculation = '1713Tunis154';
+
+Update Contrat_vente
+Set prix_vente = prix_vente- 300
+where immatriculation = '1245Tunis99' and CIN ='03645148'
+
+DELETE FROM contrat_vente where date_vente < to_date('01/01/2008','DD/MM/YYYY');
