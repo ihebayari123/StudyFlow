@@ -1,19 +1,8 @@
-<!--! ================================================================ !-->
-    <!--! [Start] Navigation Manu !-->
-    <!--! ================================================================ !-->
-    {% include 'admin/Partials/sidebar.html.twig' %}
-    <!--! ================================================================ !-->
-    <!--! [End]  Navigation Manu !-->
-    <!--! ================================================================ !-->
+{% set newOrder = order == 'ASC' ? 'DESC' : 'ASC' %}
+{# templates/admin_question/showQuestion.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
 
-    <!--! ================================================================ !-->
-    <!--! [Start] Header !-->
-    <!--! ================================================================ !-->
-   
-    {% include 'admin/partials/navbar.html.twig' %}
-    <!--! ================================================================ !-->
-    <!--! [End] Header !-->
-    <!--! ================================================================ !-->
+{% block admin_content %}
 <div class="admin-layout">
 
     {% include 'admin/Partials/sidebar.html.twig' %}
@@ -148,4 +137,5 @@
     <script src="{{ asset('assets2/js/dashboard-init.min.js') }}"></script>
     {% block admin_javascripts %}{% endblock %}
     <script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
+{% endblock %}
 {% endblock %}
