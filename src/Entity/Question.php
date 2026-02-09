@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\QuestionRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: QuestionRepository::class)]
 class Question
@@ -14,28 +15,47 @@ class Question
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le texte de la question est obligatoire.")]
+    #[Assert\Length(
+        min: 5,
+        minMessage: "Le texte de la question doit contenir au moins {{ limit }} caractères."
+    )]
     private ?string $texte = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le choix A est obligatoire.")]
     private ?string $choixA = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le choix B est obligatoire.")]
     private ?string $choixB = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le choix C est obligatoire.")]
     private ?string $choixC = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le choix D est obligatoire.")]
     private ?string $choixD = null;
 
     #[ORM\Column(length: 1)]
+    #[Assert\NotBlank(message: "Veuillez sélectionner la bonne réponse.")]
+    #[Assert\Choice(
+        choices: ['A', 'B', 'C', 'D'],
+        message: "La bonne réponse doit être A, B, C ou D."
+    )]
     private ?string $bonneReponse = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(
+        min: 3,
+        minMessage: "L’indice doit contenir au moins {{ limit }} caractères."
+    )]
     private ?string $indice = null;
 
     #[ORM\ManyToOne(inversedBy: 'questions')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: "Le quiz associé est obligatoire.")]
     private ?Quiz $quiz = null;
 
     // ================= GETTERS & SETTERS =================
