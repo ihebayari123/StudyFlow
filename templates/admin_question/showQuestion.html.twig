@@ -1,5 +1,8 @@
 {% set newOrder = order == 'ASC' ? 'DESC' : 'ASC' %}
+{# templates/admin_question/showQuestion.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
 
+{% block admin_content %}
 <div class="admin-layout">
 
     <!-- Sidebar -->
@@ -228,4 +231,5 @@
     <script src="{{ asset('assets2/js/dashboard-init.min.js') }}"></script>
     {% block admin_javascripts %}{% endblock %}
     <script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
+{% endblock %}
 {% endblock %}
