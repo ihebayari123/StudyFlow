@@ -1,0 +1,66 @@
+{# templates/admin/_sponsor_table.html.twig #}
+
+<div class="table-responsive p-4">
+    <table class="table table-hover align-middle mb-0 text-center">
+        <thead class="table-light">
+            <tr>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Montant</th>
+                <th>Événement</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sponsor in sponsors %}
+                <tr>
+                    <td class="fw-bold">{{ sponsor.nomSponsor }}</td>
+                    <td>
+                        {% if sponsor.type == 'Or' %}
+                            <span class="badge bg-warning text-dark">{{ sponsor.type }}</span>
+                        {% elseif sponsor.type == 'Argent' %}
+                            <span class="badge bg-secondary">{{ sponsor.type }}</span>
+                        {% elseif sponsor.type == 'Bronze' %}
+                            <span class="badge bg-info text-dark">{{ sponsor.type }}</span>
+                        {% else %}
+                            <span class="badge bg-light text-dark">{{ sponsor.type }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ sponsor.montant }} DT</td>
+                    <td>{{ sponsor.eventTitre ? sponsor.eventTitre.titre : '—' }}</td>
+                    <td class="d-flex justify-content-center gap-2 flex-wrap">
+
+                        <!-- Modifier -->
+                        <a href="{{ path('sponsor_edit', {'id': sponsor.id}) }}"
+                           class="btn btn-warning btn-sm rounded-3 shadow-sm d-inline-flex justify-content-center align-items-center"
+                           style="min-width: 100px; transition: transform 0.2s;"
+                           onmouseover="this.style.transform='scale(1.05)'"
+                           onmouseout="this.style.transform='scale(1)'">
+                            Modifier
+                        </a>
+
+                        <!-- Supprimer -->
+                        <form method="post"
+                              action="{{ path('sponsor_delete', {'id': sponsor.id}) }}"
+                              onsubmit="return confirm('Voulez-vous vraiment supprimer ce sponsor ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ sponsor.id) }}">
+                            <button class="btn btn-danger btn-sm rounded-3 shadow-sm d-inline-flex justify-content-center align-items-center"
+                                    style="min-width: 100px; transition: transform 0.2s;"
+                                    onmouseover="this.style.transform='scale(1.05)'"
+                                    onmouseout="this.style.transform='scale(1)'">
+                                Supprimer
+                            </button>
+                        </form>
+
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        Aucun sponsor trouvé
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

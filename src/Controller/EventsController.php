@@ -96,6 +96,8 @@ public function frontIndex(EntityManagerInterface $em): Response
             $em->flush();
 
             $this->addFlash('success', 'Événement créé avec succès');
+            $this->addFlash('notification', 'Nouvel événement ajouté');
+
 
             return $this->redirectToRoute('app_events');
         }
@@ -126,6 +128,7 @@ public function frontIndex(EntityManagerInterface $em): Response
             $em->flush();
 
             $this->addFlash('success', 'Événement mis à jour');
+            $this->addFlash('notification', 'Événement modifié');
 
             return $this->redirectToRoute('app_events');
         }
@@ -153,6 +156,7 @@ public function frontIndex(EntityManagerInterface $em): Response
             $em->flush();
 
             $this->addFlash('success', 'Événement supprimé');
+            $this->addFlash('notification', 'Événement supprimé');
         }
 
         return $this->redirectToRoute('app_events');

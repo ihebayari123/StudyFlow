@@ -3,62 +3,76 @@
 {% block title %}Liste des événements - Admin{% endblock %}
 
 {% block admin_content %}
-{# Spacer pour navbar fixe #}
-<div style="height: 80px;"></div> {# Ajuster la hauteur selon ton navbar #}
+
+<div style="height: 80px;"></div>
 
 <div class="container py-5 d-flex flex-column align-items-center">
 
     <h1 class="mb-5 text-primary fw-bold text-center">Événements</h1>
 
-    {# Messages flash #}
+    {# ================= Notification Icon ================= #}
+    <div class="dropdown nxl-h-item position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+        <a class="nxl-head-link me-3" data-bs-toggle="dropdown" href="#" role="button" data-bs-auto-close="outside">
+            <i class="feather-bell"></i>
+            <span class="badge bg-danger nxl-h-badge"></span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown nxl-notifications-menu p-2">
+            {# Contenu dynamique via JS #}
+        </div>
+    </div>
+
+    {# ================= Flash messages Symfony ================= #}
     {% for label, messages in app.flashes %}
         {% for message in messages %}
-            <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm w-100" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+            {% if label == 'notification' %}
+                <div class="d-none notif-flash">{{ message }}</div>
+            {% else %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm w-100">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endif %}
         {% endfor %}
     {% endfor %}
 
-    {# Formulaire de recherche et tri combiné #}
-    <form method="get" action="{{ path('app_events') }}" class="row mb-4 g-3 w-100 justify-content-center">
+    {# ================= Recherche + Tri ================= #}
+    <form class="row mb-4 g-3 w-100 justify-content-center">
         <div class="col-md-5">
-            <input type="text" name="search" class="form-control shadow-sm rounded-3" placeholder="Rechercher par titre ou type" value="{{ search }}">
+            <input type="text" name="search" id="searchInput" class="form-control shadow-sm rounded-3" placeholder="Rechercher par titre ou type" value="{{ search }}">
         </div>
         <div class="col-md-4">
-            <select name="sort" class="form-select shadow-sm rounded-3" onchange="this.form.submit()">
+            <select name="sort" id="sortSelect" class="form-select shadow-sm rounded-3">
                 <option value="">Trier par date</option>
-                <option value="asc" {% if sort == 'asc' %}selected{% endif %}>Du plus ancien au plus récent</option>
-                <option value="desc" {% if sort == 'desc' %}selected{% endif %}>Du plus récent au plus ancien</option>
+                <option value="asc" {% if sort == 'asc' %}selected{% endif %}>Du plus ancien</option>
+                <option value="desc" {% if sort == 'desc' %}selected{% endif %}>Du plus récent</option>
             </select>
-        </div>
-        <div class="col-md-2 text-end">
-            <button class="btn btn-outline-primary w-100 shadow-sm rounded-3">Appliquer</button>
         </div>
     </form>
 
-    {% if events is empty %}
-        <div class="alert alert-secondary text-center shadow-sm rounded-3 w-100">
-            Aucun événement trouvé.
-        </div>
-    {% else %}
-        <div class="row g-4 w-100 justify-content-center">
+    {# ================= Container dynamique ================= #}
+    <div class="row g-4 w-100 justify-content-center" id="eventsContainer">
+
+        {% if events is empty %}
+            <div class="alert alert-secondary text-center shadow-sm rounded-3 w-100">
+                Aucun événement trouvé.
+            </div>
+        {% else %}
             {% for event in events %}
                 <div class="col-md-6 col-lg-4">
                     <div class="card shadow-sm border-0 h-100 rounded-4 overflow-hidden">
                         {% if event.image %}
-                            <img src="{{ asset('uploads/' ~ event.image) }}" class="card-img-top" style="height: 180px; object-fit: cover;" alt="{{ event.titre }}">
+                            <img src="{{ asset('uploads/' ~ event.image) }}" class="card-img-top" style="height: 180px; object-fit: cover;">
                         {% else %}
                             <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
                                 <span class="text-muted">Aucune image</span>
                             </div>
                         {% endif %}
+
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title fw-bold">{{ event.titre }}</h5>
                             <p class="card-text text-truncate">{{ event.description }}</p>
-                            <p class="mb-2">
-                                <small class="text-muted">Créé le {{ event.dateCreation|date('d/m/Y H:i') }}</small>
-                            </p>
+                            <small class="text-muted mb-2">Créé le {{ event.dateCreation|date('d/m/Y H:i') }}</small>
+
                             <div class="mb-3">
                                 {% if event.type == 'Conférence' %}
                                     <span class="badge bg-primary">{{ event.type }}</span>
@@ -70,27 +84,138 @@
                                     <span class="badge bg-secondary">{{ event.type }}</span>
                                 {% endif %}
                             </div>
+
                             <div class="mt-auto d-flex justify-content-between">
-                                <a href="{{ path('event_edit', {'id': event.id}) }}" class="btn btn-warning btn-sm rounded-3 shadow-sm flex-grow-1 me-1">
-                                    Modifier
-                                </a>
-                                <form method="post" action="{{ path('event_delete', {'id': event.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?');" class="flex-grow-1 ms-1">
+                                <a href="{{ path('event_edit', {'id': event.id}) }}" class="btn btn-warning btn-sm flex-grow-1 me-1">Modifier</a>
+                                <form method="post" action="{{ path('event_delete', {'id': event.id}) }}" class="flex-grow-1 ms-1" onsubmit="return confirm('Supprimer ?');">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ event.id) }}">
-                                    <button class="btn btn-danger btn-sm rounded-3 shadow-sm w-100">Supprimer</button>
+                                    <button class="btn btn-danger btn-sm w-100">Supprimer</button>
                                 </form>
                             </div>
                         </div>
                     </div>
                 </div>
             {% endfor %}
-        </div>
-    {% endif %}
+        {% endif %}
+    </div>
 
     <div class="mt-5 text-center w-100">
-        <a href="{{ path('event_create') }}" class="btn btn-primary btn-lg shadow-sm rounded-3">
-            Ajouter un nouvel événement
-        </a>
+        <a href="{{ path('event_create') }}" class="btn btn-primary btn-lg shadow-sm rounded-3">Ajouter un nouvel événement</a>
     </div>
 
 </div>
+
+{# ================= JAVASCRIPT ================= #}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const notifButton = document.querySelector(".nxl-head-link");
+    const notifDropdown = document.querySelector(".nxl-notifications-menu");
+    const notifBadge = document.querySelector(".nxl-h-badge");
+
+    let notifications = JSON.parse(localStorage.getItem("notifications")) || [];
+
+    // Ajouter flash messages Symfony aux notifications
+    document.querySelectorAll(".notif-flash").forEach(el => {
+        const msg = el.textContent.trim();
+        if(msg && !notifications.includes(msg)){
+            notifications.push(msg);
+        }
+    });
+
+    // Fonction pour afficher notifications et badge
+    function renderNotifications() {
+        notifDropdown.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center notifications-head px-2 py-1">
+                <h6 class="fw-bold text-dark mb-0">Notifications</h6>
+                <a href="javascript:void(0);" class="fs-11 text-success text-end ms-auto" id="markAllRead">
+                    <i class="feather-check"></i>
+                    <span>Make as Read</span>
+                </a>
+            </div>
+        `;
+
+        notifications.forEach((notif, index) => {
+            const item = document.createElement("div");
+            item.className = "notifications-item px-2 py-1";
+            item.innerHTML = `
+                <div class="notifications-desc">
+                    <a href="javascript:void(0);" class="font-body text-truncate-2-line">${notif}</a>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="notifications-date text-muted border-bottom border-bottom-dashed">Maintenant</div>
+                        <div class="d-flex align-items-center float-end gap-2">
+                            <a href="javascript:void(0);" class="text-danger remove-notif" data-index="${index}">
+                                <i class="feather-x fs-12"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            notifDropdown.appendChild(item);
+        });
+
+        // Mettre à jour le badge
+        notifBadge.textContent = notifications.length;
+        notifBadge.style.display = notifications.length > 0 ? "inline-block" : "none";
+
+        localStorage.setItem("notifications", JSON.stringify(notifications));
+    }
+
+    // Fonction pour ajouter une notification
+    function addNotification(message) {
+        if(message && !notifications.includes(message)){
+            notifications.push(message);
+            renderNotifications();
+        }
+    }
+
+    renderNotifications();
+
+    // Toggle dropdown notifications
+    notifButton.addEventListener("click", () => {
+        notifDropdown.classList.toggle("show");
+    });
+
+    // Supprimer notification ou tout marquer comme lu
+    notifDropdown.addEventListener("click", (e) => {
+        if(e.target.closest(".remove-notif")) {
+            const index = e.target.closest(".remove-notif").dataset.index;
+            notifications.splice(index, 1);
+            renderNotifications();
+        }
+        if(e.target.id === "markAllRead") {
+            notifications = [];
+            renderNotifications();
+        }
+    });
+
+    // ================= Recherche et tri =================
+    const searchInput = document.getElementById("searchInput");
+    const sortSelect = document.getElementById("sortSelect");
+    const container = document.getElementById("eventsContainer");
+    let timer = null;
+
+    function loadEvents() {
+        const search = searchInput.value;
+        const sort = sortSelect.value;
+
+        fetch(`{{ path('app_events') }}?search=${search}&sort=${sort}`, {
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        })
+        .then(response => response.text())
+        .then(html => { container.innerHTML = html; });
+    }
+
+    searchInput.addEventListener("keyup", function () {
+        clearTimeout(timer);
+        timer = setTimeout(() => { loadEvents(); }, 400);
+    });
+
+    sortSelect.addEventListener("change", function () {
+        loadEvents();
+    });
+
+});
+</script>
+
 {% endblock %}

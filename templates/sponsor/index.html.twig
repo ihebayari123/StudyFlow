@@ -35,14 +35,11 @@
 
     <!-- Formulaire de recherche -->
     <div class="mb-4 w-100">
-        <form method="get" action="{{ path('sponsor_index') }}" class="d-flex w-100">
-            <input type="text" name="search" class="form-control me-2 shadow-sm rounded-3" placeholder="Rechercher par nom, type ou événement" value="{{ search }}">
-            <button class="btn btn-outline-primary shadow-sm rounded-3">Rechercher</button>
-        </form>
+        <input type="text" id="searchInput" class="form-control me-2 shadow-sm rounded-3" placeholder="Rechercher par nom, type ou événement" value="{{ search }}">
     </div>
 
     <!-- Tableau -->
-    <div class="card shadow-lg border-0 w-100">
+    <div id="sponsorTable" class="card shadow-lg border-0 w-100">
         <div class="table-responsive p-4">
             <table class="table table-hover align-middle mb-0 text-center">
                 <thead class="table-light">
@@ -110,4 +107,27 @@
     </div>
 
 </div>
+
+{# ================= AJAX ================= #}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#searchInput').on('keyup', function() {
+        let query = $(this).val();
+
+        $.ajax({
+            url: '{{ path("sponsor_search") }}',
+            type: 'GET',
+            data: { search: query },
+            success: function(data) {
+                $('#sponsorTable').html(data);
+            },
+            error: function() {
+                console.error('Erreur lors de la recherche');
+            }
+        });
+    });
+});
+</script>
+
 {% endblock %}

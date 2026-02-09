@@ -31,12 +31,10 @@ class SponsorController extends AbstractController
         // Mot clé recherche
         $search = $request->query->get('search');
 
-        // QueryBuilder
         $qb = $em->getRepository(Sponsor::class)->createQueryBuilder('s')
-                ->leftJoin('s.eventTitre', 'e') // JOIN avec Event
+                ->leftJoin('s.eventTitre', 'e')
                 ->addSelect('e');
 
-        // Recherche
         if ($search) {
             $qb->andWhere('
                 s.nomSponsor LIKE :search
@@ -46,7 +44,6 @@ class SponsorController extends AbstractController
             ->setParameter('search', '%' . $search . '%');
         }
 
-        // Tri (optionnel)
         $qb->orderBy('s.nomSponsor', 'ASC');
 
         $sponsors = $qb->getQuery()->getResult();
@@ -54,6 +51,37 @@ class SponsorController extends AbstractController
         return $this->render('sponsor/index.html.twig', [
             'sponsors' => $sponsors,
             'search'   => $search,
+        ]);
+    }
+
+    // ========================
+    // AJAX SEARCH
+    // ========================
+    #[Route('/search', name: 'sponsor_search', methods: ['GET'])]
+    public function search(EntityManagerInterface $em, Request $request): Response
+    {
+        $search = $request->query->get('search');
+
+        $qb = $em->getRepository(Sponsor::class)->createQueryBuilder('s')
+                ->leftJoin('s.eventTitre', 'e')
+                ->addSelect('e');
+
+        if ($search) {
+            $qb->andWhere('
+                s.nomSponsor LIKE :search
+                OR s.type LIKE :search
+                OR e.titre LIKE :search
+            ')
+            ->setParameter('search', '%' . $search . '%');
+        }
+
+        $qb->orderBy('s.nomSponsor', 'ASC');
+
+        $sponsors = $qb->getQuery()->getResult();
+
+        // Rendu d'un template partiel contenant uniquement le tableau
+        return $this->render('sponsor/_sponsor_table.html.twig', [
+            'sponsors' => $sponsors
         ]);
     }
 
@@ -131,8 +159,7 @@ class SponsorController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'Sponsor supprimé avec succès');
-        }
-        else {
+        } else {
             $this->addFlash('error', 'Token CSRF invalide');
         }
 

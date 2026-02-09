@@ -1,0 +1,91 @@
+{% if events is empty %}
+
+    <div class="alert alert-secondary text-center shadow-sm rounded-3 w-100">
+        Aucun événement trouvé.
+    </div>
+
+{% else %}
+
+    {% for event in events %}
+
+        <div class="col-md-6 col-lg-4">
+
+            <div class="card shadow-sm border-0 h-100 rounded-4 overflow-hidden">
+
+                {% if event.image %}
+                    <img src="{{ asset('uploads/' ~ event.image) }}"
+                         class="card-img-top"
+                         style="height: 180px; object-fit: cover;"
+                         alt="{{ event.titre }}">
+                {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center"
+                         style="height: 180px;">
+                        <span class="text-muted">Aucune image</span>
+                    </div>
+                {% endif %}
+
+                <div class="card-body d-flex flex-column">
+
+                    <h5 class="card-title fw-bold">
+                        {{ event.titre }}
+                    </h5>
+
+                    <p class="card-text text-truncate">
+                        {{ event.description }}
+                    </p>
+
+                    <small class="text-muted mb-2">
+                        Créé le {{ event.dateCreation|date('d/m/Y H:i') }}
+                    </small>
+
+                    <div class="mb-3">
+
+                        {% if event.type == 'Conférence' %}
+                            <span class="badge bg-primary">{{ event.type }}</span>
+
+                        {% elseif event.type == 'Atelier' %}
+                            <span class="badge bg-success">{{ event.type }}</span>
+
+                        {% elseif event.type == 'Séminaire' %}
+                            <span class="badge bg-info text-dark">{{ event.type }}</span>
+
+                        {% else %}
+                            <span class="badge bg-secondary">{{ event.type }}</span>
+                        {% endif %}
+
+                    </div>
+
+                    <div class="mt-auto d-flex justify-content-between">
+
+                        <a href="{{ path('event_edit', {'id': event.id}) }}"
+                           class="btn btn-warning btn-sm flex-grow-1 me-1">
+
+                            Modifier
+                        </a>
+
+                        <form method="post"
+                              action="{{ path('event_delete', {'id': event.id}) }}"
+                              class="flex-grow-1 ms-1"
+                              onsubmit="return confirm('Supprimer ?');">
+
+                            <input type="hidden"
+                                   name="_token"
+                                   value="{{ csrf_token('delete' ~ event.id) }}">
+
+                            <button class="btn btn-danger btn-sm w-100">
+                                Supprimer
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+{% endif %}

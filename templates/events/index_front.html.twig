@@ -32,44 +32,8 @@
   </div>
 </header>
 
-<!-- ======= Hero Section ======= -->
-<main>{% block content %}{% endblock %}</main>
-
-<div id="top"></div>
-<div class="vignette"></div>
-
-{% for i in 0..12 %}
-    <img src="{{ asset('assets/images/' ~ i ~ '.png') }}" class="bg-{{ i }}">
-{% endfor %}
-
-<div class="text parallax" data-speedx="0.3" data-speedy="0.3">
-    <h1 class="hero-title">StudyFlow</h1>
-</div>
-<div class="text2">
-    <h1 class="hero-subtitle">Your study journey, simplified.</h1>
-</div>
-<div class="text3">
-    <h2 class="hero-description">All your lessons, quizzes, and progress — in one intelligent platform.</h2>
-</div>
-
-<a href="#" class="sparkle-btn">
-    <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M93.781 51.578C95 50.969 96 49.359 96 48c0-1.375-1-2.969-2.219-3.578
-        0 0-22.868-1.514-31.781-10.422-8.915-8.91-10.438-31.781-10.438-31.781
-        C50.969 1 49.375 0 48 0s-2.969 1-3.594 2.219
-        c0 0-1.5 22.87-10.406 31.781-8.908 8.913-31.781 10.422-31.781 10.422
-        C1 45.031 0 46.625 0 48c0 1.359 1 2.969 2.219 3.578
-        0 0 22.873 1.51 31.781 10.422 8.906 8.911 10.406 31.781 10.406 31.781
-        C45.031 95 46.625 96 48 96s2.969-1 3.562-2.219
-        c0 0 1.523-22.871 10.438-31.781 8.913-8.908 31.781-10.422 31.781-10.422Z"
-        fill="#000"/>
-    </svg>
-    <span>Begin Your Journey</span>
-    <span aria-hidden="true">Begin Your Journey</span>
-</a>
-
 <!-- ======= Events Section ======= -->
-<div class="section events py-5" id="events" style="background: #f8f9fa;">
+<div class="section events" id="events" style="background: #f8f9fa; padding-top:0;">
   <div class="container">
     <div class="row mb-4">
       <div class="col-lg-12 text-center">
@@ -101,7 +65,7 @@
                 <span class="badge bg-primary mb-2">{{ event.type }}</span>
                 <h5 class="card-title fw-bold">{{ event.titre }}</h5>
                 <p class="card-text text-muted mb-1"><i class="bi bi-calendar-event"></i> {{ event.dateCreation ? event.dateCreation|date('d M Y') : '' }}</p>
-                <p class="card-text">{{ event.description|length > 100 ? event.description|slice(0,100) ~ '...' : event.description }}</p>
+                <p class="card-text">{{ event.description|length > 300 ? event.description|slice(0,300) ~ '...' : event.description }}</p>
 
                 <p class="mb-2">
                   <strong>Sponsors:</strong>
@@ -114,10 +78,8 @@
                   {% endif %}
                 </p>
 
-                <!-- Compteur à rebours -->
                 <p class="countdown" data-date="{{ event.dateCreation ? event.dateCreation|date('Y-m-d H:i:s') : '' }}"></p>
 
-                <!-- Coeur dynamique -->
                 <span class="heart-icon" data-event-id="{{ event.id }}">
                   <i class="bi bi-heart" style="font-size:1.5rem; cursor:pointer;"></i>
                 </span>
@@ -132,15 +94,39 @@
 
 <!-- ======= Styles ======= -->
 <style>
-.header-area { position: sticky; top: 0; z-index: 999; background-color: transparent; transition: background-color 0.3s, color 0.3s; padding:15px 0;}
-.header-area.scrolled { background-color:#8a2be2; }
+/* Box sizing global */
+* { box-sizing: border-box; }
+
+/* Supprimer l’espace blanc au top */
+html, body { margin:0; padding:0; height:100%; background-color:#f8f9fa; }
+
+/* Navbar */
+.header-area {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    background-color: #8a2be2; /* Navbar couleur fixe au départ */
+    transition: background-color 0.3s, color 0.3s;
+    padding:15px 0;
+}
+
+.header-area.scrolled {
+    background-color:#5a189a; /* Navbar couleur foncée au scroll */
+}
+
+.header-area .container {
+    padding-left: 0;
+    padding-right: 0;
+}
+
 .header-area .nav a { color:white; transition: color 0.3s;}
 .header-area.scrolled .nav a { color:#fff; }
 .header-area .logo-text { color:#fff; transition: color 0.3s;}
 .header-area.scrolled .logo-text { color:#ffd700; }
 
+/* Events */
 .event-card { border-radius: 15px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;}
-.event-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.15);}
+.event-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
 .event-card .card-title { font-family: 'Poppins', sans-serif; color: #333;}
 .event-card .card-text { font-size:0.95rem;}
 .heart-icon i { color:#ccc; transition: color 0.3s, transform 0.3s;}
