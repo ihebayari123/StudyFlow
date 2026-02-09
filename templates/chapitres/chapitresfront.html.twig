@@ -1,0 +1,355 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ cours.titre }} - Chapters{% endblock %}
+
+{% block body %}
+<!-- ======= Header ======= -->
+{% block header %}
+{% include 'home/navbar.html.twig' %}
+{% endblock %}
+
+<div class="chapters-section">
+    <div class="container">
+        
+        <!-- Course Header -->
+        <div class="course-header">
+            <a href="{{ path('app_showcourses') }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Courses
+            </a>
+            <h1 class="course-main-title">{{ cours.titre }}</h1>
+            <p class="course-description">{{ cours.description }}</p>
+            <p class="course-instructor">
+                <i class="fas fa-user"></i> {{ cours.user.nom }} {{ cours.user.prenom }}
+            </p>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-bar" placeholder="Search chapters by title...">
+            <i class="fas fa-search search-icon"></i>
+        </div>
+
+        <!-- Chapters Grid -->
+        <div class="chapters-grid">
+            {% if chapitres is empty %}
+                <div class="no-chapters">
+                    <i class="fas fa-book-open"></i>
+                    <h3>No chapters available yet</h3>
+                    <p>This course doesn't have any chapters at the moment.</p>
+                </div>
+            {% else %}
+                {% for chapitre in chapitres|sort((a, b) => a.ordre <=> b.ordre) %}
+                <div class="chapter-card">
+                    <div class="chapter-number">
+                        <span>{{ chapitre.ordre }}</span>
+                    </div>
+                    <div class="chapter-content">
+                        <h3 class="chapter-title">{{ chapitre.titre }}</h3>
+                        <p class="chapter-description">{{ chapitre.contenu }}</p>
+                        <div class="chapter-footer">
+                            <a href="#" class="view-btn">
+                                <i class="fas fa-play-circle"></i> Start Chapter
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    /* Keep navbar text white and make navbar background semi-transparent */
+    .header-area {
+        background: rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(10px);
+    }
+
+    .header-area .logo h1,
+    .header-area .nav a,
+    .header-area .menu-trigger span,
+    nav, .navbar, nav *, .navbar *, .nav-link {
+        color: white !important;
+    }
+
+    .chapters-section {
+        padding: 120px 20px 60px 20px;
+        background-color: transparent;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Course Header */
+    .course-header {
+        text-align: center;
+        margin-bottom: 50px;
+        color: white;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 30px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+        border-radius: 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        margin-bottom: 30px;
+    }
+
+    .back-btn:hover {
+        background: white;
+        color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .course-main-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .course-description {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+        opacity: 0.95;
+    }
+
+    .course-instructor {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    /* Search Bar */
+    .search-container {
+        position: relative;
+        max-width: 600px;
+        margin: 0 auto 50px auto;
+    }
+
+    .search-bar {
+        width: 100%;
+        padding: 15px 50px 15px 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 30px;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .search-bar::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .search-bar:focus {
+        outline: none;
+        background: white;
+        color: #333;
+        border-color: white;
+        box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .search-bar:focus::placeholder {
+        color: #999;
+    }
+
+    .search-icon {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1.2rem;
+        pointer-events: none;
+    }
+
+    .search-bar:focus + .search-icon {
+        color: #667eea;
+    }
+
+    /* Chapters Grid */
+    .chapters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+    }
+
+    .chapter-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        display: flex;
+    }
+
+    .chapter-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .chapter-number {
+        background: linear-gradient(135deg, #7b68ee 0%, #a78bfa 100%);
+        color: white;
+        width: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+    }
+
+    .chapter-content {
+        flex: 1;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chapter-title {
+        color: #1a1a1a;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        line-height: 1.4;
+    }
+
+    .chapter-description {
+        color: #666;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        flex: 1;
+    }
+
+    .chapter-footer {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .view-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .view-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    /* No Chapters State */
+    .no-chapters {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 80px 20px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .no-chapters i {
+        font-size: 5rem;
+        color: #667eea;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .no-chapters h3 {
+        font-size: 2rem;
+        color: #1a1a1a;
+        margin-bottom: 10px;
+    }
+
+    .no-chapters p {
+        font-size: 1.1rem;
+        color: #666;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .course-main-title {
+            font-size: 2rem;
+        }
+
+        .course-description {
+            font-size: 1rem;
+        }
+
+        .chapters-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .chapter-card {
+            flex-direction: column;
+        }
+
+        .chapter-number {
+            width: 100%;
+            padding: 30px;
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const chapterCards = document.querySelectorAll('.chapter-card');
+
+        chapterCards.forEach(card => {
+            const chapterTitle = card.querySelector('.chapter-title').textContent.toLowerCase();
+            const chapterDescription = card.querySelector('.chapter-description').textContent.toLowerCase();
+            
+            if (chapterTitle.includes(searchValue) || chapterDescription.includes(searchValue)) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

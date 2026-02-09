@@ -12,12 +12,6 @@
 
 <div class="courses-section">
     <div class="container">
-        <div class="header-with-button">
-            <h1 class="section-title">Courses</h1>
-            <a href="{{ path('app_addcours') }}" class="add-course-btn">
-                <i class="fas fa-plus-circle"></i> Add New Course
-            </a>
-        </div>
         
         <!-- Search Bar -->
 <div class="search-container">
@@ -34,31 +28,22 @@
 
         <!-- Courses Grid -->
         <div class="courses-grid">
-            {% for cours in listcours %}
-            <div class="course-card">
-                <div class="course-image">
-                    <img src="{{ cours.image }}" alt="{{ cours.titre }}">
-                    <span class="course-category">{{ cours.titre|upper }}</span>
-                    <span class="course-price">${{ random(100, 700) }}</span>
-                    
-                    <!-- Action Buttons -->
-                    <div class="course-actions">
-                        <a href="{{ path('app_updatecours', {'id': cours.id}) }}" class="action-btn edit-btn" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="{{ path('app_deletecours', {'id': cours.id}) }}" class="action-btn delete-btn" 
-                           onclick="return confirm('Are you sure you want to delete this course?')" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="course-content">
-                    <p class="course-author">{{ cours.user.nom }} {{ cours.user.prenom }}</p>
-                    <h3 class="course-title">{{ cours.description }}</h3>
-                </div>
+    {% for cours in listcours %}
+    <a href="{{ path('app_cours_chapitres', {'id': cours.id}) }}" class="course-card-link">
+        <div class="course-card">
+            <div class="course-image">
+                <img src="{{ cours.image }}" alt="{{ cours.titre }}">
+                <span class="course-category">{{ cours.titre|upper }}</span>
+                <span class="course-price">${{ random(20, 100) }}</span>
             </div>
-            {% endfor %}
+            <div class="course-content">
+                <p class="course-author">{{ cours.user.nom }} {{ cours.user.prenom }}</p>
+                <h3 class="course-title">{{ cours.description }}</h3>
+            </div>
         </div>
+    </a>
+    {% endfor %}
+</div>
     </div>
 </div>
 

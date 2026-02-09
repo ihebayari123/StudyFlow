@@ -25,6 +25,22 @@ final class ChapitresController extends AbstractController
         ]);
     }
 
+    #[Route('/cours/{id}/chapitres', name: 'app_cours_chapitres')]
+public function showChapitres(int $id, CoursRepository $coursRepository): Response
+{
+    $cours = $coursRepository->find($id);
+    
+    if (!$cours) {
+        throw $this->createNotFoundException('Course not found');
+    }
+    
+    return $this->render('chapitres/chapitresfront.html.twig', [
+        'cours' => $cours,
+        'chapitres' => $cours->getChapitres(), // Assuming you have this method
+    ]);
+}
+
+
     #[Route('/admin/courses/{courseId}/chapters', name: 'app_chapitres')]
     public function showChapitresByCourse(
         int $courseId, 
