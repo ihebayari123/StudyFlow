@@ -1,116 +1,119 @@
-<!--! ================================================================ !-->
-    <!--! [Start] Navigation Manu !-->
-    <!--! ================================================================ !-->
-    {% include 'admin/Partials/sidebar.html.twig' %}
-    <!--! ================================================================ !-->
-    <!--! [End]  Navigation Manu !-->
-    <!--! ================================================================ !-->
+{# templates/admin_question/addformquestion.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
 
-    <!--! ================================================================ !-->
-    <!--! [Start] Header !-->
-    <!--! ================================================================ !-->
-   
-    {% include 'admin/partials/navbar.html.twig' %}
-    <!--! ================================================================ !-->
-    <!--! [End] Header !-->
-    <!--! ================================================================ !-->
-<div class="admin-layout">
+{% block title %}Add Question - Admin{% endblock %}
 
-    {% include 'admin/Partials/sidebar.html.twig' %}
-    {% include 'admin/partials/navbar.html.twig' %}
 
-    <main class="main-content">
+{% block admin_content %}
+<div class="admin-main-content">
 
-        <div class="form-container">
-            {{ form_start(f, {'attr': {'class': 'custom-form'}}) }}
-
-            {% for field in f %}
-                {% if field.vars.name != 'save' %}
-                    <div class="form-group">
-                        {{ form_label(field) }}
-                        {{ form_widget(field, {'attr': {'class': 'form-input'}}) }}
-                        {{ form_errors(field) }}
-                    </div>
-                {% endif %}
-            {% endfor %}
-
-            <div class="form-group">
-                {{ form_widget(f.save, {'attr': {'class': 'form-submit'}}) }}
+    <div class="container-fluid">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h2>
+                    <i class="fas fa-question-circle"></i>
+                    Add New Question
+                </h2>
             </div>
 
-            {{ form_end(f) }}
+            <div class="card-body">
+                {{ form_start(f) }}
+
+                <div class="row">
+                    {% for field in f %}
+                        {% if field.vars.name != 'save' %}
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form_label(field) }}
+                                    {{ form_widget(field, {
+                                        attr: { class: 'form-control' }
+                                    }) }}
+                                    {{ form_errors(field) }}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="mt-4">
+                    {{ form_widget(f.save, {
+                        attr: { class: 'btn btn-success' }
+                    }) }}
+
+                    <a href="{{ path('app_showquestion') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+
+                {{ form_end(f) }}
+            </div>
         </div>
+    </div>
 
-    </main>
 </div>
+{% endblock %}
 
 
+
+{% block stylesheets %}
 <style>
-.admin-layout {
-    display: flex;
+/* Push content away from sidebar */
+.container {
+    margin-left: 280px;
+    max-width: calc(100% - 320px);
+    padding-top: 100px;
 }
 
-
-.main-content {
-    margin-left: 260px;        
-    margin-top: 70px;          
-    padding: 30px;
-    width: calc(100% - 260px);
-    background-color: #f4f6f8;
-    min-height: 100vh;
-}
-
-/* الفورم */
-.form-container {
-    max-width: 600px;
-    margin: 0 auto;
-    background: #fff;
-    padding: 25px 30px;
+/* Card */
+.card {
     border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.custom-form .form-group {
-    margin-bottom: 15px;
-    display: flex;
-    flex-direction: column;
+.card-header {
+    border-radius: 10px 10px 0 0;
 }
 
-.custom-form label {
-    font-weight: 600;
-    margin-bottom: 5px;
-    color: #333;
+/* Inputs */
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 
-.custom-form .form-input {
-    padding: 10px 12px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+/* Buttons */
+.btn {
+    padding: 10px 25px;
+    border-radius: 5px;
 }
 
-.custom-form .form-input:focus {
-    border-color: #4f46e5;
-    outline: none;
-    box-shadow: 0 0 5px rgba(79,70,229,0.3);
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        margin-left: 0;
+        max-width: 100%;
+        padding-top: 80px;
+    }
+}
+.admin-main-content {
+    margin-left: 280px;
+    padding-top: 100px;
+    padding-left: 20px;
+    padding-right: 20px;
+    min-height: 100vh;
+    background-color: #f4f6f8;
+    position: relative;
+    z-index: 1;
 }
 
-.form-submit {
-    padding: 10px 20px;
-    background-color: #4f46e5;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.form-submit:hover {
-    background-color: #3730a3;
+/* Mobile */
+@media (max-width: 768px) {
+    .admin-main-content {
+        margin-left: 0;
+        padding-top: 80px;
+    }
 }
 
 </style>
-{% block stylesheets %}
+
     
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="IE=edge" />

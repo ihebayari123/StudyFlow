@@ -1,53 +1,79 @@
 {% set newOrder = order == 'ASC' ? 'DESC' : 'ASC' %}
+<<<<<<< Updated upstream
 
 <div class="admin-layout">
+=======
+{% extends 'admin/base_admin.html.twig' %}
 
-    <!-- Sidebar -->
-    {% include 'admin/Partials/sidebar.html.twig' %}
+{% block title %}Manage Questions - Admin{% endblock %}
 
-    <!-- Navbar -->
-    {% include 'admin/partials/navbar.html.twig' %}
+{% block admin_content %}
+<div class="admin-main-content">
+    <div class="container-fluid mt-5">
+>>>>>>> Stashed changes
 
-    <!-- Main Content -->
-    <main class="main-content">
+        <!-- Header -->
+        <div class="page-header mb-4">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h2 class="page-title">
+                        <i class="fas fa-question"></i> Manage Questions
+                    </h2>
+                    <p class="text-muted">View and manage all quiz questions</p>
+                </div>
+                <div class="col-auto">
+                    <a href="{{ path('app_addformquestion') }}" class="btn btn-success">
+                        <i class="fas fa-plus-circle"></i> Add Question
+                    </a>
+                </div>
+            </div>
+        </div>
 
-        <div class="admin-page">
+        <!-- Search -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text"
+                                   name="q"
+                                   class="form-control"
+                                   placeholder="Search by text or choices..."
+                                   value="{{ app.request.get('q') }}">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-            <!-- Formulaire de recherche -->
-            <form method="get" class="search-form">
-                <input
-                    type="text"
-                    name="q"
-                    placeholder="Recherche par texte ou choix..."
-                    value="{{ app.request.get('q') }}"
-                >
-                <button type="submit">🔍</button>
-            </form>
-
-            <!-- Table -->
-            <div class="table-container">
-                <table class="quiz-table">
-                    <thead>
+        <!-- Table -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
                         <tr>
                             {% for column, label in {
                                 'id':'ID',
-                                'texte':'Texte',
-                                'choixA':'Choix A',
-                                'choixB':'Choix B',
-                                'choixC':'Choix C',
-                                'choixD':'Choix D',
-                                'bonneReponse':'Bonne Réponse',
-                                'indice':'Indice',
+                                'texte':'Text',
+                                'choixA':'Choice A',
+                                'choixB':'Choice B',
+                                'choixC':'Choice C',
+                                'choixD':'Choice D',
+                                'bonneReponse':'Correct',
+                                'indice':'Hint',
                                 'quiz':'Quiz'
                             } %}
                                 <th>
                                     {% if column != 'quiz' %}
-                                        <a href="{{ path('app_showquestion', {
-                                            q: app.request.get('q'),
-                                            sort: column,
-                                            order: newOrder
-                                        }) }}">
+                                        <a class="sort-link"
+                                           href="{{ path('app_showquestion', {
+                                                q: app.request.get('q'),
+                                                sort: column,
+                                                order: newOrder
+                                           }) }}">
                                             {{ label }}
+                                            <i class="fas fa-sort"></i>
                                         </a>
                                     {% else %}
                                         {{ label }}
@@ -56,167 +82,121 @@
                             {% endfor %}
                             <th>Actions</th>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         {% for question in listQuestion %}
                             <tr>
                                 <td>{{ question.id }}</td>
-                                <td>{{ question.texte }}</td>
+                                <td>{{ question.texte|slice(0,40) }}{% if question.texte|length > 40 %}…{% endif %}</td>
                                 <td>{{ question.choixA }}</td>
                                 <td>{{ question.choixB }}</td>
                                 <td>{{ question.choixC }}</td>
                                 <td>{{ question.choixD }}</td>
-                                <td>{{ question.bonneReponse }}</td>
-                                <td>{{ question.indice ?: 'N/A' }}</td>
-                                <td>{{ question.quiz ? question.quiz.titre : 'N/A' }}</td>
                                 <td>
-                                    <a href="{{ path('app_updateformquestion', {'id': question.id}) }}">✏</a>
-                                    |
-                                    <a href="{{ path('app_deletequestion', {'id': question.id}) }}"
-                                       onclick="return confirm('Supprimer ?')">🗑</a>
+                                    <span class="badge bg-success">
+                                        {{ question.bonneReponse }}
+                                    </span>
+                                </td>
+                                <td>{{ question.indice ?: 'N/A' }}</td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        {{ question.quiz ? question.quiz.titre : 'N/A' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{{ path('app_updateformquestion', {'id': question.id}) }}"
+                                           class="btn btn-sm btn-warning"
+                                           title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{{ path('app_deletequestion', {'id': question.id}) }}"
+                                           class="btn btn-sm btn-danger"
+                                           title="Delete"
+                                           onclick="return confirm('Delete this question?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="10" class="no-result">Aucun résultat</td>
+                                <td colspan="10" class="text-center text-muted py-4">
+                                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                                    <p>No questions found</p>
+                                </td>
                             </tr>
                         {% endfor %}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-
-            <!-- Add button -->
-            <div class="add-btn">
-                <a href="{{ path('app_addformquestion') }}">➕ Ajouter une Question</a>
-            </div>
-
         </div>
 
-    </main>
+    </div>
 </div>
 
-<!-- Styles CSS -->
 <style>
-.admin-layout {
-    display: flex;
+.admin-main-content {
+    margin-left: 280px;
+    padding-top: 100px;
 }
 
-/* المحتوى الرئيسي */
-.main-content {
-    margin-left: 260px;        /* عرض sidebar */
-    margin-top: 70px;          /* ارتفاع navbar */
-    padding: 25px;
-    width: calc(100% - 260px);
-    background-color: #f4f6f8;
-    min-height: 100vh;
+.page-title {
+    font-weight: 700;
+    color: #2c3e50;
 }
 
-/* الصفحة */
-.admin-page {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+.page-title i {
+    color: #667eea;
+    margin-right: 10px;
 }
 
-/* البحث */
-.search-form {
-    margin-bottom: 20px;
-    display: flex;
-    gap: 10px;
-}
-
-.search-form input {
-    flex: 1;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-}
-
-.search-form button {
-    padding: 8px 12px;
+.card {
+    border-radius: 10px;
     border: none;
-    background-color: #4821be;
-    color: #fff;
-    border-radius: 6px;
 }
 
-/* الجدول */
-.table-container {
-    overflow-x: auto;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+.table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
 }
 
-.quiz-table {
-    width: 100%;
-    border-collapse: collapse;
+.table tbody tr:hover {
+    background-color: #f0f4ff;
+    transform: scale(1.01);
+    box-shadow: 0 2px 8px rgba(102,126,234,0.15);
 }
 
-.quiz-table th,
-.quiz-table td {
-    padding: 12px 15px;
-}
-
-.quiz-table thead {
-    background-color: #4f46e5;
-    color: #fff;
-}
-
-.quiz-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.quiz-table tbody tr:hover {
-    background-color: #e0e7ff;
-}
-
-.quiz-table a {
-    color: #1a000a;
+.sort-link {
+    color: inherit;
     text-decoration: none;
 }
 
-/* زر الإضافة */
-.add-btn {
-    margin-top: 20px;
-    text-align: right;
+.sort-link i {
+    font-size: 0.7rem;
+    margin-left: 5px;
+    color: #adb5bd;
 }
 
-.add-btn a {
-    padding: 10px 15px;
-    background-color: #10b981;
-    color: #fff;
-    border-radius: 6px;
-    text-decoration: none;
+.btn-group {
+    display: flex;
+    gap: 5px;
 }
 
+@media (max-width: 768px) {
+    .admin-main-content {
+        margin-left: 0;
+        padding-top: 80px;
+    }
+}
 </style>
 
-{% block stylesheets %}
-    
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="" />
-    <meta name="keyword" content="" />
-    <meta name="author" content="flexilecode" />
-    <!--! BEGIN: Favicon-->
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets2/images/favicon.ico') }}" />
-    <!--! END: Favicon-->
-    <!--! BEGIN: Bootstrap CSS-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/bootstrap.min.css') }}" />
-    <!--! END: Bootstrap CSS-->
-    <!--! BEGIN: Vendors CSS-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/vendors/css/vendors.min.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/vendors/css/daterangepicker.min.css') }}" />
-    <!--! END: Vendors CSS-->
-    <!--! BEGIN: Custom CSS-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/theme.min.css') }}" />
-    <!--! END: Custom CSS-->
-    <!--! HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries !-->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
+<<<<<<< Updated upstream
 
 {% block javascripts %}
     
@@ -229,3 +209,5 @@
     {% block admin_javascripts %}{% endblock %}
     <script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
 {% endblock %}
+=======
+>>>>>>> Stashed changes

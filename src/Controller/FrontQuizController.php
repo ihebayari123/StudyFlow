@@ -53,4 +53,66 @@ public function showQuiz(Request $request, QuizRepository $repo): Response
         'order' => $order,
     ]);
 }
+
+
+ #[Route('/front/quiz/{id}/play', name: 'app_quiz_play')]
+public function quizPlay(
+    int $id,
+    QuizRepository $quizRepository,
+    QuestionRepository $questionRepository
+): Response
+{
+    
+    $quiz = $quizRepository->find($id);
+
+    if (!$quiz) {
+        throw $this->createNotFoundException('Quiz introuvable');
+    }
+
+    
+    $questions = $questionRepository->findBy([
+        'quiz' => $quiz
+    ]);
+
+    return $this->render('front_quiz/quiz_play.html.twig', [
+        'quiz' => $quiz,
+        'questions' => $questions,
+    ]);
+}
+   #[Route('/front/quiz/{id}/submit', name: 'quiz_submit', methods: ['POST'])]
+public function quizSubmit(
+    int $id,
+    Request $request,
+    QuizRepository $quizRepository,
+    QuestionRepository $questionRepository
+): Response
+{
+    $quiz = $quizRepository->find($id);
+
+    if (!$quiz) {
+        throw $this->createNotFoundException('Quiz introuvable');
+    }
+
+    $questions = $questionRepository->findBy([
+        'quiz' => $quiz
+    ]);
+
+    $score = 0;
+    $total = count($questions);
+
+    foreach ($questions as $question) {
+        $userAnswer = $request->request->get('question_' . $question->getId());
+
+        if ($userAnswer && $userAnswer === $question->getBonneReponse()) {
+            $score++;
+        }
+    }
+
+    return $this->render('front_quiz/quiz_result.html.twig', [
+        'quiz' => $quiz,
+        'score' => $score,
+        'total' => $total,
+    ]);
+}
+
 }

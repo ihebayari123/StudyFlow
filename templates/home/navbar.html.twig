@@ -1,0 +1,48 @@
+{% block header %}
+<!-- ======= Header ======= -->
+    <header class="header-area header-sticky">
+      <div class="container">
+        <div class="row">
+          <div class="col-12">
+            <nav class="main-nav">
+              <!-- Logo -->
+              <a href="{{ path('app_home') }}" class="logo">
+                <h1>StudyFlow</h1>
+              </a>
+
+              <!-- Menu -->
+              <ul class="nav">
+                <li class="scroll-to-section">
+                  <a href="/home" class="active">Home</a>
+                </li>
+                <li class="scroll-to-section">
+                  <a href="#services">Services</a>
+                </li>
+                <li class="scroll-to-section">
+                  <a href="/showcourses">Courses</a>
+                </li>
+                <li class="scroll-to-section">
+                  <a href="/front/showquiz">Quiz&Question</a>
+                </li>
+                <li class="scroll-to-section">
+                  <a href="{{ path('app_showproduit1') }}">Boutique</a>
+                </li>
+                <li class="scroll-to-section">
+                  <a href="#events">Events</a>
+                </li>
+                <li class="scroll-to-section">
+                  <a href="{{ path('app_register') }}">Register Now!</a>
+                </li>
+              </ul>
+
+              <!-- Mobile Menu -->
+              <a class="menu-trigger">
+                <span>Menu</span>
+              </a>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    {% endblock %}
