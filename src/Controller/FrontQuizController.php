@@ -100,13 +100,18 @@ public function quizSubmit(
     $score = 0;
     $total = count($questions);
 
-    foreach ($questions as $question) {
-        $userAnswer = $request->request->get('question_' . $question->getId());
+    $answers = $request->request->all('answers');
 
-        if ($userAnswer && $userAnswer === $question->getBonneReponse()) {
-            $score++;
-        }
+
+foreach ($questions as $question) {
+    if (
+        isset($answers[$question->getId()]) &&
+        $answers[$question->getId()] === $question->getBonneReponse()
+    ) {
+        $score++;
     }
+}
+
 
     return $this->render('front_quiz/quiz_result.html.twig', [
         'quiz' => $quiz,

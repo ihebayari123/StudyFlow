@@ -1,25 +1,6 @@
-<!--! ================================================================ !-->
-    <!--! [Start] Navigation Manu !-->
-    <!--! ================================================================ !-->
-    {% include 'admin/Partials/sidebar.html.twig' %}
-    <!--! ================================================================ !-->
-    <!--! [End]  Navigation Manu !-->
-    <!--! ================================================================ !-->
+{# templates/admin_quiz/addformquiz.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
 
-<<<<<<< Updated upstream
-    <!--! ================================================================ !-->
-    <!--! [Start] Header !-->
-    <!--! ================================================================ !-->
-   
-    {% include 'admin/partials/navbar.html.twig' %}
-    <!--! ================================================================ !-->
-    <!--! [End] Header !-->
-    <!--! ================================================================ !-->
-<div class="admin-layout">
-
-    {% include 'admin/Partials/sidebar.html.twig' %}
-    {% include 'admin/partials/navbar.html.twig' %}
-=======
 {% block title %}Add Quiz - Admin{% endblock %}
 
 {% block admin_content %}
@@ -49,7 +30,6 @@
                     {% endif %}
                 {% endfor %}
             </div>
->>>>>>> Stashed changes
 
             <div class="mt-4">
                 {{ form_widget(f.save, {
@@ -103,20 +83,6 @@
 }
 </style>
 
-<<<<<<< Updated upstream
-{% block javascripts %}
-    
-    <script src="{{ asset('assets2/vendors/js/vendors.min.js') }}"></script>
-    <script src="{{ asset('assets2/vendors/js/daterangepicker.min.js') }}"></script>
-    <script src="{{ asset('assets2/vendors/js/apexcharts.min.js') }}"></script>
-    <script src="{{ asset('assets2/vendors/js/circle-progress.min.js') }}"></script>
-    <script src="{{ asset('assets2/js/common-init.min.js') }}"></script>
-    <script src="{{ asset('assets2/js/dashboard-init.min.js') }}"></script>
-    {% block admin_javascripts %}{% endblock %}
-    <script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
-{% endblock %}
-=======
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
->>>>>>> Stashed changes

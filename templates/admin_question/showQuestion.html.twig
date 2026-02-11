@@ -1,8 +1,4 @@
 {% set newOrder = order == 'ASC' ? 'DESC' : 'ASC' %}
-<<<<<<< Updated upstream
-
-<div class="admin-layout">
-=======
 {% extends 'admin/base_admin.html.twig' %}
 
 {% block title %}Manage Questions - Admin{% endblock %}
@@ -10,7 +6,6 @@
 {% block admin_content %}
 <div class="admin-main-content">
     <div class="container-fluid mt-5">
->>>>>>> Stashed changes
 
         <!-- Header -->
         <div class="page-header mb-4">
@@ -196,18 +191,3 @@
 <link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
-<<<<<<< Updated upstream
-
-{% block javascripts %}
-    
-    <script src="{{ asset('assets2/vendors/js/vendors.min.js') }}"></script>
-    <script src="{{ asset('assets2/vendors/js/daterangepicker.min.js') }}"></script>
-    <script src="{{ asset('assets2/vendors/js/apexcharts.min.js') }}"></script>
-    <script src="{{ asset('assets2/vendors/js/circle-progress.min.js') }}"></script>
-    <script src="{{ asset('assets2/js/common-init.min.js') }}"></script>
-    <script src="{{ asset('assets2/js/dashboard-init.min.js') }}"></script>
-    {% block admin_javascripts %}{% endblock %}
-    <script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
-{% endblock %}
-=======
->>>>>>> Stashed changes

@@ -28,6 +28,8 @@ body {
     backdrop-filter: blur(12px);
     height: 90px;
     box-shadow: 0 6px 25px rgba(0,0,0,0.35);
+    
+
 }
 
 .main-nav .logo h1 {
@@ -154,6 +156,59 @@ body {
         font-size: 1.1rem;
     }
 }
+
+.quiz-timer {
+    margin-top: 15px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #16a34a;
+    transition: color 0.3s ease;
+}
+
+/* Timer Container */
+.timer-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 20px auto;
+}
+
+/* SVG */
+.timer-svg {
+    transform: rotate(-90deg);
+}
+
+/* Background Circle */
+.timer-bg {
+    fill: none;
+    stroke: #e5e7eb;
+    stroke-width: 10;
+}
+
+/* Progress Circle */
+.timer-progress {
+    fill: none;
+    stroke: #22c55e;
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 339.292;
+    stroke-dashoffset: 0;
+    transition: stroke 0.5s linear;
+}
+
+/* Time Text */
+.timer-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #1e293b;
+}
+
+
 </style>
 
 
@@ -162,9 +217,26 @@ body {
     <div class="quiz-header">
         <h1>{{ quiz.titre }}</h1>
         <p>Durée : {{ quiz.duree }} minutes</p>
-    </div>
+    
+     <div class="timer-wrapper">
+    <svg class="timer-svg" width="120" height="120">
+        <circle class="timer-bg" cx="60" cy="60" r="54"></circle>
+        <circle id="timerProgress"
+                class="timer-progress"
+                cx="60"
+                cy="60"
+                r="54"></circle>
+    </svg>
 
-    <form method="post" action="{{ path('quiz_submit', {id: quiz.id}) }}">
+    <div id="timerText" class="timer-text">
+        --:--
+    </div>
+</div>
+
+
+    </div>
+    <form id="quizForm" method="post" action="{{ path('quiz_submit', {id: quiz.id}) }}">
+
 
         {% for question in questions %}
             <div class="question-box">
@@ -206,4 +278,54 @@ body {
 
 </div>
 
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const totalTime = {{ quiz.duree }} * 60;
+    let timeLeft = totalTime;
+
+    const timerText = document.getElementById('timerText');
+    const progressCircle = document.getElementById('timerProgress');
+    const quizForm = document.getElementById('quizForm');
+
+    const circumference = 2 * Math.PI * 54;
+
+    function updateTimer() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+
+        timerText.textContent =
+            `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        
+        const progress = timeLeft / totalTime;
+        progressCircle.style.strokeDashoffset =
+            circumference * (1 - progress);
+
+        
+        if (progress <= 0.25) {
+            progressCircle.style.stroke = '#dc2626'; 
+        } else if (progress <= 0.5) {
+            progressCircle.style.stroke = '#f59e0b'; 
+        } else {
+            progressCircle.style.stroke = '#22c55e'; 
+        }
+
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            alert("⏰ time off");
+            quizForm.submit();
+        }
+
+        timeLeft--;
+    }
+
+    updateTimer();
+    const timerInterval = setInterval(updateTimer, 1000);
+});
+</script>
 {% endblock %}

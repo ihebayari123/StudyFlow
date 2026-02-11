@@ -1,80 +1,3 @@
-<<<<<<< Updated upstream
-{% set newOrder = order == 'ASC' ? 'DESC' : 'ASC' %}
-<!--! ================================================================ !-->
-    <!--! [Start] Navigation Manu !-->
-    <!--! ================================================================ !-->
-    {% include 'admin/Partials/sidebar.html.twig' %}
-    <!--! ================================================================ !-->
-    <!--! [End]  Navigation Manu !-->
-    <!--! ================================================================ !-->
-
-    <!--! ================================================================ !-->
-    <!--! [Start] Header !-->
-    <!--! ================================================================ !-->
-   
-    {% include 'admin/partials/navbar.html.twig' %}
-    <!--! ================================================================ !-->
-    <!--! [End] Header !-->
-    <!--! ================================================================ !-->
-
-<div class="admin-layout">
-
-    {% include 'admin/Partials/sidebar.html.twig' %}
-    {% include 'admin/partials/navbar.html.twig' %}
-
-    <main class="main-content">
-
-        <h2 class="page-title">Gestion des Quiz</h2>
-
-        <!-- Formulaire de recherche -->
-        <form method="get" class="search-form">
-            <input
-                type="text"
-                name="q"
-                placeholder="Recherche par titre..."
-                value="{{ app.request.get('q') }}"
-            >
-            <button type="submit">🔍</button>
-        </form>
-
-        <!-- Table -->
-        <div class="table-container">
-            <table class="quiz-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Titre</th>
-                        <th>Durée</th>
-                        <th>Date création</th>
-                        <th>Cours</th>
-                        <th>Questions</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for quiz in listQuiz %}
-                    <tr>
-                        <td>{{ quiz.id }}</td>
-                        <td>{{ quiz.titre }}</td>
-                        <td>{{ quiz.duree }}</td>
-                        <td>{{ quiz.dateCreation ? quiz.dateCreation|date('Y-m-d') : '—' }}</td>
-                        <td>{{ quiz.course.titre }}</td>
-                        <td>
-                            <a href="{{ path('app_quiz_questions', {id: quiz.id}) }}">Voir</a>
-                        </td>
-                        <td class="actions">
-                            <a href="{{ path('app_updateformquiz', {id: quiz.id}) }}">✏</a>
-                            <a href="{{ path('app_deletequiz', {id: quiz.id}) }}">🗑</a>
-                        </td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="7" class="no-result">Aucun résultat</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-=======
 {% extends 'admin/base_admin.html.twig' %}
 
 {% block title %}Manage Quiz - Admin{% endblock %}
@@ -98,7 +21,6 @@
                     </a>
                 </div>
             </div>
->>>>>>> Stashed changes
         </div>
 
         <!-- Search -->
@@ -234,20 +156,6 @@
     }
 }
 </style>
-<<<<<<< Updated upstream
-{% block javascripts %}
-    
-    <script src="{{ asset('assets2/vendors/js/vendors.min.js') }}"></script>
-    <script src="{{ asset('assets2/vendors/js/daterangepicker.min.js') }}"></script>
-    <script src="{{ asset('assets2/vendors/js/apexcharts.min.js') }}"></script>
-    <script src="{{ asset('assets2/vendors/js/circle-progress.min.js') }}"></script>
-    <script src="{{ asset('assets2/js/common-init.min.js') }}"></script>
-    <script src="{{ asset('assets2/js/dashboard-init.min.js') }}"></script>
-    {% block admin_javascripts %}{% endblock %}
-    <script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
-{% endblock %}
-=======
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
->>>>>>> Stashed changes
