@@ -27,11 +27,15 @@
             <div class="form-header">
                 <h1><i class="fas fa-edit"></i> Edit Chapter</h1>
                 <p>Update chapter for <strong>{{ chapitre.course.titre }}</strong></p>
+                <a href="{{ path('app_chapitre_versions', {'id': chapitre.id}) }}" class="btn btn-light btn-sm mt-2">
+                    <i class="fas fa-code-branch"></i> View Version History
+                </a>
             </div>
 
             <div class="form-container">
-                <form method="post" action="{{ path('app_editchapitre', {'id': chapitre.id}) }}">
+                <form method="post" action="{{ path('app_editchapitre', {'id': chapitre.id}) }}" enctype="multipart/form-data">
                     <div class="form-grid">
+                        <!-- Basic Info -->
                         <div class="form-group">
                             <label for="titre">
                                 <i class="fas fa-heading"></i> Chapter Title
@@ -45,31 +49,149 @@
                                    required>
                         </div>
 
-                        <div class="form-group">
-                            <label for="ordre">
-                                <i class="fas fa-sort-numeric-up"></i> Order
-                            </label>
-                            <input type="number" 
-                                   id="ordre" 
-                                   name="ordre" 
-                                   class="form-control" 
-                                   placeholder="Chapter order (e.g., 1, 2, 3...)"
-                                   value="{{ chapitre.ordre }}"
-                                   min="1"
-                                   required>
-                            <small class="form-text">Enter the position of this chapter in the course</small>
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="ordre">
+                                    <i class="fas fa-sort-numeric-up"></i> Order
+                                </label>
+                                <input type="number" 
+                                       id="ordre" 
+                                       name="ordre" 
+                                       class="form-control" 
+                                       placeholder="1, 2, 3..."
+                                       value="{{ chapitre.ordre }}"
+                                       min="1"
+                                       required>
+                            </div>
+
+                            <div class="form-group" style="flex: 1;">
+                                <label for="durationMinutes">
+                                    <i class="fas fa-clock"></i> Duration (minutes)
+                                </label>
+                                <input type="number" 
+                                       id="durationMinutes" 
+                                       name="durationMinutes" 
+                                       class="form-control" 
+                                       placeholder="30"
+                                       value="{{ chapitre.durationMinutes }}"
+                                       min="1">
+                            </div>
                         </div>
 
+                        <!-- Content Type Selection -->
+                        <div class="form-group">
+                            <label for="contentType">
+                                <i class="fas fa-layer-group"></i> Content Type
+                            </label>
+                            <select id="contentType" name="contentType" class="form-control" required>
+                                <option value="">Select content type...</option>
+                                <option value="text" {% if chapitre.contentType == 'text' %}selected{% endif %}>Text Only</option>
+                                <option value="video" {% if chapitre.contentType == 'video' %}selected{% endif %}>Video</option>
+                                <option value="file" {% if chapitre.contentType == 'file' %}selected{% endif %}>File/Document</option>
+                                <option value="mixed" {% if chapitre.contentType == 'mixed' %}selected{% endif %}>Mixed (Video + Text + Files)</option>
+                            </select>
+                        </div>
+
+                        <!-- Text Content -->
                         <div class="form-group">
                             <label for="contenu">
-                                <i class="fas fa-file-alt"></i> Content
+                                <i class="fas fa-file-alt"></i> Content Description
                             </label>
                             <textarea id="contenu" 
                                       name="contenu" 
                                       class="form-control" 
-                                      placeholder="Enter chapter content"
+                                      placeholder="Enter chapter content and description"
                                       rows="6"
                                       required>{{ chapitre.contenu }}</textarea>
+                        </div>
+
+                        <!-- Video Section -->
+                        <div class="form-group content-section" id="videoSection" style="display: {% if chapitre.contentType in ['video', 'mixed'] %}block{% else %}none{% endif %};">
+                            <label for="videoUrl">
+                                <i class="fab fa-youtube"></i> Video URL
+                            </label>
+                            <input type="url" 
+                                   id="videoUrl" 
+                                   name="videoUrl" 
+                                   class="form-control" 
+                                   value="{{ chapitre.videoUrl }}"
+                                   placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/...">
+                            <small class="form-text">Supports YouTube, Vimeo, or direct video links</small>
+                        </div>
+
+                        <!-- File Section -->
+                        <div class="form-group content-section" id="fileUploadSection" style="display: {% if chapitre.contentType in ['file', 'mixed'] %}block{% else %}none{% endif %};">
+                            <label for="fileUpload">
+                                <i class="fas fa-upload"></i> Upload File/Document
+                            </label>
+                            {% if chapitre.fileName %}
+                                <div class="current-file mb-2">
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-file"></i> Current: {{ chapitre.fileName }}
+                                    </span>
+                                </div>
+                            {% endif %}
+                            <input type="file" 
+                                   id="fileUpload" 
+                                   name="fileUpload" 
+                                   class="form-control" 
+                                   accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.zip">
+                            <small class="form-text">Accepted formats: PDF, DOC, DOCX, PPT, PPTX, TXT, ZIP (Max: 10MB)</small>
+                        </div>
+
+                        <!-- Image Section -->
+                        <div class="form-group">
+                            <label for="imageUrl">
+                                <i class="fas fa-image"></i> Chapter Thumbnail (Optional)
+                            </label>
+                            <input type="url" 
+                                   id="imageUrl" 
+                                   name="imageUrl" 
+                                   class="form-control" 
+                                   value="{{ chapitre.imageUrl }}"
+                                   placeholder="https://example.com/image.jpg">
+                        </div>
+
+                        <!-- Additional Links -->
+                        <div class="form-group">
+                            <label>
+                                <i class="fas fa-link"></i> Additional Resources (Optional)
+                            </label>
+                            <div id="linksContainer">
+                                {% if chapitre.links %}
+                                    {% for link in chapitre.links %}
+                                        <div class="link-item">
+                                            <input type="text" 
+                                                   name="linkTitle[]" 
+                                                   class="form-control mb-2" 
+                                                   value="{{ link.title }}"
+                                                   placeholder="Resource title">
+                                            <input type="url" 
+                                                   name="linkUrl[]" 
+                                                   class="form-control mb-2" 
+                                                   value="{{ link.url }}"
+                                                   placeholder="https://example.com">
+                                            <button type="button" class="btn btn-sm btn-outline-danger mt-2 remove-link-btn">
+                                                <i class="fas fa-trash"></i> Remove
+                                            </button>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="link-item">
+                                        <input type="text" 
+                                               name="linkTitle[]" 
+                                               class="form-control mb-2" 
+                                               placeholder="Resource title (e.g., Official Documentation)">
+                                        <input type="url" 
+                                               name="linkUrl[]" 
+                                               class="form-control" 
+                                               placeholder="https://example.com">
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addLinkBtn">
+                                <i class="fas fa-plus"></i> Add Another Link
+                            </button>
                         </div>
                     </div>
 
@@ -114,7 +236,7 @@
     }
 
     .form-wrapper {
-        max-width: 800px;
+        max-width: 900px;
         margin: 0 auto;
         background: white;
         border-radius: 20px;
@@ -165,6 +287,11 @@
         display: flex;
         flex-direction: column;
         gap: 25px;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 20px;
     }
 
     .form-group {
@@ -263,10 +390,96 @@
         transform: translateY(-2px);
     }
 
+    .content-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+    }
+
+    .link-item {
+        margin-bottom: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .btn-outline-primary {
+        border: 2px solid #667eea;
+        color: #667eea;
+        background: transparent;
+    }
+
+    .btn-outline-primary:hover {
+        background: #667eea;
+        color: white;
+    }
+
+    .btn-outline-danger {
+        border: 2px solid #dc3545;
+        color: #dc3545;
+        background: transparent;
+    }
+
+    .btn-outline-danger:hover {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-sm {
+        padding: 8px 20px;
+        font-size: 0.9rem;
+    }
+
+    .btn-light {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-light:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* File Upload Styling */
+    input[type="file"].form-control {
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    input[type="file"].form-control::-webkit-file-upload-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        margin-right: 15px;
+        transition: all 0.3s ease;
+    }
+
+    input[type="file"].form-control::-webkit-file-upload-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .current-file {
+        padding: 10px;
+        background: #e7f3ff;
+        border-radius: 8px;
+        border-left: 3px solid #667eea;
+    }
+
     @media (max-width: 768px) {
         .admin-main-content {
             margin-left: 0;
             padding: 80px 20px 20px;
+        }
+
+        .form-row {
+            flex-direction: column;
         }
 
         .form-header h1 {
@@ -289,4 +502,73 @@
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+    // Content Type Toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        const contentTypeSelect = document.getElementById('contentType');
+        
+        if (contentTypeSelect) {
+            contentTypeSelect.addEventListener('change', function() {
+                const videoSection = document.getElementById('videoSection');
+                const fileUploadSection = document.getElementById('fileUploadSection');
+                
+                // Hide all sections first
+                if (videoSection) videoSection.style.display = 'none';
+                if (fileUploadSection) fileUploadSection.style.display = 'none';
+                
+                // Show relevant sections based on selection
+                switch(this.value) {
+                    case 'video':
+                        if (videoSection) videoSection.style.display = 'block';
+                        break;
+                    case 'file':
+                        if (fileUploadSection) fileUploadSection.style.display = 'block';
+                        break;
+                    case 'mixed':
+                        if (videoSection) videoSection.style.display = 'block';
+                        if (fileUploadSection) fileUploadSection.style.display = 'block';
+                        break;
+                }
+            });
+        }
+
+        // Add Link Functionality
+        const addLinkBtn = document.getElementById('addLinkBtn');
+        if (addLinkBtn) {
+            addLinkBtn.addEventListener('click', function() {
+                const linksContainer = document.getElementById('linksContainer');
+                const newLinkItem = document.createElement('div');
+                newLinkItem.className = 'link-item';
+                newLinkItem.innerHTML = `
+                    <input type="text" 
+                           name="linkTitle[]" 
+                           class="form-control mb-2" 
+                           placeholder="Resource title">
+                    <input type="url" 
+                           name="linkUrl[]" 
+                           class="form-control mb-2" 
+                           placeholder="https://example.com">
+                    <button type="button" class="btn btn-sm btn-outline-danger mt-2 remove-link-btn">
+                        <i class="fas fa-trash"></i> Remove
+                    </button>
+                `;
+                linksContainer.appendChild(newLinkItem);
+            });
+        }
+
+        // Remove link functionality (event delegation)
+        const linksContainer = document.getElementById('linksContainer');
+        if (linksContainer) {
+            linksContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-link-btn') || e.target.parentElement.classList.contains('remove-link-btn')) {
+                    const linkItem = e.target.closest('.link-item');
+                    if (document.querySelectorAll('.link-item').length > 1) {
+                        linkItem.remove();
+                    }
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

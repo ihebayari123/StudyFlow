@@ -3,14 +3,22 @@
 namespace App\Controller;
 
 use App\Repository\QuizRepository;
+use App\Repository\ChapitreRepository;
+use App\Repository\TentativeQuizRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Entity\Quiz;
 use App\Entity\Question;
+use App\Entity\TentativeQuiz;
+use App\Entity\ReponseUtilisateur;
+use App\Entity\Chapitre;
 use App\Repository\UtilisateurRepository;
 use App\Repository\QuestionRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 
 class FrontQuizController extends AbstractController
