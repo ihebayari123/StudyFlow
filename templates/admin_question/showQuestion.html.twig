@@ -1,235 +1,717 @@
-{% set newOrder = order == 'ASC' ? 'DESC' : 'ASC' %}
-{# templates/admin_question/showQuestion.html.twig #}
 {% extends 'admin/base_admin.html.twig' %}
+{% set newOrder = order == 'ASC' ? 'DESC' : 'ASC' %}
+
+{% block title %}Gestion des Questions - Administration{% endblock %}
 
 {% block admin_content %}
-<div class="admin-layout">
+<div class="admin-main-content">
+    <div class="container-fluid py-4">
 
-    <!-- Sidebar -->
-    {% include 'admin/Partials/sidebar.html.twig' %}
+     <!-- Header -->
+        <div class="page-header mb-4">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h2 class="page-title">
+                        <i class="fas fa-question"></i> Manage Questions
+                    </h2>
+                    <p class="text-muted">View and manage all quiz questions</p>
+                </div>
+                <div class="col-auto">
+                    <div class="d-flex align-items-center gap-2">
 
-    <!-- Navbar -->
-    {% include 'admin/partials/navbar.html.twig' %}
+    <select id="questionType" class="form-select" style="width: 200px;">
+        <option value="choix">Question à Choix</option>
+        <option value="vraifaux">Question Vrai/Faux</option>
+        <option value="texte">Question Texte Libre</option>
+    </select>
 
-    <!-- Main Content -->
-    <main class="main-content">
+    <button class="btn btn-success" onclick="goToAddQuestion()">
+        <i class="fas fa-plus-circle"></i> Add Question
+    </button>
 
-        <div class="admin-page">
+</div>
 
-            <!-- Formulaire de recherche -->
-            <form method="get" class="search-form">
-                <input
-                    type="text"
-                    name="q"
-                    placeholder="Recherche par texte ou choix..."
-                    value="{{ app.request.get('q') }}"
-                >
-                <button type="submit">🔍</button>
-            </form>
+                </div>
+            </div>
+        </div>
 
-            <!-- Table -->
-            <div class="table-container">
-                <table class="quiz-table">
-                    <thead>
-                        <tr>
-                            {% for column, label in {
-                                'id':'ID',
-                                'texte':'Texte',
-                                'choixA':'Choix A',
-                                'choixB':'Choix B',
-                                'choixC':'Choix C',
-                                'choixD':'Choix D',
-                                'bonneReponse':'Bonne Réponse',
-                                'indice':'Indice',
-                                'quiz':'Quiz'
-                            } %}
-                                <th>
-                                    {% if column != 'quiz' %}
-                                        <a href="{{ path('app_showquestion', {
-                                            q: app.request.get('q'),
-                                            sort: column,
-                                            order: newOrder
-                                        }) }}">
-                                            {{ label }}
-                                        </a>
-                                    {% else %}
-                                        {{ label }}
-                                    {% endif %}
-                                </th>
-                            {% endfor %}
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for question in listQuestion %}
+        <!-- Statistiques -->
+        <div class="stats-grid mb-4">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary-subtle text-primary">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-value">{{ listQuestion|length }}</span>
+                    <span class="stat-label">Total Questions</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-success-subtle text-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-value">{{ listQuestion|filter(q => q.type == 'choix')|length }}</span>
+                    <span class="stat-label">QCM</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-warning-subtle text-warning">
+                    <i class="fas fa-toggle-on"></i>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-value">{{ listQuestion|filter(q => q.type == 'vraifaux')|length }}</span>
+                    <span class="stat-label">Vrai/Faux</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-info-subtle text-info">
+                    <i class="fas fa-pencil-alt"></i>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-value">{{ listQuestion|filter(q => q.type == 'texte')|length }}</span>
+                    <span class="stat-label">Texte Libre</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtres avancés -->
+        <div class="card filter-card mb-4">
+            <div class="card-body">
+                <form method="get" id="filterForm">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="text"
+                                       name="q"
+                                       class="form-control"
+                                       placeholder="Rechercher par texte, indice ou réponses..."
+                                       value="{{ app.request.get('q') }}">
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="col-md-3">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary flex-grow-1">
+                                    <i class="fas fa-filter me-2"></i>Filtrer
+                                </button>
+                                <a href="{{ path('app_showquestion') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-redo-alt"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tableau des questions -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2 text-primary"></i>
+                            Liste des Questions
+                            <span class="badge bg-primary ms-2">{{ listQuestion|length }}</span>
+                        </h5>
+                    </div>
+                    <div class="col-auto">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleCompactView()">
+                                <i class="fas fa-compress-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="questionsTable">
+                        <thead class="bg-light">
                             <tr>
-                                <td>{{ question.id }}</td>
-                                <td>{{ question.texte }}</td>
-                                <td>{{ question.choixA }}</td>
-                                <td>{{ question.choixB }}</td>
-                                <td>{{ question.choixC }}</td>
-                                <td>{{ question.choixD }}</td>
-                                <td>{{ question.bonneReponse }}</td>
-                                <td>{{ question.indice ?: 'N/A' }}</td>
-                                <td>{{ question.quiz ? question.quiz.titre : 'N/A' }}</td>
+                                <th width="50">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="selectAll">
+                                    </div>
+                                </th>
+                                <th>
+                                    <a href="?sort=id&order={{ newOrder }}" class="sort-link">
+                                        ID <i class="fas fa-sort"></i>
+                                    </a>
+                                </th>
+                                <th>Question</th>
+                                <th>Type</th>
+                                <th>Contenu/Réponse</th>
+                                <th>Indice</th>
+                                <th>Quiz</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for question in listQuestion %}
+                            <tr class="question-row" data-question-id="{{ question.id }}">
                                 <td>
-                                    <a href="{{ path('app_updateformquestion', {'id': question.id}) }}">✏</a>
-                                    |
-                                    <a href="{{ path('app_deletequestion', {'id': question.id}) }}"
-                                       onclick="return confirm('Supprimer ?')">🗑</a>
+                                    <div class="form-check">
+                                        <input class="form-check-input question-checkbox" type="checkbox" value="{{ question.id }}">
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">#{{ question.id }}</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="question-icon 
+                                            {% if question.type == 'choix' %}bg-primary-subtle text-primary
+                                            {% elseif question.type == 'vraifaux' %}bg-success-subtle text-success
+                                            {% else %}bg-info-subtle text-info{% endif %} 
+                                            rounded-circle me-3">
+                                            <i class="fas 
+                                                {% if question.type == 'choix' %}fa-list-ul
+                                                {% elseif question.type == 'vraifaux' %}fa-toggle-on
+                                                {% else %}fa-font{% endif %}">
+                                            </i>
+                                        </div>
+                                        <div>
+                                            <strong>{{ question.texte|slice(0, 60) }}</strong>
+                                            {% if question.texte|length > 60 %}
+                                                <span class="text-muted">...</span>
+                                               <button class="btn btn-link btn-sm p-0 ms-1"
+                                               onclick="showFullText({{ question.id }})">
+                                                                voir plus
+                                                </button>
+
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if question.type == 'choix' %}
+                                        <span class="badge badge-type bg-primary">
+                                            <i class="fas fa-list-ul me-1"></i>QCM
+                                        </span>
+                                    {% elseif question.type == 'vraifaux' %}
+                                        <span class="badge badge-type bg-success">
+                                            <i class="fas fa-toggle-on me-1"></i>Vrai/Faux
+                                        </span>
+                                    {% elseif question.type == 'texte' %}
+                                        <span class="badge badge-type bg-info">
+                                            <i class="fas fa-font me-1"></i>Texte Libre
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="content-preview">
+                                        {% if question.type == 'choix' %}
+                                            <div class="choices-list">
+                                                <span class="choice-item {% if question.bonneReponseChoix == 'A' %}correct-choice{% endif %}">
+                                                    A: {{ question.choixA|slice(0,15) }}{% if question.choixA|length > 15 %}…{% endif %}
+                                                </span>
+                                                <span class="choice-item {% if question.bonneReponseChoix == 'B' %}correct-choice{% endif %}">
+                                                    B: {{ question.choixB|slice(0,15) }}{% if question.choixB|length > 15 %}…{% endif %}
+                                                </span>
+                                                <span class="choice-item {% if question.bonneReponseChoix == 'C' %}correct-choice{% endif %}">
+                                                    C: {{ question.choixC|slice(0,15) }}{% if question.choixC|length > 15 %}…{% endif %}
+                                                </span>
+                                                <span class="choice-item {% if question.bonneReponseChoix == 'D' %}correct-choice{% endif %}">
+                                                    D: {{ question.choixD|slice(0,15) }}{% if question.choixD|length > 15 %}…{% endif %}
+                                                </span>
+                                            </div>
+                                        {% elseif question.type == 'vraifaux' %}
+                                            <span class="badge {% if question.bonneReponseBool %}bg-success{% else %}bg-danger{% endif %}">
+                                                {{ question.bonneReponseBool ? '✅ Vrai' : '❌ Faux' }}
+                                            </span>
+                                        {% elseif question.type == 'texte' %}
+                                            <div class="text-preview">
+                                                <span class="badge bg-secondary">Réponse attendue:</span>
+                                                <span class="ms-1">{{ question.reponseAttendue|slice(0,20) }}{% if question.reponseAttendue|length > 20 %}…{% endif %}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if question.indice %}
+                                        <span class="badge bg-warning text-dark" data-bs-toggle="tooltip" title="{{ question.indice }}">
+                                            <i class="fas fa-lightbulb me-1"></i>Indice
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-info quiz-badge" data-bs-toggle="tooltip" title="{{ question.quiz.titre }}">
+                                        <i class="fas fa-book me-1"></i>
+                                        {{ question.quiz.titre|slice(0,15) }}{% if question.quiz.titre|length > 15 %}…{% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        
+                                        <a href="{{ path('app_updateformquestion', {'id': question.id}) }}"
+                                           class="btn-action btn-edit"
+                                           title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                       
+                                        <a href="{{ path('app_deletequestion', {'id': question.id}) }}"
+                   class="btn btn-sm btn-danger"
+                   onclick="return confirm('Delete this question?')">
+                    <i class="fas fa-trash"></i>
+                </a>
+                                    </div>
                                 </td>
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="10" class="no-result">Aucun résultat</td>
+                                <td colspan="8" class="text-center py-5">
+                                    <div class="empty-state">
+                                        <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                                        <h5>Aucune question trouvée</h5>
+                                        <p class="text-muted">Commencez par créer votre première question</p>
+                                        <button class="btn btn-primary mt-3" onclick="showAddQuestionModal()">
+                                            <i class="fas fa-plus-circle me-2"></i>Créer une question
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
                         {% endfor %}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-
-            <!-- Add button -->
-            <div class="add-btn">
-                <a href="{{ path('app_addformquestion') }}">➕ Ajouter une Question</a>
+            
+            <!-- Pagination -->
+            {% if listQuestion|length > 10 %}
+            <div class="card-footer bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">
+                        Affichage de 1 à {{ listQuestion|length }} sur {{ listQuestion|length }} résultats
+                    </div>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#">Précédent</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">Suivant</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
-
+            {% endif %}
         </div>
-
-    </main>
+    </div>
 </div>
 
-<!-- Styles CSS -->
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmer la suppression</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer cette question ?</p>
+                <p class="text-danger"><small>Cette action est irréversible.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Supprimer</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal d'aperçu -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Aperçu de la question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="previewContent">
+                <!-- Contenu chargé dynamiquement -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour ajout rapide -->
+<div class="modal fade" id="quickAddModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter une question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="list-group">
+                    <a href="{{ path('app_addformquestion', {'type': 'choix'}) }}" class="list-group-item list-group-item-action">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-list-ul fa-2x text-primary me-3"></i>
+                            <div>
+                                <h6 class="mb-1">Question à Choix</h6>
+                                <small class="text-muted">Questions avec plusieurs options</small>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="{{ path('app_addformquestion', {'type': 'vraifaux'}) }}" class="list-group-item list-group-item-action">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-toggle-on fa-2x text-success me-3"></i>
+                            <div>
+                                <h6 class="mb-1">Question Vrai/Faux</h6>
+                                <small class="text-muted">Réponse binaire vrai ou faux</small>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="{{ path('app_addformquestion', {'type': 'texte'}) }}" class="list-group-item list-group-item-action">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-font fa-2x text-info me-3"></i>
+                            <div>
+                                <h6 class="mb-1">Question Texte Libre</h6>
+                                <small class="text-muted">Réponse textuelle attendue</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
-.admin-layout {
+.admin-main-content {
+    margin-left: 280px;
+    padding: 20px;
+}
+
+/* Header Icon */
+.header-icon-wrapper {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
     display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* المحتوى الرئيسي */
-.main-content {
-    margin-left: 260px;        /* عرض sidebar */
-    margin-top: 70px;          /* ارتفاع navbar */
-    padding: 25px;
-    width: calc(100% - 260px);
-    background-color: #f4f6f8;
-    min-height: 100vh;
+.header-icon-wrapper i {
+    font-size: 24px;
+    color: white;
 }
 
-/* الصفحة */
-.admin-page {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+.page-title {
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
 }
 
-/* البحث */
-.search-form {
-    margin-bottom: 20px;
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
     display: flex;
-    gap: 10px;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
 }
 
-.search-form input {
-    flex: 1;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(102,126,234,0.15);
 }
 
-.search-form button {
-    padding: 8px 12px;
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.stat-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Filter Card */
+.filter-card {
     border: none;
-    background-color: #4821be;
-    color: #fff;
-    border-radius: 6px;
+    border-radius: 12px;
+    background: white;
 }
 
-/* الجدول */
-.table-container {
-    overflow-x: auto;
-    background: #fff;
+/* Question Icon */
+.question-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+/* Badge Types */
+.badge-type {
+    padding: 6px 10px;
+    font-weight: 500;
+}
+
+/* Choices List */
+.choices-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 0.9rem;
+}
+
+.choice-item {
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #f8f9fa;
+}
+
+.correct-choice {
+    background: #d4edda;
+    color: #155724;
+    font-weight: 600;
+    border-left: 3px solid #28a745;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-action {
+    width: 32px;
+    height: 32px;
+    border: none;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+    color: #6c757d;
 }
 
-.quiz-table {
-    width: 100%;
-    border-collapse: collapse;
+.btn-action:hover {
+    transform: translateY(-2px);
 }
 
-.quiz-table th,
-.quiz-table td {
-    padding: 12px 15px;
+.btn-preview:hover {
+    background: #e3f2fd;
+    color: #1976d2;
 }
 
-.quiz-table thead {
-    background-color: #4f46e5;
-    color: #fff;
+.btn-edit:hover {
+    background: #fff3e0;
+    color: #f57c00;
 }
 
-.quiz-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
+.btn-duplicate:hover {
+    background: #e8f5e9;
+    color: #388e3c;
 }
 
-.quiz-table tbody tr:hover {
-    background-color: #e0e7ff;
+.btn-delete:hover {
+    background: #ffebee;
+    color: #d32f2f;
 }
 
-.quiz-table a {
-    color: #1a000a;
+/* Table Styles */
+.table th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    border-bottom-width: 1px;
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9ff;
+}
+
+/* Sort Link */
+.sort-link {
+    color: inherit;
     text-decoration: none;
 }
 
-/* زر الإضافة */
-.add-btn {
-    margin-top: 20px;
-    text-align: right;
+.sort-link:hover {
+    color: #667eea;
 }
 
-.add-btn a {
-    padding: 10px 15px;
-    background-color: #10b981;
-    color: #fff;
-    border-radius: 6px;
-    text-decoration: none;
+/* Empty State */
+.empty-state {
+    padding: 40px;
+    text-align: center;
 }
 
+/* Quiz Badge */
+.quiz-badge {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .admin-main-content {
+        margin-left: 0;
+        padding: 15px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-wrap: wrap;
+    }
+}
 </style>
 
-{% block stylesheets %}
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Sélection/Désélection de toutes les cases
+document.getElementById('selectAll')?.addEventListener('change', function(e) {
+    document.querySelectorAll('.question-checkbox').forEach(checkbox => {
+        checkbox.checked = e.target.checked;
+    });
+});
+
+// Fonction de suppression avec confirmation
+function deleteQuestion(questionId) {
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    confirmBtn.href = '{{ path("app_deletequestion", {id: 0}) }}'.replace('0', questionId);
+    modal.show();
+}
+
+// Fonction d'aperçu
+function previewQuestion(questionId) {
+    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    document.getElementById('previewContent').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Chargement...</p></div>';
+    modal.show();
     
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="" />
-    <meta name="keyword" content="" />
-    <meta name="author" content="flexilecode" />
-    <!--! BEGIN: Favicon-->
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets2/images/favicon.ico') }}" />
-    <!--! END: Favicon-->
-    <!--! BEGIN: Bootstrap CSS-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/bootstrap.min.css') }}" />
-    <!--! END: Bootstrap CSS-->
-    <!--! BEGIN: Vendors CSS-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/vendors/css/vendors.min.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/vendors/css/daterangepicker.min.css') }}" />
-    <!--! END: Vendors CSS-->
-    <!--! BEGIN: Custom CSS-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/theme.min.css') }}" />
-    <!--! END: Custom CSS-->
-    <!--! HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries !-->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    // Simulation de chargement (à remplacer par un vrai appel AJAX)
+    setTimeout(() => {
+        fetch(`/admin/question/${questionId}/preview`)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('previewContent').innerHTML = html;
+            })
+            .catch(() => {
+                document.getElementById('previewContent').innerHTML = '<p class="text-danger">Erreur de chargement</p>';
+            });
+    }, 500);
+}
+
+
+
+
+
+// Afficher le modal d'ajout rapide
+function showAddQuestionModal() {
+    const modal = new bootstrap.Modal(document.getElementById('quickAddModal'));
+    modal.show();
+}
+
+// Initialiser les tooltips Bootstrap
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+// Auto-submit du formulaire de filtre
+document.querySelectorAll('#filterForm select').forEach(select => {
+    select.addEventListener('change', () => {
+        document.getElementById('filterForm').submit();
+    });
+});
+
+// Vue compacte
+let compactView = false;
+function toggleCompactView() {
+    compactView = !compactView;
+    const rows = document.querySelectorAll('.question-row');
+    rows.forEach(row => {
+        if (compactView) {
+            row.style.fontSize = '0.9rem';
+        } else {
+            row.style.fontSize = '';
+        }
+    });
+}
+</script>
 {% endblock %}
 
 {% block javascripts %}
-    
-    <script src="{{ asset('assets2/vendors/js/vendors.min.js') }}"></script>
-    <script src="{{ asset('assets2/vendors/js/daterangepicker.min.js') }}"></script>
-    <script src="{{ asset('assets2/vendors/js/apexcharts.min.js') }}"></script>
-    <script src="{{ asset('assets2/vendors/js/circle-progress.min.js') }}"></script>
-    <script src="{{ asset('assets2/js/common-init.min.js') }}"></script>
-    <script src="{{ asset('assets2/js/dashboard-init.min.js') }}"></script>
-    {% block admin_javascripts %}{% endblock %}
-    <script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
-{% endblock %}
+<script>
+    function goToAddQuestion() {
+        let type = document.getElementById("questionType").value;
+        window.location.href = "/admin/addformquestion/" + type;
+    }
+</script>
+{{ parent() }}
+<script src="{{ asset('assets2/vendors/js/vendors.min.js') }}"></script>
+<script src="{{ asset('assets2/vendors/js/daterangepicker.min.js') }}"></script>
+<script src="{{ asset('assets2/vendors/js/apexcharts.min.js') }}"></script>
+<script src="{{ asset('assets2/vendors/js/circle-progress.min.js') }}"></script>
+<script src="{{ asset('assets2/js/common-init.min.js') }}"></script>
+<script src="{{ asset('assets2/js/dashboard-init.min.js') }}"></script>
+{% block admin_javascripts %}{% endblock %}
+<script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
 {% endblock %}
