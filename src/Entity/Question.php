@@ -4,61 +4,41 @@ namespace App\Entity;
 
 use App\Repository\QuestionRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
+use App\Entity\QuestionChoix;
+use App\Entity\QuestionVraiFaux;
+use App\Entity\QuestionTexteLibre;
+
 
 #[ORM\Entity(repositoryClass: QuestionRepository::class)]
-class Question
+#[ORM\Table(name: "question")]
+#[ORM\InheritanceType("SINGLE_TABLE")]
+#[ORM\DiscriminatorColumn(name: "type", type: "string")]
+#[ORM\DiscriminatorMap([
+    "choix" => QuestionChoix::class,
+    "vraifaux" => QuestionVraiFaux::class,
+    "texte" => QuestionTexteLibre::class
+])]
+abstract class Question
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    protected ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: "Le texte de la question est obligatoire.")]
-    #[Assert\Length(
-        min: 5,
-        minMessage: "Le texte de la question doit contenir au moins {{ limit }} caractères."
-    )]
-    private ?string $texte = null;
+    protected ?string $texte = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: "Le choix A est obligatoire.")]
-    private ?string $choixA = null;
-
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: "Le choix B est obligatoire.")]
-    private ?string $choixB = null;
-
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: "Le choix C est obligatoire.")]
-    private ?string $choixC = null;
-
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: "Le choix D est obligatoire.")]
-    private ?string $choixD = null;
-
-    #[ORM\Column(length: 1)]
-    #[Assert\NotBlank(message: "Veuillez sélectionner la bonne réponse.")]
-    #[Assert\Choice(
-        choices: ['A', 'B', 'C', 'D'],
-        message: "La bonne réponse doit être A, B, C ou D."
-    )]
-    private ?string $bonneReponse = null;
+    #[ORM\Column(length: 20)]
+    protected ?string $niveau = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\Length(
-        min: 3,
-        minMessage: "L’indice doit contenir au moins {{ limit }} caractères."
-    )]
-    private ?string $indice = null;
+    protected ?string $indice = null;
 
     #[ORM\ManyToOne(inversedBy: 'questions')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotNull(message: "Le quiz associé est obligatoire.")]
-    private ?Quiz $quiz = null;
+    protected ?Quiz $quiz = null;
 
-    // ================= GETTERS & SETTERS =================
+    // ===== Getters & Setters =====
 
     public function getId(): ?int
     {
@@ -76,58 +56,14 @@ class Question
         return $this;
     }
 
-    public function getChoixA(): ?string
+    public function getNiveau(): ?string
     {
-        return $this->choixA;
+        return $this->niveau;
     }
 
-    public function setChoixA(string $choixA): self
+    public function setNiveau(string $niveau): self
     {
-        $this->choixA = $choixA;
-        return $this;
-    }
-
-    public function getChoixB(): ?string
-    {
-        return $this->choixB;
-    }
-
-    public function setChoixB(string $choixB): self
-    {
-        $this->choixB = $choixB;
-        return $this;
-    }
-
-    public function getChoixC(): ?string
-    {
-        return $this->choixC;
-    }
-
-    public function setChoixC(string $choixC): self
-    {
-        $this->choixC = $choixC;
-        return $this;
-    }
-
-    public function getChoixD(): ?string
-    {
-        return $this->choixD;
-    }
-
-    public function setChoixD(string $choixD): self
-    {
-        $this->choixD = $choixD;
-        return $this;
-    }
-
-    public function getBonneReponse(): ?string
-    {
-        return $this->bonneReponse;
-    }
-
-    public function setBonneReponse(string $bonneReponse): self
-    {
-        $this->bonneReponse = $bonneReponse;
+        $this->niveau = $niveau;
         return $this;
     }
 
@@ -152,4 +88,15 @@ class Question
         $this->quiz = $quiz;
         return $this;
     }
+
+    public function getType(): string
+{
+    return match (true) {
+        $this instanceof QuestionChoix => 'choix',
+        $this instanceof QuestionVraiFaux => 'vraifaux',
+        $this instanceof QuestionTexteLibre => 'texte',
+        default => 'unknown',
+    };
+}
+
 }

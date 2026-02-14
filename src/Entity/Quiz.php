@@ -6,6 +6,7 @@ use App\Repository\QuizRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: QuizRepository::class)]
 class Quiz
@@ -15,7 +16,13 @@ class Quiz
     #[ORM\Column]
     private ?int $id = null;
 
+    
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le titre du quiz est obligatoire.")]
+    #[Assert\Length(
+        min: 3,
+        minMessage: "Le titre doit contenir au moins {{ limit }} caractères."
+    )]
     private ?string $titre = null;
 
     #[ORM\Column]
@@ -24,9 +31,7 @@ class Quiz
     #[ORM\Column]
     private ?\DateTime $dateCreation = null;
 
-    #[ORM\ManyToOne(inversedBy: 'quizzes')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Utilisateur $user = null;
+   
 
     #[ORM\ManyToOne(inversedBy: 'quizzes')]
     #[ORM\JoinColumn(nullable: false)]
@@ -35,13 +40,27 @@ class Quiz
     /**
      * @var Collection<int, Question>
      */
-    #[ORM\OneToMany(targetEntity: Question::class, mappedBy: 'quiz', orphanRemoval: true)]
+    #[ORM\OneToMany(
+        targetEntity: Question::class,
+        mappedBy: 'quiz',
+        orphanRemoval: true
+    )]
     private Collection $questions;
+
+    /**
+     * @var Collection<int, QuizAttempt>
+     */
+    #[ORM\OneToMany(targetEntity: QuizAttempt::class, mappedBy: 'quiz')]
+    private Collection $quizAttempts;
 
     public function __construct()
     {
         $this->questions = new ArrayCollection();
+        $this->dateCreation = new \DateTime();
+        $this->quizAttempts = new ArrayCollection();
     }
+
+    // ================= GETTERS & SETTERS =================
 
     public function getId(): ?int
     {
@@ -56,7 +75,6 @@ class Quiz
     public function setTitre(string $titre): static
     {
         $this->titre = $titre;
-
         return $this;
     }
 
@@ -68,7 +86,6 @@ class Quiz
     public function setDuree(int $duree): static
     {
         $this->duree = $duree;
-
         return $this;
     }
 
@@ -80,21 +97,10 @@ class Quiz
     public function setDateCreation(\DateTime $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
-
         return $this;
     }
 
-    public function getUser(): ?Utilisateur
-    {
-        return $this->userId;
-    }
-
-    public function setUser(?Utilisateur $user): static
-    {
-        $this->user = $user;
-
-        return $this;
-    }
+   
 
     public function getCourse(): ?Cours
     {
@@ -104,7 +110,6 @@ class Quiz
     public function setCourse(?Cours $course): static
     {
         $this->course = $course;
-
         return $this;
     }
 
@@ -129,9 +134,38 @@ class Quiz
     public function removeQuestion(Question $question): static
     {
         if ($this->questions->removeElement($question)) {
-            // set the owning side to null (unless already changed)
             if ($question->getQuiz() === $this) {
                 $question->setQuiz(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, QuizAttempt>
+     */
+    public function getQuizAttempts(): Collection
+    {
+        return $this->quizAttempts;
+    }
+
+    public function addQuizAttempt(QuizAttempt $quizAttempt): static
+    {
+        if (!$this->quizAttempts->contains($quizAttempt)) {
+            $this->quizAttempts->add($quizAttempt);
+            $quizAttempt->setQuiz($this);
+        }
+
+        return $this;
+    }
+
+    public function removeQuizAttempt(QuizAttempt $quizAttempt): static
+    {
+        if ($this->quizAttempts->removeElement($quizAttempt)) {
+            // set the owning side to null (unless already changed)
+            if ($quizAttempt->getQuiz() === $this) {
+                $quizAttempt->setQuiz(null);
             }
         }
 
