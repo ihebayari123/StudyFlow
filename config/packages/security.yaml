@@ -28,7 +28,7 @@ security:
     - { path: ^/logout$, roles: PUBLIC_ACCESS }
     - { path: ^/register, roles: PUBLIC_ACCESS }
 
-    # ----- Teacher-allowed routes (Courses & Chapters) -----
+    # ----- TEACHER-ALLOWED ROUTES (Courses & Chapters) -----
     # Already under /admin
     - { path: ^/admin/courses, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
     - { path: ^/admin/chapter, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
@@ -46,7 +46,7 @@ security:
     - { path: ^/cours/\d+/chapitres, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
     - { path: ^/chapitres, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
 
-    # ----- Teacher-allowed routes (Quiz & Questions) -----
+    # ----- TEACHER-ALLOWED ROUTES (Quiz & Questions) -----
     # Already under /admin
     - { path: ^/admin/question, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
     - { path: ^/admin/showquestion, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
@@ -61,46 +61,63 @@ security:
     - { path: ^/deletequestion, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
     - { path: ^/deletequiz, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
 
-    # ----- Admin-ONLY routes (User management) -----
-    - { path: ^/useradd, roles: ROLE_ADMIN }
-    - { path: ^/delete_user, roles: ROLE_ADMIN }
-    - { path: ^/edit_user, roles: ROLE_ADMIN }
-    - { path: ^/usersshow, roles: ROLE_ADMIN }
+    # ----- FRONT OFFICE - Accessible to STUDENTS & TEACHERS -----
+    - { path: ^/home, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT] }
+    - { path: ^/front, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT] }
+    - { path: ^/quiz_index, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT] }
+    - { path: ^/produits, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT] }
+    - { path: ^/events/front, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT] }
+    - { path: ^/sponsor, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT] }
+    - { path: ^/plan-education, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT] }
+    - { path: ^/well/being/score, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT] }
+    - { path: ^/test, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT] }
 
-    # ----- Admin-ONLY routes (Categories) -----
+    # ----- ADMIN-ONLY ROUTES (User management) -----
+    - { path: ^/user, roles: ROLE_ADMIN }
+    - { path: ^/useradd, roles: ROLE_ADMIN }
+    - { path: ^/usersshow, roles: ROLE_ADMIN }
+    - { path: ^/delete_user, roles: ROLE_ADMIN }
+    - { path: ^/hash-password, roles: ROLE_ADMIN }
+
+    # ----- ADMIN-ONLY ROUTES (Categories) -----
     - { path: ^/categorie, roles: ROLE_ADMIN }
     - { path: ^/showcategorie, roles: ROLE_ADMIN }
     - { path: ^/addcategorie, roles: ROLE_ADMIN }
     - { path: ^/deletecategorie, roles: ROLE_ADMIN }
     - { path: ^/updatecategorie, roles: ROLE_ADMIN }
 
-    # ----- Admin-ONLY routes (Products) -----
+    # ----- ADMIN-ONLY ROUTES (Products) -----
     - { path: ^/produit, roles: ROLE_ADMIN }
     - { path: ^/showproduit, roles: ROLE_ADMIN }
+    - { path: ^/showproduit1, roles: ROLE_ADMIN }
     - { path: ^/addproduit, roles: ROLE_ADMIN }
     - { path: ^/deleteproduit, roles: ROLE_ADMIN }
     - { path: ^/updateproduit, roles: ROLE_ADMIN }
-    - { path: ^/showproduit1, roles: ROLE_ADMIN }
 
-    # ----- Admin-ONLY routes (Events) -----
-    - { path: ^/events, roles: ROLE_ADMIN }
+    # ----- ADMIN-ONLY ROUTES (Events) -----
+    - { path: ^/events$, roles: ROLE_ADMIN }
     - { path: ^/event, roles: ROLE_ADMIN }
 
-    # ----- Admin-ONLY routes (Stress/Score management) -----
+    # ----- ADMIN-ONLY ROUTES (Stress/Score management) -----
+    - { path: ^/stresse, roles: ROLE_ADMIN }
+    - { path: ^/showstresse, roles: ROLE_ADMIN }
+    - { path: ^/add_stresse, roles: ROLE_ADMIN }
+    - { path: ^/updateformstresse, roles: ROLE_ADMIN }
+    - { path: ^/delete_score, roles: ROLE_ADMIN }
     - { path: ^/showscore, roles: ROLE_ADMIN }
     - { path: ^/update_score, roles: ROLE_ADMIN }
     - { path: ^/well-being, roles: ROLE_ADMIN }
 
-    # ----- Admin-only area (everything else under /admin) -----
+    # ----- ADMIN-ONLY ROUTES (Sponsor) -----
+    - { path: ^/sponsor/create, roles: ROLE_ADMIN }
+    - { path: ^/sponsor/edit, roles: ROLE_ADMIN }
+    - { path: ^/sponsor/delete, roles: ROLE_ADMIN }
+
+    # ----- ADMIN-ONLY (everything else under /admin) -----
     - { path: ^/admin, roles: ROLE_ADMIN }
 
     # ----- Teacher choice page -----
     - { path: ^/login/success, roles: ROLE_ENSEIGNANT }
-
-    # ----- Student/Teacher front office -----
-    - { path: ^/home, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT] }
-    - { path: ^/front, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT] }
-    - { path: ^/quiz_index, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT] }
 
     # Default: all other paths require authentication
     - { path: ^/, roles: ROLE_USER }
