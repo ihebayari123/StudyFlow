@@ -2,22 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\Question;
+use App\Entity\QuizAttempt;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Question>
+ * @extends ServiceEntityRepository<QuizAttempt>
  */
-class QuestionRepository extends ServiceEntityRepository
+class QuizAttemptRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Question::class);
+        parent::__construct($registry, QuizAttempt::class);
     }
 
     //    /**
-    //     * @return Question[] Returns an array of Question objects
+    //     * @return QuizAttempt[] Returns an array of QuizAttempt objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -31,7 +31,7 @@ class QuestionRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Question
+    //    public function findOneBySomeField($value): ?QuizAttempt
     //    {
     //        return $this->createQueryBuilder('q')
     //            ->andWhere('q.exampleField = :val')
@@ -40,15 +40,4 @@ class QuestionRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
-
-    public function getTypeLabel(): string
-{
-    return match (true) {
-        $this instanceof QuestionChoix => 'QCM',
-        $this instanceof QuestionVraiFaux => 'Vrai/Faux',
-        $this instanceof QuestionTexteLibre => 'Texte Libre',
-        default => 'Unknown',
-    };
-}
-
 }

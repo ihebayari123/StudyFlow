@@ -1,104 +1,269 @@
 {% extends 'admin/base_admin.html.twig' %}
 
-{% block title %}Manage Quiz - Admin{% endblock %}
+{% block title %}Gestion des Quiz - Administration{% endblock %}
 
 {% block admin_content %}
 <div class="admin-main-content">
-    <div class="container-fluid mt-5">
+    <div class="container-fluid py-4">
 
-        <!-- Header -->
+        <!-- Header avec statistiques -->
         <div class="page-header mb-4">
-            <div class="row align-items-center">
-                <div class="col">
-                    <h2 class="page-title">
-                        <i class="fas fa-question-circle"></i> Manage Quiz
-                    </h2>
-                    <p class="text-muted">View and manage all quizzes</p>
+            <div class="row align-items-center g-3">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center">
+                        <div class="header-icon-wrapper">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h2 class="page-title mb-1">Gestion des Quiz</h2>
+                            <p class="text-muted mb-0">Gérez tous les quiz de la plateforme</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-auto">
-                    <a href="{{ path('app_addformquiz') }}" class="btn btn-success">
-                        <i class="fas fa-plus-circle"></i> Add New Quiz
-                    </a>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-md-end gap-2">
+                        
+                        <a href="{{ path('app_addformquiz') }}" class="btn btn-success">
+                            <i class="fas fa-plus-circle me-2"></i>Nouveau Quiz
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Search -->
-        <div class="card mb-4">
+        <!-- Statistiques -->
+        <div class="stats-grid mb-4">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary-subtle text-primary">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-value">{{ listQuiz|length }}</span>
+                    <span class="stat-label">Total Quiz</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-success-subtle text-success">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-details">
+                    {% set totalDuration = 0 %}
+                    {% for quiz in listQuiz %}
+                        {% set totalDuration = totalDuration + quiz.duree %}
+                    {% endfor %}
+                    <span class="stat-value">{{ totalDuration }}</span>
+                    <span class="stat-label">Minutes totales</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-info-subtle text-info">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="stat-details">
+                    
+                    <span class="stat-label">Cours concernés</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-warning-subtle text-warning">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-value">{{ listQuiz|map(q => q.tentatives is defined ? q.tentatives|length : 0)|reduce((carry, v) => carry + v, 0) }}</span>
+                    <span class="stat-label">Tentatives</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtres et recherche avancés -->
+        <div class="card filter-card mb-4">
             <div class="card-body">
-                <form method="get">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <input type="text"
-                                   name="q"
-                                   class="form-control"
-                                   placeholder="Search by title..."
-                                   value="{{ app.request.get('q') }}">
+                <form method="get" id="filterForm">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="text"
+                                       name="q"
+                                       class="form-control"
+                                       placeholder="Rechercher par titre..."
+                                       value="{{ app.request.get('q') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="course" class="form-select">
+                                <option value="">Tous les cours</option>
+                                {% for course in courses ?? [] %}
+                                    <option value="{{ course.id }}" {{ app.request.get('course') == course.id ? 'selected' : '' }}>
+                                        {{ course.titre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="duration" class="form-select">
+                                <option value="">Toutes durées</option>
+                                <option value="0-15" {{ app.request.get('duration') == '0-15' ? 'selected' : '' }}>≤ 15 min</option>
+                                <option value="15-30" {{ app.request.get('duration') == '15-30' ? 'selected' : '' }}>15-30 min</option>
+                                <option value="30-60" {{ app.request.get('duration') == '30-60' ? 'selected' : '' }}>30-60 min</option>
+                                <option value="60+" {{ app.request.get('duration') == '60+' ? 'selected' : '' }}>60+ min</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary flex-grow-1">
+                                    <i class="fas fa-filter me-2"></i>Filtrer
+                                </button>
+                                
+                            </div>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- Quiz Table -->
+        <!-- Tableau des quiz -->
         <div class="card shadow-sm">
-            <div class="card-body">
+            <div class="card-header bg-white py-3">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2 text-primary"></i>
+                            Liste des Quiz
+                            <span class="badge bg-primary ms-2">{{ listQuiz|length }}</span>
+                        </h5>
+                    </div>
+                    <div class="col-auto">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleView('grid')">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm active" onclick="toggleView('list')">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                        <tr>
-                            <th>ID</th>
-                            <th>Title</th>
-                            <th>Duration</th>
-                            <th>Date</th>
-                            <th>Course</th>
-                            <th>Questions</th>
-                            <th>Actions</th>
-                        </tr>
+                    <table class="table table-hover align-middle mb-0" id="quizTable">
+                        <thead class="bg-light">
+                            <tr>
+                                <th width="50">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="selectAll">
+                                    </div>
+                                </th>
+                                <th>
+                                    <a href="?sort=id&order={{ app.request.get('order') == 'asc' ? 'desc' : 'asc' }}" class="text-dark text-decoration-none">
+                                        ID
+                                        {% if app.request.get('sort') == 'id' %}
+                                            <i class="fas fa-chevron-{{ app.request.get('order') == 'asc' ? 'up' : 'down' }} ms-1"></i>
+                                        {% endif %}
+                                    </a>
+                                </th>
+                                <th>Titre</th>
+                                <th>Durée</th>
+                                <th>Date</th>
+                                <th>Cours</th>
+                                <th>Questions</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
                         </thead>
                         <tbody>
                         {% for quiz in listQuiz %}
-                            <tr>
-                                <td>{{ quiz.id }}</td>
-                                <td><strong>{{ quiz.titre }}</strong></td>
+                            <tr class="quiz-row" data-quiz-id="{{ quiz.id }}">
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input quiz-checkbox" type="checkbox" value="{{ quiz.id }}">
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-secondary">#{{ quiz.id }}</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="quiz-icon bg-primary-subtle text-primary rounded-circle me-3">
+                                            <i class="fas fa-question"></i>
+                                        </div>
+                                        <div>
+                                            <strong>{{ quiz.titre }}</strong>
+                                            {% if quiz.description is defined and quiz.description %}
+                                                <br><small class="text-muted">{{ quiz.description|slice(0, 30) }}...</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
                                 <td>
                                     <span class="badge bg-warning text-dark">
+                                        <i class="far fa-clock me-1"></i>
                                         {{ quiz.duree }} min
                                     </span>
                                 </td>
-                                <td>{{ quiz.dateCreation|date('Y-m-d') }}</td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span>{{ quiz.dateCreation|date('d/m/Y') }}</span>
+                                        <small class="text-muted">{{ quiz.dateCreation|date('H:i') }}</small>
+                                    </div>
+                                </td>
                                 <td>
                                     <span class="badge bg-info">
-                                        {{ quiz.course.titre }}
+                                        <i class="fas fa-book me-1"></i>
+                                        {{ quiz.course.titre|slice(0, 20) }}
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="{{ path('app_quiz_questions',{id:quiz.id}) }}"
-                                       class="btn btn-sm btn-info">
-                                        <i class="fas fa-list"></i> View
-                                    </a>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-secondary rounded-pill">
+                                            {{ quiz.questions|default([])|length }} Q
+                                        </span>
+                                        <a href="{{ path('app_quiz_questions',{id:quiz.id}) }}"
+                                           class="btn btn-sm btn-outline-info"
+                                           title="Voir les questions">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </div>
                                 </td>
                                 <td>
-                                    <div class="btn-group">
+                                    {% set hasQuestions = quiz.questions|default([])|length > 0 %}
+                                    {% if hasQuestions %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>Actif
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>Pas de questions
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        
                                         <a href="{{ path('app_updateformquiz',{id:quiz.id}) }}"
-                                           class="btn btn-sm btn-warning"
-                                           title="Edit">
+                                           class="btn-action btn-edit"
+                                           title="Modifier">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="{{ path('app_deletequiz',{id:quiz.id}) }}"
-                                           class="btn btn-sm btn-danger"
-                                           title="Delete"
-                                           onclick="return confirm('Are you sure?')">
+                                        
+                                        <button class="btn-action btn-delete" title="Supprimer" onclick="deleteQuiz({{ quiz.id }})">
                                             <i class="fas fa-trash"></i>
-                                        </a>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
-                                    <i class="fas fa-inbox fa-3x mb-3"></i>
-                                    <p>No quizzes found</p>
+                                <td colspan="9" class="text-center py-5">
+                                    <div class="empty-state">
+                                        <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                                        <h5>Aucun quiz trouvé</h5>
+                                        <p class="text-muted">Commencez par créer votre premier quiz</p>
+                                        <a href="{{ path('app_addformquiz') }}" class="btn btn-primary mt-3">
+                                            <i class="fas fa-plus-circle me-2"></i>Créer un quiz
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -106,56 +271,314 @@
                     </table>
                 </div>
             </div>
+            
+            <!-- Pagination -->
+            {% if listQuiz|length > 10 %}
+            <div class="card-footer bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">
+                        Affichage de 1 à {{ listQuiz|length }} sur {{ listQuiz|length }} résultats
+                    </div>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">Précédent</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">Suivant</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            {% endif %}
         </div>
-
     </div>
 </div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmer la suppression</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer ce quiz ?</p>
+                <p class="text-danger"><small>Cette action est irréversible.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Supprimer</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <style>
 .admin-main-content {
     margin-left: 280px;
-    padding-top: 100px;
+    padding: 20px;
+}
+
+/* Header Icon */
+.header-icon-wrapper {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-icon-wrapper i {
+    font-size: 24px;
+    color: white;
 }
 
 .page-title {
     font-weight: 700;
     color: #2c3e50;
+    margin: 0;
 }
 
-.page-title i {
-    color: #667eea;
-    margin-right: 10px;
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
 }
 
-.card {
-    border-radius: 10px;
-    border: none;
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
 }
 
-.table thead th {
-    font-weight: 600;
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(102,126,234,0.15);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.stat-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #6c757d;
     text-transform: uppercase;
-    font-size: 0.85rem;
+    letter-spacing: 0.5px;
 }
 
-.table tbody tr:hover {
-    background-color: #f0f4ff;
-    transform: scale(1.01);
-    box-shadow: 0 2px 8px rgba(102,126,234,0.15);
+/* Filter Card */
+.filter-card {
+    border: none;
+    border-radius: 12px;
+    background: white;
 }
 
-.btn-group {
+/* Quiz Icon */
+.quiz-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+/* Action Buttons */
+.action-buttons {
     display: flex;
     gap: 5px;
 }
 
+.btn-action {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+    color: #6c757d;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+}
+
+.btn-preview:hover {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.btn-edit:hover {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.btn-duplicate:hover {
+    background: #e8f5e9;
+    color: #388e3c;
+}
+
+.btn-delete:hover {
+    background: #ffebee;
+    color: #d32f2f;
+}
+
+/* Table Styles */
+.table th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    border-bottom-width: 1px;
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9ff;
+}
+
+/* Empty State */
+.empty-state {
+    padding: 40px;
+    text-align: center;
+}
+
+/* Badge Styles */
+.badge {
+    padding: 6px 10px;
+    font-weight: 500;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
     .admin-main-content {
         margin-left: 0;
-        padding-top: 80px;
+        padding: 15px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-wrap: wrap;
     }
 }
 </style>
 
+<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Bootstrap JS (pour les modals) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Sélection/Désélection de toutes les cases
+document.getElementById('selectAll')?.addEventListener('change', function(e) {
+    document.querySelectorAll('.quiz-checkbox').forEach(checkbox => {
+        checkbox.checked = e.target.checked;
+    });
+});
+
+// Fonction de suppression avec confirmation
+function deleteQuiz(quizId) {
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    confirmBtn.href = '{{ path('app_deletequiz', {id: 0}) }}'.replace('0', quizId);
+    modal.show();
+}
+
+
+    
+    // Simulation de chargement (à remplacer par un vrai appel AJAX)
+    setTimeout(() => {
+        fetch(`/admin/quiz/${quizId}/preview`)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('previewContent').innerHTML = html;
+            })
+            .catch(() => {
+                document.getElementById('previewContent').innerHTML = '<p class="text-danger">Erreur de chargement</p>';
+            });
+    }, 500);
+}
+
+
+
+// Fonction de changement de vue
+function toggleView(view) {
+    const table = document.getElementById('quizTable');
+    const buttons = document.querySelectorAll('.btn-group .btn');
+    
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.closest('.btn').classList.add('active');
+    
+    if (view === 'grid') {
+        // Implémentez la vue grille si nécessaire
+        console.log('Grid view');
+    } else {
+        table.style.display = 'table';
+    }
+}
+
+// Animation des lignes au survol
+document.querySelectorAll('.quiz-row').forEach(row => {
+    row.addEventListener('mouseenter', () => {
+        row.style.backgroundColor = '#f8f9ff';
+    });
+    
+    row.addEventListener('mouseleave', () => {
+        row.style.backgroundColor = '';
+    });
+});
+
+// Auto-submit du formulaire de filtre
+document.querySelectorAll('#filterForm select').forEach(select => {
+    select.addEventListener('change', () => {
+        document.getElementById('filterForm').submit();
+    });
+});
+</script>
 {% endblock %}

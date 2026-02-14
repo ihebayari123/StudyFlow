@@ -9,6 +9,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Entity\Quiz;
 use App\Entity\Question;
+use App\Entity\QuestionChoix;
+use App\Entity\QuestionVraiFaux;
+use App\Entity\QuestionTexteLibre;
+
 use App\Repository\UtilisateurRepository;
 use App\Repository\QuestionRepository;
 
@@ -79,7 +83,7 @@ public function quizPlay(
         'questions' => $questions,
     ]);
 }
-   #[Route('/front/quiz/{id}/submit', name: 'quiz_submit', methods: ['POST'])]
+  #[Route('/front/quiz/{id}/submit', name: 'quiz_submit', methods: ['POST'])]
 public function quizSubmit(
     int $id,
     Request $request,
@@ -97,25 +101,46 @@ public function quizSubmit(
         'quiz' => $quiz
     ]);
 
-    $score = 0;
+    $answers = $request->request->all('answers') ?? [];
+
+    $scoreQuestions = 0;
+    $scorePoints = 0;
     $total = count($questions);
 
-    $answers = $request->request->all('answers');
+    foreach ($questions as $question) {
 
+    $userAnswer = $answers[$question->getId()] ?? null;
+    $isCorrect = false;
 
-foreach ($questions as $question) {
-    if (
-        isset($answers[$question->getId()]) &&
-        $answers[$question->getId()] === $question->getBonneReponse()
-    ) {
-        $score++;
+    // ===== QCM =====
+    if ($question instanceof QuestionChoix) {
+        $isCorrect = $userAnswer === $question->getBonneReponseChoix();
+    }
+
+    // ===== VRAI / FAUX =====
+    elseif ($question instanceof QuestionVraiFaux) {
+        $isCorrect = $userAnswer === $question->getBonneReponseBool();
+    }
+
+    // ===== TEXTE LIBRE =====
+    elseif ($question instanceof QuestionTexteLibre) {
+
+        $bonneReponse = $question->getReponseAttendue(); 
+        $isCorrect =
+            strtolower(trim($userAnswer)) ===
+            strtolower(trim($bonneReponse));
+    }
+
+    if ($isCorrect) {
+        $scoreQuestions++;
     }
 }
 
 
     return $this->render('front_quiz/quiz_result.html.twig', [
         'quiz' => $quiz,
-        'score' => $score,
+        'scoreQuestions' => $scoreQuestions,
+        'scorePoints' => $scorePoints,
         'total' => $total,
     ]);
 }

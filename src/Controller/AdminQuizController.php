@@ -68,7 +68,7 @@ public function index(Request $request, QuizRepository $repo): Response
 public function addformquiz(
     Request $req,
     ManagerRegistry $m,
-    UtilisateurRepository $userRepo
+    
 ): Response {
     $em = $m->getManager();
     $quiz = new Quiz();
@@ -82,8 +82,7 @@ public function addformquiz(
         $quiz->setDateCreation(new \DateTime());
 
         
-        $user = $userRepo->find(1); 
-        $quiz->setUser($user);
+        
 
         $em->persist($quiz);
         $em->flush();

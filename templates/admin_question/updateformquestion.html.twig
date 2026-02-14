@@ -1,154 +1,602 @@
-{# templates/admin_question/addformquestion.html.twig #}
-{% extends 'admin/base_admin.html.twig' %}
+<!--! ================================================================ !-->
+<!--! [Start] Navigation Manu !-->
+<!--! ================================================================ !-->
+{% include 'admin/Partials/sidebar.html.twig' %}
+<!--! ================================================================ !-->
+<!--! [End]  Navigation Manu !-->
+<!--! ================================================================ !-->
 
-{% block title %}Add Question - Admin{% endblock %}
-
+{% block title %}Ajouter une Question - Administration{% endblock %}
 
 {% block admin_content %}
 <div class="admin-main-content">
-
-    <div class="container-fluid">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h2>
-                    <i class="fas fa-question-circle"></i>
-                    Add New Question
-                </h2>
-            </div>
-
-            <div class="card-body">
-                {{ form_start(f) }}
-
-                <div class="row">
-                    {% for field in f %}
-                        {% if field.vars.name != 'save' %}
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    {{ form_label(field) }}
-                                    {{ form_widget(field, {
-                                        attr: { class: 'form-control' }
-                                    }) }}
-                                    {{ form_errors(field) }}
-                                </div>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-
-                <div class="mt-4">
-                    {{ form_widget(f.save, {
-                        attr: { class: 'btn btn-success' }
-                    }) }}
-
-                    <a href="{{ path('app_showquestion') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to List
+    <div class="container-fluid py-4">
+        
+        <!-- Fil d'Ariane -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                
+                <li class="breadcrumb-item">
+                    <a href="{{ path('app_showquestion') }}" class="text-decoration-none">
+                        <i class="fas fa-question-circle me-1"></i>Questions
                     </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Ajouter une question</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <!-- Carte principale -->
+                <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                    <!-- En-tête avec dégradé -->
+                    <div class="card-header bg-gradient-primary text-white py-4">
+                        <div class="d-flex align-items-center">
+                            <div class="header-icon-wrapper me-3">
+                                <i class="fas fa-question-circle fa-2x"></i>
+                            </div>
+                            <div>
+                                <h2 class="h3 mb-1 fw-bold">Ajouter une nouvelle question</h2>
+                                <p class="mb-0 opacity-75">Créez une question pour enrichir vos quiz</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Corps du formulaire -->
+                    <div class="card-body p-4 p-lg-5">
+                        {{ form_start(f, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate', 'id': 'questionForm'}}) }}
+
+                        <!-- Indicateur de progression -->
+                        <div class="form-progress mb-4">
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" id="formProgress" style="width: 0%;" role="progressbar"></div>
+                            </div>
+                            <small class="text-muted mt-2 d-block" id="progressText">0% complété</small>
+                        </div>
+
+                        <div class="row g-4">
+                            {% for field in f %}
+                                {% if field.vars.name != 'save' %}
+                                    {% set fieldName = field.vars.name %}
+                                    {% set fieldType = field.vars.block_prefixes[1] ?? '' %}
+                                    
+                                    <div class="col-md-{% if fieldName in ['texte', 'indice'] %}12{% else %}6{% endif %}">
+                                        <div class="form-group mb-3 animate-field">
+                                            {{ form_label(field, null, {
+                                                'label_attr': {
+                                                    'class': 'form-label fw-semibold text-dark'
+                                                }
+                                            }) }}
+                                            
+                                            <div class="position-relative">
+                                                {{ form_widget(field, {
+                                                    'attr': {
+                                                        'class': 'form-control form-control-lg border-2 ' ~ (field.vars.errors|length ? 'is-invalid' : ''),
+                                                        'placeholder': 'Saisir ' ~ field.vars.label|lower,
+                                                        'data-field': fieldName
+                                                    }
+                                                }) }}
+                                                
+                                                {% if fieldName == 'texte' %}
+                                                    <span class="position-absolute top-50 end-0 translate-middle-y me-3 text-muted">
+                                                        <i class="fas fa-pencil-alt"></i>
+                                                    </span>
+                                                {% elseif fieldName == 'indice' %}
+                                                    <span class="position-absolute top-50 end-0 translate-middle-y me-3 text-muted">
+                                                        <i class="fas fa-lightbulb"></i>
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            {% if field.vars.errors|length %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in field.vars.errors %}
+                                                        {{ error.message }}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                            
+                                            {% if fieldName == 'texte' %}
+                                                <small class="text-muted mt-2 d-block">
+                                                    <i class="fas fa-info-circle me-1"></i>
+                                                    Saisissez l'énoncé clair et précis de votre question
+                                                </small>
+                                            {% elseif fieldName == 'indice' %}
+                                                <small class="text-muted mt-2 d-block">
+                                                    <i class="fas fa-info-circle me-1"></i>
+                                                    Optionnel : un indice pour aider les apprenants
+                                                </small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        
+
+                        <!-- Boutons d'action -->
+                        <div class="d-flex gap-3 mt-5 pt-3 border-top">
+                            {{ form_widget(f.save, {
+                                'attr': {
+                                    'class': 'btn btn-success btn-lg px-5 flex-grow-1',
+                                    'id': 'submitBtn'
+                                },
+                                'label': ' Enregistrer la question'
+                            }) }}
+
+                            <a href="{{ path('app_showquestion') }}" class="btn btn-outline-secondary btn-lg px-4">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </a>
+                        </div>
+
+                        {{ form_end(f) }}
+                    </div>
                 </div>
 
-                {{ form_end(f) }}
+                <!-- Carte d'aide -->
+                <div class="card border-0 bg-light mt-4 rounded-3">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="help-icon me-3">
+                                <i class="fas fa-question-circle fa-2x text-primary"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-2">Conseils pour créer une bonne question</h6>
+                                <ul class="text-muted small mb-0 ps-3">
+                                    <li>Formulez la question de manière claire et précise</li>
+                                    <li>Évitez les ambiguïtés et les doubles négations</li>
+                                    <li>Proposez des distracteurs pertinents pour les QCM</li>
+                                    <li>Ajoutez un indice pour guider les apprenants</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
 </div>
 {% endblock %}
 
-
-
 {% block stylesheets %}
 <style>
-/* Push content away from sidebar */
-.container {
-    margin-left: 280px;
-    max-width: calc(100% - 320px);
-    padding-top: 100px;
-}
-
-/* Card */
-.card {
-    border-radius: 10px;
-}
-
-.card-header {
-    border-radius: 10px 10px 0 0;
-}
-
-/* Inputs */
-.form-control:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-}
-
-/* Buttons */
-.btn {
-    padding: 10px 25px;
-    border-radius: 5px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .container {
-        margin-left: 0;
-        max-width: 100%;
-        padding-top: 80px;
-    }
-}
+/* Reset et styles de base */
 .admin-main-content {
     margin-left: 280px;
-    padding-top: 100px;
+    padding-top: 80px;
     padding-left: 20px;
     padding-right: 20px;
     min-height: 100vh;
-    background-color: #f4f6f8;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
     position: relative;
     z-index: 1;
 }
 
-/* Mobile */
-@media (max-width: 768px) {
-    .admin-main-content {
-        margin-left: 0;
-        padding-top: 80px;
+/* Fil d'Ariane */
+.breadcrumb {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 12px 20px;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.breadcrumb a {
+    color: #4a5568;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb a:hover {
+    color: #667eea;
+}
+
+/* En-tête avec dégradé */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.header-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+}
+
+/* Animation des champs */
+.animate-field {
+    animation: slideInUp 0.5s ease;
+    animation-fill-mode: both;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
+/* Styles des champs */
+.form-control-lg {
+    padding: 14px 18px;
+    font-size: 1rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.form-control-lg:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+    transform: translateY(-2px);
+}
+
+.form-label {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    color: #2d3748;
+}
+
+/* Aperçu en direct */
+.preview-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid #667eea !important;
+}
+
+.preview-card:hover {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transform: translateY(-3px);
+}
+
+.preview-content {
+    min-height: 60px;
+    border: 1px dashed #cbd5e0;
+}
+
+/* Boutons */
+.btn {
+    border-radius: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    transition: all 0.3s ease;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    border: none;
+}
+
+.btn-success:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(56, 161, 105, 0.4);
+}
+
+.btn-outline-secondary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+/* Validation */
+.is-invalid {
+    border-color: #f56565 !important;
+}
+
+.is-invalid:focus {
+    box-shadow: 0 0 0 0.25rem rgba(245, 101, 101, 0.25) !important;
+}
+
+.invalid-feedback {
+    font-size: 0.875rem;
+    margin-top: 5px;
+}
+
+/* Progress bar */
+.form-progress {
+    background: #f7fafc;
+    padding: 15px;
+    border-radius: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .admin-main-content {
+        margin-left: 0;
+        padding-top: 70px;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .breadcrumb {
+        flex-wrap: wrap;
+    }
+    
+    .btn-lg {
+        padding: 12px 20px;
+        font-size: 0.95rem;
+    }
+}
+
+/* Tooltips personnalisés */
+[data-tooltip] {
+    position: relative;
+    cursor: help;
+}
+
+[data-tooltip]:before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 12px;
+    background: #2d3748;
+    color: white;
+    font-size: 0.875rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+[data-tooltip]:hover:before {
+    opacity: 1;
+    visibility: visible;
+    bottom: 120%;
+}
+
+/* Loader pour la soumission */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.btn-loading:after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Notifications toast */
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+    z-index: 9999;
+}
+
+.toast-notification.show {
+    transform: translateX(0);
+}
+
+.toast-notification.success {
+    border-left: 4px solid #48bb78;
+}
+
+.toast-notification.error {
+    border-left: 4px solid #f56565;
+}
 </style>
 
-    
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="" />
-    <meta name="keyword" content="" />
-    <meta name="author" content="flexilecode" />
-    <!--! BEGIN: Favicon-->
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets2/images/favicon.ico') }}" />
-    <!--! END: Favicon-->
-    <!--! BEGIN: Bootstrap CSS-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/bootstrap.min.css') }}" />
-    <!--! END: Bootstrap CSS-->
-    <!--! BEGIN: Vendors CSS-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/vendors/css/vendors.min.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/vendors/css/daterangepicker.min.css') }}" />
-    <!--! END: Vendors CSS-->
-    <!--! BEGIN: Custom CSS-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/theme.min.css') }}" />
-    <!--! END: Custom CSS-->
-    <!--! HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries !-->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+<!-- Meta tags et CSS existants -->
+<meta charset="utf-8" />
+<meta http-equiv="x-ua-compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="" />
+<meta name="keyword" content="" />
+<meta name="author" content="flexilecode" />
+
+<!-- Favicon -->
+<link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets2/images/favicon.ico') }}" />
+
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/bootstrap.min.css') }}" />
+<link rel="stylesheet" type="text/css" href="{{ asset('assets2/vendors/css/vendors.min.css') }}" />
+<link rel="stylesheet" type="text/css" href="{{ asset('assets2/vendors/css/daterangepicker.min.css') }}" />
+<link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/theme.min.css') }}" />
+
+<!-- Font Awesome 6 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<!-- HTML5 shim and Respond.js -->
+<!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
 {% endblock %}
 
 {% block javascripts %}
-    
-    <script src="{{ asset('assets2/vendors/js/vendors.min.js') }}"></script>
-    <script src="{{ asset('assets2/vendors/js/daterangepicker.min.js') }}"></script>
-    <script src="{{ asset('assets2/vendors/js/apexcharts.min.js') }}"></script>
-    <script src="{{ asset('assets2/vendors/js/circle-progress.min.js') }}"></script>
-    <script src="{{ asset('assets2/js/common-init.min.js') }}"></script>
-    <script src="{{ asset('assets2/js/dashboard-init.min.js') }}"></script>
-    {% block admin_javascripts %}{% endblock %}
-    <script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
+<script src="{{ asset('assets2/vendors/js/vendors.min.js') }}"></script>
+<script src="{{ asset('assets2/vendors/js/daterangepicker.min.js') }}"></script>
+<script src="{{ asset('assets2/vendors/js/apexcharts.min.js') }}"></script>
+<script src="{{ asset('assets2/vendors/js/circle-progress.min.js') }}"></script>
+<script src="{{ asset('assets2/js/common-init.min.js') }}"></script>
+<script src="{{ asset('assets2/js/dashboard-init.min.js') }}"></script>
+{% block admin_javascripts %}{% endblock %}
+<script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
+
+<!-- Scripts personnalisés -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('questionForm');
+    const inputs = form.querySelectorAll('input, select, textarea');
+    const progressBar = document.getElementById('formProgress');
+    const progressText = document.getElementById('progressText');
+    const submitBtn = document.getElementById('submitBtn');
+    const livePreview = document.getElementById('livePreview');
+
+    // Calcul de la progression
+    function updateProgress() {
+        let filled = 0;
+        const total = inputs.length;
+
+        inputs.forEach(input => {
+            if (input.value.trim() !== '') {
+                filled++;
+            }
+        });
+
+        const percentage = Math.round((filled / total) * 100);
+        progressBar.style.width = percentage + '%';
+        progressText.textContent = percentage + '% complété';
+    }
+
+    // Aperçu en direct
+    function updatePreview() {
+        const questionText = document.querySelector('[data-field="texte"]')?.value;
+        const indice = document.querySelector('[data-field="indice"]')?.value;
+
+        let previewHtml = '<div class="preview-item">';
+        
+        if (questionText) {
+            previewHtml += `
+                <div class="mb-3">
+                    <span class="badge bg-primary mb-2">Question</span>
+                    <p class="fw-bold mb-2">${questionText}</p>
+                </div>
+            `;
+        }
+
+        if (indice) {
+            previewHtml += `
+                <div class="mb-3">
+                    <span class="badge bg-warning text-dark mb-2">Indice</span>
+                    <p class="fst-italic text-muted mb-2">
+                        <i class="fas fa-lightbulb me-2"></i>${indice}
+                    </p>
+                </div>
+            `;
+        }
+
+        if (!questionText && !indice) {
+            previewHtml = '<p class="text-muted fst-italic mb-0"><i class="fas fa-arrow-right me-2"></i>Remplissez le formulaire pour voir l\'aperçu</p>';
+        }
+
+        previewHtml += '</div>';
+        livePreview.innerHTML = previewHtml;
+    }
+
+    // Écouteurs d'événements
+    inputs.forEach(input => {
+        input.addEventListener('input', () => {
+            updateProgress();
+            updatePreview();
+        });
+    });
+
+    // Animation de soumission
+    form.addEventListener('submit', function(e) {
+        submitBtn.classList.add('btn-loading');
+        submitBtn.disabled = true;
+        
+        // Afficher une notification de succès
+        showToast('Question en cours d\'enregistrement...', 'success');
+    });
+
+    // Gestionnaire de notifications toast
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast-notification ${type}`;
+        toast.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-3 fa-lg"></i>
+                <div>${message}</div>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, 3000);
+    }
+
+    // Validation en temps réel
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && this.value.trim() === '') {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+
+    // Animation des champs au défilement
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+
+    document.querySelectorAll('.animate-field').forEach(field => {
+        observer.observe(field);
+    });
+
+    // Raccourcis clavier
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + S pour sauvegarder
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            form.submit();
+        }
+        
+        // Escape pour annuler
+        if (e.key === 'Escape') {
+            window.location.href = '{{ path('app_showquestion') }}';
+        }
+    });
+
+    // Initialisation
+    updateProgress();
+    updatePreview();
+
+    // Auto-resize pour les textareas
+    const textareas = form.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    });
+});
+</script>
 {% endblock %}

@@ -63,6 +63,12 @@ class Utilisateur
     #[ORM\OneToMany(targetEntity: StressSurvey::class, mappedBy: 'userId', orphanRemoval: true)]
     private Collection $stressSurveys;
 
+    /**
+     * @var Collection<int, QuizAttempt>
+     */
+    #[ORM\OneToMany(targetEntity: QuizAttempt::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $quizAttempts;
+
     public function __construct()
     {
         $this->cours = new ArrayCollection();
@@ -70,6 +76,7 @@ class Utilisateur
         $this->events = new ArrayCollection();
         $this->produits = new ArrayCollection();
         $this->stressSurveys = new ArrayCollection();
+        $this->quizAttempts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -179,36 +186,7 @@ class Utilisateur
         return $this;
     }
 
-    /**
-     * @return Collection<int, Quiz>
-     */
-    public function getQuizzes(): Collection
-    {
-        return $this->quizzes;
-    }
-
-    public function addQuiz(Quiz $quiz): static
-    {
-        if (!$this->quizzes->contains($quiz)) {
-            $this->quizzes->add($quiz);
-            $quiz->setUserId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeQuiz(Quiz $quiz): static
-    {
-        if ($this->quizzes->removeElement($quiz)) {
-            // set the owning side to null (unless already changed)
-            if ($quiz->getUserId() === $this) {
-                $quiz->setUserId(null);
-            }
-        }
-
-        return $this;
-    }
-
+    
     /**
      * @return Collection<int, Event>
      */
@@ -293,6 +271,36 @@ class Utilisateur
             // set the owning side to null (unless already changed)
             if ($stressSurvey->getUserId() === $this) {
                 $stressSurvey->setUserId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, QuizAttempt>
+     */
+    public function getQuizAttempts(): Collection
+    {
+        return $this->quizAttempts;
+    }
+
+    public function addQuizAttempt(QuizAttempt $quizAttempt): static
+    {
+        if (!$this->quizAttempts->contains($quizAttempt)) {
+            $this->quizAttempts->add($quizAttempt);
+            $quizAttempt->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeQuizAttempt(QuizAttempt $quizAttempt): static
+    {
+        if ($this->quizAttempts->removeElement($quizAttempt)) {
+            // set the owning side to null (unless already changed)
+            if ($quizAttempt->getUser() === $this) {
+                $quizAttempt->setUser(null);
             }
         }
 

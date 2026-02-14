@@ -4,41 +4,41 @@ namespace App\Entity;
 
 use App\Repository\QuestionRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\QuestionChoix;
+use App\Entity\QuestionVraiFaux;
+use App\Entity\QuestionTexteLibre;
+
 
 #[ORM\Entity(repositoryClass: QuestionRepository::class)]
-class Question
+#[ORM\Table(name: "question")]
+#[ORM\InheritanceType("SINGLE_TABLE")]
+#[ORM\DiscriminatorColumn(name: "type", type: "string")]
+#[ORM\DiscriminatorMap([
+    "choix" => QuestionChoix::class,
+    "vraifaux" => QuestionVraiFaux::class,
+    "texte" => QuestionTexteLibre::class
+])]
+abstract class Question
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    protected ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $texte = null;
+    protected ?string $texte = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $choixA = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $choixB = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $choixC = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $choixD = null;
-
-    #[ORM\Column(length: 1)]
-    private ?string $bonneReponse = null;
+    #[ORM\Column(length: 20)]
+    protected ?string $niveau = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $indice = null;
+    protected ?string $indice = null;
 
     #[ORM\ManyToOne(inversedBy: 'questions')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Quiz $quiz = null;
+    protected ?Quiz $quiz = null;
 
-    // ================= GETTERS & SETTERS =================
+    // ===== Getters & Setters =====
 
     public function getId(): ?int
     {
@@ -56,58 +56,14 @@ class Question
         return $this;
     }
 
-    public function getChoixA(): ?string
+    public function getNiveau(): ?string
     {
-        return $this->choixA;
+        return $this->niveau;
     }
 
-    public function setChoixA(string $choixA): self
+    public function setNiveau(string $niveau): self
     {
-        $this->choixA = $choixA;
-        return $this;
-    }
-
-    public function getChoixB(): ?string
-    {
-        return $this->choixB;
-    }
-
-    public function setChoixB(string $choixB): self
-    {
-        $this->choixB = $choixB;
-        return $this;
-    }
-
-    public function getChoixC(): ?string
-    {
-        return $this->choixC;
-    }
-
-    public function setChoixC(string $choixC): self
-    {
-        $this->choixC = $choixC;
-        return $this;
-    }
-
-    public function getChoixD(): ?string
-    {
-        return $this->choixD;
-    }
-
-    public function setChoixD(string $choixD): self
-    {
-        $this->choixD = $choixD;
-        return $this;
-    }
-
-    public function getBonneReponse(): ?string
-    {
-        return $this->bonneReponse;
-    }
-
-    public function setBonneReponse(string $bonneReponse): self
-    {
-        $this->bonneReponse = $bonneReponse;
+        $this->niveau = $niveau;
         return $this;
     }
 
@@ -132,4 +88,15 @@ class Question
         $this->quiz = $quiz;
         return $this;
     }
+
+    public function getType(): string
+{
+    return match (true) {
+        $this instanceof QuestionChoix => 'choix',
+        $this instanceof QuestionVraiFaux => 'vraifaux',
+        $this instanceof QuestionTexteLibre => 'texte',
+        default => 'unknown',
+    };
+}
+
 }

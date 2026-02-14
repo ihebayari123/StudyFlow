@@ -5,7 +5,6 @@
 {% block body %}
 {% include 'home/navbar.html.twig' %}
 
-
 <style>
 /* Reset */
 * {
@@ -28,8 +27,6 @@ body {
     backdrop-filter: blur(12px);
     height: 90px;
     box-shadow: 0 6px 25px rgba(0,0,0,0.35);
-    
-
 }
 
 .main-nav .logo h1 {
@@ -79,9 +76,51 @@ body {
     font-size: 1.05rem;
 }
 
+/* Progress Bar */
+.progress-indicator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 15px;
+    background: #f8fafc;
+    border-radius: 50px;
+}
+
+.question-counter {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #4f46e5;
+    background: #eef2ff;
+    padding: 8px 20px;
+    border-radius: 25px;
+}
+
+.progress-bar-container {
+    flex-grow: 1;
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 10px;
+    margin: 0 20px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
 /* Question Box */
 .question-box {
     margin-bottom: 40px;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .question-title {
@@ -111,35 +150,137 @@ body {
     transform: translateX(4px);
 }
 
-.answers input {
+.answers input[type="radio"],
+.answers input[type="text"] {
     accent-color: #6366f1;
+}
+
+.answers input[type="radio"] {
     transform: scale(1.2);
 }
 
-/* Selected Effect */
-.answers input:checked + span {
-    color: #4f46e5;
-    font-weight: 600;
+.answers input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 2px solid #e5e7eb;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
 }
 
-/* Submit Button */
-.submit-btn {
-    width: 100%;
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
-    color: #ffffff;
+.answers input[type="text"]:focus {
+    outline: none;
+    border-color: #6366f1;
+}
+
+/* Navigation Buttons */
+.navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.nav-btn {
+    flex: 1;
+    padding: 15px;
     border: none;
-    padding: 16px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    border-radius: 30px;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    margin-top: 40px;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.prev-btn {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.prev-btn:hover:not(:disabled) {
+    background: #e2e8f0;
+    transform: translateX(-3px);
+}
+
+.next-btn {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+}
+
+.next-btn:hover:not(:disabled) {
+    transform: translateX(3px);
+    box-shadow: 0 10px 20px rgba(99,102,241,0.3);
+}
+
+.submit-btn {
+    flex: 1;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .submit-btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(99,102,241,0.5);
+    box-shadow: 0 10px 30px rgba(34,197,94,0.4);
+}
+
+.nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Timer Container */
+.timer-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 20px auto;
+}
+
+.timer-svg {
+    transform: rotate(-90deg);
+}
+
+.timer-bg {
+    fill: none;
+    stroke: #e5e7eb;
+    stroke-width: 10;
+}
+
+.timer-progress {
+    fill: none;
+    stroke: #22c55e;
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 339.292;
+    stroke-dashoffset: 0;
+    transition: stroke 0.5s linear;
+}
+
+.timer-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #1e293b;
 }
 
 /* Responsive */
@@ -155,177 +296,316 @@ body {
     .question-title {
         font-size: 1.1rem;
     }
+    
+    .navigation-buttons {
+        flex-direction: column;
+    }
 }
-
-.quiz-timer {
-    margin-top: 15px;
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: #16a34a;
-    transition: color 0.3s ease;
-}
-
-/* Timer Container */
-.timer-wrapper {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    margin: 20px auto;
-}
-
-/* SVG */
-.timer-svg {
-    transform: rotate(-90deg);
-}
-
-/* Background Circle */
-.timer-bg {
-    fill: none;
-    stroke: #e5e7eb;
-    stroke-width: 10;
-}
-
-/* Progress Circle */
-.timer-progress {
-    fill: none;
-    stroke: #22c55e;
-    stroke-width: 10;
-    stroke-linecap: round;
-    stroke-dasharray: 339.292;
-    stroke-dashoffset: 0;
-    transition: stroke 0.5s linear;
-}
-
-/* Time Text */
-.timer-text {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 1.1rem;
-    color: #1e293b;
-}
-
-
 </style>
 
-
 <div class="quiz-container">
-
     <div class="quiz-header">
         <h1>{{ quiz.titre }}</h1>
-        <p>Durée : {{ quiz.duree }} minutes</p>
-    
-     <div class="timer-wrapper">
-    <svg class="timer-svg" width="120" height="120">
-        <circle class="timer-bg" cx="60" cy="60" r="54"></circle>
-        <circle id="timerProgress"
-                class="timer-progress"
-                cx="60"
-                cy="60"
-                r="54"></circle>
-    </svg>
-
-    <div id="timerText" class="timer-text">
-        --:--
-    </div>
-</div>
-
-
-    </div>
-    <form id="quizForm" method="post" action="{{ path('quiz_submit', {id: quiz.id}) }}">
-
-
-        {% for question in questions %}
-            <div class="question-box">
-                <div class="question-title">
-                    {{ loop.index }}. {{ question.texte }}
-                </div>
-
-                <div class="answers">
-                    <label>
-                        <input type="radio" name="answers[{{ question.id }}]" value="A">
-                        {{ question.choixA }}
-                    </label>
-
-                    <label>
-                        <input type="radio" name="answers[{{ question.id }}]" value="B">
-                        {{ question.choixB }}
-                    </label>
-
-                    <label>
-                        <input type="radio" name="answers[{{ question.id }}]" value="C">
-                        {{ question.choixC }}
-                    </label>
-
-                    <label>
-                        <input type="radio" name="answers[{{ question.id }}]" value="D">
-                        {{ question.choixD }}
-                    </label>
-                </div>
+        <p>Durée totale : {{ quiz.duree }} minutes</p>
+        
+        <div class="progress-indicator">
+            <span class="question-counter" id="questionCounter">Question <span id="currentQuestionNum">1</span>/{{ questions|length }}</span>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progressBar" style="width: {{ (1 / questions|length * 100) }}%"></div>
             </div>
-        {% else %}
-            <p>Aucune question disponible pour ce quiz.</p>
-        {% endfor %}
+        </div>
 
-        <button type="submit" class="submit-btn">
-            ✅ Terminer le Quiz
-        </button>
+        <div class="timer-wrapper">
+            <svg class="timer-svg" width="120" height="120">
+                <circle class="timer-bg" cx="60" cy="60" r="54"></circle>
+                <circle id="timerProgress"
+                        class="timer-progress"
+                        cx="60"
+                        cy="60"
+                        r="54"></circle>
+            </svg>
+            <div id="timerText" class="timer-text">--:--</div>
+        </div>
+    </div>
 
+    <form id="quizForm" method="post" action="{{ path('quiz_submit', {id: quiz.id}) }}">
+        <div id="questionsContainer">
+            {% for question in questions %}
+                <div class="question-box" data-question-id="{{ question.id }}" {% if loop.index > 1 %}style="display: none;"{% endif %}>
+                    <div class="question-title">
+                        {{ loop.index }}. {{ question.texte }}
+                    </div>
+
+                    <div class="answers">
+                        {% if question.type == 'choix' %}
+                            <label>
+                                <input type="radio" name="answers[{{ question.id }}]" value="A" class="answer-input" data-question="{{ question.id }}">
+                                <span>{{ question.choixA }}</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="answers[{{ question.id }}]" value="B" class="answer-input" data-question="{{ question.id }}">
+                                <span>{{ question.choixB }}</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="answers[{{ question.id }}]" value="C" class="answer-input" data-question="{{ question.id }}">
+                                <span>{{ question.choixC }}</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="answers[{{ question.id }}]" value="D" class="answer-input" data-question="{{ question.id }}">
+                                <span>{{ question.choixD }}</span>
+                            </label>
+                        {% elseif question.type == 'vraifaux' %}
+                            <label>
+                                <input type="radio" name="answers[{{ question.id }}]" value="1" class="answer-input" data-question="{{ question.id }}">
+                                <span>✅ Vrai</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="answers[{{ question.id }}]" value="0" class="answer-input" data-question="{{ question.id }}">
+                                <span>❌ Faux</span>
+                            </label>
+                        {% elseif question.type == 'texte' %}
+                            <input type="text"
+                                   name="answers[{{ question.id }}]"
+                                   placeholder="Votre réponse..."
+                                   class="answer-input"
+                                   data-question="{{ question.id }}"
+                                   style="width:100%; padding:12px; border-radius:10px; border:2px solid #e5e7eb;">
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <p>Aucune question disponible pour ce quiz.</p>
+            {% endfor %}
+        </div>
+
+        <div class="navigation-buttons">
+            <button type="button" id="prevBtn" class="nav-btn prev-btn" disabled>
+                ← Précédent
+            </button>
+            <button type="button" id="nextBtn" class="nav-btn next-btn">
+                Suivant →
+            </button>
+            <button type="submit" id="submitBtn" class="submit-btn" style="display: none;">
+                ✅ Terminer le Quiz
+            </button>
+        </div>
     </form>
-
 </div>
-
-
 {% endblock %}
 
 {% block javascripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-
-    const totalTime = {{ quiz.duree }} * 60;
-    let timeLeft = totalTime;
-
+    const questions = document.querySelectorAll('.question-box');
+    const totalQuestions = questions.length;
+    let currentQuestionIndex = 0;
+    
+    // Timer configuration
+    const totalTime = {{ quiz.duree }} * 60; // Total time in seconds
+    const timePerQuestion = totalTime / totalQuestions; // Equal time per question
+    let timeLeftForCurrent = timePerQuestion;
+    
+    // Store answers
+    const answers = {};
+    
+    // DOM elements
     const timerText = document.getElementById('timerText');
     const progressCircle = document.getElementById('timerProgress');
-    const quizForm = document.getElementById('quizForm');
-
+    const currentQuestionNum = document.getElementById('currentQuestionNum');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    
     const circumference = 2 * Math.PI * 54;
+    let timerInterval;
 
-    function updateTimer() {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-
-        timerText.textContent =
-            `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
+    function showQuestion(index) {
+        // Hide all questions
+        questions.forEach(q => q.style.display = 'none');
         
-        const progress = timeLeft / totalTime;
-        progressCircle.style.strokeDashoffset =
-            circumference * (1 - progress);
-
+        // Show current question
+        questions[index].style.display = 'block';
         
-        if (progress <= 0.25) {
-            progressCircle.style.stroke = '#dc2626'; 
-        } else if (progress <= 0.5) {
-            progressCircle.style.stroke = '#f59e0b'; 
+        // Update counter
+        currentQuestionNum.textContent = index + 1;
+        
+        // Update progress bar
+        const progress = ((index + 1) / totalQuestions) * 100;
+        progressBar.style.width = progress + '%';
+        
+        // Update navigation buttons
+        prevBtn.disabled = index === 0;
+        
+        // Show/hide next/submit buttons
+        if (index === totalQuestions - 1) {
+            nextBtn.style.display = 'none';
+            submitBtn.style.display = 'block';
         } else {
-            progressCircle.style.stroke = '#22c55e'; 
+            nextBtn.style.display = 'block';
+            submitBtn.style.display = 'none';
         }
-
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            alert("⏰ time off");
-            quizForm.submit();
-        }
-
-        timeLeft--;
+        
+        // Reset timer for new question
+        resetTimer();
     }
 
-    updateTimer();
-    const timerInterval = setInterval(updateTimer, 1000);
+    function resetTimer() {
+        // Clear existing interval
+        if (timerInterval) {
+            clearInterval(timerInterval);
+        }
+        
+        // Reset time for current question
+        timeLeftForCurrent = timePerQuestion;
+        
+        // Update timer display
+        updateTimerDisplay();
+        
+        // Start new interval
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const minutes = Math.floor(timeLeftForCurrent / 60);
+        const seconds = Math.floor(timeLeftForCurrent % 60);
+        
+        timerText.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        const progress = timeLeftForCurrent / timePerQuestion;
+        progressCircle.style.strokeDashoffset = circumference * (1 - progress);
+        
+        // Change color based on time left
+        if (progress <= 0.25) {
+            progressCircle.style.stroke = '#dc2626'; // Red
+        } else if (progress <= 0.5) {
+            progressCircle.style.stroke = '#f59e0b'; // Orange
+        } else {
+            progressCircle.style.stroke = '#22c55e'; // Green
+        }
+    }
+
+    function updateTimer() {
+        timeLeftForCurrent--;
+        updateTimerDisplay();
+        
+        // If time is up for current question
+        if (timeLeftForCurrent <= 0) {
+            // Auto-save current answer if any
+            saveCurrentAnswer();
+            
+            // Move to next question or submit if last
+            if (currentQuestionIndex < totalQuestions - 1) {
+                currentQuestionIndex++;
+                showQuestion(currentQuestionIndex);
+            } else {
+                // Time's up on last question - submit
+                clearInterval(timerInterval);
+                alert("⏰ Temps écoulé !");
+                document.getElementById('quizForm').submit();
+            }
+        }
+    }
+
+    function saveCurrentAnswer() {
+        const currentQuestion = questions[currentQuestionIndex];
+        const questionId = currentQuestion.dataset.questionId;
+        const answerInputs = currentQuestion.querySelectorAll('.answer-input');
+        
+        if (answerInputs.length === 1 && answerInputs[0].type === 'text') {
+            // Text input
+            answers[questionId] = answerInputs[0].value;
+        } else {
+            // Radio buttons
+            const checkedRadio = currentQuestion.querySelector('input[type="radio"]:checked');
+            if (checkedRadio) {
+                answers[questionId] = checkedRadio.value;
+            }
+        }
+    }
+
+    function loadSavedAnswer() {
+        const currentQuestion = questions[currentQuestionIndex];
+        const questionId = currentQuestion.dataset.questionId;
+        const savedAnswer = answers[questionId];
+        
+        if (savedAnswer !== undefined) {
+            const answerInputs = currentQuestion.querySelectorAll('.answer-input');
+            
+            if (answerInputs.length === 1 && answerInputs[0].type === 'text') {
+                // Text input
+                answerInputs[0].value = savedAnswer;
+            } else {
+                // Radio buttons
+                const radioToCheck = currentQuestion.querySelector(`input[value="${savedAnswer}"]`);
+                if (radioToCheck) {
+                    radioToCheck.checked = true;
+                }
+            }
+        }
+    }
+
+    // Event Listeners
+    prevBtn.addEventListener('click', () => {
+        if (currentQuestionIndex > 0) {
+            saveCurrentAnswer();
+            currentQuestionIndex--;
+            showQuestion(currentQuestionIndex);
+            loadSavedAnswer();
+        }
+    });
+
+    nextBtn.addEventListener('click', () => {
+        if (currentQuestionIndex < totalQuestions - 1) {
+            saveCurrentAnswer();
+            currentQuestionIndex++;
+            showQuestion(currentQuestionIndex);
+            loadSavedAnswer();
+        }
+    });
+
+    // Auto-save answers when changed
+    document.querySelectorAll('.answer-input').forEach(input => {
+        input.addEventListener('change', (e) => {
+            const questionBox = e.target.closest('.question-box');
+            if (questionBox) {
+                const questionId = questionBox.dataset.questionId;
+                if (e.target.type === 'text') {
+                    answers[questionId] = e.target.value;
+                } else {
+                    answers[questionId] = e.target.value;
+                }
+            }
+        });
+        
+        // For text inputs, also save on input
+        if (input.type === 'text') {
+            input.addEventListener('input', (e) => {
+                const questionBox = e.target.closest('.question-box');
+                if (questionBox) {
+                    const questionId = questionBox.dataset.questionId;
+                    answers[questionId] = e.target.value;
+                }
+            });
+        }
+    });
+
+    // Before submit, save all answers
+    document.getElementById('quizForm').addEventListener('submit', (e) => {
+        saveCurrentAnswer();
+        
+        // Create hidden inputs for all answers
+        Object.keys(answers).forEach(questionId => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = `answers[${questionId}]`;
+            input.value = answers[questionId];
+            e.target.appendChild(input);
+        });
+    });
+
+    // Initialize
+    showQuestion(0);
 });
 </script>
 {% endblock %}

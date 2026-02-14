@@ -31,9 +31,7 @@ class Quiz
     #[ORM\Column]
     private ?\DateTime $dateCreation = null;
 
-    #[ORM\ManyToOne(inversedBy: 'quizzes')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Utilisateur $user = null;
+   
 
     #[ORM\ManyToOne(inversedBy: 'quizzes')]
     #[ORM\JoinColumn(nullable: false)]
@@ -49,10 +47,17 @@ class Quiz
     )]
     private Collection $questions;
 
+    /**
+     * @var Collection<int, QuizAttempt>
+     */
+    #[ORM\OneToMany(targetEntity: QuizAttempt::class, mappedBy: 'quiz')]
+    private Collection $quizAttempts;
+
     public function __construct()
     {
         $this->questions = new ArrayCollection();
         $this->dateCreation = new \DateTime();
+        $this->quizAttempts = new ArrayCollection();
     }
 
     // ================= GETTERS & SETTERS =================
@@ -95,16 +100,7 @@ class Quiz
         return $this;
     }
 
-    public function getUser(): ?Utilisateur
-    {
-        return $this->user;
-    }
-
-    public function setUser(?Utilisateur $user): static
-    {
-        $this->user = $user;
-        return $this;
-    }
+   
 
     public function getCourse(): ?Cours
     {
@@ -140,6 +136,36 @@ class Quiz
         if ($this->questions->removeElement($question)) {
             if ($question->getQuiz() === $this) {
                 $question->setQuiz(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, QuizAttempt>
+     */
+    public function getQuizAttempts(): Collection
+    {
+        return $this->quizAttempts;
+    }
+
+    public function addQuizAttempt(QuizAttempt $quizAttempt): static
+    {
+        if (!$this->quizAttempts->contains($quizAttempt)) {
+            $this->quizAttempts->add($quizAttempt);
+            $quizAttempt->setQuiz($this);
+        }
+
+        return $this;
+    }
+
+    public function removeQuizAttempt(QuizAttempt $quizAttempt): static
+    {
+        if ($this->quizAttempts->removeElement($quizAttempt)) {
+            // set the owning side to null (unless already changed)
+            if ($quizAttempt->getQuiz() === $this) {
+                $quizAttempt->setQuiz(null);
             }
         }
 
