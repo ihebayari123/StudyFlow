@@ -23,20 +23,53 @@ security:
             target: app_login
 
   access_control:
+    # Public routes
     - { path: ^/login$, roles: PUBLIC_ACCESS }
     - { path: ^/logout$, roles: PUBLIC_ACCESS }
     - { path: ^/register, roles: PUBLIC_ACCESS }
 
-    # Admin area – accessible to admins and teachers
-    - { path: ^/admin, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    # ----- Teacher-allowed routes (Courses & Chapters) -----
+    # Already under /admin
+    - { path: ^/admin/courses, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/admin/chapter, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/admin/chapters, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    
+    # Not under /admin - add explicit rules
+    - { path: ^/showcourses, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/addcours, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/deletecours, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/updatecours, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/showcoursesback, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/addcoursback, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/deletecoursback, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/updatecoursback, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
 
-    # Teacher choice page – only teachers (after login)
+    # ----- Teacher-allowed routes (Quiz & Questions) -----
+    # Already under /admin
+    - { path: ^/admin/question, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/admin/showquestion, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/admin/addformquestion, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/admin/updateformquestion, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/admin/showquiz, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/admin/addformquiz, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/admin/updateformquiz, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/admin/quiz, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    
+    # Not under /admin - add explicit rules
+    - { path: ^/deletequestion, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    - { path: ^/deletequiz, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+
+    # ----- Admin-only area (everything else under /admin) -----
+    - { path: ^/admin, roles: ROLE_ADMIN }
+
+    # ----- Teacher choice page -----
     - { path: ^/login/success, roles: ROLE_ENSEIGNANT }
 
-    # Home (front office) – accessible to students and teachers
+    # ----- Student/Teacher front office -----
     - { path: ^/home, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT] }
+    - { path: ^/front, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT] }
 
-    # All other paths require at least ROLE_USER (any authenticated user)
+    # Default: all other paths require authentication
     - { path: ^/, roles: ROLE_USER }
 
 when@test:
