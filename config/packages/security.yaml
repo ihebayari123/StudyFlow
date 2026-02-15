@@ -21,6 +21,7 @@ security:
         logout:
             path: app_logout
             target: app_login
+        user_checker: App\Security\UserStatusChecker
 
   access_control:
     # Public routes
