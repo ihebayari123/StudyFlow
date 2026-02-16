@@ -106,6 +106,7 @@ public function quizSubmit(
     $scoreQuestions = 0;
     $scorePoints = 0;
     $total = count($questions);
+    $maxPoints = 0;
 
     foreach ($questions as $question) {
 
@@ -119,30 +120,63 @@ public function quizSubmit(
 
     // ===== VRAI / FAUX =====
     elseif ($question instanceof QuestionVraiFaux) {
-        $isCorrect = $userAnswer === $question->getBonneReponseBool();
+        $userBool = $userAnswer === "1";
+        $isCorrect = $userBool === $question->getBonneReponseBool();
     }
 
     // ===== TEXTE LIBRE =====
     elseif ($question instanceof QuestionTexteLibre) {
 
-        $bonneReponse = $question->getReponseAttendue(); 
+        $bonneReponse = $question->getReponseAttendue();
+
         $isCorrect =
             strtolower(trim($userAnswer)) ===
             strtolower(trim($bonneReponse));
     }
+     
 
+    switch (strtolower($question->getNiveau())) {
+    case 'facile':
+        $maxPoints += 1;
+        break;
+    case 'moyen':
+        $maxPoints += 2;
+        break;
+    case 'difficile':
+        $maxPoints += 3;
+        break;
+}
+
+    // ===== score=====
     if ($isCorrect) {
+
         $scoreQuestions++;
+
+        
+        switch (strtolower($question->getNiveau())) {
+            case 'facile':
+                $scorePoints += 1;
+                break;
+            case 'moyen':
+                $scorePoints += 2;
+                break;
+            case 'difficile':
+                $scorePoints += 3;
+                break;
+        }
     }
 }
 
 
+
     return $this->render('front_quiz/quiz_result.html.twig', [
-        'quiz' => $quiz,
-        'scoreQuestions' => $scoreQuestions,
-        'scorePoints' => $scorePoints,
-        'total' => $total,
-    ]);
+    'quiz' => $quiz,
+    'scoreQuestions' => $scoreQuestions,
+    'scorePoints' => $scorePoints,
+    'maxPoints' => $maxPoints,
+    'total' => $total,
+]);
+
 }
 
 }

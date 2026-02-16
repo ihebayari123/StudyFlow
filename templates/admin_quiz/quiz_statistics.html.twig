@@ -1,0 +1,272 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block admin_content %}
+
+<div class="admin-main-content">
+    <div class="container-fluid py-4">
+
+        <!-- Header -->
+        <div class="mb-4">
+            <h2 class="fw-bold">
+                📊 Statistiques Globales des Quiz
+            </h2>
+            <p class="text-muted mb-0">
+                Analyse complète des performances de tous les quiz
+            </p>
+        </div>
+
+        {% for quizId, data in allStats %}
+            {% set quiz = data.quiz %}
+            {% set stats = data.stats %}
+            {% set timeStats = data.timeStats %}
+            {% set userStats = data.userStats %}
+            {% set scoreDistribution = data.scoreDistribution %}
+
+            <div class="card shadow-sm border-0 mb-5" id="quiz-{{ quiz.id }}">
+                
+                <div class="card-body">
+
+                    <!-- Summary Cards Row -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="text-muted mb-2">Tentatives totales</h6>
+                                            <h2 class="fw-bold mb-0">{{ stats.total_attempts }}</h2>
+                                            <small class="text-muted">
+                                                Terminées: {{ stats.completed_attempts }} | 
+                                                En cours: {{ stats.in_progress_attempts }}
+                                            </small>
+                                        </div>
+                                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                                            <i class="fas fa-users fa-2x text-primary"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="text-muted mb-2">Points moyens</h6>
+                                            <h2 class="fw-bold mb-0">{{ stats.average_points }}</h2>
+                                            <small class="text-success">
+                                                sur {{ stats.max_possible_score }} points max
+                                            </small>
+                                        </div>
+                                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                                            <i class="fas fa-chart-line fa-2x text-success"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="text-muted mb-2">Taux de réussite</h6>
+                                            <h2 class="fw-bold mb-0">{{ stats.success_rate }}%</h2>
+                                            <small class="text-info">
+                                                {{ stats.average_questions_correct }}/{{ quiz.questions|length }} réponses correctes
+                                            </small>
+                                        </div>
+                                        <div class="bg-info bg-opacity-10 p-3 rounded-circle">
+                                            <i class="fas fa-check-circle fa-2x text-info"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="text-muted mb-2">Utilisateurs uniques</h6>
+                                            <h2 class="fw-bold mb-0">{{ userStats.total_unique_users }}</h2>
+                                            <small class="text-warning">
+                                                Moy. {{ userStats.average_attempts_per_user }} tentative/utilisateur
+                                            </small>
+                                        </div>
+                                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                                            <i class="fas fa-user-graduate fa-2x text-warning"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Score Statistics Row -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-4">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-transparent">
+                                    <h5 class="mb-0">🏆 Meilleurs et pires scores</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <span class="text-muted">Meilleur score:</span>
+                                        <span class="fw-bold text-success">{{ stats.best_score }} points</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <span class="text-muted">Pire score:</span>
+                                        <span class="fw-bold text-danger">{{ stats.worst_score }} points</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <span class="text-muted">Médiane:</span>
+                                        <span class="fw-bold">{{ stats.median_score }} points</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Écart type:</span>
+                                        <span class="fw-bold">{{ stats.standard_deviation }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-transparent">
+                                    <h5 class="mb-0">📊 Distribution des scores</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if stats.total_attempts > 0 %}
+                                        {% for range, count in scoreDistribution %}
+                                            {% set percentage = (count / stats.total_attempts * 100)|round(1) %}
+                                            <div class="mb-3">
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <span>{{ range }}</span>
+                                                    <span>{{ count }} tentative(s) ({{ percentage }}%)</span>
+                                                </div>
+                                                <div class="progress" style="height: 10px;">
+                                                    <div class="progress-bar {% if loop.index == 5 %}bg-success{% elseif loop.index == 4 %}bg-info{% elseif loop.index == 3 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                                         style="width: {{ percentage }}%"></div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-muted text-center">Aucune donnée disponible</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Analysis -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-transparent">
+                                    <h5 class="mb-0">⏱️ Analyse du temps</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if stats.completed_attempts > 0 %}
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <span class="text-muted">Temps moyen de complétion:</span>
+                                            <span class="fw-bold">{{ timeStats.average_completion_time_formatted }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <span class="text-muted">Complétion la plus rapide:</span>
+                                            <span class="fw-bold text-success">{{ timeStats.fastest_completion_time|date('i:s') }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <span class="text-muted">Complétion la plus lente:</span>
+                                            <span class="fw-bold text-danger">{{ timeStats.slowest_completion_time|date('H:i:s') }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-muted">Heure de pointe:</span>
+                                            <span class="fw-bold">{{ timeStats.peak_hour }}:00</span>
+                                        </div>
+                                    {% else %}
+                                        <p class="text-muted text-center">Aucune tentative terminée</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-transparent">
+                                    <h5 class="mb-0">👥 Performance des utilisateurs</h5>
+                                </div>
+                                <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                                    {% if userStats.users_stats|length > 0 %}
+                                        {% for userStat in userStats.users_stats|slice(0, 5) %}
+                                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                                <div>
+                                                    <div class="fw-bold">{{ userStat.user.nom }} {{ userStat.user.prenom }}</div>
+                                                    <small class="text-muted">{{ userStat.attempts_count }} tentative(s)</small>
+                                                </div>
+                                                <div class="text-end">
+                                                    <div class="fw-bold text-primary">{{ userStat.best_score }}</div>
+                                                    <small>Meilleur score</small>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-muted text-center mb-0">Pas assez de données</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Aucun quiz disponible pour le moment
+            </div>
+        {% endfor %}
+
+    </div>
+</div>
+
+<style>
+.admin-main-content {
+    margin-left: 280px;
+    padding: 20px;
+}
+
+.card {
+    border-radius: 15px;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.progress {
+    border-radius: 10px;
+}
+
+.table th {
+    font-weight: 600;
+    color: #495057;
+}
+
+.badge {
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+.card-header.bg-primary {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+
+</style>
+
+{% endblock %}
