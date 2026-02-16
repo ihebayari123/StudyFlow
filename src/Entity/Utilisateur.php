@@ -75,6 +75,15 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $statutCompte = null;   
 
+    #[ORM\Column(type: 'integer')]
+    private ?int $loginFrequency = 0;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $lastLogin = null;
+
+    #[ORM\Column(type: 'integer')]
+    private ?int $failedLoginAttempts = 0;
+
     /**
      * @var Collection<int, Cours>
      */
@@ -237,4 +246,38 @@ public function getPassword(): string
     return $this->motDePasse;
 }
 
+public function getLoginFrequency(): ?int
+{
+    return $this->loginFrequency;
 }
+
+public function setLoginFrequency(int $loginFrequency): static
+{
+    $this->loginFrequency = $loginFrequency;
+    return $this;
+}
+
+public function getLastLogin(): ?\DateTimeInterface
+{
+    return $this->lastLogin;
+}
+
+public function setLastLogin(?\DateTimeInterface $lastLogin): static
+{
+    $this->lastLogin = $lastLogin;
+    return $this;
+}
+
+public function getFailedLoginAttempts(): ?int
+{
+    return $this->failedLoginAttempts;
+}
+
+public function setFailedLoginAttempts(int $failedLoginAttempts): static
+{
+    $this->failedLoginAttempts = $failedLoginAttempts;
+    return $this;
+}
+
+}
+

@@ -29,6 +29,8 @@ security:
     - { path: ^/logout$, roles: PUBLIC_ACCESS }
     - { path: ^/register, roles: PUBLIC_ACCESS }
     - { path: ^/home, roles: PUBLIC_ACCESS }
+    - { path: ^/useradd, roles: PUBLIC_ACCESS }
+
 
     # ----- ROUTES AVEC "SHOW" - Accessible à TOUS les rôles (étudiant, enseignant, admin) -----
     - { path: ^/show, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT, ROLE_ADMIN] }
