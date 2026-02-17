@@ -1,0 +1,1879 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Exercices Fitness Avancés{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    /* Variables CSS */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --dark-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        --card-bg: rgba(255, 255, 255, 0.95);
+        --shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        --shadow-hover: 0 30px 80px rgba(0, 0, 0, 0.2);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    /* Keep navbar text white and make navbar background semi-transparent */
+    .header-area {
+        background: rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(10px);
+    }
+
+    .header-area .logo h1,
+    .header-area .nav a,
+    .header-area .menu-trigger span,
+    nav, .navbar, nav *, .navbar *, .nav-link {
+        color: white !important;
+    }
+
+    /* Back Button */
+    .back-button-container {
+        max-width: 1400px;
+        margin: 20px auto 0;
+        padding: 0 20px;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 25px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        margin-bottom: 20px;
+    }
+
+    .back-btn:hover {
+        background: white;
+        color: #667eea;
+        transform: translateX(-5px);
+        border-color: white;
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .back-btn i {
+        font-size: 1rem;
+        transition: transform 0.3s ease;
+    }
+
+    .back-btn:hover i {
+        transform: translateX(-3px);
+    }
+
+    /* Hero Section */
+    .fitness-hero {
+        background: var(--dark-gradient);
+        min-height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        padding: 60px 20px;
+        margin-bottom: 50px;
+    }
+
+    .fitness-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+        animation: pulse-bg 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-bg {
+        0%, 100% { transform: scale(1); opacity: 0.5; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .hero-content {
+        text-align: center;
+        z-index: 1;
+        position: relative;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff 0%, #a8b2ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 20px;
+        animation: slideDown 0.8s ease-out;
+    }
+
+    .hero-subtitle {
+        font-size: 1.3rem;
+        color: rgba(255, 255, 255, 0.8);
+        max-width: 600px;
+        margin: 0 auto;
+        animation: slideUp 0.8s ease-out 0.2s both;
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: 20px;
+        margin: -50px auto 50px;
+        max-width: 1000px;
+        box-shadow: var(--shadow);
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        gap: 20px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 15px 30px;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: countUp 2s ease-out;
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 0.95rem;
+        margin-top: 5px;
+    }
+
+    @keyframes countUp {
+        from { opacity: 0; transform: scale(0.5); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Exercises Container */
+    .exercises-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 20px 60px;
+    }
+
+    .section-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 50px;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Search Bar */
+    .search-container {
+        position: relative;
+        max-width: 600px;
+        margin: 0 auto 40px auto;
+    }
+
+    .search-bar {
+        width: 100%;
+        padding: 15px 50px 15px 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 30px;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .search-bar::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .search-bar:focus {
+        outline: none;
+        background: white;
+        color: #333;
+        border-color: white;
+        box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .search-bar:focus::placeholder {
+        color: #999;
+    }
+
+    .search-icon {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1.2rem;
+        pointer-events: none;
+    }
+
+    .search-bar:focus + .search-icon {
+        color: #667eea;
+    }
+
+    /* Filter Buttons */
+    .filter-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 60px;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 12px 30px;
+        border: none;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: 30px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        background-color: white;
+        color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Exercises Grid */
+    .exercises-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+    }
+
+    .exercise-card {
+        background: white;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+    }
+
+    .exercise-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .exercise-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: var(--primary-gradient);
+        transform: scaleX(0);
+        transition: transform 0.4s ease;
+    }
+
+    .exercise-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .exercise-header {
+        padding: 25px 25px 15px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .exercise-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        animation: iconPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes iconPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .exercise-icon.warmup { background: var(--warning-gradient); }
+    .exercise-icon.cardio { background: var(--secondary-gradient); }
+    .exercise-icon.strength { background: var(--primary-gradient); }
+    .exercise-icon.stretch { background: var(--success-gradient); }
+
+    .exercise-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+
+    .exercise-category {
+        font-size: 0.85rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .exercise-body {
+        padding: 0 25px 25px;
+    }
+
+    .exercise-description {
+        color: #555;
+        line-height: 1.7;
+        margin-bottom: 20px;
+    }
+
+    .exercise-meta {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .meta-item i {
+        color: #667eea;
+    }
+
+    /* Animation Container */
+    .animation-container {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Jumping Jacks Animation */
+    .jumping-jack-figure {
+        width: 80px;
+        height: 120px;
+        position: relative;
+        animation: jumpingJack 1.5s ease-in-out infinite;
+    }
+
+    .jj-head {
+        width: 30px;
+        height: 30px;
+        background: var(--primary-gradient);
+        border-radius: 50%;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .jj-body {
+        width: 20px;
+        height: 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        position: absolute;
+        top: 35px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .jj-arm-left, .jj-arm-right {
+        width: 35px;
+        height: 8px;
+        background: #667eea;
+        border-radius: 4px;
+        position: absolute;
+        top: 40px;
+    }
+
+    .jj-arm-left {
+        left: -25px;
+        transform-origin: right center;
+        animation: armWaveLeft 1.5s ease-in-out infinite;
+    }
+
+    .jj-arm-right {
+        right: -25px;
+        transform-origin: left center;
+        animation: armWaveRight 1.5s ease-in-out infinite;
+    }
+
+    .jj-leg-left, .jj-leg-right {
+        width: 12px;
+        height: 45px;
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        border-radius: 6px;
+        position: absolute;
+        top: 70px;
+    }
+
+    .jj-leg-left {
+        left: 20px;
+        transform-origin: top center;
+        animation: legSpreadLeft 1.5s ease-in-out infinite;
+    }
+
+    .jj-leg-right {
+        right: 20px;
+        transform-origin: top center;
+        animation: legSpreadRight 1.5s ease-in-out infinite;
+    }
+
+    @keyframes jumpingJack {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+
+    @keyframes armWaveLeft {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(140deg); }
+    }
+
+    @keyframes armWaveRight {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-140deg); }
+    }
+
+    @keyframes legSpreadLeft {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(30deg); }
+    }
+
+    @keyframes legSpreadRight {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-30deg); }
+    }
+
+    /* Squat Animation */
+    .squat-figure {
+        width: 80px;
+        height: 100px;
+        position: relative;
+        animation: squatBody 2s ease-in-out infinite;
+    }
+
+    .sq-head {
+        width: 35px;
+        height: 35px;
+        background: var(--secondary-gradient);
+        border-radius: 50%;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .sq-torso {
+        width: 25px;
+        height: 35px;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border-radius: 12px;
+        position: absolute;
+        top: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .sq-thighs {
+        width: 50px;
+        height: 12px;
+        background: #f5576c;
+        border-radius: 6px;
+        position: absolute;
+        top: 70px;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: thighBend 2s ease-in-out infinite;
+    }
+
+    .sq-calves {
+        width: 12px;
+        height: 35px;
+        background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+        border-radius: 6px;
+        position: absolute;
+        top: 75px;
+    }
+
+    .sq-calves.left { left: 22px; animation: calfLeft 2s ease-in-out infinite; }
+    .sq-calves.right { right: 22px; animation: calfRight 2s ease-in-out infinite; }
+
+    @keyframes squatBody {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(25px); }
+    }
+
+    @keyframes thighBend {
+        0%, 100% { width: 50px; }
+        50% { width: 70px; }
+    }
+
+    @keyframes calfLeft {
+        0%, 100% { transform: rotate(0deg); top: 75px; }
+        50% { transform: rotate(45deg); top: 85px; }
+    }
+
+    @keyframes calfRight {
+        0%, 100% { transform: rotate(0deg); top: 75px; }
+        50% { transform: rotate(-45deg); top: 85px; }
+    }
+
+    /* Push-up Animation */
+    .pushup-figure {
+        width: 100px;
+        height: 60px;
+        position: relative;
+        animation: pushupBody 2s ease-in-out infinite;
+    }
+
+    .pu-head {
+        width: 25px;
+        height: 25px;
+        background: var(--success-gradient);
+        border-radius: 50%;
+        position: absolute;
+        top: 5px;
+        left: 15px;
+    }
+
+    .pu-torso {
+        width: 50px;
+        height: 15px;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        border-radius: 8px;
+        position: absolute;
+        top: 15px;
+        left: 25px;
+    }
+
+    .pu-arm {
+        width: 8px;
+        height: 35px;
+        background: #4facfe;
+        border-radius: 4px;
+        position: absolute;
+        top: 20px;
+        animation: armBend 2s ease-in-out infinite;
+    }
+
+    .pu-arm.left { left: 35px; }
+    .pu-arm.right { left: 55px; }
+
+    @keyframes pushupBody {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(20px); }
+    }
+
+    @keyframes armBend {
+        0%, 100% { height: 35px; }
+        50% { height: 20px; }
+    }
+
+    /* Plank Animation */
+    .plank-figure {
+        width: 120px;
+        height: 50px;
+        position: relative;
+        animation: plankShake 3s ease-in-out infinite;
+    }
+
+    .pl-head {
+        width: 22px;
+        height: 22px;
+        background: var(--warning-gradient);
+        border-radius: 50%;
+        position: absolute;
+        top: 5px;
+        left: 5px;
+    }
+
+    .pl-body {
+        width: 70px;
+        height: 18px;
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        border-radius: 9px;
+        position: absolute;
+        top: 8px;
+        left: 25px;
+    }
+
+    .pl-arm {
+        width: 35px;
+        height: 6px;
+        background: #fa709a;
+        border-radius: 3px;
+        position: absolute;
+        top: 25px;
+        left: 30px;
+    }
+
+    .pl-leg {
+        width: 40px;
+        height: 8px;
+        background: linear-gradient(135deg, #fee140 0%, #fa709a 100%);
+        border-radius: 4px;
+        position: absolute;
+        top: 22px;
+        left: 75px;
+    }
+
+    @keyframes plankShake {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        25% { transform: translateY(-2px) rotate(0.5deg); }
+        75% { transform: translateY(2px) rotate(-0.5deg); }
+    }
+
+    /* Lunges Animation */
+    .lunge-figure {
+        width: 100px;
+        height: 110px;
+        position: relative;
+        animation: lungeMove 3s ease-in-out infinite;
+    }
+
+    .ln-head {
+        width: 28px;
+        height: 28px;
+        background: var(--primary-gradient);
+        border-radius: 50%;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .ln-torso {
+        width: 22px;
+        height: 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 11px;
+        position: absolute;
+        top: 32px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .ln-leg-front, .ln-leg-back {
+        width: 14px;
+        height: 45px;
+        background: #764ba2;
+        border-radius: 7px;
+        position: absolute;
+        top: 65px;
+    }
+
+    .ln-leg-front {
+        left: 25px;
+        transform-origin: top center;
+        animation: frontLeg 3s ease-in-out infinite;
+    }
+
+    .ln-leg-back {
+        right: 25px;
+        transform-origin: top center;
+        animation: backLeg 3s ease-in-out infinite;
+    }
+
+    @keyframes lungeMove {
+        0%, 100% { transform: translateX(0); }
+        50% { transform: translateX(20px); }
+    }
+
+    @keyframes frontLeg {
+        0%, 100% { transform: rotate(-20deg); height: 45px; }
+        50% { transform: rotate(20deg); height: 35px; }
+    }
+
+    @keyframes backLeg {
+        0%, 100% { transform: rotate(20deg); height: 35px; }
+        50% { transform: rotate(-20deg); height: 45px; }
+    }
+
+    /* Mountain Climbers Animation */
+    .mountain-figure {
+        width: 100px;
+        height: 70px;
+        position: relative;
+    }
+
+    .mc-head {
+        width: 22px;
+        height: 22px;
+        background: var(--secondary-gradient);
+        border-radius: 50%;
+        position: absolute;
+        top: 0;
+        left: 10px;
+    }
+
+    .mc-body {
+        width: 45px;
+        height: 14px;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border-radius: 7px;
+        position: absolute;
+        top: 12px;
+        left: 20px;
+    }
+
+    .mc-knee-left, .mc-knee-right {
+        width: 12px;
+        height: 12px;
+        background: #f5576c;
+        border-radius: 50%;
+        position: absolute;
+        top: 35px;
+    }
+
+    .mc-knee-left {
+        left: 35px;
+        animation: kneeLeft 0.8s ease-in-out infinite;
+    }
+
+    .mc-knee-right {
+        right: 35px;
+        animation: kneeRight 0.8s ease-in-out infinite;
+    }
+
+    @keyframes kneeLeft {
+        0%, 100% { transform: translateY(0) translateX(0); }
+        50% { transform: translateY(-15px) translateX(10px); }
+    }
+
+    @keyframes kneeRight {
+        0%, 100% { transform: translateY(-15px) translateX(-10px); }
+        50% { transform: translateY(0) translateX(0); }
+    }
+
+    /* Burpees Animation */
+    .burpee-figure {
+        width: 80px;
+        height: 100px;
+        position: relative;
+        animation: burpeeJump 2s ease-in-out infinite;
+    }
+
+    .bp-head {
+        width: 25px;
+        height: 25px;
+        background: var(--success-gradient);
+        border-radius: 50%;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .bp-body {
+        width: 20px;
+        height: 30px;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        border-radius: 10px;
+        position: absolute;
+        top: 28px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .bp-legs {
+        width: 50px;
+        height: 10px;
+        background: #00f2fe;
+        border-radius: 5px;
+        position: absolute;
+        top: 55px;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: legsSpread 2s ease-in-out infinite;
+    }
+
+    @keyframes burpeeJump {
+        0%, 100% { transform: translateY(0) scaleY(1); }
+        30% { transform: translateY(30px) scaleY(0.6); }
+        60% { transform: translateY(-20px) scaleY(1.1); }
+    }
+
+    @keyframes legsSpread {
+        0%, 100% { width: 20px; }
+        30% { width: 60px; }
+        60% { width: 20px; }
+    }
+
+    /* High Knees Animation */
+    .highknee-figure {
+        width: 80px;
+        height: 110px;
+        position: relative;
+    }
+
+    .hk-head {
+        width: 26px;
+        height: 26px;
+        background: var(--warning-gradient);
+        border-radius: 50%;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: headBob 0.6s ease-in-out infinite;
+    }
+
+    .hk-torso {
+        width: 20px;
+        height: 35px;
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        border-radius: 10px;
+        position: absolute;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .hk-thigh-left, .hk-thigh-right {
+        width: 12px;
+        height: 30px;
+        background: #fa709a;
+        border-radius: 6px;
+        position: absolute;
+        top: 60px;
+        transform-origin: top center;
+    }
+
+    .hk-thigh-left {
+        left: 25px;
+        animation: highKneeLeft 0.6s ease-in-out infinite;
+    }
+
+    .hk-thigh-right {
+        right: 25px;
+        animation: highKneeRight 0.6s ease-in-out infinite;
+    }
+
+    @keyframes headBob {
+        0%, 100% { transform: translateX(-50%) translateY(0); }
+        50% { transform: translateX(-50%) translateY(-5px); }
+    }
+
+    @keyframes highKneeLeft {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-70deg); }
+    }
+
+    @keyframes highKneeRight {
+        0%, 100% { transform: rotate(-70deg); }
+        50% { transform: rotate(0deg); }
+    }
+
+    /* Exercise Steps */
+    .exercise-steps {
+        background: #f8f9ff;
+        border-radius: 16px;
+        padding: 20px;
+        margin-top: 15px;
+    }
+
+    .step-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        padding: 12px 0;
+        border-bottom: 1px solid #e0e4ff;
+    }
+
+    .step-item:last-child {
+        border-bottom: none;
+    }
+
+    .step-number {
+        width: 30px;
+        height: 30px;
+        background: var(--primary-gradient);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .step-text {
+        color: #555;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    /* Difficulty Badge */
+    .difficulty-badge {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .difficulty-beginner {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        color: #0d5c3b;
+    }
+
+    .difficulty-intermediate {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: #8b4513;
+    }
+
+    .difficulty-advanced {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        color: white;
+    }
+
+    /* Timer Section */
+    .timer-section {
+        background: var(--dark-gradient);
+        border-radius: 20px;
+        padding: 40px;
+        margin-top: 50px;
+        text-align: center;
+        color: white;
+    }
+
+    .timer-display {
+        font-size: 5rem;
+        font-weight: 800;
+        font-family: 'Courier New', monospace;
+        background: linear-gradient(135deg, #fff 0%, #a8b2ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 20px 0;
+        text-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+    }
+
+    .timer-controls {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .timer-btn {
+        padding: 15px 35px;
+        border: none;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .timer-btn.start {
+        background: var(--success-gradient);
+        color: white;
+    }
+
+    .timer-btn.pause {
+        background: var(--warning-gradient);
+        color: white;
+    }
+
+    .timer-btn.reset {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+
+    .timer-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .timer-presets {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .preset-btn {
+        padding: 10px 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: transparent;
+        color: white;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .preset-btn:hover, .preset-btn.active {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: white;
+    }
+
+    /* Progress Ring */
+    .progress-ring-container {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        margin: 0 auto;
+    }
+
+    .progress-ring {
+        transform: rotate(-90deg);
+    }
+
+    .progress-ring-circle {
+        transition: stroke-dashoffset 0.35s;
+        transform-origin: 50% 50%;
+    }
+
+    /* Breathing Guide */
+    .breathing-guide {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 80px;
+        height: 80px;
+        background: var(--primary-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+        animation: breathe 4s ease-in-out infinite;
+        z-index: 1000;
+        transition: transform 0.3s ease;
+    }
+
+    .breathing-guide:hover {
+        transform: scale(1.1);
+    }
+
+    @keyframes breathe {
+        0%, 100% { transform: scale(1); box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4); }
+        50% { transform: scale(1.15); box-shadow: 0 15px 50px rgba(102, 126, 234, 0.6); }
+    }
+
+    .breathing-guide i {
+        color: white;
+        font-size: 2rem;
+    }
+
+    /* Pulse Effect */
+    .pulse-effect {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: rgba(102, 126, 234, 0.3);
+        animation: pulse-ring 2s ease-out infinite;
+    }
+
+    @keyframes pulse-ring {
+        0% { transform: scale(1); opacity: 1; }
+        100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    /* No Results */
+    .no-results {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 80px 20px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 30px;
+        border: 2px dashed rgba(255, 255, 255, 0.3);
+    }
+
+    .no-results i {
+        color: white;
+        margin-bottom: 20px;
+    }
+
+    .no-results h3 {
+        color: white;
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .no-results p {
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 30px;
+    }
+
+    .create-first-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 40px;
+        background: white;
+        color: #667eea;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .create-first-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 20px 45px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .back-button-container {
+            margin-top: 100px;
+        }
+        
+        .hero-title {
+            font-size: 2.2rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1rem;
+        }
+        
+        .timer-display {
+            font-size: 3rem;
+        }
+        
+        .exercises-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-bar {
+            margin: -30px 15px 30px;
+        }
+        
+        .filter-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .filter-btn {
+            width: 200px;
+        }
+    }
+
+    @keyframes breatheGuide {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- ======= Header ======= -->
+{% block header %}
+{% include 'home/navbar.html.twig' %}
+{% endblock %}
+
+<!-- Bouton Retour -->
+<div class="back-button-container">
+    <a href="{{ path('app_studyflow') }}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Retour au StudyFlow
+    </a>
+</div>
+
+<!-- Hero Section -->
+<section class="fitness-hero">
+    <div class="hero-content">
+        <h1 class="hero-title">💪 Exercices Fitness Avancés</h1>
+        <p class="hero-subtitle">Transformez votre corps et votre esprit avec nos exercices professionnels animés. Suivez votre progression et atteignez vos objectifs.</p>
+    </div>
+</section>
+
+<!-- Stats Bar -->
+<div class="stats-bar">
+    <div class="stat-item">
+        <div class="stat-number">8</div>
+        <div class="stat-label">Exercices</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number">45</div>
+        <div class="stat-label">Minutes</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number">3</div>
+        <div class="stat-label">Niveaux</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number">∞</div>
+        <div class="stat-label">Bénéfices</div>
+    </div>
+</div>
+
+<!-- Exercises Container -->
+<div class="exercises-container">
+    <h2 class="section-title">Programme d'Entraînement Complet</h2>
+    
+    <!-- Search Bar -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-bar" placeholder="Rechercher un exercice par nom ou muscle...">
+        <i class="fas fa-search search-icon"></i>
+    </div>
+    
+    <!-- Filter Buttons -->
+    <div class="filter-buttons">
+        <button class="filter-btn active">Tous</button>
+        <button class="filter-btn">Échauffement</button>
+        <button class="filter-btn">Renforcement</button>
+        <button class="filter-btn">Cardio</button>
+        <button class="filter-btn">Core</button>
+        <button class="filter-btn">Full Body</button>
+    </div>
+    
+    <div class="exercises-grid">
+        <!-- Jumping Jacks -->
+        <div class="exercise-card" data-category="échauffement">
+            <div class="exercise-header">
+                <div class="exercise-icon warmup">🔥</div>
+                <div>
+                    <div class="exercise-category">Échauffement</div>
+                    <div class="exercise-title">Jumping Jacks</div>
+                </div>
+            </div>
+            <div class="exercise-body">
+                <div class="animation-container">
+                    <div class="jumping-jack-figure">
+                        <div class="jj-head"></div>
+                        <div class="jj-body"></div>
+                        <div class="jj-arm-left"></div>
+                        <div class="jj-arm-right"></div>
+                        <div class="jj-leg-left"></div>
+                        <div class="jj-leg-right"></div>
+                    </div>
+                </div>
+                <p class="exercise-description">
+                    Exercice cardio classique qui sollicite tout le corps. Idéal pour échauffer les muscles et augmenter la fréquence cardiaque.
+                </p>
+                <div class="exercise-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i> 60 secondes
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-fire"></i> 150 calories
+                    </div>
+                </div>
+                <span class="difficulty-badge difficulty-beginner">Débutant</span>
+                <div class="exercise-steps">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-text">Debout, pieds joints et bras le long du corps</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-text">Sautez en écartant les jambes et levant les bras</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-text">Revenez à la position initiale en sautant</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Squats -->
+        <div class="exercise-card" data-category="renforcement">
+            <div class="exercise-header">
+                <div class="exercise-icon strength">🏋️</div>
+                <div>
+                    <div class="exercise-category">Renforcement</div>
+                    <div class="exercise-title">Squats</div>
+                </div>
+            </div>
+            <div class="exercise-body">
+                <div class="animation-container">
+                    <div class="squat-figure">
+                        <div class="sq-head"></div>
+                        <div class="sq-torso"></div>
+                        <div class="sq-thighs"></div>
+                        <div class="sq-calves left"></div>
+                        <div class="sq-calves right"></div>
+                    </div>
+                </div>
+                <p class="exercise-description">
+                    Le roi des exercices de jambes. Renforce les quadriceps, les fessiers et les ischio-jambiers tout en améliorant l'équilibre.
+                </p>
+                <div class="exercise-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-redo-alt"></i> 3 séries x 15
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-dumbbell"></i> Force
+                    </div>
+                </div>
+                <span class="difficulty-badge difficulty-intermediate">Intermédiaire</span>
+                <div class="exercise-steps">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-text">Pieds écartés largeur des épaules, dos droit</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-text">Baissez les hanches comme pour vous asseoir</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-text">Remontez en poussant sur les talons</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Push-ups -->
+        <div class="exercise-card" data-category="renforcement">
+            <div class="exercise-header">
+                <div class="exercise-icon strength">💪</div>
+                <div>
+                    <div class="exercise-category">Renforcement</div>
+                    <div class="exercise-title">Pompes (Push-ups)</div>
+                </div>
+            </div>
+            <div class="exercise-body">
+                <div class="animation-container">
+                    <div class="pushup-figure">
+                        <div class="pu-head"></div>
+                        <div class="pu-torso"></div>
+                        <div class="pu-arm left"></div>
+                        <div class="pu-arm right"></div>
+                    </div>
+                </div>
+                <p class="exercise-description">
+                    Exercice fondamental pour le haut du corps. Développe la poitrine, les épaules, les triceps et le core.
+                </p>
+                <div class="exercise-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-redo-alt"></i> 3 séries x 12
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-bullseye"></i> Haut du corps
+                    </div>
+                </div>
+                <span class="difficulty-badge difficulty-intermediate">Intermédiaire</span>
+                <div class="exercise-steps">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-text">Position planche, mains sous les épaules</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-text">Descendez en fléchissant les coudes</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-text">Poussez pour revenir à la position initiale</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plank -->
+        <div class="exercise-card" data-category="core">
+            <div class="exercise-header">
+                <div class="exercise-icon strength">🎯</div>
+                <div>
+                    <div class="exercise-category">Core</div>
+                    <div class="exercise-title">Planche (Plank)</div>
+                </div>
+            </div>
+            <div class="exercise-body">
+                <div class="animation-container">
+                    <div class="plank-figure">
+                        <div class="pl-head"></div>
+                        <div class="pl-body"></div>
+                        <div class="pl-arm"></div>
+                        <div class="pl-leg"></div>
+                    </div>
+                </div>
+                <p class="exercise-description">
+                    Exercice isométrique excellent pour renforcer les muscles profonds du core, améliorer la posture et la stabilité.
+                </p>
+                <div class="exercise-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i> 3 x 45 secondes
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-bullseye"></i> Core
+                    </div>
+                </div>
+                <span class="difficulty-badge difficulty-intermediate">Intermédiaire</span>
+                <div class="exercise-steps">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-text">Position planche sur les avant-bras</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-text">Corps aligné, contraction abdominale</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-text">Maintenez la position en respirant</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lunges -->
+        <div class="exercise-card" data-category="renforcement">
+            <div class="exercise-header">
+                <div class="exercise-icon strength">🦵</div>
+                <div>
+                    <div class="exercise-category">Renforcement</div>
+                    <div class="exercise-title">Fentes (Lunges)</div>
+                </div>
+            </div>
+            <div class="exercise-body">
+                <div class="animation-container">
+                    <div class="lunge-figure">
+                        <div class="ln-head"></div>
+                        <div class="ln-torso"></div>
+                        <div class="ln-leg-front"></div>
+                        <div class="ln-leg-back"></div>
+                    </div>
+                </div>
+                <p class="exercise-description">
+                    Exercice unilatéral qui renforce les jambes individuellement, améliore l'équilibre et la coordination.
+                </p>
+                <div class="exercise-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-redo-alt"></i> 3 séries x 12/jambe
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-balance-scale"></i> Équilibre
+                    </div>
+                </div>
+                <span class="difficulty-badge difficulty-intermediate">Intermédiaire</span>
+                <div class="exercise-steps">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-text">Debout, faites un grand pas en avant</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-text">Descendez jusqu'à ce que la cuisse soit parallèle</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-text">Revenez en poussant sur le talon avant</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mountain Climbers -->
+        <div class="exercise-card" data-category="cardio">
+            <div class="exercise-header">
+                <div class="exercise-icon cardio">🏔️</div>
+                <div>
+                    <div class="exercise-category">Cardio</div>
+                    <div class="exercise-title">Mountain Climbers</div>
+                </div>
+            </div>
+            <div class="exercise-body">
+                <div class="animation-container">
+                    <div class="mountain-figure">
+                        <div class="mc-head"></div>
+                        <div class="mc-body"></div>
+                        <div class="mc-knee-left"></div>
+                        <div class="mc-knee-right"></div>
+                    </div>
+                </div>
+                <p class="exercise-description">
+                    Exercice cardio intense qui combine renforcement du core et montée de fréquence cardiaque. Excellent pour la coordination.
+                </p>
+                <div class="exercise-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i> 45 secondes
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-bolt"></i> Intense
+                    </div>
+                </div>
+                <span class="difficulty-badge difficulty-advanced">Avancé</span>
+                <div class="exercise-steps">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-text">Position planche, corps aligné</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-text">Amenez un genou vers la poitrine</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-text">Alternez rapidement les jambes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Burpees -->
+        <div class="exercise-card" data-category="full body">
+            <div class="exercise-header">
+                <div class="exercise-icon cardio">⭐</div>
+                <div>
+                    <div class="exercise-category">Full Body</div>
+                    <div class="exercise-title">Burpees</div>
+                </div>
+            </div>
+            <div class="exercise-body">
+                <div class="animation-container">
+                    <div class="burpee-figure">
+                        <div class="bp-head"></div>
+                        <div class="bp-body"></div>
+                        <div class="bp-legs"></div>
+                    </div>
+                </div>
+                <p class="exercise-description">
+                    L'exercice ultime full-body. Combine squat, pompe et saut vertical pour un entraînement cardio-musculation complet.
+                </p>
+                <div class="exercise-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-redo-alt"></i> 3 séries x 10
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-bomb"></i> Explosif
+                    </div>
+                </div>
+                <span class="difficulty-badge difficulty-advanced">Avancé</span>
+                <div class="exercise-steps">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-text">Debout, descendez en squat mains au sol</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-text">Reculez les pieds en position pompe</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-text">Revenez au squat puis sautez</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- High Knees -->
+        <div class="exercise-card" data-category="cardio">
+            <div class="exercise-header">
+                <div class="exercise-icon cardio">🏃</div>
+                <div>
+                    <div class="exercise-category">Cardio</div>
+                    <div class="exercise-title">High Knees</div>
+                </div>
+            </div>
+            <div class="exercise-body">
+                <div class="animation-container">
+                    <div class="highknee-figure">
+                        <div class="hk-head"></div>
+                        <div class="hk-torso"></div>
+                        <div class="hk-thigh-left"></div>
+                        <div class="hk-thigh-right"></div>
+                    </div>
+                </div>
+                <p class="exercise-description">
+                    Course sur place avec montée des genoux. Excellent pour le cardio, renforce les abdominaux et améliore la coordination.
+                </p>
+                <div class="exercise-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i> 60 secondes
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-running"></i> Cardio
+                    </div>
+                </div>
+                <span class="difficulty-badge difficulty-intermediate">Intermédiaire</span>
+                <div class="exercise-steps">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-text">Debout, commencez à courir sur place</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-text">Montez les genoux jusqu'à la hauteur des hanches</div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-text">Gardez un rythme rapide et constant</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timer Section -->
+    <div class="timer-section">
+        <h3 style="color: white; font-size: 1.8rem; margin-bottom: 20px;">⏱️ Minuteur d'Entraînement</h3>
+        <div class="progress-ring-container">
+            <svg class="progress-ring" width="200" height="200">
+                <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="8"/>
+                <circle class="progress-ring-circle" cx="100" cy="100" r="90" fill="none" stroke="url(#gradient)" stroke-width="8" stroke-linecap="round" stroke-dasharray="565.48" stroke-dashoffset="0"/>
+                <defs>
+                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#667eea"/>
+                        <stop offset="100%" stop-color="#764ba2"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+        <div class="timer-display" id="timerDisplay">03:00</div>
+        <div class="timer-controls">
+            <button class="timer-btn start" id="startBtn" onclick="startTimer()">▶ Démarrer</button>
+            <button class="timer-btn pause" id="pauseBtn" onclick="pauseTimer()" style="display:none;">⏸ Pause</button>
+            <button class="timer-btn reset" onclick="resetTimer()">↺ Réinitialiser</button>
+        </div>
+        <div class="timer-presets">
+            <button class="preset-btn" onclick="setTimer(30)">30s</button>
+            <button class="preset-btn" onclick="setTimer(60)">1min</button>
+            <button class="preset-btn active" onclick="setTimer(180)">3min</button>
+            <button class="preset-btn" onclick="setTimer(300)">5min</button>
+            <button class="preset-btn" onclick="setTimer(600)">10min</button>
+        </div>
+    </div>
+</div>
+
+<!-- Breathing Guide Button -->
+<div class="breathing-guide" onclick="toggleBreathingModal()">
+    <div class="pulse-effect"></div>
+    <i class="fas fa-lungs"></i>
+</div>
+
+<!-- Breathing Modal -->
+<div id="breathingModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:white; padding:40px; border-radius:30px; text-align:center; max-width:400px;">
+        <h3 style="margin-bottom:20px; color:#1a1a2e;">Guide de Respiration</h3>
+        <div style="width:150px; height:150px; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius:50%; margin:20px auto; animation:breatheGuide 4s ease-in-out infinite; display:flex; align-items:center; justify-content:center; color:white; font-size:1.2rem; font-weight:bold;">
+            <span id="breathText">Inspirez</span>
+        </div>
+        <p style="color:#666; margin:20px 0;">Respirez profondément pour vous détendre entre les exercices</p>
+        <button onclick="toggleBreathingModal()" style="padding:12px 30px; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; border:none; border-radius:25px; cursor:pointer; font-weight:600;">Fermer</button>
+    </div>
+</div>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    // Timer Variables
+    let timerInterval;
+    let totalTime = 180;
+    let currentTime = 180;
+    let isRunning = false;
+
+    const timerDisplay = document.getElementById('timerDisplay');
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const progressCircle = document.querySelector('.progress-ring-circle');
+    const circumference = 2 * Math.PI * 90;
+
+    progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+    progressCircle.style.strokeDashoffset = 0;
+
+    function updateDisplay() {
+        const minutes = Math.floor(currentTime / 60);
+        const seconds = currentTime % 60;
+        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        const offset = circumference - (currentTime / totalTime) * circumference;
+        progressCircle.style.strokeDashoffset = offset;
+    }
+
+    function startTimer() {
+        if (!isRunning) {
+            isRunning = true;
+            startBtn.style.display = 'none';
+            pauseBtn.style.display = 'inline-block';
+            timerInterval = setInterval(() => {
+                if (currentTime > 0) {
+                    currentTime--;
+                    updateDisplay();
+                } else {
+                    pauseTimer();
+                    alert('⏰ Temps écoulé ! Excellent travail !');
+                }
+            }, 1000);
+        }
+    }
+
+    function pauseTimer() {
+        isRunning = false;
+        clearInterval(timerInterval);
+        startBtn.style.display = 'inline-block';
+        pauseBtn.style.display = 'none';
+    }
+
+    function resetTimer() {
+        pauseTimer();
+        currentTime = totalTime;
+        updateDisplay();
+    }
+
+    function setTimer(seconds) {
+        pauseTimer();
+        totalTime = seconds;
+        currentTime = seconds;
+        updateDisplay();
+        
+        document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    // Filter functionality
+    document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filterValue = this.textContent.trim().toLowerCase();
+            const exerciseCards = document.querySelectorAll('.exercise-card');
+            
+            exerciseCards.forEach(card => {
+                const category = card.dataset.category;
+                
+                if (filterValue === 'tous' || category === filterValue) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const exerciseCards = document.querySelectorAll('.exercise-card');
+        
+        exerciseCards.forEach(card => {
+            const title = card.querySelector('.exercise-title').textContent.toLowerCase();
+            const description = card.querySelector('.exercise-description').textContent.toLowerCase();
+            const category = card.querySelector('.exercise-category').textContent.toLowerCase();
+            
+            if (title.includes(searchValue) || description.includes(searchValue) || category.includes(searchValue)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    // Breathing Guide
+    let breathingInterval;
+    function toggleBreathingModal() {
+        const modal = document.getElementById('breathingModal');
+        const breathText = document.getElementById('breathText');
+        
+        if (modal.style.display === 'none' || modal.style.display === '') {
+            modal.style.display = 'flex';
+            let isInhale = true;
+            breathingInterval = setInterval(() => {
+                isInhale = !isInhale;
+                breathText.textContent = isInhale ? 'Inspirez' : 'Expirez';
+            }, 2000);
+        } else {
+            modal.style.display = 'none';
+            clearInterval(breathingInterval);
+        }
+    }
+
+    // Scroll Animation
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.exercise-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
+
+    // Initialize display
+    updateDisplay();
+</script>
+{% endblock %}

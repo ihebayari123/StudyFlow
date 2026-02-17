@@ -1,0 +1,1407 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion du Temps Étudiant - StudyFlow{% endblock %}
+
+{% block body %}
+    <!-- Header -->
+    {% block header %}
+        {% include 'home/navbar.html.twig' %}
+    {% endblock %}
+
+    <!-- Main Content -->
+    <div class="time-management-section">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="header-with-button">
+                <h1 class="section-title">⏰ Gestion du Temps <span class="highlight">Étudiant</span></h1>
+                <div class="header-icon">
+                    <span class="emoji">🎯</span>
+                </div>
+            </div>
+
+            <!-- Page Description -->
+            <div class="description-section">
+                <p class="description-text">
+                    Maîtrisez votre emploi du temps, optimisez votre productivité et réduisez votre stress grâce à des techniques éprouvées.
+                </p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-value">+40%</h3>
+                        <p>de productivité</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-value">-80%</h3>
+                        <p>de stress</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-value">6h</h3>
+                        <p>travail effectif/jour</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Navigation -->
+            <div class="quick-nav">
+                <a href="#techniques" class="quick-nav-item">
+                    <i class="fas fa-book-open"></i>
+                    <span>Techniques</span>
+                </a>
+                <a href="#modeles" class="quick-nav-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Modèles</span>
+                </a>
+                <a href="#outils" class="quick-nav-item">
+                    <i class="fas fa-tools"></i>
+                    <span>Outils</span>
+                </a>
+                <a href="#erreurs" class="quick-nav-item">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Erreurs</span>
+                </a>
+                <a href="#profil" class="quick-nav-item">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Par Profil</span>
+                </a>
+            </div>
+
+            <!-- Techniques Section -->
+            <section id="techniques" class="content-section">
+                <div class="section-header">
+                    <span class="section-tag">METHODOLOGIE</span>
+                    <h2 class="section-subtitle">
+                        <i class="fas fa-book-open"></i> Techniques de Gestion du Temps
+                    </h2>
+                    <p class="section-description">Choisissez la méthode qui correspond à votre style d'apprentissage</p>
+                </div>
+
+                <div class="cards-grid">
+                    {% for technique in techniques %}
+                    <div class="card" data-id="{{ technique.id }}">
+                        <div class="card-image">
+                            <div class="card-logo">
+                                <div class="logo-container" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    {{ technique.icone|raw }}
+                                </div>
+                            </div>
+                            <span class="card-category">{{ technique.categorie }}</span>
+                            <div class="card-level">
+                                <span class="level-badge niveau-{{ technique.niveau|lower }}">{{ technique.niveau }}</span>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">{{ technique.nom }}</h3>
+                            <p class="card-description">{{ technique.description }}</p>
+                            
+                            <div class="card-principe">
+                                <i class="fas fa-lightbulb"></i>
+                                <strong>Principe :</strong> {{ technique.principe }}
+                            </div>
+
+                            <div class="card-steps">
+                                <h4><i class="fas fa-list-ol"></i> Étapes :</h4>
+                                <div class="steps-list">
+                                    {% for etape in technique.etapes %}
+                                    <div class="step-item">
+                                        <span class="step-number">{{ loop.index }}</span>
+                                        <div class="step-content">
+                                            <strong>{{ etape.titre }}</strong>
+                                            <p>{{ etape.description }}</p>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="card-avantages">
+                                <h4><i class="fas fa-star"></i> Avantages :</h4>
+                                <ul>
+                                    {% for avantage in technique.avantages %}
+                                    <li>{{ avantage }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <div class="card-conseils">
+                                <h4><i class="fas fa-gem"></i> Conseils pro :</h4>
+                                <ul>
+                                    {% for conseil in technique.conseils %}
+                                    <li>{{ conseil }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <div class="card-footer">
+                                <span class="duration-badge">
+                                    <i class="far fa-clock"></i> {{ technique.duree }}
+                                </span>
+                                <button class="card-btn" onclick="toggleDetails('{{ technique.id }}')">
+                                    En savoir plus <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Modeles Planning Section -->
+            <section id="modeles" class="content-section">
+                <div class="section-header">
+                    <span class="section-tag">PLANIFICATION</span>
+                    <h2 class="section-subtitle">
+                        <i class="fas fa-calendar-alt"></i> Modèles de Planning
+                    </h2>
+                    <p class="section-description">Des exemples concrets pour structurer vos semaines</p>
+                </div>
+
+                <div class="modeles-grid">
+                    {% for modele in modelesPlanning %}
+                    <div class="modele-card">
+                        <div class="modele-header">
+                            <h3 class="modele-title">{{ modele.nom }}</h3>
+                            <p class="modele-description">{{ modele.description }}</p>
+                        </div>
+                        
+                        <div class="planning-container">
+                            {% for jour in modele.structure %}
+                            <div class="jour-card">
+                                <div class="jour-header">{{ jour.jour }}</div>
+                                <div class="jour-content">
+                                    <div class="creneau"><span class="label">Matin</span> {{ jour.matin }}</div>
+                                    <div class="creneau"><span class="label">Après-midi</span> {{ jour['apres-midi'] }}</div>
+                                    <div class="creneau"><span class="label">Soir</span> {{ jour.soir }}</div>
+                                    <div class="creneau"><span class="label">Nuit</span> {{ jour.nuit }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="modele-conseils">
+                            <h4><i class="fas fa-lightbulb"></i> Conseils pour ce modèle</h4>
+                            <ul>
+                                {% for conseil in modele.conseils %}
+                                <li>{{ conseil }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Outils Section -->
+            <section id="outils" class="content-section">
+                <div class="section-header">
+                    <span class="section-tag">RESSOURCES</span>
+                    <h2 class="section-subtitle">
+                        <i class="fas fa-tools"></i> Outils Recommandés
+                    </h2>
+                    <p class="section-description">Les meilleures applications pour gérer votre temps</p>
+                </div>
+
+                <div class="outils-grid">
+                    {% for outil in outils %}
+                    <div class="outil-card categorie-{{ outil.categorie|lower }}">
+                        <div class="outil-icon">{{ outil.icone|raw }}</div>
+                        <div class="outil-content">
+                            <span class="outil-categorie">{{ outil.categorie }}</span>
+                            <h3 class="outil-title">{{ outil.nom }}</h3>
+                            <p class="outil-description">{{ outil.description }}</p>
+                            <div class="outil-features">
+                                {% for feature in outil.features %}
+                                <span class="feature-tag">{{ feature }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Erreurs Section -->
+            <section id="erreurs" class="content-section">
+                <div class="section-header">
+                    <span class="section-tag">PIÈGES À ÉVITER</span>
+                    <h2 class="section-subtitle">
+                        <i class="fas fa-exclamation-triangle"></i> Erreurs Courantes
+                    </h2>
+                    <p class="section-description">Identifiez et corrigez vos habitudes chronophages</p>
+                </div>
+
+                <div class="erreurs-grid">
+                    {% for erreur in erreurs %}
+                    <div class="erreur-card">
+                        <div class="erreur-number">{{ loop.index }}</div>
+                        <div class="erreur-content">
+                            <h3 class="erreur-title">{{ erreur.titre }}</h3>
+                            <p class="erreur-description">{{ erreur.description }}</p>
+                            <div class="erreur-solution">
+                                <i class="fas fa-check-circle"></i>
+                                <strong>Solution :</strong> {{ erreur.solution }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Profil Section -->
+            <section id="profil" class="content-section">
+                <div class="section-header">
+                    <span class="section-tag">PERSONNALISATION</span>
+                    <h2 class="section-subtitle">
+                        <i class="fas fa-user-graduate"></i> Conseils par Profil
+                    </h2>
+                    <p class="section-description">Adaptez votre gestion du temps selon votre formation</p>
+                </div>
+
+                <div class="profils-grid">
+                    {% for profil in conseilsParProfil %}
+                    <div class="profil-card">
+                        <div class="profil-header">
+                            <span class="profil-icon">🎓</span>
+                            <h3 class="profil-title">{{ profil.profil }}</h3>
+                        </div>
+                        <ul class="profil-conseils">
+                            {% for conseil in profil.conseils %}
+                            <li>{{ conseil }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Indicateurs Section -->
+            <section class="content-section">
+                <div class="section-header">
+                    <span class="section-tag">SUIVI</span>
+                    <h2 class="section-subtitle">
+                        <i class="fas fa-chart-line"></i> Indicateurs de Productivité
+                    </h2>
+                    <p class="section-description">Mesurez votre progression et ajustez votre stratégie</p>
+                </div>
+
+                <div class="indicateurs-grid">
+                    {% for indicateur in indicateurs %}
+                    <div class="indicateur-card">
+                        <div class="indicateur-icon">{{ indicateur.icone|raw }}</div>
+                        <div class="indicateur-content">
+                            <h3 class="indicateur-title">{{ indicateur.nom }}</h3>
+                            <p class="indicateur-description">{{ indicateur.description }}</p>
+                            <div class="indicateur-target">
+                                <span class="target-label">Objectif :</span>
+                                <span class="target-value">{{ indicateur.cible }}</span>
+                            </div>
+                        </div>
+                        <div class="progress-ring">
+                            <svg viewBox="0 0 36 36">
+                                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <path class="circle-progress" stroke-dasharray="75, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            </svg>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- CTA Section -->
+            <div class="cta-section">
+                <h3><i class="fas fa-rocket"></i> Prêt à transformer votre productivité ?</h3>
+                <p>Commencez par appliquer une technique pendant 2 semaines et observez les résultats</p>
+                <div class="cta-buttons">
+                    <a href="{{ path('app_stresse') }}" class="btn-primary">
+                        <i class="fas fa-chart-line"></i> Évaluer mon stress
+                    </a>
+                    <a href="{{ path('app_studyflow_score') }}" class="btn-secondary">
+                        <i class="fas fa-calculator"></i> Calculer mon score
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Styles -->
+    {% block stylesheets %}
+        {{ parent() }}
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+            /* Reset & Base */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+            }
+
+            /* Header */
+            .header-area {
+                background: rgba(0, 0, 0, 0.3) !important;
+                backdrop-filter: blur(10px);
+            }
+
+            .header-area .logo h1,
+            .header-area .nav a,
+            .header-area .menu-trigger span,
+            nav, .navbar, nav *, .navbar *, .nav-link {
+                color: white !important;
+            }
+
+            /* Layout */
+            .time-management-section {
+                padding: 120px 20px 60px 20px;
+                background-color: transparent;
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+
+            /* Typography */
+            .section-title {
+                font-size: 3rem;
+                font-weight: 700;
+                color: #ffffff;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+                margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .highlight {
+                background: linear-gradient(120deg, #fbbf24, #f59e0b);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .section-subtitle {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #ffffff;
+                text-align: center;
+                margin-bottom: 20px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .section-description {
+                font-size: 1.2rem;
+                color: rgba(255, 255, 255, 0.9);
+                text-align: center;
+                margin-bottom: 40px;
+            }
+
+            .description-text {
+                font-size: 1.2rem;
+                color: rgba(255, 255, 255, 0.9);
+                max-width: 800px;
+                margin: 0 auto;
+                line-height: 1.6;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            }
+
+            .section-tag {
+                display: inline-block;
+                background: rgba(255, 255, 255, 0.15);
+                color: white;
+                padding: 6px 16px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 700;
+                letter-spacing: 1px;
+                margin-bottom: 15px;
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(255, 255, 255, 0.1);
+            }
+
+            /* Header */
+            .header-with-button {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+
+            .header-icon .emoji {
+                font-size: 4rem;
+                filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
+            }
+
+            /* Description Section */
+            .description-section {
+                margin-bottom: 40px;
+                text-align: center;
+            }
+
+            /* Stats Cards */
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 25px;
+                margin-bottom: 50px;
+            }
+
+            .stat-card {
+                background: rgba(255, 255, 255, 0.15);
+                border-radius: 20px;
+                padding: 30px;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(255, 255, 255, 0.1);
+                transition: all 0.3s ease;
+            }
+
+            .stat-card:hover {
+                background: rgba(255, 255, 255, 0.25);
+                transform: translateY(-5px);
+            }
+
+            .stat-icon {
+                width: 60px;
+                height: 60px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                color: white;
+            }
+
+            .stat-content h3 {
+                font-size: 2rem;
+                font-weight: 700;
+                color: white;
+                margin-bottom: 5px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            .stat-content p {
+                color: rgba(255, 255, 255, 0.9);
+                font-size: 0.9rem;
+                font-weight: 500;
+            }
+
+            /* Quick Navigation */
+            .quick-nav {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                flex-wrap: wrap;
+                margin-bottom: 50px;
+            }
+
+            .quick-nav-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 12px 25px;
+                background: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(255, 255, 255, 0.1);
+                border-radius: 30px;
+                color: white;
+                text-decoration: none;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+
+            .quick-nav-item:hover {
+                background: rgba(255, 255, 255, 0.25);
+                transform: translateY(-2px);
+                color: white;
+            }
+
+            .quick-nav-item i {
+                font-size: 1.2rem;
+            }
+
+            /* Content Sections */
+            .content-section {
+                margin-bottom: 60px;
+                padding: 40px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 20px;
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(255, 255, 255, 0.2);
+            }
+
+            /* Cards Grid */
+            .cards-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                gap: 30px;
+                margin-top: 30px;
+            }
+
+            .card {
+                background: white;
+                border-radius: 20px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            }
+
+            .card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            }
+
+            .card-image {
+                position: relative;
+                height: 180px;
+                background: linear-gradient(135deg, #f0f4ff 0%, #e6e9ff 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .card-logo {
+                text-align: center;
+            }
+
+            .logo-container {
+                width: 90px;
+                height: 90px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2.2rem;
+                color: white;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
+
+            .card-category {
+                position: absolute;
+                top: 15px;
+                left: 15px;
+                background: white;
+                color: #7b68ee;
+                padding: 8px 20px;
+                border-radius: 25px;
+                font-weight: 600;
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .card-level {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+            }
+
+            .level-badge {
+                padding: 8px 15px;
+                border-radius: 25px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                background: white;
+            }
+
+            .niveau-débutant {
+                color: #2e7d32;
+            }
+
+            .niveau-intermédiaire {
+                color: #ef6c00;
+            }
+
+            .niveau-avancé {
+                color: #991b1b;
+            }
+
+            .card-content {
+                padding: 25px;
+            }
+
+            .card-title {
+                color: #1a1a1a;
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin-bottom: 10px;
+            }
+
+            .card-description {
+                color: #666;
+                font-size: 0.95rem;
+                line-height: 1.5;
+                margin-bottom: 15px;
+            }
+
+            .card-principe {
+                background: #f0f9ff;
+                padding: 12px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 0.9rem;
+            }
+
+            .card-principe i {
+                color: #667eea;
+            }
+
+            .card-steps h4,
+            .card-avantages h4,
+            .card-conseils h4 {
+                color: #333;
+                font-size: 1rem;
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            .steps-list {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+
+            .step-item {
+                display: flex;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .step-number {
+                width: 28px;
+                height: 28px;
+                background: #667eea;
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 700;
+                font-size: 0.875rem;
+                flex-shrink: 0;
+            }
+
+            .step-content strong {
+                display: block;
+                margin-bottom: 3px;
+                color: #333;
+            }
+
+            .step-content p {
+                font-size: 0.875rem;
+                color: #666;
+                margin: 0;
+            }
+
+            .card-avantages ul,
+            .card-conseils ul {
+                list-style: none;
+                padding: 0;
+                margin-bottom: 20px;
+            }
+
+            .card-avantages li,
+            .card-conseils li {
+                padding: 8px 0;
+                padding-left: 25px;
+                position: relative;
+                font-size: 0.9rem;
+                color: #555;
+            }
+
+            .card-avantages li::before {
+                content: '✓';
+                position: absolute;
+                left: 0;
+                color: #10b981;
+                font-weight: bold;
+            }
+
+            .card-conseils li::before {
+                content: '💎';
+                position: absolute;
+                left: 0;
+            }
+
+            .card-footer {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding-top: 20px;
+                border-top: 1px solid #eee;
+                margin-top: 20px;
+            }
+
+            .duration-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                background: #f0f4ff;
+                color: #667eea;
+                padding: 5px 12px;
+                border-radius: 20px;
+                font-size: 0.9rem;
+                font-weight: 600;
+            }
+
+            .card-btn {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .card-btn:hover {
+                transform: scale(1.05);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            }
+
+            /* Modeles Grid */
+            .modeles-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+                gap: 30px;
+                margin-top: 30px;
+            }
+
+            .modele-card {
+                background: white;
+                border-radius: 20px;
+                padding: 25px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            }
+
+            .modele-header {
+                margin-bottom: 20px;
+            }
+
+            .modele-title {
+                color: #1a1a1a;
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin-bottom: 10px;
+            }
+
+            .modele-description {
+                color: #666;
+                font-size: 0.95rem;
+            }
+
+            .planning-container {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 8px;
+                margin-bottom: 20px;
+            }
+
+            .jour-card {
+                background: #f8f9fa;
+                border-radius: 10px;
+                overflow: hidden;
+            }
+
+            .jour-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 8px;
+                text-align: center;
+                font-weight: 600;
+                font-size: 0.8rem;
+            }
+
+            .jour-content {
+                padding: 8px;
+            }
+
+            .creneau {
+                font-size: 0.7rem;
+                padding: 4px 0;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .creneau:last-child {
+                border-bottom: none;
+            }
+
+            .creneau .label {
+                display: block;
+                font-weight: 600;
+                color: #667eea;
+                font-size: 0.65rem;
+                margin-bottom: 2px;
+            }
+
+            .modele-conseils {
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 10px;
+            }
+
+            .modele-conseils h4 {
+                color: #333;
+                font-size: 1rem;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            .modele-conseils ul {
+                list-style: none;
+                padding: 0;
+            }
+
+            .modele-conseils li {
+                padding: 5px 0;
+                padding-left: 20px;
+                position: relative;
+                font-size: 0.9rem;
+                color: #555;
+            }
+
+            .modele-conseils li::before {
+                content: '•';
+                position: absolute;
+                left: 0;
+                color: #667eea;
+                font-weight: bold;
+            }
+
+            /* Outils Grid */
+            .outils-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-top: 30px;
+            }
+
+            .outil-card {
+                background: white;
+                border-radius: 15px;
+                padding: 25px;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                transition: all 0.3s ease;
+                border-top: 4px solid transparent;
+            }
+
+            .outil-card:hover {
+                transform: translateY(-5px);
+            }
+
+            .categorie-digital {
+                border-top-color: #3b82f6;
+            }
+
+            .categorie-analogique {
+                border-top-color: #10b981;
+            }
+
+            .categorie-app {
+                border-top-color: #f59e0b;
+            }
+
+            .outil-icon {
+                font-size: 3rem;
+                margin-bottom: 15px;
+            }
+
+            .outil-categorie {
+                display: inline-block;
+                background: #f1f5f9;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                color: #64748b;
+                margin-bottom: 10px;
+            }
+
+            .outil-title {
+                color: #1a1a1a;
+                font-size: 1.2rem;
+                font-weight: 700;
+                margin-bottom: 10px;
+            }
+
+            .outil-description {
+                color: #666;
+                font-size: 0.9rem;
+                margin-bottom: 15px;
+            }
+
+            .outil-features {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+                justify-content: center;
+            }
+
+            .feature-tag {
+                background: #f1f5f9;
+                padding: 4px 8px;
+                border-radius: 5px;
+                font-size: 0.7rem;
+                color: #64748b;
+            }
+
+            /* Erreurs Grid */
+            .erreurs-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+                margin-top: 30px;
+            }
+
+            .erreur-card {
+                background: white;
+                border-radius: 15px;
+                padding: 25px;
+                display: flex;
+                gap: 15px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                border-left: 4px solid #ef4444;
+            }
+
+            .erreur-number {
+                width: 35px;
+                height: 35px;
+                background: #ef4444;
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 800;
+                font-size: 1.2rem;
+                flex-shrink: 0;
+            }
+
+            .erreur-title {
+                color: #1a1a1a;
+                font-size: 1.1rem;
+                font-weight: 700;
+                margin-bottom: 10px;
+            }
+
+            .erreur-description {
+                color: #666;
+                font-size: 0.9rem;
+                margin-bottom: 10px;
+                line-height: 1.5;
+            }
+
+            .erreur-solution {
+                background: #f0f9ff;
+                padding: 10px;
+                border-radius: 8px;
+                font-size: 0.9rem;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .erreur-solution i {
+                color: #10b981;
+            }
+
+            /* Profils Grid */
+            .profils-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 25px;
+                margin-top: 30px;
+            }
+
+            .profil-card {
+                background: white;
+                border-radius: 20px;
+                padding: 25px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                transition: all 0.3s ease;
+            }
+
+            .profil-card:hover {
+                transform: translateY(-5px);
+            }
+
+            .profil-header {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+
+            .profil-icon {
+                font-size: 2.5rem;
+            }
+
+            .profil-title {
+                color: #1a1a1a;
+                font-size: 1.2rem;
+                font-weight: 700;
+                margin: 0;
+            }
+
+            .profil-conseils {
+                list-style: none;
+                padding: 0;
+            }
+
+            .profil-conseils li {
+                padding: 12px 0;
+                padding-left: 25px;
+                position: relative;
+                border-bottom: 1px solid #f1f5f9;
+                color: #555;
+                font-size: 0.9rem;
+            }
+
+            .profil-conseils li:last-child {
+                border-bottom: none;
+            }
+
+            .profil-conseils li::before {
+                content: '→';
+                position: absolute;
+                left: 0;
+                color: #667eea;
+                font-weight: bold;
+            }
+
+            /* Indicateurs Grid */
+            .indicateurs-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 25px;
+                margin-top: 30px;
+            }
+
+            .indicateur-card {
+                background: white;
+                border-radius: 20px;
+                padding: 25px;
+                display: flex;
+                gap: 15px;
+                position: relative;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            }
+
+            .indicateur-icon {
+                font-size: 2.5rem;
+                flex-shrink: 0;
+            }
+
+            .indicateur-title {
+                color: #1a1a1a;
+                font-size: 1.1rem;
+                font-weight: 700;
+                margin-bottom: 5px;
+            }
+
+            .indicateur-description {
+                color: #666;
+                font-size: 0.85rem;
+                margin-bottom: 10px;
+            }
+
+            .indicateur-target {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            .target-label {
+                font-size: 0.85rem;
+                color: #666;
+            }
+
+            .target-value {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 3px 10px;
+                border-radius: 15px;
+                font-size: 0.85rem;
+                font-weight: 600;
+            }
+
+            .progress-ring {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                width: 50px;
+                height: 50px;
+            }
+
+            .circle-bg {
+                fill: none;
+                stroke: #e2e8f0;
+                stroke-width: 3;
+            }
+
+            .circle-progress {
+                fill: none;
+                stroke: #667eea;
+                stroke-width: 3;
+                stroke-linecap: round;
+                transform: rotate(-90deg);
+                transform-origin: 50% 50%;
+            }
+
+            /* CTA Section */
+            .cta-section {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 50px;
+                border-radius: 20px;
+                text-align: center;
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                margin-top: 40px;
+            }
+
+            .cta-section h3 {
+                font-size: 2rem;
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .cta-section p {
+                font-size: 1.1rem;
+                opacity: 0.9;
+                margin-bottom: 30px;
+            }
+
+            .cta-buttons {
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                flex-wrap: wrap;
+            }
+
+            .btn-primary {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                padding: 15px 35px;
+                background: white;
+                color: #667eea;
+                text-decoration: none;
+                border-radius: 30px;
+                font-weight: 600;
+                font-size: 1.1rem;
+                transition: all 0.3s ease;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn-primary:hover {
+                transform: scale(1.05);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+                color: #667eea;
+            }
+
+            .btn-secondary {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                padding: 15px 35px;
+                background: transparent;
+                color: white;
+                text-decoration: none;
+                border-radius: 30px;
+                font-weight: 600;
+                font-size: 1.1rem;
+                border: 2px solid white;
+                transition: all 0.3s ease;
+            }
+
+            .btn-secondary:hover {
+                background: white;
+                color: #667eea;
+                transform: scale(1.05);
+            }
+
+            /* Responsive */
+            @media (max-width: 1024px) {
+                .planning-container {
+                    grid-template-columns: repeat(4, 1fr);
+                }
+            }
+
+            @media (max-width: 768px) {
+                .time-management-section {
+                    padding: 100px 15px 40px 15px;
+                }
+
+                .header-with-button {
+                    flex-direction: column;
+                    text-align: center;
+                }
+
+                .section-title {
+                    font-size: 2.2rem;
+                    justify-content: center;
+                }
+
+                .section-subtitle {
+                    font-size: 1.6rem;
+                }
+
+                .description-text,
+                .section-description {
+                    font-size: 1rem;
+                }
+
+                .stats-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .quick-nav {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+
+                .quick-nav-item {
+                    justify-content: center;
+                }
+
+                .cards-grid,
+                .modeles-grid,
+                .outils-grid,
+                .erreurs-grid,
+                .profils-grid,
+                .indicateurs-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .planning-container {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+
+                .content-section {
+                    padding: 30px 20px;
+                }
+
+                .cta-section {
+                    padding: 30px 20px;
+                }
+
+                .cta-section h3 {
+                    font-size: 1.5rem;
+                }
+
+                .cta-buttons {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .btn-primary,
+                .btn-secondary {
+                    width: 100%;
+                    justify-content: center;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .section-title {
+                    font-size: 1.8rem;
+                }
+
+                .header-icon .emoji {
+                    font-size: 3rem;
+                }
+
+                .planning-container {
+                    grid-template-columns: 1fr;
+                }
+
+                .erreur-card {
+                    flex-direction: column;
+                    align-items: center;
+                    text-align: center;
+                }
+
+                .indicateur-card {
+                    flex-direction: column;
+                    text-align: center;
+                }
+
+                .indicateur-target {
+                    justify-content: center;
+                }
+            }
+        </style>
+    {% endblock %}
+
+    <script>
+        function toggleDetails(id) {
+            const card = document.querySelector(`[data-id="${id}"]`);
+            const btn = card.querySelector('.card-btn');
+            const steps = card.querySelector('.card-steps');
+            const avantages = card.querySelector('.card-avantages');
+            const conseils = card.querySelector('.card-conseils');
+            
+            if (btn.innerHTML.includes('En savoir plus')) {
+                btn.innerHTML = 'Réduire <i class="fas fa-arrow-up"></i>';
+                steps.style.display = 'block';
+                avantages.style.display = 'block';
+                conseils.style.display = 'block';
+            } else {
+                btn.innerHTML = 'En savoir plus <i class="fas fa-arrow-right"></i>';
+                steps.style.display = 'none';
+                avantages.style.display = 'none';
+                conseils.style.display = 'none';
+            }
+        }
+
+        // Initialisation : cacher les détails
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.card-steps, .card-avantages, .card-conseils').forEach(el => {
+                el.style.display = 'none';
+            });
+        });
+    </script>
+{% endblock %}
