@@ -1,0 +1,254 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Profil{% endblock %}
+
+{% block header %}
+    {% include 'home/navbar.html.twig' %}
+{% endblock %}
+
+{% block body %}
+<main class="auth-main">
+    <div class="container">
+        <div class="auth-card" style="padding: 30px;">
+            <div class="auth-header" style="margin-bottom: 20px;">
+                <h1 class="auth-title" style="font-size: 1.8rem;">Mon Profil</h1>
+                <p class="auth-subtitle">Modifiez vos informations personnelles</p>
+            </div>
+
+            {# Affichage des messages flash #}
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success" style="padding: 10px 15px; margin-bottom: 20px; border-radius: 30px; font-size: 0.9rem;">
+                    <i class="fas fa-check-circle me-2"></i>{{ message }}
+                </div>
+            {% endfor %}
+
+            {{ form_start(form, {'attr': {'class': 'auth-form', 'novalidate': 'novalidate'}}) }}
+
+            <div class="row" style="display: flex; gap: 15px; margin-bottom: 10px;">
+                <div class="col" style="flex: 1;">
+                    <div class="form-group">
+                        {{ form_label(form.nom, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.nom, {'attr': {'class': 'form-input', 'placeholder': 'Nom'}}) }}
+                        <div class="form-error">{{ form_errors(form.nom) }}</div>
+                    </div>
+                </div>
+                <div class="col" style="flex: 1;">
+                    <div class="form-group">
+                        {{ form_label(form.prenom, 'Prénom', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.prenom, {'attr': {'class': 'form-input', 'placeholder': 'Prénom'}}) }}
+                        <div class="form-error">{{ form_errors(form.prenom) }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                {{ form_label(form.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.email, {'attr': {'class': 'form-input', 'placeholder': 'vous@exemple.com'}}) }}
+                <div class="form-error">{{ form_errors(form.email) }}</div>
+            </div>
+
+            <div style="margin: 15px 0 10px;">
+                <h5 style="color: var(--gray-700); font-size: 1rem; margin-bottom: 5px;">Changer le mot de passe</h5>
+                <p style="font-size: 0.8rem; color: var(--gray-500); margin-bottom: 10px;">
+                    <i class="fas fa-info-circle me-1"></i>Laissez vide pour conserver l'actuel
+                </p>
+            </div>
+
+            <div class="row" style="display: flex; gap: 15px; margin-bottom: 10px;">
+                <div class="col" style="flex: 1;">
+                    <div class="form-group">
+                        {{ form_label(form.plainPassword.first, 'Nouveau mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.plainPassword.first, {'attr': {'class': 'form-input', 'placeholder': 'Nouveau mot de passe'}}) }}
+                        <div class="form-error">{{ form_errors(form.plainPassword.first) }}</div>
+                    </div>
+                </div>
+                <div class="col" style="flex: 1;">
+                    <div class="form-group">
+                        {{ form_label(form.plainPassword.second, 'Confirmer', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.plainPassword.second, {'attr': {'class': 'form-input', 'placeholder': 'Confirmer'}}) }}
+                        <div class="form-error">{{ form_errors(form.plainPassword.second) }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center" style="margin-top: 20px;">
+                <a href="{{ path('app_home') }}" class="btn btn-outline-secondary" style="padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 0.9rem;">
+                    <i class="fas fa-arrow-left me-2"></i>Retour
+                </a>
+                <button type="submit" class="btn btn-primary" style="padding: 10px 25px; border-radius: 50px; font-weight: 600; font-size: 0.9rem; background: var(--primary-color); color: white; border: none;">
+                    <i class="fas fa-save me-2"></i>Enregistrer
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+
+            <div class="auth-footer" style="margin-top: 15px; font-size: 0.8rem;">
+                <i class="fas fa-shield-alt me-1"></i>Vos informations sont protégées
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    :root {
+        --primary-color: #4f46e5;
+        --primary-dark: #4338ca;
+        --gray-100: #f1f5f9;
+        --gray-200: #e2e8f0;
+        --gray-300: #cbd5e1;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        --border-radius: 16px;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    .auth-main {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .auth-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-lg);
+        padding: 30px;
+        animation: fadeInUp 0.5s ease;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .auth-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 5px;
+    }
+
+    .auth-subtitle {
+        font-size: 0.95rem;
+        color: var(--gray-500);
+    }
+
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 10px 15px;
+        border: 2px solid var(--gray-200);
+        border-radius: 50px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+    .form-error {
+        color: #ef4444;
+        font-size: 0.75rem;
+        margin-top: 2px;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-outline-secondary {
+        border: 2px solid var(--gray-300);
+        background: transparent;
+        color: var(--gray-700);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-outline-secondary:hover {
+        background: var(--gray-100);
+        border-color: var(--gray-400);
+        transform: translateY(-2px);
+    }
+
+    .alert-success {
+        background: #d1e7dd;
+        border: 1px solid #badbcc;
+        color: #0f5132;
+        padding: 10px 15px;
+        border-radius: 30px;
+        font-size: 0.9rem;
+    }
+
+    .row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 10px;
+    }
+
+    .col {
+        flex: 1;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
