@@ -97,6 +97,7 @@
 </div>
 
 <!-- Hidden chapter data for JavaScript -->
+ 
 <script>
     const chaptersData = {
         {% for chapitre in chapitres %}
@@ -127,18 +128,8 @@
         min-height: 100vh;
     }
 
-    /* Keep navbar text white and make navbar background semi-transparent */
-    .header-area {
-        background: rgba(0, 0, 0, 0.3) !important;
-        backdrop-filter: blur(10px);
-    }
-
-    .header-area .logo h1,
-    .header-area .nav a,
-    .header-area .menu-trigger span,
-    nav, .navbar, nav *, .navbar *, .nav-link {
-        color: white !important;
-    }
+   
+    
 
     .chapters-section {
         padding: 120px 20px 60px 20px;
