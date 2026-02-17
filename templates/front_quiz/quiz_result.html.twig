@@ -1,0 +1,561 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+<style>
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding-top: 140px;
+}
+
+/* Header */
+.header-area {
+    background: rgba(0,0,0,0.3) !important;
+    backdrop-filter: blur(12px);
+    height: 90px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+}
+
+/* Nav */
+.main-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.main-nav .logo h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.main-nav .nav {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+.main-nav .nav li a {
+    color: rgba(255,255,255,0.9);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.main-nav .nav li a:hover,
+.main-nav .nav li a.active {
+    color: #ffd166;
+}
+
+/* Result Wrapper */
+.result-wrapper {
+    max-width: 800px;
+    margin: 60px auto;
+    padding: 0 20px;
+}
+
+/* Result Card */
+.result-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 32px;
+    padding: 50px 40px;
+    text-align: center;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+    backdrop-filter: blur(10px);
+    animation: fadeUp 0.6s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.result-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #ffd166);
+}
+
+/* Anim */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Badge de réussite */
+.success-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    animation: scaleIn 0.5s ease 0.2s both;
+}
+
+.badge-excellent {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+}
+
+.badge-good {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+}
+
+.badge-average {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.badge-poor {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+/* Titles */
+.result-card h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #4f46e5;
+    margin-bottom: 10px;
+    animation: slideInLeft 0.5s ease;
+}
+
+.result-card h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin-bottom: 20px;
+    animation: slideInRight 0.5s ease 0.1s both;
+}
+
+.quiz-meta {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+    color: #64748b;
+    font-size: 0.95rem;
+    animation: fadeUp 0.5s ease 0.2s both;
+}
+
+.quiz-meta span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Score Circle */
+.score-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px 0;
+    animation: scaleIn 0.6s ease 0.3s both;
+}
+
+.score-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+.score-circle::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    opacity: 0.3;
+    z-index: -1;
+}
+
+.score-percentage {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #4f46e5;
+    line-height: 1;
+}
+
+.score-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin: 40px 0;
+}
+
+.stat-item {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 20px;
+    animation: fadeUp 0.5s ease;
+    animation-fill-mode: both;
+}
+
+.stat-item:nth-child(1) { animation-delay: 0.4s; }
+.stat-item:nth-child(2) { animation-delay: 0.5s; }
+.stat-item:nth-child(3) { animation-delay: 0.6s; }
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-icon {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+/* Progress Bar */
+.progress-container {
+    margin: 30px 0;
+    animation: fadeUp 0.5s ease 0.7s both;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.progress-bar {
+    height: 12px;
+    background: #e5e7eb;
+    border-radius: 30px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 30px;
+    width: 0%;
+    transition: width 1s ease-in-out;
+}
+
+/* Message */
+.result-message {
+    font-size: 1.1rem;
+    color: #475569;
+    margin: 30px 0;
+    padding: 20px;
+    background: #f1f5f9;
+    border-radius: 16px;
+    animation: fadeUp 0.5s ease 0.8s both;
+}
+
+/* Buttons */
+.actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 40px;
+    animation: fadeUp 0.5s ease 0.9s both;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 30px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    box-shadow: 0 10px 30px rgba(99,102,241,0.45);
+}
+
+.btn-secondary {
+    background: white;
+    color: #4f46e5;
+    border: 2px solid #4f46e5;
+}
+
+.btn-secondary:hover {
+    background: #4f46e5;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(79,70,229,0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(99,102,241,0.6);
+}
+
+.btn i {
+    font-style: normal;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .result-card {
+        padding: 35px 25px;
+    }
+
+    .result-card h1 {
+        font-size: 2rem;
+    }
+
+    .result-card h2 {
+        font-size: 1.2rem;
+    }
+
+    .score-circle {
+        width: 150px;
+        height: 150px;
+    }
+
+    .score-percentage {
+        font-size: 2.5rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+
+    .quiz-meta {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- ======= Header ======= -->
+{% block header %}
+{% include 'home/navbar.html.twig' %}
+{% endblock %}
+
+<div class="result-wrapper">
+    <div class="result-card">
+        {# Badge de performance #}
+        {% set percentage = (scoreQuestions / total * 100)|round %}
+        {% if percentage >= 80 %}
+            <div class="success-badge badge-excellent">
+                🏆 Excellent ! Félicitations !
+            </div>
+        {% elseif percentage >= 60 %}
+            <div class="success-badge badge-good">
+                📚 Bien ! Continue comme ça !
+            </div>
+        {% elseif percentage >= 40 %}
+            <div class="success-badge badge-average">
+                💪 Peut mieux faire !
+            </div>
+        {% else %}
+            <div class="success-badge badge-poor">
+                📖 Réessaie pour t'améliorer !
+            </div>
+        {% endif %}
+
+        <h1>📊 Résultat du Quiz</h1>
+        <h2>{{ quiz.titre }}</h2>
+
+        {# Métadonnées du quiz #}
+        <div class="quiz-meta">
+            <span>⏱️ Durée: {{ quiz.duree }} minutes</span>
+            <span>📝 Questions: {{ total }}</span>
+            <span>📅 {{ "now"|date("d/m/Y") }}</span>
+        </div>
+
+        {# Cercle de score #}
+        <div class="score-container">
+            <div class="score-circle">
+                <span class="score-percentage">{{ percentage }}%</span>
+                <span class="score-label">Réussite</span>
+            </div>
+        </div>
+
+        {# Grille des statistiques #}
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value">{{ scoreQuestions }}</div>
+                <div class="stat-label">Bonnes réponses</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">❌</div>
+                <div class="stat-value">{{ total - scoreQuestions }}</div>
+                <div class="stat-label">Mauvaises réponses</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-value">{{ scorePoints }}</div>
+                <div class="stat-label">Points</div>
+            </div>
+        </div>
+
+        {# Barre de progression #}
+        <div class="progress-container">
+            <div class="progress-label">
+                <span>Progression</span>
+                <span>{{ scoreQuestions }}/{{ total }}</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: {{ percentage }}%"></div>
+            </div>
+        </div>
+
+        {# Message personnalisé #}
+        <div class="result-message">
+            {% if percentage == 100 %}
+                🎉 Parfait ! Tu as obtenu un score parfait ! Tu maîtrises parfaitement ce sujet.
+            {% elseif percentage >= 80 %}
+                🌟 Excellent travail ! Tu as une très bonne maîtrise du sujet. Continue comme ça !
+            {% elseif percentage >= 60 %}
+                📈 Bon résultat ! Tu as bien compris l'essentiel. Quelques révisions et ce sera parfait.
+            {% elseif percentage >= 40 %}
+                📝 Résultat correct. N'hésite pas à revoir les cours pour t'améliorer.
+            {% else %}
+                💪 Ne te décourage pas ! Chaque erreur est une opportunité d'apprendre. Réessaie !
+            {% endif %}
+        </div>
+
+        {# Boutons d'action #}
+        <div class="actions">
+            <a href="{{ path('app_quiz_play', {id: quiz.id}) }}" class="btn btn-primary">
+                🔄 Réessayer le quiz
+            </a>
+            <a href="{{ path('app_frontshowquiz') }}" class="btn btn-secondary">
+                📚 Voir tous les quiz
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Animation supplémentaire pour la barre de progression
+document.addEventListener('DOMContentLoaded', function() {
+    const progressFill = document.getElementById('progressFill');
+    
+    // Animation au chargement
+    setTimeout(() => {
+        progressFill.style.transition = 'width 1s ease-in-out';
+        progressFill.style.width = '{{ percentage }}%';
+    }, 500);
+
+    // Effet de confettis pour les scores parfaits
+    {% if percentage >= 80 %}
+    if (typeof confetti === 'function') {
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+    }
+    {% endif %}
+});
+
+// Fonction pour partager le résultat
+function shareResult() {
+    const text = `J'ai obtenu {{ scoreQuestions }}/{{ total }} ({{ percentage }}%) au quiz "{{ quiz.titre }}" !`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Résultat du Quiz',
+            text: text,
+            url: window.location.href
+        });
+    } else {
+        navigator.clipboard.writeText(text);
+        alert('Résultat copié dans le presse-papier !');
+    }
+}
+</script>
+{% endblock %}
