@@ -48,15 +48,15 @@
                     <a href="{{ path('app_cours_chapitres', {'id': cours.id}) }}" class="course-card-link">
                         <div class="course-card">
                             <div class="course-media">
-                                {% if cours.image %}
-                                    <img src="{{ cours.image }}" alt="{{ cours.titre }}" class="course-image" loading="lazy">
-                                {% else %}
-                                    <div class="course-image-placeholder">
-                                        <i class="fas fa-graduation-cap"></i>
-                                    </div>
-                                {% endif %}
-                                <div class="course-category-badge">{{ cours.categorie|default('DEVELOPMENT')|upper }}</div>
-                            </div>
+    {% if cours.image %}
+        <img src="{{ asset('uploads/courses/' ~ cours.image) }}" alt="{{ cours.titre }}" class="course-image" loading="lazy">
+    {% else %}
+        <div class="course-image-placeholder">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
+    {% endif %}
+    <div class="course-category-badge">{{ cours.categorie|default('DEVELOPMENT')|upper }}</div>
+</div>
                             <div class="course-content">
                                 <div class="course-instructor">
                                     <i class="fas fa-user-circle"></i>
