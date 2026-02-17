@@ -1,23 +1,10 @@
-<!--! ================================================================ !-->
-    <!--! [Start] Navigation Manu !-->
-    <!--! ================================================================ !-->
-    {% include 'admin/Partials/sidebar.html.twig' %}
-    <!--! ================================================================ !-->
-    <!--! [End]  Navigation Manu !-->
-    <!--! ================================================================ !-->
+{# templates/admin_quiz/addformquiz.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
 
-    <!--! ================================================================ !-->
-    <!--! [Start] Header !-->
-    <!--! ================================================================ !-->
-   
-    {% include 'admin/partials/navbar.html.twig' %}
-    <!--! ================================================================ !-->
-    <!--! [End] Header !-->
-    <!--! ================================================================ !-->
+{% block admin_content %}
 <div class="admin-layout">
 
-    {% include 'admin/Partials/sidebar.html.twig' %}
-    {% include 'admin/partials/navbar.html.twig' %}
+
 
     <main class="main-content">
 
@@ -148,4 +135,5 @@
     <script src="{{ asset('assets2/js/dashboard-init.min.js') }}"></script>
     {% block admin_javascripts %}{% endblock %}
     <script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
+{% endblock %}
 {% endblock %}

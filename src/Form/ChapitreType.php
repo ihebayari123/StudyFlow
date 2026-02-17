@@ -18,7 +18,7 @@ class ChapitreType extends AbstractType
                 'label' => 'Course Title',
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => '.'
+                    'placeholder' => 'Enter course title'
                 ]
             ])
             ->add('contenu')

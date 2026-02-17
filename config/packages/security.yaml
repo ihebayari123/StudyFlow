@@ -21,18 +21,24 @@ security:
         logout:
             path: app_logout
             target: app_login
-        
 
   access_control:
-  # Pages publiques (sans connexion)
-  - { path: ^/login$, roles: PUBLIC_ACCESS }
-  - { path: ^/register, roles: PUBLIC_ACCESS }
-  - { path: ^/logout$, roles: PUBLIC_ACCESS }
+    - { path: ^/login$, roles: PUBLIC_ACCESS }
+    - { path: ^/logout$, roles: PUBLIC_ACCESS }
+    - { path: ^/register, roles: PUBLIC_ACCESS }
 
-  # Tout le reste → utilisateur connecté suffit
-  - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
+    # Admin area – accessible to admins and teachers
+    - { path: ^/admin, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
 
-  
+    # Teacher choice page – only teachers (after login)
+    - { path: ^/login/success, roles: ROLE_ENSEIGNANT }
+
+    # Home (front office) – accessible to students and teachers
+    - { path: ^/home, roles: [ROLE_ETUDIANT, ROLE_ENSEIGNANT] }
+
+    # All other paths require at least ROLE_USER (any authenticated user)
+    - { path: ^/, roles: ROLE_USER }
+
 when@test:
   security:
     password_hashers:
