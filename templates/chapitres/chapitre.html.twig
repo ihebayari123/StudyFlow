@@ -74,6 +74,11 @@
                                 <td>{{ chapitre.contenu|slice(0, 80) }}{% if chapitre.contenu|length > 80 %}...{% endif %}</td>
                                 <td>
                                     <div class="btn-group" role="group">
+                                        <a href="{{ path('app_chapitre_versions', {'id': chapitre.id}) }}" 
+                                           class="btn btn-sm btn-info" 
+                                           title="Version History">
+                                            <i class="fas fa-code-branch"></i>
+                                        </a>
                                         <a href="{{ path('app_editchapitre', {'id': chapitre.id}) }}" 
                                            class="btn btn-sm btn-warning" 
                                            title="Edit">
