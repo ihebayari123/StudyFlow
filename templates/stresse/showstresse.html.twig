@@ -1,0 +1,718 @@
+
+{# templates/stresse/showstresse.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Manage stresse - Admin{% endblock %}
+
+{% block admin_content %}
+ <div style="padding: 60px; margin-left: 210px; overflow-x: auto;">
+ 
+<div class="container-fluid px-4">
+    <!-- En-tête principal -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-5 pt-4">
+        <div>
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <h1 class="display-6 fw-bold text-dark mb-0">Stress Surveys</h1>
+                <!-- Badge de notification cliquable -->
+                <a href="{{ path('app_well_being_notifications') }}" 
+                   class="notification-badge position-relative d-flex align-items-center justify-content-center text-decoration-none"
+                   data-bs-toggle="tooltip" 
+                   title="Cliquez pour voir les notifications de bien-être">
+                    <i class="fas fa-bell fs-5 text-warning"></i>
+                    <span class="notification-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        3
+                        <span class="visually-hidden">nouvelles notifications</span>
+                    </span>
+                </a>
+            </div>
+            <p class="text-muted mb-0">Analyse du bien-être et du stress étudiant</p>
+        </div>
+        
+        <!-- Statistiques rapides -->
+        <div class="d-flex flex-wrap gap-3">
+            <div class="stat-card bg-white rounded-3 shadow-sm p-3 d-flex align-items-center gap-3">
+                <div class="bg-primary bg-opacity-10 p-2 rounded-2">
+                    <i class="fas fa-database text-primary fs-4"></i>
+                </div>
+                <div>
+                    <div class="fs-3 fw-bold">{{ liststresse|length }}</div>
+                    <div class="text-muted small">Surveys</div>
+                </div>
+            </div>
+            
+            <!-- Bouton Alertes (NOUVEAU) -->
+            <a href="{{ path('app_stresse_avance') }}" 
+               class="btn btn-warning d-flex align-items-center gap-2 px-4 rounded-3 fw-medium shadow-sm">
+                <i class="fas fa-exclamation-triangle"></i>
+                Alertes Avancées
+            </a>
+            
+            <a href="{{ path('app_stresse_statistiques') }}" 
+               class="btn btn-success d-flex align-items-center gap-2 px-4 rounded-3 fw-medium shadow-sm">
+                <i class="fas fa-chart-bar"></i>
+                Statistiques
+            </a>
+            
+            <a href="{{ path('app_add_stresse') }}" 
+               class="btn btn-primary d-flex align-items-center gap-2 px-4 rounded-3 fw-medium shadow-sm">
+                <i class="fas fa-plus-circle"></i>
+                Nouveau Survey
+            </a>
+        </div>
+    </div>
+
+    <!-- Section Plan d'Éducation -->
+    <div class="card border-0 shadow-sm rounded-4 mt-4">
+        <div class="card-body p-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <h6 class="fw-semibold mb-0 text-dark">
+                        <i class="fas fa-graduation-cap text-primary me-2"></i>
+                        Plan d'Éducation
+                    </h6>
+                    <p class="text-muted small mb-0">Générer un plan pour un étudiant</p>
+                </div>
+                <div class="col-md-8">
+                    <form action="{{ path('app_plan_education', {'id': 0}) }}" method="get" 
+                          onsubmit="event.preventDefault(); var id = document.getElementById('plan-id').value; if(id) window.location.href = '{{ path('app_plan_education', {'id': 'ID'}) }}'.replace('ID', id);"
+                          class="d-flex gap-2">
+                        <input type="number" id="plan-id" name="id" 
+                               class="form-control" placeholder="Entrer l'ID du survey..." 
+                               min="1" required style="max-width: 200px;">
+                        <button type="submit" class="btn btn-info d-flex align-items-center gap-2 px-4 rounded-3 fw-medium">
+                            <i class="fas fa-graduation-cap"></i>
+                            Voir le Plan
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section des contrôles -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <div class="row g-4 align-items-center">
+                        <div class="col-md-4">
+                            <h6 class="fw-semibold mb-0 text-dark">Filtres et tris</h6>
+                            <p class="text-muted small mb-0">Organisez vos données</p>
+                        </div>
+                        
+                        <div class="col-md-8">
+                            <div class="d-flex flex-wrap gap-3 justify-content-md-end">
+                                <!-- Recherche par date -->
+                                <div class="flex-grow-1" style="max-width: 300px;">
+                                    <form method="get" action="{{ path('app_showstresse_recherche') }}" class="position-relative">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-transparent border-end-0">
+                                                <i class="fas fa-search text-muted"></i>
+                                            </span>
+                                            <input type="date" name="date" 
+                                                   class="form-control border-start-0 ps-0"
+                                                   placeholder="Rechercher par date">
+                                        </div>
+                                    </form>
+                                </div>
+                                
+                                <!-- Boutons de tri -->
+                                <div class="d-flex gap-2">
+                                    <a href="{{ path('app_showstresse_sort_date') }}" 
+                                       class="btn btn-outline-dark btn-sm d-flex align-items-center gap-2 px-3 rounded-3">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <span>Date</span>
+                                    </a>
+                                    <a href="{{ path('app_showstresse_sort_sleep') }}" 
+                                       class="btn btn-outline-dark btn-sm d-flex align-items-center gap-2 px-3 rounded-3">
+                                        <i class="fas fa-moon"></i>
+                                        <span>Sommeil</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau principal -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <!-- En-tête du tableau -->
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="fw-semibold mb-0">Tous les Surveys</h5>
+                        <span class="badge bg-light text-dark rounded-pill px-3 py-2">
+                            {{ liststresse|length }} résultat{% if liststresse|length > 1 %}s{% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Corps du tableau -->
+                <div class="card-body p-0">
+                    {% if liststresse|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr class="border-bottom border-light-subtle">
+                                    <th class="ps-4 py-3 text-uppercase small fw-semibold text-muted">
+                                        <i class="fas fa-hashtag me-2"></i>ID
+                                    </th>
+                                    <th class="py-3 text-uppercase small fw-semibold text-muted">
+                                        <i class="far fa-calendar me-2"></i>Date
+                                    </th>
+                                    <th class="py-3 text-uppercase small fw-semibold text-muted text-center">
+                                        <i class="fas fa-bed me-2"></i>Sommeil
+                                    </th>
+                                    <th class="py-3 text-uppercase small fw-semibold text-muted text-center">
+                                        <i class="fas fa-book-open me-2"></i>Étude
+                                    </th>
+                                    <th class="py-3 text-uppercase small fw-semibold text-muted">
+                                        <i class="fas fa-user-circle me-2"></i>Utilisateur
+                                    </th>
+                                    <th class="pe-4 py-3 text-uppercase small fw-semibold text-muted text-end">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            
+                            <tbody>
+                                {% for item in liststresse %}
+                                <tr class="border-bottom border-light-subtle">
+                                    <!-- ID -->
+                                    <td class="ps-4 py-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="bg-primary bg-opacity-10 p-2 rounded-2">
+                                                <i class="fas fa-chart-bar text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">#{{ item.id }}</div>
+                                                <small class="text-muted">Survey</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Date -->
+                                    <td class="py-3">
+                                        <div class="d-flex flex-column">
+                                            <div class="fw-medium">{{ item.date|date('d/m/Y') }}</div>
+                                            <small class="text-muted">{{ item.date|date('H:i') }}</small>
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Heures de sommeil -->
+                                    <td class="py-3 text-center">
+                                        {% set sleepColor = item.sleepHours >= 7 ? 'success' : 
+                                                           (item.sleepHours >= 5 ? 'warning' : 'danger') %}
+                                        <div class="progress-circle" data-percentage="{{ (item.sleepHours/10)*100 }}" 
+                                             data-color="{{ sleepColor }}" data-label="{{ item.sleepHours }}h">
+                                            <div class="progress-circle-inner">
+                                                <span class="fw-bold">{{ item.sleepHours }}h</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Heures d'étude -->
+                                    <td class="py-3 text-center">
+                                        {% set studyColor = item.studyHours <= 4 ? 'success' : 
+                                                           (item.studyHours <= 8 ? 'warning' : 'danger') %}
+                                        <div class="progress-circle" data-percentage="{{ (item.studyHours/12)*100 }}" 
+                                             data-color="{{ studyColor }}" data-label="{{ item.studyHours }}h">
+                                            <div class="progress-circle-inner">
+                                                <span class="fw-bold">{{ item.studyHours }}h</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Utilisateur -->
+                                    <td class="py-3">
+                                        {% if item.user %}
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar-sm bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-user text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-medium">Utilisateur #{{ item.user.id }}</div>
+                                                <small class="text-muted">Membre</small>
+                                            </div>
+                                        </div>
+                                        {% else %}
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar-sm bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-user-slash text-secondary"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-muted">Non assigné</div>
+                                                <small class="text-muted">-</small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                    
+                                    <!-- Actions -->
+                                    <td class="pe-4 py-3 text-end">
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <!-- Score -->
+                                            <a href="{{ path('app_showscore_recherche', {'survey_id': item.id}) }}" 
+                                               class="btn btn-sm btn-success d-flex align-items-center gap-2 px-3 rounded-3"
+                                               data-bs-toggle="tooltip" title="Analyser le score">
+                                                <i class="fas fa-chart-pie"></i>
+                                                <span class="d-none d-md-inline">Score</span>
+                                            </a>
+                                            
+                                            <!-- Modifier -->
+                                            <a href="{{ path('app_updatestresse', {'id': item.id}) }}"
+                                               class="btn btn-sm btn-outline-primary d-flex align-items-center gap-2 px-3 rounded-3"
+                                               data-bs-toggle="tooltip" title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                                <span class="d-none d-md-inline">Éditer</span>
+                                            </a>
+                                            
+                                            <!-- Supprimer -->
+                                            <a href="{{ path('app_delete_user', {'id': item.id}) }}" 
+                                               class="btn btn-sm btn-outline-danger d-flex align-items-center gap-2 px-3 rounded-3"
+                                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette entrée ?');"
+                                               data-bs-toggle="tooltip" title="Supprimer">
+                                                <i class="fas fa-trash"></i>
+                                                <span class="d-none d-md-inline">Supprimer</span>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <!-- État vide -->
+                    <div class="text-center py-8">
+                        <div class="empty-state">
+                            <div class="empty-state-icon mb-4">
+                                <i class="fas fa-chart-line fa-4x text-muted opacity-25"></i>
+                            </div>
+                            <h4 class="fw-semibold mb-3">Aucun survey disponible</h4>
+                            <p class="text-muted mb-4">Commencez par créer votre premier stress survey</p>
+                            <a href="{{ path('app_add_stresse') }}" 
+                               class="btn btn-primary px-4 rounded-3 d-inline-flex align-items-center gap-2">
+                                <i class="fas fa-plus"></i>
+                                Créer un survey
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Pied de tableau -->
+                {% if liststresse|length > 0 %}
+                <div class="card-footer bg-white border-0 py-3">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                        <div class="text-muted small">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Dernière mise à jour : {{ "now"|date('d/m/Y à H:i') }}
+                        </div>
+                        
+                        <!-- Légende des indicateurs -->
+                        <div class="d-flex flex-wrap gap-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="indicator-dot bg-success"></div>
+                                <small class="text-muted">Optimal</small>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="indicator-dot bg-warning"></div>
+                                <small class="text-muted">Modéré</small>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="indicator-dot bg-danger"></div>
+                                <small class="text-muted">Critique</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Styles modernes -->
+<style>
+:root {
+    --primary-color: #4361ee;
+    --success-color: #06d6a0;
+    --warning-color: #ffd166;
+    --danger-color: #ef476f;
+    --light-bg: #f8f9fa;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Badge de notification */
+.notification-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 209, 102, 0.15) 0%, rgba(255, 193, 7, 0.25) 100%);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.notification-badge:hover {
+    background: linear-gradient(135deg, rgba(255, 209, 102, 0.25) 0%, rgba(255, 193, 7, 0.35) 100%);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.2);
+}
+
+.notification-count {
+    font-size: 0.7rem;
+    padding: 0.25em 0.5em;
+    animation: pulse 2s infinite;
+    border: 2px solid #fff;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(220, 53, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+
+/* Cartes */
+.card {
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+/* Stat cards */
+.stat-card {
+    min-width: 160px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--card-shadow);
+}
+
+/* Cercles de progression */
+.progress-circle {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto;
+    position: relative;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--circle-color) calc(var(--percentage) * 1%),
+        rgba(0, 0, 0, 0.1) 0
+    );
+    display: flex;
+    align-items-center;
+    justify-content: center;
+}
+
+.progress-circle::before {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 50%;
+}
+
+.progress-circle-inner {
+    position: relative;
+    z-index: 1;
+    background: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+/* Avatars */
+.avatar-sm {
+    width: 36px;
+    height: 36px;
+}
+
+/* Indicateurs */
+.indicator-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+/* États vides */
+.empty-state {
+    padding: 3rem;
+}
+
+.empty-state-icon {
+    opacity: 0.1;
+}
+
+/* Table */
+.table {
+    --bs-table-hover-bg: rgba(67, 97, 238, 0.02);
+}
+
+.table-hover tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--bs-table-hover-bg);
+    transform: scale(1.002);
+}
+
+/* Boutons - Animation spéciale pour le bouton d'alerte */
+.btn-warning {
+    background: linear-gradient(135deg, #ffd166 0%, #ffc043 100%);
+    border: none;
+    color: #000;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-warning:hover {
+    background: linear-gradient(135deg, #ffc043 0%, #ffb017 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.3);
+    color: #000;
+}
+
+.btn-warning::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 20px;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(30deg);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    0% { left: -60%; }
+    20% { left: 100%; }
+    100% { left: 100%; }
+}
+
+.btn {
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-outline-primary {
+    border: 1px solid rgba(67, 97, 238, 0.2);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Formulaires */
+.form-control, .input-group-text {
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+    border-color: var(--primary-color);
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .display-6 {
+        font-size: 1.8rem;
+    }
+    
+    .stat-card {
+        min-width: 140px;
+    }
+    
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    .notification-badge {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .notification-badge i {
+        font-size: 1.1rem;
+    }
+}
+
+/* Animation d'entrée */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.row > div {
+    animation: fadeInUp 0.5s ease forwards;
+    opacity: 0;
+}
+
+.row > div:nth-child(1) { animation-delay: 0.1s; }
+.row > div:nth-child(2) { animation-delay: 0.2s; }
+.row > div:nth-child(3) { animation-delay: 0.3s; }
+
+/* Ombre portée subtile */
+.shadow-sm {
+    box-shadow: var(--card-shadow) !important;
+}
+
+/* Bordures arrondies */
+.rounded-3 {
+    border-radius: 12px !important;
+}
+
+.rounded-4 {
+    border-radius: 16px !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser les tooltips
+    var tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltips.map(function(element) {
+        return new bootstrap.Tooltip(element, {
+            trigger: 'hover'
+        });
+    });
+
+    // Configurer les cercles de progression
+    document.querySelectorAll('.progress-circle').forEach(function(circle) {
+        const percentage = circle.getAttribute('data-percentage');
+        const color = circle.getAttribute('data-color');
+        
+        let circleColor;
+        switch(color) {
+            case 'success': circleColor = '#06d6a0'; break;
+            case 'warning': circleColor = '#ffd166'; break;
+            case 'danger': circleColor = '#ef476f'; break;
+            default: circleColor = '#4361ee';
+        }
+        
+        circle.style.setProperty('--percentage', percentage);
+        circle.style.setProperty('--circle-color', circleColor);
+    });
+
+    // Animation de survol pour les cartes
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.boxShadow = 'var(--hover-shadow)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = 'var(--card-shadow)';
+        });
+    });
+
+    // Animation pour le badge de notification
+    const notificationBadge = document.querySelector('.notification-badge');
+    if (notificationBadge) {
+        notificationBadge.addEventListener('click', function(e) {
+            // Petite animation au clic
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    }
+
+    // Confirmation de suppression améliorée
+    const deleteButtons = document.querySelectorAll('a[onclick*="confirm"]');
+    deleteButtons.forEach(button => {
+        const originalOnclick = button.getAttribute('onclick');
+        button.removeAttribute('onclick');
+        
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            
+            // Créer une modal de confirmation personnalisée
+            const confirmationModal = `
+                <div class="modal fade" id="deleteConfirmation" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content rounded-3">
+                            <div class="modal-header border-0">
+                                <h5 class="modal-title fw-semibold">Confirmer la suppression</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body py-4">
+                                <div class="text-center mb-4">
+                                    <div class="mb-3">
+                                        <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+                                    </div>
+                                    <h6 class="fw-semibold">Êtes-vous sûr de vouloir supprimer cet enregistrement ?</h6>
+                                    <p class="text-muted mt-2">Cette action est irréversible.</p>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Annuler</button>
+                                <a href="${href}" class="btn btn-danger rounded-3">Supprimer</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Ajouter la modal au body
+            document.body.insertAdjacentHTML('beforeend', confirmationModal);
+            
+            // Afficher la modal
+            const modal = new bootstrap.Modal(document.getElementById('deleteConfirmation'));
+            modal.show();
+            
+            // Nettoyer la modal après fermeture
+            document.getElementById('deleteConfirmation').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block admin_content %}
+<div class="admin-main-content">
+    <div class="container-fluid mt-5">
+        <div class="page-header mb-4">
+            <h2 class="page-title"><i class="fas fa-edit"></i> Update Course</h2>
+            <p class="text-muted">Edit the course details below</p>
+        </div>
+
+        {{ form_start(f) }}
+            <div class="mb-3">
+                {{ form_label(f.titre) }}
+                {{ form_widget(f.titre, {'attr': {'class': 'form-control'}}) }}
+            </div>
+            <div class="mb-3">
+                {{ form_label(f.description) }}
+                {{ form_widget(f.description, {'attr': {'class': 'form-control'}}) }}
+            </div>
+            <div class="mb-3">
+                {{ form_label(f.image) }}
+                {{ form_widget(f.image, {'attr': {'class': 'form-control'}}) }}
+            </div>
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+            <a href="{{ path('app_showcoursesback') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Cancel
+            </a>
+        {{ form_end(f) }}
+    </div>
+</div>
+
+<style>
+.admin-main-content {
+    margin-left: 280px;
+    padding-top: 100px;
+}
+
+.page-title i {
+    color: #667eea;
+    margin-right: 10px;
+}
+
+.mb-3 {
+    margin-bottom: 1rem;
+}
+</style>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}

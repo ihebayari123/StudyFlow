@@ -1,0 +1,292 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Add New Chapter{% endblock %}
+
+{% block admin_content %}
+<div class="admin-main-content">
+    <div class="container-fluid mt-5">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ path('app_coursesback') }}">
+                        <i class="fas fa-book"></i> Courses
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ path('app_chapitres', {'courseId': cours.id}) }}">
+                        {{ cours.titre }}
+                    </a>
+                </li>
+                <li class="breadcrumb-item active">Add Chapter</li>
+            </ol>
+        </nav>
+
+        <!-- Form Wrapper -->
+        <div class="form-wrapper">
+            <div class="form-header">
+                <h1><i class="fas fa-plus-circle"></i> Add New Chapter</h1>
+                <p>Add a new chapter to <strong>{{ cours.titre }}</strong></p>
+            </div>
+
+            <div class="form-container">
+                <form method="post" action="{{ path('app_addchapitre', {'courseId': cours.id}) }}">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="titre">
+                                <i class="fas fa-heading"></i> Chapter Title
+                            </label>
+                            <input type="text" 
+                                   id="titre" 
+                                   name="titre" 
+                                   class="form-control" 
+                                   placeholder="Enter chapter title"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ordre">
+                                <i class="fas fa-sort-numeric-up"></i> Order
+                            </label>
+                            <input type="number" 
+                                   id="ordre" 
+                                   name="ordre" 
+                                   class="form-control" 
+                                   placeholder="Chapter order (e.g., 1, 2, 3...)"
+                                   min="1"
+                                   required>
+                            <small class="form-text">Enter the position of this chapter in the course</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contenu">
+                                <i class="fas fa-file-alt"></i> Content
+                            </label>
+                            <textarea id="contenu" 
+                                      name="contenu" 
+                                      class="form-control" 
+                                      placeholder="Enter chapter content"
+                                      rows="6"
+                                      required></textarea>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="course_id" value="{{ cours.id }}">
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create Chapter
+                        </button>
+                        <a href="{{ path('app_chapitres', {'courseId': cours.id}) }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-main-content {
+        margin-left: 280px;
+        padding-top: 100px;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .breadcrumb {
+        background-color: transparent;
+        padding: 0;
+    }
+
+    .breadcrumb-item a {
+        color: white;
+        text-decoration: none;
+    }
+
+    .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb-item.active {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .form-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        animation: slideUp 0.5s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        text-align: center;
+    }
+
+    .form-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .form-header i {
+        margin-right: 10px;
+    }
+
+    .form-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .form-container {
+        padding: 40px;
+    }
+
+    .form-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 1rem;
+    }
+
+    .form-group label i {
+        color: #667eea;
+        margin-right: 8px;
+    }
+
+    .form-control {
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-control:hover {
+        border-color: #b0b0b0;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .form-text {
+        color: #666;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 35px;
+        padding-top: 25px;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .btn {
+        padding: 14px 30px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: inherit;
+    }
+
+    .btn i {
+        font-size: 1.1rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        flex: 1;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        background: #e0e0e0;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #d0d0d0;
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+        .admin-main-content {
+            margin-left: 0;
+            padding: 80px 20px 20px;
+        }
+
+        .form-header h1 {
+            font-size: 2rem;
+        }
+
+        .form-container {
+            padding: 30px 20px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}

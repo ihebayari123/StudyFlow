@@ -1,0 +1,1152 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nutrition & Bien-être{% endblock %}
+
+{% block body %}
+    <!-- Header -->
+    {% block header %}
+        {% include 'home/navbar.html.twig' %}
+    {% endblock %}
+
+    <!-- Main Content -->
+    <div class="nutrition-section">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="header-with-button">
+                <h1 class="section-title">🥗 Guide Nutritionnel</h1>
+                <div class="header-icon">
+                    <span class="emoji">🥑</span>
+                </div>
+            </div>
+
+            <!-- Page Description -->
+            <div class="description-section">
+                <p class="description-text">
+                    Découvrez les aliments qui boostent votre performance, votre humeur et calculez vos apports caloriques
+                </p>
+            </div>
+
+            <!-- Quick Tip of the Day -->
+            <div class="daily-tip-card">
+                <div class="tip-label">
+                    <i class="fas fa-lightbulb"></i> Conseil nutrition du jour
+                </div>
+                <p class="tip-text">Une alimentation équilibrée améliore votre concentration et votre mémoire. Pensez à manger des fruits et légumes de saison !</p>
+            </div>
+
+            <!-- Calorie Calculator -->
+            <div class="calculator-section">
+                <div class="section-header">
+                    <h2 class="section-subtitle">
+                        <i class="fas fa-calculator"></i> Calculateur de Calories
+                    </h2>
+                </div>
+
+                <div class="calculator-card">
+                    <div class="calculator-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><i class="fas fa-utensils"></i> Aliment</label>
+                                <select id="calcFoodSelect" class="form-control" onchange="updateCalorieInfo()">
+                                    <option value="">Sélectionner un aliment</option>
+                                    {% for food in allFoods %}
+                                    <option value="{{ food.calories }}" data-name="{{ food.name }}">{{ food.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-weight-scale"></i> Quantité (g)</label>
+                                <input type="number" id="calcQuantity" class="form-control" placeholder="Ex: 100" min="1" onkeyup="calculatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-fire"></i> Cal/100g</label>
+                                <input type="number" id="calcCaloriesPer100" class="form-control" readonly placeholder="Auto">
+                            </div>
+                        </div>
+                        <button class="btn-add-food" onclick="addToCalculator()">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Ajouter au calculateur</span>
+                        </button>
+                    </div>
+
+                    <div class="food-list-header">
+                        <h4><i class="fas fa-list"></i> Aliments ajoutés</h4>
+                    </div>
+                    
+                    <div class="food-list" id="foodList">
+                        <p class="empty-list">Aucun aliment ajouté. Utilisez le formulaire ci-dessus ou cliquez "Ajouter" sur une carte.</p>
+                    </div>
+                    
+                    <div class="total-calories">
+                        <div class="total-label">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Total Calories</span>
+                        </div>
+                        <div class="total-number" id="totalCalories">0</div>
+                        <span class="total-unit">kcal</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Section -->
+            <div class="search-section">
+                <div class="section-header">
+                    <h2 class="section-subtitle">
+                        <i class="fas fa-search"></i> Rechercher des aliments
+                    </h2>
+                </div>
+
+                <div class="search-card">
+                    <div class="search-container">
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="search-input" id="searchInput" placeholder="Rechercher un aliment..." onkeyup="searchFoods()">
+                        </div>
+                        <select class="filter-select" id="categoryFilter" onchange="filterByCategory()">
+                            <option value="all">Toutes les catégories</option>
+                            <option value="strength-speed">Force & Vitesse ↑</option>
+                            <option value="decrease">Force & Vitesse ↓</option>
+                            <option value="joy">Niveau de Joie ↑</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Food Categories with Tabs -->
+            <div class="tabs-container">
+                <ul class="nav nav-tabs" id="foodTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="strength-tab" data-bs-toggle="tab" data-bs-target="#strength" type="button" role="tab">
+                            <i class="fas fa-bolt"></i> Force & Vitesse ↑
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="decrease-tab" data-bs-toggle="tab" data-bs-target="#decrease" type="button" role="tab">
+                            <i class="fas fa-arrow-down"></i> Force & Vitesse ↓
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="joy-tab" data-bs-toggle="tab" data-bs-target="#joy" type="button" role="tab">
+                            <i class="fas fa-smile"></i> Niveau de Joie ↑
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="foodTabContent">
+                <!-- Strength & Speed Boosters -->
+                <div class="tab-pane fade show active" id="strength" role="tabpanel">
+                    <div class="foods-grid">
+                        {% for food in strengthSpeedFoods %}
+                        <div class="food-card strength-speed" data-name="{{ food.name|lower }}" data-category="strength-speed">
+                            <div class="food-card-header">
+                                <div class="food-icon-large">{{ food.emoji }}</div>
+                                <div class="food-info">
+                                    <h3 class="food-name">{{ food.name }}</h3>
+                                    <span class="food-calories-badge">
+                                        <i class="fas fa-fire"></i> {{ food.calories }} kcal/100g
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="food-benefits">
+                                {% for benefit in food.benefits %}
+                                <span class="benefit-tag benefit-positive">
+                                    <i class="fas fa-check-circle"></i> {{ benefit }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                            <p class="food-description">{{ food.description }}</p>
+                            <button class="btn-add-food small" onclick="quickAdd('{{ food.name }}', {{ food.calories }})">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>Ajouter</span>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Strength & Speed Decreasers -->
+                <div class="tab-pane fade" id="decrease" role="tabpanel">
+                    <div class="foods-grid">
+                        {% for food in decreaseFoods %}
+                        <div class="food-card decrease" data-name="{{ food.name|lower }}" data-category="decrease">
+                            <div class="food-card-header">
+                                <div class="food-icon-large">{{ food.emoji }}</div>
+                                <div class="food-info">
+                                    <h3 class="food-name">{{ food.name }}</h3>
+                                    <span class="food-calories-badge">
+                                        <i class="fas fa-fire"></i> {{ food.calories }} kcal/100g
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="food-benefits">
+                                {% for effect in food.negativeEffects %}
+                                <span class="benefit-tag benefit-negative">
+                                    <i class="fas fa-exclamation-triangle"></i> {{ effect }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                            <p class="food-description">{{ food.description }}</p>
+                            <button class="btn-add-food small" onclick="quickAdd('{{ food.name }}', {{ food.calories }})">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>Ajouter</span>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Happiness Boosters -->
+                <div class="tab-pane fade" id="joy" role="tabpanel">
+                    <div class="foods-grid">
+                        {% for food in joyFoods %}
+                        <div class="food-card joy" data-name="{{ food.name|lower }}" data-category="joy">
+                            <div class="food-card-header">
+                                <div class="food-icon-large">{{ food.emoji }}</div>
+                                <div class="food-info">
+                                    <h3 class="food-name">{{ food.name }}</h3>
+                                    <span class="food-calories-badge">
+                                        <i class="fas fa-fire"></i> {{ food.calories }} kcal/100g
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="food-benefits">
+                                {% for benefit in food.benefits %}
+                                <span class="benefit-tag benefit-joy">
+                                    <i class="fas fa-heart"></i> {{ benefit }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                            <p class="food-description">{{ food.description }}</p>
+                            <button class="btn-add-food small" onclick="quickAdd('{{ food.name }}', {{ food.calories }})">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>Ajouter</span>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Results Message -->
+            <div class="no-results" id="noResults" style="display:none;">
+                <div class="no-results-icon">🔍</div>
+                <h3>Aucun aliment trouvé</h3>
+                <p>Essayez avec d'autres termes de recherche</p>
+            </div>
+
+            <!-- Contact Section -->
+            <div class="contact-section">
+                <h3><i class="fas fa-apple-alt"></i> Besoin de conseils personnalisés ?</h3>
+                <p>Contactez nos nutritionnistes pour un plan alimentaire adapté à vos objectifs</p>
+                <a href="#" class="btn-contact">
+                    <i class="fas fa-calendar-check"></i> Prendre rendez-vous
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Styles -->
+    {% block stylesheets %}
+        {{ parent() }}
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+            /* Reset & Base */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+            }
+
+            /* Header */
+            .header-area {
+                background: rgba(0, 0, 0, 0.3) !important;
+                backdrop-filter: blur(10px);
+            }
+
+            .header-area .logo h1,
+            .header-area .nav a,
+            .header-area .menu-trigger span,
+            nav, .navbar, nav *, .navbar *, .nav-link {
+                color: white !important;
+            }
+
+            /* Layout */
+            .nutrition-section {
+                padding: 120px 20px 60px 20px;
+                background-color: transparent;
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+
+            /* Typography */
+            .section-title {
+                font-size: 3rem;
+                font-weight: 700;
+                color: #ffffff;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+                margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .section-subtitle {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #ffffff;
+                text-align: center;
+                margin-bottom: 30px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .section-description {
+                font-size: 1.2rem;
+                color: rgba(255, 255, 255, 0.9);
+                text-align: center;
+                margin-bottom: 40px;
+            }
+
+            .description-text {
+                font-size: 1.2rem;
+                color: rgba(255, 255, 255, 0.9);
+                max-width: 800px;
+                margin: 0 auto;
+                line-height: 1.6;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            }
+
+            /* Header */
+            .header-with-button {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+
+            .header-icon .emoji {
+                font-size: 4rem;
+                filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
+            }
+
+            /* Description Section */
+            .description-section {
+                margin-bottom: 40px;
+                text-align: center;
+            }
+
+            /* Daily Tip Card */
+            .daily-tip-card {
+                background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+                color: white;
+                padding: 25px 35px;
+                border-radius: 20px;
+                margin-bottom: 40px;
+                box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+            }
+
+            .tip-label {
+                font-weight: 600;
+                font-size: 1rem;
+                text-transform: uppercase;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .tip-label i {
+                font-size: 1.2rem;
+            }
+
+            .tip-text {
+                font-size: 1.3rem;
+                margin: 0;
+                line-height: 1.5;
+            }
+
+            /* Calculator Section */
+            .calculator-section {
+                margin-bottom: 50px;
+            }
+
+            .calculator-card {
+                background: white;
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            }
+
+            .calculator-form {
+                margin-bottom: 25px;
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: 2fr 1fr 1fr;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .form-group label {
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            .form-group label i {
+                color: #667eea;
+            }
+
+            .form-control {
+                padding: 12px 15px;
+                border: 2px solid #e0e4ff;
+                border-radius: 12px;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+            }
+
+            .form-control:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            .btn-add-food {
+                width: 100%;
+                padding: 15px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .btn-add-food:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            }
+
+            .btn-add-food.small {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .food-list-header {
+                border-bottom: 2px solid #e0e4ff;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+            }
+
+            .food-list-header h4 {
+                color: #333;
+                font-size: 1.1rem;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .food-list {
+                max-height: 300px;
+                overflow-y: auto;
+                margin-bottom: 20px;
+            }
+
+            .empty-list {
+                text-align: center;
+                color: #999;
+                padding: 30px;
+                background: #f8f9fa;
+                border-radius: 12px;
+            }
+
+            .food-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px;
+                border-bottom: 1px solid #e0e4ff;
+                transition: all 0.3s ease;
+            }
+
+            .food-item:hover {
+                background: #f8f9fa;
+            }
+
+            .food-item:last-child {
+                border-bottom: none;
+            }
+
+            .food-info-compact {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .food-icon-small {
+                width: 35px;
+                height: 35px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.2rem;
+            }
+
+            .food-details h4 {
+                margin: 0;
+                color: #333;
+                font-size: 1rem;
+            }
+
+            .food-details span {
+                color: #666;
+                font-size: 0.8rem;
+            }
+
+            .food-calories {
+                font-weight: 700;
+                color: #667eea;
+            }
+
+            .remove-btn {
+                width: 30px;
+                height: 30px;
+                background: #ff6b6b;
+                color: white;
+                border: none;
+                border-radius: 50%;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .remove-btn:hover {
+                background: #ee5a24;
+                transform: scale(1.1);
+            }
+
+            .total-calories {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 20px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .total-label {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 1.2rem;
+                font-weight: 600;
+            }
+
+            .total-number {
+                font-size: 2rem;
+                font-weight: 800;
+            }
+
+            .total-unit {
+                opacity: 0.8;
+            }
+
+            /* Search Section */
+            .search-section {
+                margin-bottom: 40px;
+            }
+
+            .search-card {
+                background: white;
+                border-radius: 20px;
+                padding: 25px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            }
+
+            .search-container {
+                display: flex;
+                gap: 15px;
+                flex-wrap: wrap;
+                align-items: center;
+            }
+
+            .search-input-wrapper {
+                flex: 1;
+                position: relative;
+                min-width: 250px;
+            }
+
+            .search-icon {
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #999;
+            }
+
+            .search-input {
+                width: 100%;
+                padding: 15px 15px 15px 45px;
+                border: 2px solid #e0e4ff;
+                border-radius: 12px;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+            }
+
+            .search-input:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            .filter-select {
+                padding: 15px 25px;
+                border: 2px solid #e0e4ff;
+                border-radius: 12px;
+                font-size: 1rem;
+                background: white;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .filter-select:focus {
+                outline: none;
+                border-color: #667eea;
+            }
+
+            /* Tabs */
+            .tabs-container {
+                margin-bottom: 30px;
+            }
+
+            .nav-tabs {
+                border: none;
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .nav-tabs .nav-link {
+                border: none;
+                padding: 15px 30px;
+                border-radius: 30px;
+                background: rgba(255, 255, 255, 0.15);
+                color: white;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(255, 255, 255, 0.1);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .nav-tabs .nav-link:hover {
+                background: rgba(255, 255, 255, 0.25);
+                transform: translateY(-2px);
+            }
+
+            .nav-tabs .nav-link.active {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: 2px solid rgba(255, 255, 255, 0.2);
+            }
+
+            /* Foods Grid */
+            .foods-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 25px;
+                margin-bottom: 40px;
+            }
+
+            .food-card {
+                background: white;
+                border-radius: 20px;
+                padding: 25px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+                border-top: 4px solid;
+            }
+
+            .food-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            }
+
+            .food-card.strength-speed {
+                border-top-color: #4CAF50;
+            }
+
+            .food-card.decrease {
+                border-top-color: #f44336;
+            }
+
+            .food-card.joy {
+                border-top-color: #FF9800;
+            }
+
+            .food-card-header {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin-bottom: 15px;
+            }
+
+            .food-icon-large {
+                font-size: 2.5rem;
+            }
+
+            .food-info {
+                flex: 1;
+            }
+
+            .food-name {
+                color: #333;
+                font-size: 1.2rem;
+                font-weight: 700;
+                margin-bottom: 5px;
+            }
+
+            .food-calories-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 5px 12px;
+                background: #f0f4ff;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                color: #667eea;
+                font-weight: 600;
+            }
+
+            .food-calories-badge i {
+                font-size: 0.8rem;
+            }
+
+            .food-benefits {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+
+            .benefit-tag {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 5px 10px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+            }
+
+            .benefit-positive {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            .benefit-negative {
+                background: #f8d7da;
+                color: #721c24;
+            }
+
+            .benefit-joy {
+                background: #f3e5f5;
+                color: #7b1fa2;
+            }
+
+            .food-description {
+                color: #666;
+                font-size: 0.9rem;
+                line-height: 1.5;
+                margin-bottom: 15px;
+            }
+
+            /* No Results */
+            .no-results {
+                text-align: center;
+                padding: 60px 20px;
+                color: white;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 20px;
+                backdrop-filter: blur(10px);
+                margin-bottom: 40px;
+            }
+
+            .no-results-icon {
+                font-size: 4rem;
+                margin-bottom: 20px;
+                opacity: 0.8;
+            }
+
+            .no-results h3 {
+                color: white;
+                margin-bottom: 10px;
+            }
+
+            .no-results p {
+                color: rgba(255, 255, 255, 0.8);
+            }
+
+            /* Contact Section */
+            .contact-section {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 50px;
+                border-radius: 20px;
+                text-align: center;
+                border: 2px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .contact-section h3 {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .contact-section p {
+                font-size: 1.1rem;
+                opacity: 0.9;
+                margin-bottom: 25px;
+            }
+
+            .btn-contact {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                padding: 15px 35px;
+                background: white;
+                color: #667eea;
+                text-decoration: none;
+                border-radius: 30px;
+                font-weight: 600;
+                font-size: 1.1rem;
+                transition: all 0.3s ease;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn-contact:hover {
+                transform: scale(1.05);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+                color: #667eea;
+                text-decoration: none;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .nutrition-section {
+                    padding: 100px 15px 40px 15px;
+                }
+
+                .header-with-button {
+                    flex-direction: column;
+                    text-align: center;
+                }
+
+                .section-title {
+                    font-size: 2.2rem;
+                    justify-content: center;
+                }
+
+                .section-subtitle {
+                    font-size: 1.6rem;
+                }
+
+                .description-text {
+                    font-size: 1rem;
+                }
+
+                .form-row {
+                    grid-template-columns: 1fr;
+                }
+
+                .search-container {
+                    flex-direction: column;
+                }
+
+                .search-input-wrapper,
+                .filter-select {
+                    width: 100%;
+                }
+
+                .nav-tabs {
+                    flex-direction: column;
+                }
+
+                .nav-tabs .nav-link {
+                    justify-content: center;
+                }
+
+                .foods-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .contact-section {
+                    padding: 30px 20px;
+                }
+
+                .contact-section h3 {
+                    font-size: 1.5rem;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .section-title {
+                    font-size: 1.8rem;
+                }
+
+                .header-icon .emoji {
+                    font-size: 3rem;
+                }
+
+                .daily-tip-card {
+                    padding: 20px;
+                }
+
+                .tip-text {
+                    font-size: 1.1rem;
+                }
+
+                .food-card-header {
+                    flex-direction: column;
+                    text-align: center;
+                }
+            }
+        </style>
+    {% endblock %}
+
+    <!-- JavaScript -->
+    {% block javascripts %}
+        {{ parent() }}
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            // Calculator State
+            let calculatorItems = [];
+            let itemIdCounter = 0;
+
+            // Update calorie info when food is selected
+            function updateCalorieInfo() {
+                const select = document.getElementById('calcFoodSelect');
+                const caloriesInput = document.getElementById('calcCaloriesPer100');
+                const selectedOption = select.options[select.selectedIndex];
+                
+                if (selectedOption.value) {
+                    caloriesInput.value = selectedOption.value;
+                } else {
+                    caloriesInput.value = '';
+                }
+            }
+
+            // Add to calculator
+            function addToCalculator() {
+                const select = document.getElementById('calcFoodSelect');
+                const quantity = document.getElementById('calcQuantity');
+                const caloriesPer100 = document.getElementById('calcCaloriesPer100');
+                
+                const selectedOption = select.options[select.selectedIndex];
+                const foodName = selectedOption.getAttribute('data-name');
+                const qty = parseFloat(quantity.value);
+                const calPer100 = parseFloat(caloriesPer100.value);
+                
+                if (!foodName || !qty || !calPer100) {
+                    alert('Veuillez remplir tous les champs');
+                    return;
+                }
+                
+                const totalCalories = Math.round((qty * calPer100) / 100);
+                
+                const item = {
+                    id: itemIdCounter++,
+                    name: foodName,
+                    quantity: qty,
+                    calories: totalCalories,
+                    emoji: getFoodEmoji(foodName)
+                };
+                
+                calculatorItems.push(item);
+                updateFoodList();
+                
+                // Reset form
+                select.value = '';
+                quantity.value = '';
+                caloriesPer100.value = '';
+            }
+
+            // Quick add from food card
+            function quickAdd(foodName, caloriesPer100) {
+                const qty = prompt(`Quantité de ${foodName} (en grammes):`, '100');
+                if (qty && !isNaN(qty)) {
+                    const totalCalories = Math.round((parseFloat(qty) * caloriesPer100) / 100);
+                    
+                    const item = {
+                        id: itemIdCounter++,
+                        name: foodName,
+                        quantity: parseFloat(qty),
+                        calories: totalCalories,
+                        emoji: getFoodEmoji(foodName)
+                    };
+                    
+                    calculatorItems.push(item);
+                    updateFoodList();
+                    
+                    // Scroll to calculator
+                    document.querySelector('.calculator-section').scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+
+            // Get emoji for food
+            function getFoodEmoji(foodName) {
+                const emojiMap = {
+                    'poulet': '🍗', 'steak': '🥩', 'saumon': '🐟', 'oeufs': '🥚',
+                    'banane': '🍌', 'avoine': '🌾', 'patate douce': '🍠', 'épinards': '🥬',
+                    'quinoa': '🍚', 'amandes': '🥜', 'yaourt': '🥛', 'brocoli': '🥦',
+                    'boisson énergisante': '🥤', 'fast food': '🍔', 'bonbons': '🍬',
+                    'soda': '🧃', 'alcool': '🍺', 'chips': '🥔', 'pâtisseries': '🧁',
+                    'chocolat noir': '🍫', 'baies': '🫐', 'noix': '🌰', 'avocat': '🥑',
+                    'thé vert': '🍵', 'miel': '🍯', 'orange': '🍊', 'lentilles': '🫘'
+                };
+                
+                const lowerName = foodName.toLowerCase();
+                for (const [key, emoji] of Object.entries(emojiMap)) {
+                    if (lowerName.includes(key)) return emoji;
+                }
+                return '🍽️';
+            }
+
+            // Update food list display
+            function updateFoodList() {
+                const listContainer = document.getElementById('foodList');
+                const totalElement = document.getElementById('totalCalories');
+                
+                if (calculatorItems.length === 0) {
+                    listContainer.innerHTML = '<p class="empty-list">Aucun aliment ajouté. Utilisez le formulaire ci-dessus ou cliquez "Ajouter" sur une carte.</p>';
+                    totalElement.textContent = '0';
+                    return;
+                }
+                
+                let html = '';
+                let total = 0;
+                
+                calculatorItems.forEach(item => {
+                    total += item.calories;
+                    html += `
+                        <div class="food-item">
+                            <div class="food-info-compact">
+                                <div class="food-icon-small">${item.emoji}</div>
+                                <div class="food-details">
+                                    <h4>${item.name}</h4>
+                                    <span>${item.quantity}g</span>
+                                </div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:15px;">
+                                <span class="food-calories">${item.calories} kcal</span>
+                                <button class="remove-btn" onclick="removeItem(${item.id})">×</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                listContainer.innerHTML = html;
+                totalElement.textContent = total.toLocaleString();
+            }
+
+            // Remove item from calculator
+            function removeItem(id) {
+                calculatorItems = calculatorItems.filter(item => item.id !== id);
+                updateFoodList();
+            }
+
+            // Search foods
+            function searchFoods() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const cards = document.querySelectorAll('.food-card');
+                const categoryFilter = document.getElementById('categoryFilter').value;
+                
+                let visibleCount = 0;
+                
+                cards.forEach(card => {
+                    const name = card.getAttribute('data-name');
+                    const category = card.getAttribute('data-category');
+                    
+                    const matchesSearch = name.includes(searchTerm);
+                    const matchesCategory = categoryFilter === 'all' || category === categoryFilter;
+                    
+                    if (matchesSearch && matchesCategory) {
+                        card.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // Show/hide no results message
+                const noResults = document.getElementById('noResults');
+                const tabPanes = document.querySelectorAll('.tab-pane');
+                
+                if (visibleCount === 0) {
+                    noResults.style.display = 'block';
+                    tabPanes.forEach(p => p.style.display = 'none');
+                } else {
+                    noResults.style.display = 'none';
+                    tabPanes.forEach(p => p.style.display = 'block');
+                }
+            }
+
+            // Filter by category
+            function filterByCategory() {
+                searchFoods();
+            }
+
+            // Calculate preview
+            function calculatePreview() {
+                // Optional preview calculation
+            }
+        </script>
+    {% endblock %}
+{% endblock %}

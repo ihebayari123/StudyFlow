@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter une Catégorie{% endblock %}
+
+{% block body %}
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 30px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
+    }
+    input, textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+    .error {
+        color: red;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    button {
+        background: #4CAF50;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    button:hover {
+        background: #45a049;
+    }
+</style>
+
+<div class="form-container">
+    <h1><center>Ajouter une Catégorie</center></h1>
+    
+    {# Désactivation du contrôle HTML5 #}
+    {{ form_start(ff, {'attr': {'novalidate': 'novalidate'}}) }}
+    
+    <div class="form-group">
+        {{ form_label(ff.nomCategorie, "Nom de la Catégorie") }}
+        {{ form_widget(ff.nomCategorie) }}
+        {{ form_errors(ff.nomCategorie) }}
+    </div>
+    
+    <div class="form-group">
+        {{ form_label(ff.description, "Description") }}
+        {{ form_widget(ff.description) }}
+        {{ form_errors(ff.description) }}
+    </div>
+    
+    {{ form_row(ff.save) }}
+    
+    {{ form_end(ff) }}
+</div>
+
+{% endblock %}

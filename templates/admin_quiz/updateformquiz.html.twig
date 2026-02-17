@@ -1,0 +1,151 @@
+<!--! ================================================================ !-->
+    <!--! [Start] Navigation Manu !-->
+    <!--! ================================================================ !-->
+    {% include 'admin/Partials/sidebar.html.twig' %}
+    <!--! ================================================================ !-->
+    <!--! [End]  Navigation Manu !-->
+    <!--! ================================================================ !-->
+
+    <!--! ================================================================ !-->
+    <!--! [Start] Header !-->
+    <!--! ================================================================ !-->
+   
+    {% include 'admin/partials/navbar.html.twig' %}
+    <!--! ================================================================ !-->
+    <!--! [End] Header !-->
+    <!--! ================================================================ !-->
+<div class="admin-layout">
+
+    {% include 'admin/Partials/sidebar.html.twig' %}
+    {% include 'admin/partials/navbar.html.twig' %}
+
+    <main class="main-content">
+
+        <div class="form-container">
+            {{ form_start(f, {'attr': {'class': 'custom-form'}}) }}
+
+            {% for field in f %}
+                {% if field.vars.name != 'save' %}
+                    <div class="form-group">
+                        {{ form_label(field) }}
+                        {{ form_widget(field, {'attr': {'class': 'form-input'}}) }}
+                        {{ form_errors(field) }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <div class="form-group">
+                {{ form_widget(f.save, {'attr': {'class': 'form-submit'}}) }}
+            </div>
+
+            {{ form_end(f) }}
+        </div>
+
+    </main>
+</div>
+
+
+<style>
+.admin-layout {
+    display: flex;
+}
+
+/* المحتوى الرئيسي */
+.main-content {
+    margin-left: 260px;        /* عرض الـ sidebar */
+    margin-top: 70px;          /* ارتفاع الـ navbar */
+    padding: 30px;
+    width: calc(100% - 260px);
+    background-color: #f4f6f8;
+    min-height: 100vh;
+}
+
+/* الفورم */
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 25px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.custom-form .form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.custom-form label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.custom-form .form-input {
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.custom-form .form-input:focus {
+    border-color: #4f46e5;
+    outline: none;
+    box-shadow: 0 0 5px rgba(79,70,229,0.3);
+}
+
+.form-submit {
+    padding: 10px 20px;
+    background-color: #4f46e5;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.form-submit:hover {
+    background-color: #3730a3;
+}
+
+</style>
+{% block stylesheets %}
+    
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="" />
+    <meta name="keyword" content="" />
+    <meta name="author" content="flexilecode" />
+    <!--! BEGIN: Favicon-->
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets2/images/favicon.ico') }}" />
+    <!--! END: Favicon-->
+    <!--! BEGIN: Bootstrap CSS-->
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/bootstrap.min.css') }}" />
+    <!--! END: Bootstrap CSS-->
+    <!--! BEGIN: Vendors CSS-->
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/vendors/css/vendors.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/vendors/css/daterangepicker.min.css') }}" />
+    <!--! END: Vendors CSS-->
+    <!--! BEGIN: Custom CSS-->
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/theme.min.css') }}" />
+    <!--! END: Custom CSS-->
+    <!--! HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries !-->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+{% endblock %}
+
+{% block javascripts %}
+    
+    <script src="{{ asset('assets2/vendors/js/vendors.min.js') }}"></script>
+    <script src="{{ asset('assets2/vendors/js/daterangepicker.min.js') }}"></script>
+    <script src="{{ asset('assets2/vendors/js/apexcharts.min.js') }}"></script>
+    <script src="{{ asset('assets2/vendors/js/circle-progress.min.js') }}"></script>
+    <script src="{{ asset('assets2/js/common-init.min.js') }}"></script>
+    <script src="{{ asset('assets2/js/dashboard-init.min.js') }}"></script>
+    {% block admin_javascripts %}{% endblock %}
+    <script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
+{% endblock %}

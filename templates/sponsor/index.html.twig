@@ -1,0 +1,113 @@
+{# templates/admin/sponsors_admin.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Liste des sponsors - Admin{% endblock %}
+
+{% block admin_content %}
+
+{# Spacer pour navbar fixe - ajuster la hauteur selon ton navbar #}
+<div style="height: 80px;"></div>
+
+<div class="container py-5 d-flex flex-column align-items-center">
+
+    <h1 class="mb-5 text-primary fw-bold text-center">Liste des sponsors</h1>
+
+    <!-- Bouton Ajouter -->
+    <div class="text-end mb-4 w-100">
+        <a href="{{ path('sponsor_create') }}"
+           class="btn btn-primary btn-lg rounded-3 shadow-sm"
+           style="min-width: 160px; transition: transform 0.2s;"
+           onmouseover="this.style.transform='scale(1.05)'"
+           onmouseout="this.style.transform='scale(1)'">
+            Ajouter un sponsor
+        </a>
+    </div>
+
+    <!-- Messages Flash -->
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm w-100" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <!-- Formulaire de recherche -->
+    <div class="mb-4 w-100">
+        <form method="get" action="{{ path('sponsor_index') }}" class="d-flex w-100">
+            <input type="text" name="search" class="form-control me-2 shadow-sm rounded-3" placeholder="Rechercher par nom, type ou événement" value="{{ search }}">
+            <button class="btn btn-outline-primary shadow-sm rounded-3">Rechercher</button>
+        </form>
+    </div>
+
+    <!-- Tableau -->
+    <div class="card shadow-lg border-0 w-100">
+        <div class="table-responsive p-4">
+            <table class="table table-hover align-middle mb-0 text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nom</th>
+                        <th>Type</th>
+                        <th>Montant</th>
+                        <th>Événement</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sponsor in sponsors %}
+                        <tr>
+                            <td class="fw-bold">{{ sponsor.nomSponsor }}</td>
+                            <td>
+                                {% if sponsor.type == 'Or' %}
+                                    <span class="badge bg-warning text-dark">{{ sponsor.type }}</span>
+                                {% elseif sponsor.type == 'Argent' %}
+                                    <span class="badge bg-secondary">{{ sponsor.type }}</span>
+                                {% elseif sponsor.type == 'Bronze' %}
+                                    <span class="badge bg-info text-dark">{{ sponsor.type }}</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark">{{ sponsor.type }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ sponsor.montant }} DT</td>
+                            <td>{{ sponsor.eventTitre ? sponsor.eventTitre.titre : '—' }}</td>
+                            <td class="d-flex justify-content-center gap-2 flex-wrap">
+
+                                <!-- Modifier -->
+                                <a href="{{ path('sponsor_edit', {'id': sponsor.id}) }}"
+                                   class="btn btn-warning btn-sm rounded-3 shadow-sm d-inline-flex justify-content-center align-items-center"
+                                   style="min-width: 100px; transition: transform 0.2s;"
+                                   onmouseover="this.style.transform='scale(1.05)'"
+                                   onmouseout="this.style.transform='scale(1)'">
+                                    Modifier
+                                </a>
+
+                                <!-- Supprimer -->
+                                <form method="post"
+                                      action="{{ path('sponsor_delete', {'id': sponsor.id}) }}"
+                                      onsubmit="return confirm('Voulez-vous vraiment supprimer ce sponsor ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ sponsor.id) }}">
+                                    <button class="btn btn-danger btn-sm rounded-3 shadow-sm d-inline-flex justify-content-center align-items-center"
+                                            style="min-width: 100px; transition: transform 0.2s;"
+                                            onmouseover="this.style.transform='scale(1.05)'"
+                                            onmouseout="this.style.transform='scale(1)'">
+                                        Supprimer
+                                    </button>
+                                </form>
+
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                Aucun sponsor trouvé
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
