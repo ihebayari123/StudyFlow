@@ -1,0 +1,745 @@
+{# templates/stresse/add.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Manage add - Admin{% endblock %}
+
+{% block admin_content %}
+
+ <div style="padding: 60px; margin-left: 210px; overflow-x: auto;">
+<div class="container-fluid py-4">
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultations Médicales</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --medical-blue: #1a6fcf;
+            --light-blue: #e8f2ff;
+            --hospital-green: #10b981;
+            --medical-teal: #0d9488;
+            --warning-amber: #f59e0b;
+            --coral-red: #ef4444;
+            --dark-gray: #374151;
+            --medium-gray: #6b7280;
+            --light-gray: #f3f4f6;
+            --border-color: #e5e7eb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+            padding: 30px;
+        }
+        
+        .medical-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        /* En-tête médical */
+        .medical-header {
+            background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
+            color: white;
+            padding: 30px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .medical-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 0%, transparent 50%);
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header-text h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .header-text p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .add-btn {
+            background: white;
+            color: var(--medical-blue);
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            background: var(--light-blue);
+        }
+        
+        /* Tableau médical */
+        .table-wrapper {
+            padding: 30px;
+            overflow-x: auto;
+        }
+        
+        .medical-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 1100px;
+        }
+        
+        .medical-table thead {
+            background: var(--light-gray);
+            border-radius: 12px 12px 0 0;
+            overflow: hidden;
+        }
+        
+        .medical-table th {
+            padding: 20px 25px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark-gray);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-color);
+            position: relative;
+        }
+        
+        .medical-table th:first-child {
+            border-radius: 12px 0 0 0;
+        }
+        
+        .medical-table th:last-child {
+            border-radius: 0 12px 0 0;
+        }
+        
+        .medical-table th i {
+            margin-right: 10px;
+            color: var(--medical-teal);
+        }
+        
+        .medical-table tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .medical-table tbody tr:hover {
+            background: var(--light-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 111, 207, 0.1);
+        }
+        
+        .medical-table td {
+            padding: 20px 25px;
+            color: var(--dark-gray);
+            font-size: 14.5px;
+            font-weight: 500;
+        }
+        
+        .consultation-id {
+            font-family: 'Courier New', monospace;
+            background: var(--light-blue);
+            color: var(--medical-blue);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            display: inline-block;
+        }
+        
+        .date-cell {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .date-main {
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+        
+        .date-time {
+            font-size: 13px;
+            color: var(--medium-gray);
+            margin-top: 4px;
+        }
+        
+        .genre-cell {
+            position: relative;
+        }
+        
+        .genre-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12.5px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .genre-male {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+        }
+        
+        .genre-female {
+            background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+            color: #9d174d;
+        }
+        
+        .genre-other {
+            background: var(--light-gray);
+            color: var(--medium-gray);
+        }
+        
+        .niveau-cell {
+            position: relative;
+        }
+        
+        .niveau-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12.5px;
+            font-weight: 600;
+            display: inline-block;
+            position: relative;
+            padding-left: 28px;
+        }
+        
+        .niveau-badge::before {
+            content: '';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .niveau-faible {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+        }
+        
+        .niveau-faible::before {
+            background: var(--hospital-green);
+        }
+        
+        .niveau-moyen {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+        }
+        
+        .niveau-moyen::before {
+            background: var(--warning-amber);
+        }
+        
+        .niveau-eleve {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+        }
+        
+        .niveau-eleve::before {
+            background: var(--coral-red);
+        }
+        
+        .medecin-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .medecin-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .medecin-name {
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+        
+        .stress-cell {
+            position: relative;
+        }
+        
+        .stress-badge {
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--medical-teal);
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Boutons d'action */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-start;
+        }
+        
+        .delete-btn {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: var(--coral-red);
+            border: 1px solid #fca5a5;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        
+        .delete-btn:hover {
+            background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+            color: #b91c1c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+        
+        /* AJOUT DU BOUTON UPDATE */
+        .update-btn {
+            background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%);
+            color: var(--medical-blue);
+            border: 1px solid #60a5fa;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        
+        .update-btn:hover {
+            background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);
+            color: #1e40af;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 111, 207, 0.2);
+        }
+        
+        /* État vide */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+        
+        .empty-icon {
+            font-size: 60px;
+            color: var(--border-color);
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .empty-state h3 {
+            color: var(--medium-gray);
+            font-size: 20px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .empty-state p {
+            color: #9ca3af;
+            margin-bottom: 30px;
+            max-width: 400px;
+            margin: 0 auto 30px;
+        }
+        
+        /* Pagination */
+        .table-footer {
+            padding: 25px 30px;
+            border-top: 1px solid var(--border-color);
+            background: var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-info {
+            color: var(--medium-gray);
+            font-size: 14px;
+        }
+        
+        .footer-info strong {
+            color: var(--dark-gray);
+        }
+        
+        .pagination {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .pagination-btn {
+            padding: 10px 16px;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 8px;
+            color: var(--medium-gray);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pagination-btn:hover {
+            border-color: var(--medical-blue);
+            color: var(--medical-blue);
+        }
+        
+        .pagination-btn.active {
+            background: var(--medical-blue);
+            color: white;
+            border-color: var(--medical-blue);
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .medical-header {
+                padding: 25px 20px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+                align-items: flex-start;
+            }
+            
+            .table-wrapper {
+                padding: 20px;
+            }
+            
+            .table-footer {
+                flex-direction: column;
+                gap: 20px;
+                align-items: flex-start;
+            }
+            
+            .medical-table td, .medical-table th {
+                padding: 15px 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .delete-btn, .update-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+    <script>
+        function confirmDelete(id) {
+            if (confirm("Êtes-vous sûr de vouloir supprimer cette consultation ? Cette action est irréversible.")) {
+                return true;
+            }
+            return false;
+        }
+        
+        function confirmUpdate(id) {
+            if (confirm("Êtes-vous sûr de vouloir modifier cette consultation ?")) {
+                return true;
+            }
+            return false;
+        }
+    </script>
+</head>
+<body>
+    <div class="medical-container">
+        <!-- En-tête -->
+        <div class="medical-header">
+            <div class="header-content">
+                <div class="header-title">
+                    <div class="header-icon">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <div class="header-text">
+                        <h1>Consultations Médicales</h1>
+                        <p>Gestion des rendez-vous patients</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <a href="{{ path('app_exercice_respiration') }}" class="add-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                        <i class="fas fa-wind"></i>
+                        Respiration
+                    </a>
+                    <a href="{{ path('app_statistiques_consultation') }}" class="add-btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+                        <i class="fas fa-chart-pie"></i>
+                        Statistiques
+                    </a>
+                    <a href="{{ path('app_add_consultation') }}" class="add-btn">
+                        <i class="fas fa-plus-circle"></i>
+                        Nouvelle Consultation
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Barre de recherche et filtres -->
+        <div style="padding: 25px 30px; background: #f8fafc; border-bottom: 1px solid var(--border-color);">
+            <form method="get" action="{{ path('app_showconsultation') }}" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: end;">
+                <div style="flex: 1; min-width: 250px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: var(--dark-gray); margin-bottom: 6px;">
+                        <i class="fas fa-search" style="margin-right: 5px; color: var(--medical-blue);"></i>
+                        Rechercher
+                    </label>
+                    <input type="text" name="search" value="{{ search|default('') }}" placeholder="Nom médecin, prénom ou motif..." 
+                           style="width: 100%; padding: 12px 16px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 14px; outline: none; transition: all 0.3s ease;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: var(--dark-gray); margin-bottom: 6px;">
+                        <i class="fas fa-sort" style="margin-right: 5px; color: var(--medical-blue);"></i>
+                        Trier par
+                    </label>
+                    <select name="sort" style="padding: 12px 16px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 14px; outline: none; background: white; cursor: pointer;">
+                        <option value="id" {% if sort == 'id' %}selected{% endif %}>ID</option>
+                        <option value="date" {% if sort == 'date' %}selected{% endif %}>Date</option>
+                        <option value="motif" {% if sort == 'motif' %}selected{% endif %}>Motif</option>
+                        <option value="genre" {% if sort == 'genre' %}selected{% endif %}>Genre</option>
+                        <option value="niveau" {% if sort == 'niveau' %}selected{% endif %}>Niveau</option>
+                        <option value="medecin" {% if sort == 'medecin' %}selected{% endif %}>Médecin</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: var(--dark-gray); margin-bottom: 6px;">
+                        <i class="fas fa-arrow-up" style="margin-right: 5px; color: var(--medical-blue);"></i>
+                        Ordre
+                    </label>
+                    <select name="order" style="padding: 12px 16px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 14px; outline: none; background: white; cursor: pointer;">
+                        <option value="ASC" {% if order == 'ASC' %}selected{% endif %}>Croissant ↑</option>
+                        <option value="DESC" {% if order == 'DESC' %}selected{% endif %}>Décroissant ↓</option>
+                    </select>
+                </div>
+                <button type="submit" style="background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-filter"></i>
+                    Filtrer
+                </button>
+                {% if search %}
+                    <a href="{{ path('app_showconsultation') }}" style="background: white; color: var(--coral-red); border: 2px solid #fecaca; padding: 12px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-times"></i>
+                        Réinitialiser
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Tableau -->
+        <div class="table-wrapper">
+            <table class="medical-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-hashtag"></i> ID</th>
+                        <th><i class="fas fa-calendar-alt"></i> Date de consultation</th>
+                        <th><i class="fas fa-comment-medical"></i> Motif</th>
+                        <th><i class="fas fa-user-tag"></i> Genre</th>
+                        <th><i class="fas fa-chart-line"></i> Niveau</th>
+                        <th><i class="fas fa-user-md"></i> Médecin</th>
+                        <th><i class="fas fa-heart-rate"></i> Stress Survey</th>
+                        <th><i class="fas fa-cogs"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if consultations|length > 0 %}
+                        {% for i in consultations %}
+                        <tr>
+                            <td>
+                                <span class="consultation-id">#{{ i.id }}</span>
+                            </td>
+                            <td>
+                                <div class="date-cell">
+                                    <span class="date-main">{{ i.dateDeConsultation|date('Y-m-d') }}</span>
+                                    <span class="date-time">{{ i.dateDeConsultation|date('H:i') }}</span>
+                                </div>
+                            </td>
+                            <td>{{ i.motif }}</td>
+                            <td>
+                                <span class="genre-badge 
+                                    {% if i.genre == 'Homme' %}genre-male
+                                    {% elseif i.genre == 'Femme' %}genre-female
+                                    {% else %}genre-other{% endif %}">
+                                    {{ i.genre }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="niveau-badge 
+                                    {% if i.niveau == 'Faible' %}niveau-faible
+                                    {% elseif i.niveau == 'Moyen' %}niveau-moyen
+                                    {% elseif i.niveau == 'Élevé' %}niveau-eleve{% endif %}">
+                                    {{ i.niveau }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if i.medecin.nom %}
+                                <div class="medecin-cell">
+                                    <div class="medecin-avatar">
+                                        {{ i.medecin.nom|first|upper }}
+                                    </div>
+                                    <span class="medecin-name">{{ i.medecin.nom }}</span>
+                                </div>
+                                {% else %}
+                                <span style="color: #9ca3af; font-style: italic;">---</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if i.stressSurvey.id %}
+                                <span class="stress-badge">
+                                    <i class="fas fa-chart-bar"></i>
+                                    #{{ i.stressSurvey.id }}
+                                </span>
+                                {% else %}
+                                <span style="color: #9ca3af; font-style: italic;">---</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <!-- Bouton Bilan -->
+                                    <a href="{{ path('app_bilan_consultation', {'id': i.id}) }}" 
+                                       class="update-btn"
+                                       style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border-color: #6d28d9;">
+                                        <i class="fas fa-clipboard-check"></i>
+                                        Bilan
+                                    </a>
+                                    
+                                    <!-- Bouton Update -->
+                                    <a href="{{ path('app_updateconsultation', {'id': i.id}) }}" 
+                                       class="update-btn"
+                                       onclick="return confirmUpdate({{ i.id }})">
+                                        <i class="fas fa-edit"></i>
+                                        Modifier
+                                    </a>
+                                    
+                                    <!-- Bouton Delete -->
+                                    <a href="{{ path('app_delete_consultation', {'id': i.id}) }}" 
+                                       class="delete-btn"
+                                       onclick="return confirmDelete({{ i.id }})">
+                                        <i class="fas fa-trash"></i>
+                                        Supprimer
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <div class="empty-icon">
+                                        <i class="fas fa-clipboard-list"></i>
+                                    </div>
+                                    <h3>Aucune consultation trouvée</h3>
+                                    <p>Commencez par ajouter une nouvelle consultation médicale</p>
+                                    <a href="{{ path('app_add_consultation') }}" class="add-btn" style="margin-top: 20px;">
+                                        <i class="fas fa-plus-circle"></i>
+                                        Créer une consultation
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if consultations|length > 0 %}
+        <div class="table-footer">
+            <div class="footer-info">
+                Affichage de <strong>{{ consultations|length }}</strong> consultation{{ consultations|length > 1 ? 's' : '' }}
+            </div>
+            <div class="pagination">
+                <button class="pagination-btn">‹</button>
+                <button class="pagination-btn active">1</button>
+                <button class="pagination-btn">2</button>
+                <button class="pagination-btn">3</button>
+                <button class="pagination-btn">›</button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
+{% endblock %}

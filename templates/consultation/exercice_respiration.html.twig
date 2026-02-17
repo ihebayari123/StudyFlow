@@ -1,0 +1,811 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Exercice de Respiration - 5 Minutes{% endblock %}
+
+{% block body %}
+<!-- ======= Header ======= -->
+{% block header %}
+{% include 'home/navbar.html.twig' %}
+{% endblock %}
+
+<div class="respiration-section">
+    <div class="container">
+        <!-- Header avec titre et bouton retour -->
+        <div class="header-with-button">
+            <h1 class="section-title">Exercice de Respiration</h1>
+            <a href="{{ path('app_studyflow_affiche') }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Retour
+            </a>
+        </div>
+
+        <!-- Instructions Cards -->
+        <div class="instructions-grid">
+            <div class="instruction-card inspire">
+                <div class="instruction-icon">🫁</div>
+                <h3>Inspirez</h3>
+                <p>Respirez profondément par le nez pendant 4 secondes</p>
+            </div>
+            <div class="instruction-card hold">
+                <div class="instruction-icon">⏸️</div>
+                <h3>Retenez</h3>
+                <p>Retenez votre souffle pendant 4 secondes</p>
+            </div>
+            <div class="instruction-card exhale">
+                <div class="instruction-icon">💨</div>
+                <h3>Expirez</h3>
+                <p>Soufflez lentement par la bouche pendant 6 secondes</p>
+            </div>
+        </div>
+
+        <!-- Timer Card -->
+        <div class="timer-card">
+            <!-- Breathing Circle -->
+            <div class="breath-circle-container">
+                <div id="breathCircle" class="breath-circle">
+                    <span id="breathText" class="breath-text">Prêt</span>
+                </div>
+                <div class="circle-outer"></div>
+                
+                <!-- Cercles décoratifs -->
+                <div class="circle-glow"></div>
+                <div class="circle-pulse"></div>
+            </div>
+
+            <!-- Timer Display -->
+            <div class="timer-display">
+                <div id="timer">05:00</div>
+                <span class="timer-label">Temps restant</span>
+            </div>
+
+            <!-- Phase Indicator -->
+            <div id="phaseIndicator" class="phase-indicator">
+                <span>Cliquez sur "Commencer" pour démarrer l'exercice</span>
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="control-buttons">
+                <button id="startBtn" onclick="startExercise()" class="btn-start">
+                    <i class="fas fa-play"></i>
+                    Commencer
+                </button>
+                <button id="stopBtn" onclick="stopExercise()" class="btn-stop">
+                    <i class="fas fa-stop"></i>
+                    Arrêter
+                </button>
+            </div>
+        </div>
+
+        <!-- Tips Card -->
+        <div class="tips-card">
+            <h5 class="tips-title">
+                <i class="fas fa-lightbulb"></i>
+                Conseils pour une meilleure respiration
+            </h5>
+            <ul class="tips-list">
+                <li>Asseyez-vous confortablement avec le dos droit</li>
+                <li>Fermez les yeux pour mieux vous concentrer</li>
+                <li>Placez une main sur votre ventre pour sentir la respiration</li>
+                <li>Respirez calmement et régulièrement</li>
+                <li>Si vous vous sentez étourdi, arrêtez et reprenez votre respiration normale</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+        min-height: 100vh;
+    }
+
+    /* Keep navbar text white and make navbar background semi-transparent */
+    .header-area {
+        background: rgba(0, 0, 0, 0.2) !important;
+        backdrop-filter: blur(10px);
+    }
+
+    .header-area .logo h1,
+    .header-area .nav a,
+    .header-area .menu-trigger span,
+    nav, .navbar, nav *, .navbar *, .nav-link {
+        color: white !important;
+    }
+
+    .respiration-section {
+        padding: 120px 20px 60px 20px;
+        background-color: transparent;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Header with Back Button */
+    .header-with-button {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 50px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .section-title {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #ffffff;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        margin: 0;
+    }
+
+    /* Back Button */
+    .back-btn {
+        padding: 15px 35px;
+        background: white;
+        color: #10b981;
+        text-decoration: none;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+        margin-top: 30px;
+    }
+
+    .back-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(255, 255, 255, 0.4);
+        background: linear-gradient(135deg, #ffffff 0%, #f0fff9 100%);
+        color: #047857;
+    }
+
+    /* Instructions Grid */
+    .instructions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 50px;
+    }
+
+    .instruction-card {
+        background: white;
+        padding: 35px 25px;
+        border-radius: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .instruction-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    }
+
+    .instruction-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .instruction-card.inspire {
+        background: linear-gradient(145deg, #f0fdf4, #dcfce7);
+        border-bottom: 5px solid #22c55e;
+    }
+
+    .instruction-card.hold {
+        background: linear-gradient(145deg, #fef3c7, #fde68a);
+        border-bottom: 5px solid #f59e0b;
+    }
+
+    .instruction-card.exhale {
+        background: linear-gradient(145deg, #eff6ff, #dbeafe);
+        border-bottom: 5px solid #3b82f6;
+    }
+
+    .instruction-icon {
+        font-size: 56px;
+        margin-bottom: 20px;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .instruction-card h3 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 15px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .instruction-card.inspire h3 {
+        color: #166534;
+    }
+
+    .instruction-card.hold h3 {
+        color: #92400e;
+    }
+
+    .instruction-card.exhale h3 {
+        color: #1e40af;
+    }
+
+    .instruction-card p {
+        color: #334155;
+        font-size: 1.1rem;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* Timer Card */
+    .timer-card {
+        background: white;
+        border-radius: 40px;
+        padding: 60px 40px;
+        margin-bottom: 50px;
+        text-align: center;
+        box-shadow: 0 30px 70px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .timer-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .timer-card::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .breath-circle-container {
+        position: relative;
+        width: 320px;
+        height: 320px;
+        margin: 0 auto 40px;
+    }
+
+    .breath-circle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: 50%;
+        box-shadow: 0 20px 50px rgba(16, 185, 129, 0.4);
+        transition: all 4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 3;
+    }
+
+    .breath-text {
+        color: white;
+        font-size: 28px;
+        font-weight: 800;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        letter-spacing: 1px;
+    }
+
+    .circle-outer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        z-index: 2;
+        animation: rotate 20s linear infinite;
+    }
+
+    .circle-glow {
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        width: calc(100% + 20px);
+        height: calc(100% + 20px);
+        border: 2px solid rgba(16, 185, 129, 0.3);
+        border-radius: 50%;
+        animation: pulse 2s ease-in-out infinite;
+        z-index: 1;
+    }
+
+    .circle-pulse {
+        position: absolute;
+        top: -20px;
+        left: -20px;
+        width: calc(100% + 40px);
+        height: calc(100% + 40px);
+        border: 2px solid rgba(16, 185, 129, 0.2);
+        border-radius: 50%;
+        animation: pulseSlow 3s ease-in-out infinite;
+        z-index: 1;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 0.6; }
+        50% { transform: scale(1.05); opacity: 0.3; }
+    }
+
+    @keyframes pulseSlow {
+        0%, 100% { transform: scale(1); opacity: 0.4; }
+        50% { transform: scale(1.1); opacity: 0.2; }
+    }
+
+    .timer-display {
+        margin-bottom: 30px;
+        position: relative;
+        z-index: 3;
+    }
+
+    .timer-display #timer {
+        font-size: 90px;
+        font-weight: 800;
+        color: #0f172a;
+        font-family: 'Courier New', monospace;
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        line-height: 1;
+        margin-bottom: 10px;
+        letter-spacing: 5px;
+    }
+
+    .timer-label {
+        color: #64748b;
+        font-size: 1.2rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .phase-indicator {
+        display: inline-block;
+        padding: 18px 45px;
+        background: #f1f5f9;
+        border-radius: 50px;
+        margin-bottom: 40px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        position: relative;
+        z-index: 3;
+        border: 2px solid transparent;
+    }
+
+    .phase-indicator span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .control-buttons {
+        display: flex;
+        gap: 25px;
+        justify-content: center;
+        position: relative;
+        z-index: 3;
+    }
+
+    .btn-start {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        padding: 20px 55px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255,255,255,0.3);
+        letter-spacing: 1px;
+    }
+
+    .btn-start:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(16, 185, 129, 0.5);
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
+
+    .btn-stop {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        padding: 20px 55px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255,255,255,0.3);
+        letter-spacing: 1px;
+    }
+
+    .btn-stop:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(239, 68, 68, 0.5);
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    }
+
+    /* Tips Card */
+    .tips-card {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        padding: 45px 50px;
+        border-radius: 30px;
+        border: 1px solid #fcd34d;
+        box-shadow: 0 20px 50px rgba(245, 158, 11, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .tips-card::before {
+        content: '✨';
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        font-size: 60px;
+        opacity: 0.1;
+        transform: rotate(15deg);
+    }
+
+    .tips-title {
+        color: #92400e;
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .tips-title i {
+        font-size: 2rem;
+    }
+
+    .tips-list {
+        color: #a16207;
+        margin: 0;
+        padding-left: 0;
+        line-height: 2.2;
+        font-size: 1.2rem;
+        list-style-type: none;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 15px;
+    }
+
+    .tips-list li {
+        position: relative;
+        padding-left: 40px;
+        margin-bottom: 12px;
+        font-weight: 500;
+    }
+
+    .tips-list li:before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #059669;
+        font-weight: 900;
+        font-size: 1.5rem;
+        background: rgba(16, 185, 129, 0.1);
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .section-title {
+            font-size: 2.5rem;
+        }
+        
+        .breath-circle-container {
+            width: 280px;
+            height: 280px;
+        }
+        
+        .timer-display #timer {
+            font-size: 70px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .respiration-section {
+            padding: 100px 15px 40px 15px;
+        }
+
+        .header-with-button {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .back-btn {
+            width: 100%;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .instructions-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .timer-card {
+            padding: 40px 25px;
+        }
+
+        .breath-circle-container {
+            width: 240px;
+            height: 240px;
+        }
+
+        .breath-circle {
+            width: 160px;
+            height: 160px;
+        }
+
+        .breath-text {
+            font-size: 22px;
+        }
+
+        .timer-display #timer {
+            font-size: 60px;
+        }
+
+        .phase-indicator {
+            padding: 15px 30px;
+            font-size: 1rem;
+        }
+
+        .control-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-start,
+        .btn-stop {
+            width: 100%;
+            justify-content: center;
+            padding: 18px 40px;
+        }
+
+        .tips-card {
+            padding: 35px 25px;
+        }
+
+        .tips-title {
+            font-size: 1.5rem;
+        }
+
+        .tips-list {
+            grid-template-columns: 1fr;
+            font-size: 1.1rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .section-title {
+            font-size: 1.8rem;
+        }
+
+        .breath-circle-container {
+            width: 200px;
+            height: 200px;
+        }
+
+        .breath-circle {
+            width: 140px;
+            height: 140px;
+        }
+
+        .timer-display #timer {
+            font-size: 50px;
+        }
+
+        .instruction-card h3 {
+            font-size: 1.6rem;
+        }
+    }
+
+    /* Animations supplémentaires */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .instruction-card, .timer-card, .tips-card {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .instruction-card:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .instruction-card:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+</style>
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+    let timerInterval;
+    let breathInterval;
+    let totalSeconds = 300; // 5 minutes
+    let isRunning = false;
+
+    function updateTimer() {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        document.getElementById('timer').textContent = 
+            String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+    }
+
+    function breatheIn() {
+        const circle = document.getElementById('breathCircle');
+        const text = document.getElementById('breathText');
+        const indicator = document.getElementById('phaseIndicator');
+        
+        circle.style.width = '280px';
+        circle.style.height = '280px';
+        circle.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+        text.textContent = 'Inspirez';
+        indicator.innerHTML = '<span>🫁 Inspirez par le nez (4s)</span>';
+        indicator.style.background = '#d1fae5';
+        indicator.style.borderColor = '#22c55e';
+    }
+
+    function hold() {
+        const text = document.getElementById('breathText');
+        const indicator = document.getElementById('phaseIndicator');
+        
+        text.textContent = 'Retenez';
+        indicator.innerHTML = '<span>⏸️ Retenez votre souffle (4s)</span>';
+        indicator.style.background = '#fef3c7';
+        indicator.style.borderColor = '#f59e0b';
+    }
+
+    function breatheOut() {
+        const circle = document.getElementById('breathCircle');
+        const text = document.getElementById('breathText');
+        const indicator = document.getElementById('phaseIndicator');
+        
+        circle.style.width = '200px';
+        circle.style.height = '200px';
+        circle.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+        text.textContent = 'Expirez';
+        indicator.innerHTML = '<span>💨 Expirez par la bouche (6s)</span>';
+        indicator.style.background = '#dbeafe';
+        indicator.style.borderColor = '#3b82f6';
+    }
+
+    function runBreathCycle() {
+        breatheIn();
+        
+        setTimeout(() => {
+            if (!isRunning) return;
+            hold();
+            
+            setTimeout(() => {
+                if (!isRunning) return;
+                breatheOut();
+            }, 4000);
+        }, 4000);
+    }
+
+    function startExercise() {
+        if (isRunning) return;
+        
+        isRunning = true;
+        document.getElementById('startBtn').style.display = 'none';
+        document.getElementById('stopBtn').style.display = 'inline-flex';
+        
+        runBreathCycle();
+        breathInterval = setInterval(runBreathCycle, 14000);
+        
+        timerInterval = setInterval(() => {
+            if (totalSeconds > 0) {
+                totalSeconds--;
+                updateTimer();
+            } else {
+                stopExercise();
+                document.getElementById('phaseIndicator').innerHTML = '<span>🎉 Exercice terminé ! Bravo !</span>';
+                document.getElementById('phaseIndicator').style.background = '#d1fae5';
+                document.getElementById('phaseIndicator').style.borderColor = '#22c55e';
+                document.getElementById('breathText').textContent = 'Terminé';
+            }
+        }, 1000);
+    }
+
+    function stopExercise() {
+        isRunning = false;
+        clearInterval(timerInterval);
+        clearInterval(breathInterval);
+        
+        document.getElementById('startBtn').style.display = 'inline-flex';
+        document.getElementById('stopBtn').style.display = 'none';
+        document.getElementById('startBtn').innerHTML = '<i class="fas fa-redo"></i> Recommencer';
+        
+        const circle = document.getElementById('breathCircle');
+        circle.style.width = '200px';
+        circle.style.height = '200px';
+        circle.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+        document.getElementById('breathText').textContent = 'Prêt';
+        document.getElementById('phaseIndicator').innerHTML = '<span>Exercice arrêté. Cliquez sur "Recommencer" pour continuer.</span>';
+        document.getElementById('phaseIndicator').style.background = '#f1f5f9';
+        document.getElementById('phaseIndicator').style.borderColor = 'transparent';
+        
+        if (totalSeconds === 0) {
+            totalSeconds = 300;
+            updateTimer();
+            document.getElementById('startBtn').innerHTML = '<i class="fas fa-play"></i> Commencer';
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,842 @@
+{# templates/stresse/add.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Manage add - Admin{% endblock %}
+
+{% block admin_content %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --primary-light: rgba(102, 126, 234, 0.1);
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+            --gray-light: #e2e8f0;
+            --gray: #94a3b8;
+            --border-radius: 12px;
+        }
+
+        .form-page {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .form-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+        }
+
+        .form-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        .form-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .form-body {
+            padding: 50px;
+        }
+
+        @media (max-width: 768px) {
+            .form-body {
+                padding: 30px;
+            }
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--dark-color);
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .required::after {
+            content: " *";
+            color: var(--danger-color);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: var(--light-color);
+            color: var(--dark-color);
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px var(--primary-light);
+            background: white;
+            transform: translateY(-1px);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+
+        .form-input:focus + .input-icon {
+            color: var(--primary-color);
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 13px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .error-message i {
+            font-size: 12px;
+        }
+
+        .form-input.error {
+            border-color: var(--danger-color);
+            background: rgba(239, 68, 68, 0.02);
+        }
+
+        .form-input.success {
+            border-color: var(--success-color);
+        }
+
+        /* Style pour la disponibilité */
+        .availability-group {
+            background: var(--light-color);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-top: 10px;
+        }
+
+        .availability-label {
+            display: block;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+
+        .availability-options {
+            display: flex;
+            gap: 20px;
+        }
+
+        @media (max-width: 576px) {
+            .availability-options {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+        .availability-option {
+            flex: 1;
+            position: relative;
+        }
+
+        .availability-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .availability-custom {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px 25px;
+            background: white;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .availability-custom:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .availability-input:checked + .availability-custom {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .availability-custom i {
+            font-size: 20px;
+        }
+
+        .availability-option[data-value="true"] .availability-custom i {
+            color: var(--success-color);
+        }
+
+        .availability-option[data-value="false"] .availability-custom i {
+            color: var(--danger-color);
+        }
+
+        .availability-input:checked + .availability-custom i {
+            color: white !important;
+        }
+
+        /* Bouton de soumission */
+        .submit-group {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid var(--gray-light);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 220px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-submit i {
+            font-size: 18px;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            animation: slideIn 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.4s; }
+        .availability-group { animation-delay: 0.5s; }
+        .submit-group { animation-delay: 0.6s; }
+
+        /* Tooltip et info */
+        .info-text {
+            font-size: 13px;
+            color: var(--gray);
+            margin-top: 6px;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .info-text i {
+            font-size: 12px;
+        }
+
+        /* Chargement */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--gray-light);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Retour à la liste */
+        .back-link {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            z-index: 3;
+        }
+
+        .back-link:hover {
+            transform: translateX(-5px);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Champ obligatoire */
+        .required-hint {
+            text-align: right;
+            font-size: 12px;
+            color: var(--gray);
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .required-hint span {
+            color: var(--danger-color);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="form-page">
+    <div class="form-container">
+        <div class="form-card">
+            <!-- En-tête du formulaire -->
+            <div class="form-header">
+                <!-- Bouton retour -->
+                <a href="{{ path('app_showmedecin') }}" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour à la liste
+                </a>
+                
+                <div class="header-content">
+                    <div class="form-icon">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <h1 class="form-title">
+                        {{ f.vars.value.id ? 'Modifier le Médecin' : 'Nouveau Médecin' }}
+                    </h1>
+                    <p class="form-subtitle">
+                        {{ f.vars.value.id ? 'Mettez à jour les informations du médecin' : 'Remplissez les informations pour ajouter un nouveau médecin' }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Corps du formulaire -->
+            <div class="form-body">
+                <div class="required-hint">
+                    Les champs marqués d'un <span>*</span> sont obligatoires
+                </div>
+                
+                {{ form_start(f, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation', 'id': 'medecinForm'}}) }}
+                
+                <div class="form-grid">
+                    <!-- Nom -->
+                    <div class="form-group">
+                        {{ form_label(f.nom, null, {'label_attr': {'class': 'form-label required'}}) }}
+                        <div class="input-wrapper">
+                            {{ form_widget(f.nom, {
+                                'attr': {
+                                    'class': 'form-input' ~ (f.nom.vars.errors|length > 0 ? ' error' : ''),
+                                    'placeholder': 'ex: Martin'
+                                }
+                            }) }}
+                            <span class="input-icon">
+                                <i class="fas fa-signature"></i>
+                            </span>
+                        </div>
+                        {% if f.nom.vars.errors %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form_errors(f.nom) }}
+                            </div>
+                        {% endif %}
+                        <div class="info-text">
+                            <i class="fas fa-info-circle"></i>
+                            2 à 50 caractères, lettres uniquement
+                        </div>
+                    </div>
+
+                    <!-- Prénom -->
+                    <div class="form-group">
+                        {{ form_label(f.prenom, null, {'label_attr': {'class': 'form-label required'}}) }}
+                        <div class="input-wrapper">
+                            {{ form_widget(f.prenom, {
+                                'attr': {
+                                    'class': 'form-input' ~ (f.prenom.vars.errors|length > 0 ? ' error' : ''),
+                                    'placeholder': 'ex: Sophie'
+                                }
+                            }) }}
+                            <span class="input-icon">
+                                <i class="fas fa-user"></i>
+                            </span>
+                        </div>
+                        {% if f.prenom.vars.errors %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form_errors(f.prenom) }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group full-width">
+                        {{ form_label(f.email, null, {'label_attr': {'class': 'form-label required'}}) }}
+                        <div class="input-wrapper">
+                            {{ form_widget(f.email, {
+                                'attr': {
+                                    'class': 'form-input' ~ (f.email.vars.errors|length > 0 ? ' error' : ''),
+                                    'placeholder': 'exemple@clinique.fr'
+                                }
+                            }) }}
+                            <span class="input-icon">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                        </div>
+                        {% if f.email.vars.errors %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form_errors(f.email) }}
+                            </div>
+                        {% endif %}
+                        <div class="info-text">
+                            <i class="fas fa-shield-alt"></i>
+                            Email professionnel requis - confidentiel
+                        </div>
+                    </div>
+
+                    <!-- Téléphone -->
+                    <div class="form-group full-width">
+                        {{ form_label(f.telephone, null, {'label_attr': {'class': 'form-label required'}}) }}
+                        <div class="input-wrapper">
+                            {{ form_widget(f.telephone, {
+                                'attr': {
+                                    'class': 'form-input' ~ (f.telephone.vars.errors|length > 0 ? ' error' : ''),
+                                    'placeholder': '+33 1 23 45 67 89'
+                                }
+                            }) }}
+                            <span class="input-icon">
+                                <i class="fas fa-phone"></i>
+                            </span>
+                        </div>
+                        {% if f.telephone.vars.errors %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form_errors(f.telephone) }}
+                            </div>
+                        {% endif %}
+                        <div class="info-text">
+                            <i class="fas fa-globe"></i>
+                            Format international recommandé (10 à 20 chiffres)
+                        </div>
+                    </div>
+
+                    <!-- Disponibilité -->
+                    <div class="form-group full-width">
+                        <label class="form-label required">Disponibilité</label>
+                        <div class="availability-group">
+                            <div class="availability-options">
+                                {% for child in f.disponibilite %}
+                                    <div class="availability-option" data-value="{{ child.vars.value }}">
+                                        {{ form_widget(child, {
+                                            'attr': {
+                                                'class': 'availability-input'
+                                            }
+                                        }) }}
+                                        <label for="{{ child.vars.id }}" class="availability-custom">
+                                            <i class="fas {% if child.vars.value == '1' %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                                            <span>{{ child.vars.label }}</span>
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% if f.disponibilite.vars.errors %}
+                                <div class="error-message" style="margin-top: 15px;">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ form_errors(f.disponibilite) }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bouton de soumission -->
+                <div class="submit-group">
+                    {{ form_widget(f.save, {
+                        'label': f.vars.value.id ? 'Mettre à jour le médecin' : 'Enregistrer le médecin',
+                        'attr': {
+                            'class': 'btn-submit',
+                            'id': 'submitBtn'
+                        }
+                    }) }}
+                </div>
+
+                {{ form_end(f) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Overlay de chargement -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('medecinForm');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Validation en temps réel
+            const inputs = document.querySelectorAll('.form-input');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    validateField(this);
+                });
+                
+                input.addEventListener('blur', function() {
+                    validateField(this);
+                });
+                
+                // Initial validation
+                validateField(input);
+            });
+            
+            function validateField(field) {
+                const errorElement = field.parentElement.nextElementSibling;
+                const infoElement = field.parentElement.nextElementSibling?.nextElementSibling;
+                
+                // Réinitialiser les états
+                field.classList.remove('error', 'success');
+                
+                if (field.value.trim() === '') {
+                    if (field.hasAttribute('required')) {
+                        field.classList.add('error');
+                    }
+                    return;
+                }
+                
+                // Validation spécifique par type
+                let isValid = field.checkValidity();
+                
+                if (field.type === 'email') {
+                    isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value);
+                } else if (field.name.includes('telephone')) {
+                    isValid = /^[\d\s\-\+\(\)]{10,20}$/.test(field.value.replace(/\s/g, ''));
+                } else if (field.name.includes('nom') || field.name.includes('prenom')) {
+                    isValid = /^[a-zA-ZÀ-ÿ\s\-]{2,50}$/.test(field.value);
+                }
+                
+                if (isValid) {
+                    field.classList.add('success');
+                    if (errorElement && errorElement.classList.contains('error-message')) {
+                        errorElement.style.display = 'none';
+                    }
+                } else {
+                    field.classList.add('error');
+                }
+            }
+            
+            // Animation des boutons radio
+            const radioInputs = document.querySelectorAll('.availability-input');
+            radioInputs.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    // Retirer la classe active de tous les boutons
+                    document.querySelectorAll('.availability-custom').forEach(label => {
+                        label.classList.remove('active');
+                    });
+                    
+                    // Ajouter la classe active au bouton sélectionné
+                    if (this.checked) {
+                        this.nextElementSibling.classList.add('active');
+                    }
+                });
+                
+                // Initialiser l'état actif
+                if (radio.checked) {
+                    radio.nextElementSibling.classList.add('active');
+                }
+            });
+            
+            // Soumission du formulaire avec overlay
+            form.addEventListener('submit', function(e) {
+                // Validation finale
+                let isValid = true;
+                inputs.forEach(input => {
+                    validateField(input);
+                    if (input.classList.contains('error')) {
+                        isValid = false;
+                    }
+                });
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    showError('Veuillez corriger les erreurs dans le formulaire.');
+                    return;
+                }
+                
+                // Afficher l'overlay de chargement
+                loadingOverlay.classList.add('active');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement en cours...';
+            });
+            
+            // Fonction pour afficher les erreurs
+            function showError(message) {
+                // Créer une notification d'erreur
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-notification';
+                errorDiv.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                // Styles pour la notification
+                errorDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: var(--danger-color);
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: var(--border-radius);
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    z-index: 1000;
+                    animation: slideInRight 0.3s ease;
+                    box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+                `;
+                
+                errorDiv.querySelector('button').style.cssText = `
+                    background: none;
+                    border: none;
+                    color: white;
+                    cursor: pointer;
+                    font-size: 14px;
+                    margin-left: auto;
+                    padding: 0 0 0 10px;
+                `;
+                
+                document.body.appendChild(errorDiv);
+                
+                // Supprimer automatiquement après 5 secondes
+                setTimeout(() => {
+                    if (errorDiv.parentNode) {
+                        errorDiv.remove();
+                    }
+                }, 5000);
+            }
+            
+            // Animation CSS pour la notification
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInRight {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                
+                .error-notification {
+                    animation: slideInRight 0.3s ease;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Effet de focus amélioré
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'scale(1.01)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'scale(1)';
+                });
+            });
+            
+            // Auto-format du téléphone
+            const phoneInput = document.querySelector('input[name*="telephone"]');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function(e) {
+                    let value = this.value.replace(/\D/g, '');
+                    
+                    if (value.length > 10) {
+                        value = value.substring(0, 10);
+                    }
+                    
+                    if (value.length > 6) {
+                        value = value.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d+)/, '$1 $2 $3 $4 $5');
+                    } else if (value.length > 4) {
+                        value = value.replace(/(\d{2})(\d{2})(\d+)/, '$1 $2 $3');
+                    } else if (value.length > 2) {
+                        value = value.replace(/(\d{2})(\d+)/, '$1 $2');
+                    }
+                    
+                    this.value = value;
+                });
+            }
+        });
+    </script>
+{% endblock %}
