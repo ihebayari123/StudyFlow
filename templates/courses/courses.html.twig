@@ -33,6 +33,7 @@
         </div>
 
         <!-- Courses Grid -->
+<<<<<<< HEAD
         <div class="courses-grid">
             {% for cours in listcours %}
             <div class="course-card">
@@ -55,6 +56,47 @@
                 <div class="course-content">
                     <p class="course-author">{{ cours.user.nom }} {{ cours.user.prenom }}</p>
                     <h3 class="course-title">{{ cours.description }}</h3>
+=======
+        <div class="courses-grid-wrapper">
+            <div class="courses-grid" id="coursesGrid">
+                {% for cours in listcours %}
+                <div class="course-item" data-category="{{ cours.categorie|default('development')|lower }}">
+                    <a href="{{ path('app_cours_chapitres', {'id': cours.id}) }}" class="course-card-link">
+                        <div class="course-card">
+                            <div class="course-media">
+    {% if cours.image %}
+        <img src="{{ asset('uploads/courses/' ~ cours.image) }}" alt="{{ cours.titre }}" class="course-image" loading="lazy">
+    {% else %}
+        <div class="course-image-placeholder">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
+    {% endif %}
+    <div class="course-category-badge">{{ cours.categorie|default('DEVELOPMENT')|upper }}</div>
+</div>
+                            <div class="course-content">
+                                <div class="course-instructor">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span>{{ cours.user.nom }} {{ cours.user.prenom }}</span>
+                                </div>
+                                <h3 class="course-title">{{ cours.titre }}</h3>
+                                <p class="course-description">{{ cours.description|slice(0, 100) }}{% if cours.description|length > 100 %}...{% endif %}</p>
+                                <div class="course-footer">
+                                    <span class="course-link">
+                                        Start Learning 
+                                        <i class="fas fa-arrow-right"></i>
+                                    </span>
+                                    <span class="course-difficulty">
+                                        {% if cours.niveau is defined %}
+                                            {{ cours.niveau }}
+                                        {% else %}
+                                            All Levels
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+>>>>>>> Gestion_cours
                 </div>
             </div>
             {% endfor %}

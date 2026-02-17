@@ -4,93 +4,385 @@
 {% block title %}Add Course - Admin{% endblock %}
 
 {% block admin_content %}
-<div class="container mt-5">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h2><i class="fas fa-plus-circle"></i> Add New Course</h2>
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Create New Course</h1>
+            <p class="text-muted">Fill in the details below to add a new course</p>
         </div>
-        <div class="card-body">
-            {{ form_start(f) }}
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            {{ form_label(f.titre, 'Course Title') }}
-                            {{ form_widget(f.titre, {'attr': {'class': 'form-control', 'placeholder': 'Enter course title'}}) }}
+        <div>
+            <span class="badge bg-primary bg-gradient px-3 py-2">
+                <i class="fas fa-plus-circle me-1"></i> New Course
+            </span>
+        </div>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="row">
+        <div class="col-lg-8 col-xl-9">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    {{ form_start(f, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                    
+                    <!-- Course Title -->
+                    <div class="mb-4">
+                        <div class="form-floating">
+                            {{ form_widget(f.titre, {
+                                'attr': {
+                                    'class': 'form-control form-control-lg rounded-3',
+                                    'placeholder': 'Enter course title',
+                                    'id': 'courseTitle'
+                                }
+                            }) }}
+                            {{ form_label(f.titre, 'Course Title', {'label_attr': {'for': 'courseTitle'}}) }}
                             {{ form_errors(f.titre) }}
                         </div>
+                        <small class="text-muted">Give your course a clear, descriptive title</small>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            {{ form_label(f.image, 'Image URL') }}
-                            {{ form_widget(f.image, {'attr': {'class': 'form-control', 'placeholder': 'https://example.com/image.jpg'}}) }}
-                            {{ form_errors(f.image) }}
+                    <!-- Image Upload Section -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Course Image</label>
+                        
+                        <div class="upload-area border rounded-3 p-4 text-center" id="uploadArea">
+                            <div class="upload-content" id="uploadContent">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                <h5 class="mb-2">Click to upload or drag and drop</h5>
+                                <p class="text-muted mb-3">JPG, PNG or GIF (Max 2MB)</p>
+                                
+                                <button type="button" class="btn btn-primary px-4" id="uploadButton">
+                                    <i class="fas fa-upload me-2"></i>Choose Image
+                                </button>
+                            </div>
+                            
+                            <!-- Image Preview (hidden initially) -->
+                            <div class="image-preview" id="imagePreview" style="display: none;">
+                                <div class="position-relative">
+                                    <img src="#" alt="Preview" class="img-fluid rounded-3" style="max-height: 200px;">
+                                    <div class="mt-3">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" id="removeImageBtn">
+                                            <i class="fas fa-trash me-1"></i>Remove
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="changeImageBtn">
+                                            <i class="fas fa-exchange-alt me-1"></i>Change
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden file input - rendered by Symfony -->
+                        <div style="position: absolute; left: -9999px;">
+                            {{ form_widget(f.imageFile) }}
+                        </div>
+                        
+                        {{ form_errors(f.imageFile) }}
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Course Description</label>
+                        {{ form_widget(f.description, {
+                            'attr': {
+                                'class': 'form-control rounded-3',
+                                'placeholder': 'Write a comprehensive description of your course...',
+                                'rows': '5'
+                            }
+                        }) }}
+                        {{ form_errors(f.description) }}
+                        <small class="text-muted">Describe what students will learn and course requirements</small>
+                    </div>
+
+                    <!-- Instructor Selection -->
+                    <div class="mb-5">
+                        <label class="form-label fw-semibold">Assign Instructor</label>
+                        <div class="form-floating">
+                            {{ form_widget(f.user, {
+                                'attr': {
+                                    'class': 'form-select rounded-3',
+                                    'id': 'courseInstructor'
+                                }
+                            }) }}
+                            {{ form_label(f.user, 'Select Instructor', {'label_attr': {'for': 'courseInstructor'}}) }}
+                            {{ form_errors(f.user) }}
                         </div>
                     </div>
-                </div>
 
-                <div class="form-group mb-3">
-                    {{ form_label(f.description, 'Description') }}
-                    {{ form_widget(f.description, {'attr': {'class': 'form-control', 'placeholder': 'Enter course description', 'rows': '4'}}) }}
-                    {{ form_errors(f.description) }}
+                    <!-- Form Actions -->
+                    <div class="d-flex gap-3 justify-content-end pt-3 border-top">
+                        <a href="{{ path('app_showcoursesback') }}" class="btn btn-outline-secondary btn-lg px-4 rounded-3">
+                            <i class="fas fa-arrow-left me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg px-5 rounded-3 shadow-sm">
+                            <i class="fas fa-save me-2"></i>Create Course
+                        </button>
+                    </div>
+                    
+                    {{ form_end(f) }}
                 </div>
+            </div>
+        </div>
 
-                <div class="form-group mb-3">
-                    {{ form_label(f.user, 'Instructor') }}
-                    {{ form_widget(f.user, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(f.user) }}
+        <!-- Side Panel with Tips -->
+        <div class="col-lg-4 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-transparent border-0 pt-4">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        Tips for Great Courses
+                    </h5>
                 </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Title:</strong> Be specific and searchable
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Image:</strong> Use high-quality images (JPG, PNG)
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Description:</strong> Include learning outcomes
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Instructor:</strong> Choose experienced teachers
+                        </li>
+                    </ul>
+                </div>
+            </div>
 
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save"></i> Create Course
-                    </button>
-                    <a href="{{ path('app_showcoursesback') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to List
-                    </a>
+            <!-- Image Upload Tips -->
+            <div class="card border-0 shadow-sm rounded-4 bg-gradient-primary text-white">
+                <div class="card-body p-4">
+                    <h5 class="text-white mb-3">
+                        <i class="fas fa-image me-2"></i>Image Guidelines
+                    </h5>
+                    <ul class="small opacity-75 mb-3">
+                        <li>Max file size: 2MB</li>
+                        <li>Accepted formats: JPG, PNG, GIF</li>
+                        <li>Recommended ratio: 16:9</li>
+                    </ul>
                 </div>
-            {{ form_end(f) }}
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Custom Styles -->
 <style>
-    /* Push content away from sidebar */
-    .container {
-    margin-left: 280px; /* Away from sidebar */
-    max-width: calc(100% - 320px);
-    padding-top: 100px; /* Push below navbar - adjust as needed */
-}
+    .container-fluid {
+        margin-left: 280px;
+        width: calc(100% - 280px);
+        padding: 100px 40px 40px 40px;
+        transition: all 0.3s;
+    }
 
     .card {
-        border-radius: 10px;
-    }
-    
-    .card-header {
-        border-radius: 10px 10px 0 0;
+        transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .form-control:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.1) !important;
     }
 
-    .btn {
-        padding: 10px 25px;
-        border-radius: 5px;
+    .upload-area {
+        background-color: #f8f9fa;
+        border: 2px dashed #dee2e6 !important;
+        transition: all 0.3s;
+        cursor: pointer;
     }
 
-    /* Responsive - remove margin on mobile */
-    @media (max-width: 768px) {
-        .container {
+    .upload-area:hover {
+        background-color: #e9ecef;
+        border-color: #4f46e5 !important;
+    }
+
+    .upload-area.dragover {
+        background-color: #e3f2fd;
+        border-color: #4f46e5 !important;
+    }
+
+    .image-preview img {
+        border: 3px solid #4f46e5;
+        padding: 3px;
+        background: white;
+    }
+
+    .form-control, .form-select {
+        border: 1px solid #e0e0e0;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.1);
+    }
+
+    .form-floating > label {
+        color: #6c757d;
+        font-weight: 400;
+    }
+
+    .badge.bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1.5rem rgba(102, 126, 234, 0.3) !important;
+    }
+
+    .list-unstyled li {
+        padding: 8px 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    @media (max-width: 991.98px) {
+        .container-fluid {
             margin-left: 0;
-            max-width: 100%;
+            width: 100%;
+            padding: 20px;
         }
     }
 </style>
 
+<!-- JavaScript for Image Upload -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    console.log("Script loaded");
+    
+    // Find the file input - Symfony generates it with a unique ID
+    const fileInput = document.querySelector('input[type="file"][name*="imageFile"]');
+    
+    console.log("File input found:", fileInput);
+    
+    if (!fileInput) {
+        console.error("ERROR: File input not found! Looking for input with name containing 'imageFile'");
+        // Let's see what file inputs exist
+        const allFileInputs = document.querySelectorAll('input[type="file"]');
+        console.log("All file inputs on page:", allFileInputs);
+        return;
+    }
+    
+    const uploadArea = document.getElementById('uploadArea');
+    const uploadButton = document.getElementById('uploadButton');
+    const uploadContent = document.getElementById('uploadContent');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = imagePreview.querySelector('img');
+    const removeImageBtn = document.getElementById('removeImageBtn');
+    const changeImageBtn = document.getElementById('changeImageBtn');
 
+    console.log("All elements found:", {
+        fileInput: !!fileInput,
+        uploadArea: !!uploadArea,
+        uploadButton: !!uploadButton
+    });
 
-<!-- Font Awesome for Icons -->
+    // Upload button click
+    uploadButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("Upload button clicked - triggering file input");
+        fileInput.click();
+    });
+
+    // Upload area click
+    uploadArea.addEventListener('click', function (e) {
+        if (!e.target.closest('#uploadButton')) {
+            console.log("Upload area clicked - triggering file input");
+            fileInput.click();
+        }
+    });
+
+    // File change event
+    fileInput.addEventListener('change', function () {
+        console.log("File input changed");
+        const file = this.files[0];
+        console.log("Selected file:", file);
+
+        if (!file) return;
+
+        if (file.size > 2 * 1024 * 1024) {
+            alert("File must be less than 2MB");
+            this.value = "";
+            return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+            alert("Please select a valid image");
+            this.value = "";
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            console.log("Image loaded, showing preview");
+            uploadContent.style.display = "none";
+            imagePreview.style.display = "block";
+            previewImg.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Remove image
+    removeImageBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        fileInput.value = "";
+        imagePreview.style.display = "none";
+        uploadContent.style.display = "block";
+    });
+
+    // Change image
+    changeImageBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        fileInput.click();
+    });
+
+    // Drag & Drop
+    uploadArea.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.add("dragover");
+    });
+
+    uploadArea.addEventListener('dragleave', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.remove("dragover");
+    });
+
+    uploadArea.addEventListener('drop', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.remove("dragover");
+
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+
+        fileInput.files = e.dataTransfer.files;
+        fileInput.dispatchEvent(new Event('change'));
+    });
+});
+</script>
+
+<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}

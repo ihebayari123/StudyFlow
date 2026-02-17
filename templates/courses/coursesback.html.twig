@@ -53,7 +53,7 @@
                             <tr class="course-row" data-course-id="{{ cours.id }}">
                                 <td>{{ cours.id }}</td>
                                 <td>
-                                    <img src="{{ cours.image }}" alt="{{ cours.titre }}" class="course-thumb">
+                                    <img src="{{ asset('uploads/courses/' ~ cours.image) }}" alt="{{ cours.titre }}" class="course-thumb">
                                 </td>
                                 <td><strong>{{ cours.titre }}</strong></td>
                                 <td>{{ cours.description|slice(0, 50) }}...</td>
