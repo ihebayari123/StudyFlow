@@ -1660,6 +1660,327 @@ public function generateEmploiTempsAvance(Request $request, ManagerRegistry $doc
     ]);
 }
 
+    /**
+     * Agenda des cours avec notifications
+     * Fonction liée à l'emploi du temps (generateEmploiTempsAvance)
+     * Utilise les mêmes paramètres que la route /stresse/emploie/avance
+     */
+    #[Route('/stresse/agenda', name: 'app_stresse_agenda')]
+    public function agenda(Request $request, ManagerRegistry $doctrine): Response
+    {
+        // Paramètres par défaut (identiques à generateEmploiTempsAvance)
+        $defaultMatiereParJour = 4;
+        $defaultHeureParMatiere = 1.5;
+        $defaultPause = 0.5;
+        $defaultHeureDebut = 8;
+        $defaultPeriode = 'semaine';
+        
+        // Récupération et validation des paramètres (même logique que generateEmploiTempsAvance)
+        $matiereParJour = $this->validateInt($request->query->get('matiere_par_jour', $defaultMatiereParJour), 1, 8);
+        $heureParMatiere = $this->validateFloat($request->query->get('heure_par_matiere', $defaultHeureParMatiere), 0.5, 4);
+        $pause = $this->validateFloat($request->query->get('pause', $defaultPause), 0.25, 2);
+        $heureDebut = $this->validateInt($request->query->get('heure_debut', $defaultHeureDebut), 6, 22);
+        $periode = $request->query->get('periode', $defaultPeriode);
+        $inclureWeekend = $request->query->getBoolean('inclure_weekend', false);
+        $niveauStress = $request->query->getInt('niveau_stress', 5);
+        
+        // Récupérer les matières (même logique que generateEmploiTempsAvance)
+        $matieresSelectionnees = $this->getMatieresFromRequest($request);
+        
+        // Générer l'emploi du temps en utilisant la même fonction que generateEmploiTempsAvance
+        $emploiTemps = $this->genererEmploiTempsAvance(
+            $matieresSelectionnees,
+            $matiereParJour,
+            $heureParMatiere,
+            $pause,
+            $heureDebut,
+            $periode,
+            $inclureWeekend,
+            $niveauStress
+        );
+        
+        // Générer les notifications pour chaque cours
+        $notifications = $this->genererNotificationsCours($emploiTemps);
+        
+        // Calculer les cours à venir
+        $coursAVoir = $this->getCoursAVoir($emploiTemps);
+        
+        return $this->render('stresse/agenda.html.twig', [
+            'emploiTemps' => $emploiTemps,
+            'notifications' => $notifications,
+            'coursAVoir' => $coursAVoir,
+            'matieres' => $matieresSelectionnees,
+            'jours' => $this->getJoursSemaine($inclureWeekend, $periode),
+            'parametres' => [
+                'matiereParJour' => $matiereParJour,
+                'heureParMatiere' => $heureParMatiere,
+                'pause' => $pause,
+                'heureDebut' => $heureDebut,
+                'periode' => $periode,
+                'inclureWeekend' => $inclureWeekend,
+                'niveauStress' => $niveauStress
+            ]
+        ]);
+    }
+
+    /**
+     * Génère les notifications pour chaque cours
+     */
+    private function genererNotificationsCours(array $emploiTemps): array
+    {
+        $notifications = [];
+        $aujourdhui = new \DateTime();
+        $jourActuel = strftime('%A', $aujourdhui->getTimestamp());
+        
+        // Mapper les jours en français
+        $joursMap = [
+            'Monday' => 'Lundi', 'Tuesday' => 'Mardi', 'Wednesday' => 'Mercredi',
+            'Thursday' => 'Jeudi', 'Friday' => 'Vendredi', 'Saturday' => 'Samedi', 'Sunday' => 'Dimanche'
+        ];
+        $jourActuel = $joursMap[$jourActuel] ?? $jourActuel;
+        
+        $numeroJour = (int)$aujourdhui->format('N'); // 1 (Lundi) à 7 (Dimanche)
+        
+        foreach ($emploiTemps as $jour => $cours) {
+            foreach ($cours as $index => $coursDetail) {
+                $notification = [
+                    'id' => uniqid('notif_'),
+                    'matiere' => $coursDetail['matiere'],
+                    'jour' => $jour,
+                    'heureDebut' => $coursDetail['heureDebut'],
+                    'heureFin' => $coursDetail['heureFin'],
+                    'plage' => $coursDetail['plage'] ?? 'matin',
+                    'efficacite' => $coursDetail['efficacite'] ?? 'Normale',
+                    'type' => 'info',
+                    'message' => '',
+                    'priorite' => 'normale'
+                ];
+                
+                // Déterminer si c'est aujourd'hui
+                $estAujourdhui = ($jour === $jourActuel);
+                
+                // Calculer l'urgence de la notification
+                $heureCours = explode(':', $coursDetail['heureDebut']);
+                $heureActuelle = (int)date('H');
+                $minuteActuelle = (int)date('i');
+                $heureDebutCours = (int)$heureCours[0];
+                $minuteDebutCours = isset($heureCours[1]) ? (int)$heureCours[1] : 0;
+                
+                $minutesAvantCours = ($heureDebutCours * 60 + $minuteDebutCours) - ($heureActuelle * 60 + $minuteActuelle);
+                
+                // Définir le type de notification
+                if ($estAujourdhui) {
+                    if ($minutesAvantCours <= 0 && $minutesAvantCours >= -60) {
+                        // Cours en cours
+                        $notification['type'] = 'en_cours';
+                        $notification['message'] = 'Cours de ' . $coursDetail['matiere'] . ' en cours maintenant!';
+                        $notification['priorite'] = 'haute';
+                    } elseif ($minutesAvantCours > 0 && $minutesAvantCours <= 15) {
+                        // Cours commence dans moins de 15 minutes
+                        $notification['type'] = 'imminent';
+                        $notification['message'] = 'Cours de ' . $coursDetail['matiere'] . ' commence dans ' . $minutesAvantCours . ' minutes!';
+                        $notification['priorite'] = 'haute';
+                    } elseif ($minutesAvantCours > 15 && $minutesAvantCours <= 60) {
+                        // Cours commence dans moins d'une heure
+                        $notification['type'] = 'proche';
+                        $notification['message'] = 'Cours de ' . $coursDetail['matiere'] . ' dans environ ' . $minutesAvantCours . ' minutes';
+                        $notification['priorite'] = 'moyenne';
+                    } else {
+                        // Cours à venir aujourd'hui
+                        $notification['type'] = 'avenir';
+                        $notification['message'] = 'Cours de ' . $coursDetail['matiere'] . ' prévu à ' . $coursDetail['heureDebut'];
+                        $notification['priorite'] = 'basse';
+                    }
+                } else {
+                    // Cours d'un autre jour
+                    $notification['type'] = 'avenir';
+                    $notification['message'] = 'Cours de ' . $coursDetail['matiere'] . ' prévu ' . $jour . ' à ' . $coursDetail['heureDebut'];
+                    $notification['priorite'] = 'basse';
+                }
+                
+                // Ajouter des conseils selon la matière et le niveau d'efficacité
+                $notification['conseils'] = $this->getConseilsMatiere($coursDetail['matiere'], $coursDetail['efficacite'] ?? 'Normale');
+                
+                $notifications[] = $notification;
+            }
+        }
+        
+        // Trier les notifications par priorité
+        usort($notifications, function($a, $b) {
+            $priorites = ['haute' => 0, 'moyenne' => 1, 'basse' => 2];
+            return $priorites[$a['priorite']] - $priorites[$b['priorite']];
+        });
+        
+        return $notifications;
+    }
+
+    /**
+     * Récupère les matières depuis la requête
+     */
+    private function getMatieresFromRequest(Request $request): array
+    {
+        $matieresSelectionnees = [];
+        $allParams = $request->query->all();
+        
+        if (isset($allParams['matieres'])) {
+            $matieresParam = $allParams['matieres'];
+            
+            if (is_array($matieresParam)) {
+                $matieresSelectionnees = $matieresParam;
+            } elseif (is_string($matieresParam) && !empty($matieresParam)) {
+                if (strpos($matieresParam, '[') === 0 || strpos($matieresParam, '{') === 0) {
+                    $decoded = json_decode($matieresParam, true);
+                    if (is_array($decoded)) {
+                        $matieresSelectionnees = $decoded;
+                    }
+                } else {
+                    $matieresSelectionnees = array_map('trim', explode(',', $matieresParam));
+                }
+            }
+        }
+        
+        if (empty($matieresSelectionnees)) {
+            $matieresFromGet = $request->query->get('matieres');
+            if (is_array($matieresFromGet)) {
+                $matieresSelectionnees = $matieresFromGet;
+            } elseif (is_string($matieresFromGet) && !empty($matieresFromGet)) {
+                $matieresSelectionnees = [$matieresFromGet];
+            }
+        }
+        
+        if (empty($matieresSelectionnees)) {
+            $matieresSelectionnees = [
+                'Mathématiques', 'Physique', 'Chimie', 'SVT', 'Français', 
+                'Anglais', 'Histoire', 'Géographie', 'Philosophie', 'Informatique'
+            ];
+        }
+        
+        return array_values(array_filter(array_map('trim', $matieresSelectionnees), function($value) {
+            return !empty($value);
+        }));
+    }
+
+    /**
+     * Retourne les cours à venir (les 10 prochains)
+     */
+    private function getCoursAVoir(array $emploiTemps): array
+    {
+        $coursAVoir = [];
+        $aujourdhui = new \DateTime();
+        $jourActuel = strftime('%A', $aujourdhui->getTimestamp());
+        
+        $joursMap = [
+            'Monday' => 'Lundi', 'Tuesday' => 'Mardi', 'Wednesday' => 'Mercredi',
+            'Thursday' => 'Jeudi', 'Friday' => 'Vendredi', 'Saturday' => 'Samedi', 'Sunday' => 'Dimanche'
+        ];
+        $jourActuel = $joursMap[$jourActuel] ?? $jourActuel;
+        
+        // Ordre des jours pour le tri
+        $ordreJours = ['Lundi' => 1, 'Mardi' => 2, 'Mercredi' => 3, 'Jeudi' => 4, 'Vendredi' => 5, 'Samedi' => 6, 'Dimanche' => 7];
+        
+        $aujourdhuiNumero = (int)$aujourdhui->format('N');
+        
+        foreach ($emploiTemps as $jour => $cours) {
+            foreach ($cours as $coursDetail) {
+                $jourNumero = $ordreJours[$jour] ?? 8;
+                $estAujourdhui = ($jour === $jourActuel);
+                
+                $coursAVoir[] = [
+                    'jour' => $jour,
+                    'jourNumero' => $jourNumero,
+                    'estAujourdhui' => $estAujourdhui,
+                    'matiere' => $coursDetail['matiere'],
+                    'heureDebut' => $coursDetail['heureDebut'],
+                    'heureFin' => $coursDetail['heureFin'],
+                    'plage' => $coursDetail['plage'] ?? 'matin',
+                    'efficacite' => $coursDetail['efficacite'] ?? 'Normale'
+                ];
+            }
+        }
+        
+        // Trier par jour et heure
+        usort($coursAVoir, function($a, $b) use ($aujourdhuiNumero) {
+            // Si un cours est aujourd'hui, il passe en premier
+            if ($a['estAujourdhui'] && !$b['estAujourdhui']) return -1;
+            if (!$a['estAujourdhui'] && $b['estAujourdhui']) return 1;
+            
+            // Trier par jour
+            if ($a['jourNumero'] !== $b['jourNumero']) {
+                return $a['jourNumero'] - $b['jourNumero'];
+            }
+            
+            // Trier par heure
+            return strcmp($a['heureDebut'], $b['heureDebut']);
+        });
+        
+        return array_slice($coursAVoir, 0, 10); // Retourner les 10 premiers
+    }
+
+    /**
+     * Retourne des conseils pour une matière
+     */
+    private function getConseilsMatiere(string $matiere, string $efficacite): array
+    {
+        $conseilsParMatiere = [
+            'Mathématiques' => [
+                'Pratiquez régulièrement avec des exercices variés',
+                'Ne négligez pas les bases avant d\'attaquer les problèmes complexes',
+                'Faites des fiches de formules et théorèmes'
+            ],
+            'Physique' => [
+                'Comprenez les concepts avant de mémoriser les formules',
+                'Faites des schémas pour visualer les problèmes',
+                'Reliez la théorie aux applications pratiques'
+            ],
+            'Chimie' => [
+                'Apprenez le tableau périodique par cœur',
+                'Pratiquez les équations chimiques régulièrement',
+                'Faites des fiches de réactifs et produits'
+            ],
+            'SVT' => [
+                'Utilisez des schémas pour comprendre les processus',
+                'Reliez les concepts à des exemples concrets',
+                'Faites des fiches de définitions'
+            ],
+            'Français' => [
+                'Lisez régulièrement pour enrichir votre vocabulaire',
+                'Pratiquez l\'écriture avec des exercices variés',
+                'Analysez des textes de différents genres'
+            ],
+            'Anglais' => [
+                'Écoutez des podcasts ou regarde des vidéos en anglais',
+                'Pratiquez régulièrement la conversation',
+                'Apprenez le vocabulaire en contexte'
+            ],
+            'Histoire' => [
+                'Créez une frise chronologique pour situer les événements',
+                'Comprenez les causes et conséquences des événements',
+                'Faites des résumés de chaque période'
+            ],
+            'Géographie' => [
+                'Utilisez des cartes pour visualiser les espaces',
+                'Apprenez avec des exemples concrets',
+                'Faites des fiches de vocabulaires géographiques'
+            ],
+            'Philosophie' => [
+                'Lisez les textes des philosophes avec attention',
+                'Entraînez-vous à la dissertation régulièrement',
+                'Construisez des arguments logiques'
+            ],
+            'Informatique' => [
+                'Pratiquez le code régulièrement',
+                'Comprenez les concepts avant de coder',
+                'Faites des projets pratiques'
+            ]
+        ];
+        
+        return $conseilsParMatiere[$matiere] ?? [
+            'Révision régulière est clé',
+            'Faites des résumé de cours',
+            'Pratiquez avec des exercices'
+        ];
+    }
+
 /**
  * Génère un emploi du temps avancé avec optimisation anti-stress
  */
