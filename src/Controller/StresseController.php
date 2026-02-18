@@ -429,8 +429,60 @@ final class StresseController extends AbstractController
 
    
     #[Route('/stresse/coach', name: 'app_stresse_coach')]
-    public function coachStressManagement(): Response
+    public function coachStressManagement(Request $request): Response
     {
+        // Paramètres par défaut (identiques à generateEmploiTempsAvance)
+        $defaultMatiereParJour = 4;
+        $defaultHeureParMatiere = 1.5;
+        $defaultPause = 0.5;
+        $defaultHeureDebut = 8;
+        $defaultPeriode = 'semaine';
+        
+        // Récupération et validation des paramètres
+        $matiereParJour = $this->validateInt($request->query->get('matiere_par_jour', $defaultMatiereParJour), 1, 8);
+        $heureParMatiere = $this->validateFloat($request->query->get('heure_par_matiere', $defaultHeureParMatiere), 0.5, 4);
+        $pause = $this->validateFloat($request->query->get('pause', $defaultPause), 0.25, 2);
+        $heureDebut = $this->validateInt($request->query->get('heure_debut', $defaultHeureDebut), 6, 22);
+        $periode = $request->query->get('periode', $defaultPeriode);
+        $inclureWeekend = $request->query->getBoolean('inclure_weekend', false);
+        $niveauStress = $request->query->getInt('niveau_stress', 5);
+        
+        // Récupérer les matières
+        $matieresSelectionnees = $this->getMatieresFromRequest($request);
+        
+        // Générer l'emploi du temps
+        $emploiTemps = $this->genererEmploiTempsAvance(
+            $matieresSelectionnees,
+            $matiereParJour,
+            $heureParMatiere,
+            $pause,
+            $heureDebut,
+            $periode,
+            $inclureWeekend,
+            $niveauStress
+        );
+        
+        // Générer les notifications pour chaque cours
+        $notifications = $this->genererNotificationsCours($emploiTemps);
+        
+        // Calculer les cours à venir
+        $coursAVoir = $this->getCoursAVoir($emploiTemps);
+        
+        // Message motivant basé sur le niveau de stress
+        $motivationalMessages = [
+            1 => "🌟 Excellent ! Votre niveau de stress est très bas. Continuez comme ça !",
+            2 => "💪 Très bien ! Vous gérez parfaitement votre stress.",
+            3 => "👍 Bon travail ! Vous êtes sur la bonne voie.",
+            4 => "💫 Bien joué ! Continuez à appliquer vos techniques de relaxation.",
+            5 => "✨ Correct ! N'oubliez pas de prendre soin de vous.",
+            6 => "💪 Vous pouvez le faire ! Respirez profondément et restez positif.",
+            7 => "🌈 Ne vous inquiétez pas ! Chaque pas compte vers le calme.",
+            8 => "🌻 C'est normal de se sentir stressed. Prenez du temps pour vous.",
+            9 => "💙 Soyez gentil avec vous-même. Demandez de l'aide si nécessaire.",
+            10 => "🌺 Votre bien-être est important. Consultez un professionnel si besoin."
+        ];
+        $messageMotivant = $motivationalMessages[$niveauStress] ?? $motivationalMessages[5];
+
         // Techniques de respiration pour gérer le stress
         $breathingTechniques = [
             [
@@ -646,6 +698,20 @@ final class StresseController extends AbstractController
             'timeOrganization' => $timeOrganization,
             'workshops' => $workshops,
             'dailyTips' => $dailyTips,
+            'coursAVoir' => $coursAVoir,
+            'notifications' => $notifications,
+            'parametres' => [
+                'matiereParJour' => $matiereParJour,
+                'heureParMatiere' => $heureParMatiere,
+                'pause' => $pause,
+                'heureDebut' => $heureDebut,
+                'periode' => $periode,
+                'inclureWeekend' => $inclureWeekend,
+                'niveauStress' => $niveauStress
+            ],
+            'emploiTemps' => $emploiTemps,
+            'matieres' => $matieresSelectionnees,
+            'messageMotivant' => $messageMotivant
         ]);
     }
    
