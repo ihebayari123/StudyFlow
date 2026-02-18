@@ -427,6 +427,7 @@ final class StresseController extends AbstractController
 
 
 
+   
     #[Route('/stresse/coach', name: 'app_stresse_coach')]
     public function coachStressManagement(): Response
     {
