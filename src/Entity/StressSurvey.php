@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\StressSurveyRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -29,6 +31,17 @@ class StressSurvey
 
     #[ORM\OneToOne(mappedBy: 'survey', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private ?WellBeingScore $wellBeingScore = null;
+
+    /**
+     * @var Collection<int, Consultation>
+     */
+    #[ORM\OneToMany(targetEntity: Consultation::class, mappedBy: 'stress_survey', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $consultations;
+
+    public function __construct()
+    {
+        $this->consultations = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -96,6 +109,36 @@ class StressSurvey
         }
 
         $this->wellBeingScore = $wellBeingScore;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Consultation>
+     */
+    public function getConsultations(): Collection
+    {
+        return $this->consultations;
+    }
+
+    public function addConsultation(Consultation $consultation): static
+    {
+        if (!$this->consultations->contains($consultation)) {
+            $this->consultations->add($consultation);
+            $consultation->setStressSurvey($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConsultation(Consultation $consultation): static
+    {
+        if ($this->consultations->removeElement($consultation)) {
+            // set the owning side to null (unless already changed)
+            if ($consultation->getStressSurvey() === $this) {
+                $consultation->setStressSurvey(null);
+            }
+        }
 
         return $this;
     }

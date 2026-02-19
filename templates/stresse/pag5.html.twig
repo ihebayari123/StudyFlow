@@ -1,0 +1,1217 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ pageTitle }}{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    /* Styles généraux */
+    .games-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .games-header {
+        text-align: center;
+        padding: 3rem 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin-bottom: 2rem;
+        border-radius: 0 0 50px 50px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+
+    .games-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+
+    .games-header p {
+        font-size: 1.2rem;
+        opacity: 0.95;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* Cartes de jeux */
+    .game-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .game-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    }
+
+    .game-card.active {
+        border-color: #667eea;
+    }
+
+    .game-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        cursor: pointer;
+    }
+
+    .game-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-right: 1rem;
+        color: white;
+    }
+
+    .game-title-section h3 {
+        margin: 0;
+        font-size: 1.4rem;
+        color: #2d3748;
+    }
+
+    .game-meta {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #718096;
+    }
+
+    .game-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .game-content {
+        display: none;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+        margin-top: 1rem;
+    }
+
+    .game-content.active {
+        display: block;
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .benefits-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .benefit-tag {
+        background: #edf2f7;
+        color: #4a5568;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+    }
+
+    /* ===== JEU 1: RESPIRATION GUIDÉE ===== */
+    .breathing-container {
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .breathing-circle {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
+        margin: 2rem auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.3rem;
+        font-weight: 600;
+        box-shadow: 0 10px 30px rgba(76, 175, 80, 0.4);
+        transition: all 0.1s ease;
+    }
+
+    .breathing-circle.inhale {
+        animation: inhale 4s ease-in-out;
+    }
+
+    .breathing-circle.hold {
+        animation: hold 4s ease-in-out;
+    }
+
+    .breathing-circle.exhale {
+        animation: exhale 4s ease-in-out;
+    }
+
+    @keyframes inhale {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.5); }
+    }
+
+    @keyframes hold {
+        0%, 100% { transform: scale(1.5); }
+    }
+
+    @keyframes exhale {
+        0% { transform: scale(1.5); }
+        100% { transform: scale(1); }
+    }
+
+    .breathing-text {
+        font-size: 1.5rem;
+        color: #4a5568;
+        margin: 1rem 0;
+        min-height: 2rem;
+    }
+
+    .breathing-progress {
+        width: 100%;
+        height: 6px;
+        background: #e2e8f0;
+        border-radius: 3px;
+        overflow: hidden;
+        margin: 1rem 0;
+    }
+
+    .breathing-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #4CAF50, #81C784);
+        width: 0%;
+        transition: width 0.1s linear;
+    }
+
+    /* ===== JEU 2: MANDALA ===== */
+    .mandala-container {
+        text-align: center;
+    }
+
+    .mandala-svg {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .mandala-svg path {
+        fill: white;
+        stroke: #9C27B0;
+        stroke-width: 2;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .mandala-svg path:hover {
+        stroke-width: 3;
+    }
+
+    .mandala-svg path.filled {
+        stroke: none;
+    }
+
+    .color-palette {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin: 1.5rem 0;
+        flex-wrap: wrap;
+    }
+
+    .color-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .color-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .color-btn.active {
+        border-color: #2d3748;
+        transform: scale(1.15);
+    }
+
+    .mandala-controls {
+        margin-top: 1rem;
+    }
+
+    /* ===== JEU 3: PUZZLE ZEN ===== */
+    .puzzle-container {
+        text-align: center;
+    }
+
+    .puzzle-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        max-width: 320px;
+        margin: 1.5rem auto;
+        background: #e2e8f0;
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    .puzzle-piece {
+        aspect-ratio: 1;
+        background: linear-gradient(135deg, #2196F3 0%, #64B5F6 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+    }
+
+    .puzzle-piece:hover {
+        transform: scale(1.05);
+    }
+
+    .puzzle-piece.empty {
+        background: transparent;
+        box-shadow: none;
+        cursor: default;
+    }
+
+    .puzzle-piece.correct {
+        background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
+    }
+
+    .puzzle-stats {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 1rem 0;
+    }
+
+    .puzzle-stat {
+        text-align: center;
+    }
+
+    .puzzle-stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2196F3;
+    }
+
+    .puzzle-stat-label {
+        color: #718096;
+        font-size: 0.9rem;
+    }
+
+    /* ===== JEU 4: MÉMOIRE POSITIVE ===== */
+    .memory-container {
+        text-align: center;
+    }
+
+    .memory-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        max-width: 500px;
+        margin: 1.5rem auto;
+    }
+
+    .memory-card {
+        aspect-ratio: 3/4;
+        background: linear-gradient(135deg, #FF9800 0%, #FFB74D 100%);
+        border-radius: 15px;
+        cursor: pointer;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.6s;
+        box-shadow: 0 6px 15px rgba(255, 152, 0, 0.3);
+    }
+
+    .memory-card.flipped {
+        transform: rotateY(180deg);
+    }
+
+    .memory-card.matched {
+        animation: matchPulse 0.5s ease;
+    }
+
+    @keyframes matchPulse {
+        0%, 100% { transform: rotateY(180deg) scale(1); }
+        50% { transform: rotateY(180deg) scale(1.1); }
+    }
+
+    .memory-card-face {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+    }
+
+    .memory-card-front {
+        background: linear-gradient(135deg, #FF9800 0%, #FFB74D 100%);
+    }
+
+    .memory-card-back {
+        background: white;
+        transform: rotateY(180deg);
+        flex-direction: column;
+        padding: 0.5rem;
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .memory-card-back .gratitude-text {
+        font-size: 0.8rem;
+        color: #4a5568;
+        margin-top: 0.5rem;
+    }
+
+    /* ===== JEU 5: BULLES ANTI-STRESS ===== */
+    .bubbles-container {
+        position: relative;
+        height: 400px;
+        background: linear-gradient(180deg, #E0F7FA 0%, #B2EBF2 100%);
+        border-radius: 20px;
+        overflow: hidden;
+        cursor: crosshair;
+    }
+
+    .bubble {
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(0,188,212,0.6));
+        box-shadow: 0 4px 15px rgba(0,188,212,0.3), inset 0 -5px 10px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: transform 0.1s ease;
+        animation: float linear infinite;
+    }
+
+    .bubble:hover {
+        transform: scale(1.1);
+    }
+
+    .bubble.pop {
+        animation: pop 0.3s ease forwards;
+    }
+
+    @keyframes pop {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.4); opacity: 0.8; }
+        100% { transform: scale(0); opacity: 0; }
+    }
+
+    @keyframes float {
+        from { transform: translateY(420px); }
+        to { transform: translateY(-100px); }
+    }
+
+    .bubbles-stats {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(255,255,255,0.9);
+        padding: 1rem 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .bubbles-score {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #00BCD4;
+    }
+
+    .bubbles-label {
+        color: #718096;
+        font-size: 0.9rem;
+    }
+
+    /* Conseils du psychiatre */
+    .tips-section {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-top: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    .tips-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .tips-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .tips-header h3 {
+        margin: 0;
+        color: #2d3748;
+    }
+
+    .tip-card {
+        background: #f7fafc;
+        border-radius: 12px;
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #667eea;
+    }
+
+    .tip-card h4 {
+        margin: 0 0 0.5rem 0;
+        color: #2d3748;
+        font-size: 1.1rem;
+    }
+
+    .tip-card p {
+        margin: 0;
+        color: #4a5568;
+        line-height: 1.6;
+    }
+
+    /* Boutons */
+    .btn-game {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.8rem 2rem;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin: 0.5rem;
+    }
+
+    .btn-game:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-game:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-secondary {
+        background: #edf2f7;
+        color: #4a5568;
+    }
+
+    .btn-secondary:hover {
+        background: #e2e8f0;
+    }
+
+    /* Message de complétion */
+    .completion-message {
+        background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        margin: 1rem 0;
+        animation: slideIn 0.5s ease;
+    }
+
+    @keyframes slideIn {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .games-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .memory-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .breathing-circle {
+            width: 150px;
+            height: 150px;
+        }
+
+        .bubbles-container {
+            height: 300px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="games-container">
+    <!-- Header -->
+    <div class="games-header">
+        <h1>🧘 {{ pageTitle }}</h1>
+        <p>{{ pageSubtitle }}</p>
+    </div>
+
+    <div class="container">
+        <!-- Jeu 1: Respiration Guidée -->
+        <div class="game-card" id="game-respiration" style="border-color: {{ gameStats.respiration.color }}">
+            <div class="game-header" onclick="toggleGame('respiration')">
+                <div class="game-icon" style="background: {{ gameStats.respiration.color }}">
+                    🫁
+                </div>
+                <div class="game-title-section">
+                    <h3>{{ gameStats.respiration.title }}</h3>
+                    <div class="game-meta">
+                        <span>⏱️ {{ gameStats.respiration.duration }}</span>
+                        <span>📊 {{ gameStats.respiration.difficulty }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="benefits-list">
+                {% for benefit in gameStats.respiration.benefits %}
+                    <span class="benefit-tag">{{ benefit }}</span>
+                {% endfor %}
+            </div>
+            <div class="game-content" id="content-respiration">
+                <p style="color: #4a5568; margin-bottom: 1.5rem;">{{ gameStats.respiration.description }}</p>
+                <div class="breathing-container">
+                    <div class="breathing-circle" id="breathing-circle">
+                        <span id="breathing-action">Prêt?</span>
+                    </div>
+                    <div class="breathing-text" id="breathing-text">Cliquez sur Démarrer pour commencer</div>
+                    <div class="breathing-progress">
+                        <div class="breathing-progress-bar" id="breathing-progress"></div>
+                    </div>
+                    <div class="breathing-controls">
+                        <button class="btn-game" id="btn-start-breathing" onclick="startBreathing()">Démarrer</button>
+                        <button class="btn-game btn-secondary" onclick="stopBreathing()">Arrêter</button>
+                    </div>
+                    <div id="breathing-complete" style="display: none;">
+                        <div class="completion-message">
+                            <h4>🌟 Excellent !</h4>
+                            <p>Vous avez complété un cycle de cohérence cardiaque. Votre corps est maintenant plus détendu.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jeu 2: Mandala Thérapeutique -->
+        <div class="game-card" id="game-mandala" style="border-color: {{ gameStats.mandala.color }}">
+            <div class="game-header" onclick="toggleGame('mandala')">
+                <div class="game-icon" style="background: {{ gameStats.mandala.color }}">
+                    🎨
+                </div>
+                <div class="game-title-section">
+                    <h3>{{ gameStats.mandala.title }}</h3>
+                    <div class="game-meta">
+                        <span>⏱️ {{ gameStats.mandala.duration }}</span>
+                        <span>📊 {{ gameStats.mandala.difficulty }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="benefits-list">
+                {% for benefit in gameStats.mandala.benefits %}
+                    <span class="benefit-tag">{{ benefit }}</span>
+                {% endfor %}
+            </div>
+            <div class="game-content" id="content-mandala">
+                <p style="color: #4a5568; margin-bottom: 1.5rem;">{{ gameStats.mandala.description }}</p>
+                <div class="mandala-container">
+                    <div class="color-palette">
+                        <div class="color-btn active" style="background: #E91E63" data-color="#E91E63" onclick="selectColor(this)"></div>
+                        <div class="color-btn" style="background: #9C27B0" data-color="#9C27B0" onclick="selectColor(this)"></div>
+                        <div class="color-btn" style="background: #673AB7" data-color="#673AB7" onclick="selectColor(this)"></div>
+                        <div class="color-btn" style="background: #3F51B5" data-color="#3F51B5" onclick="selectColor(this)"></div>
+                        <div class="color-btn" style="background: #2196F3" data-color="#2196F3" onclick="selectColor(this)"></div>
+                        <div class="color-btn" style="background: #00BCD4" data-color="#00BCD4" onclick="selectColor(this)"></div>
+                        <div class="color-btn" style="background: #4CAF50" data-color="#4CAF50" onclick="selectColor(this)"></div>
+                        <div class="color-btn" style="background: #FFEB3B" data-color="#FFEB3B" onclick="selectColor(this)"></div>
+                        <div class="color-btn" style="background: #FF9800" data-color="#FF9800" onclick="selectColor(this)"></div>
+                        <div class="color-btn" style="background: #F44336" data-color="#F44336" onclick="selectColor(this)"></div>
+                    </div>
+                    <svg class="mandala-svg" viewBox="0 0 400 400" id="mandala-svg">
+                        <!-- Mandala pattern - cercles concentriques avec motifs -->
+                        <g id="mandala-layers">
+                            <!-- Cercle extérieur -->
+                            <path d="M200,20 A180,180 0 1,1 199.9,20" fill="none" stroke="#9C27B0" stroke-width="2"/>
+                            <!-- Pétales extérieurs - positions prédéfinies -->
+                            <path d="M360,200 Q380,210 340,220 Q300,210 360,200" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M340,260 Q350,280 300,270 Q280,250 340,260" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M280,320 Q290,340 250,330 Q230,300 280,320" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M200,340 Q210,360 180,350 Q160,320 200,340" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M120,320 Q110,340 90,310 Q110,280 120,320" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M60,260 Q50,280 40,240 Q70,220 60,260" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M40,200 Q20,210 50,180 Q80,190 40,200" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M60,140 Q50,160 70,120 Q100,130 60,140" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M120,80 Q110,100 130,60 Q160,70 120,80" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M200,60 Q190,80 210,50 Q230,40 200,60" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M280,80 Q270,100 290,70 Q300,50 280,80" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M340,140 Q330,160 350,130 Q360,110 340,140" class="mandala-part" onclick="fillPart(this)"/>
+                            <!-- Cercle moyen -->
+                            <circle cx="200" cy="200" r="120" fill="none" stroke="#9C27B0" stroke-width="2" class="mandala-part" onclick="fillPart(this)"/>
+                            <!-- Pétales moyens -->
+                            <path d="M280,140 Q300,150 260,160 Q240,150 280,140" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M320,200 Q330,220 300,210 Q290,190 320,200" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M280,260 Q290,280 260,270 Q250,250 280,260" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M200,280 Q210,300 180,290 Q170,270 200,280" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M120,260 Q110,280 100,250 Q120,230 120,260" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M80,200 Q70,220 90,190 Q100,180 80,200" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M120,140 Q110,160 130,130 Q140,120 120,140" class="mandala-part" onclick="fillPart(this)"/>
+                            <path d="M200,120 Q190,140 210,110 Q220,100 200,120" class="mandala-part" onclick="fillPart(this)"/>
+                            <!-- Centre -->
+                            <circle cx="200" cy="200" r="40" class="mandala-part" onclick="fillPart(this)"/>
+                            <!-- Décoration centre -->
+                            <circle cx="220" cy="200" r="8" class="mandala-part" onclick="fillPart(this)"/>
+                            <circle cx="210" cy="217" r="8" class="mandala-part" onclick="fillPart(this)"/>
+                            <circle cx="190" cy="217" r="8" class="mandala-part" onclick="fillPart(this)"/>
+                            <circle cx="180" cy="200" r="8" class="mandala-part" onclick="fillPart(this)"/>
+                            <circle cx="190" cy="183" r="8" class="mandala-part" onclick="fillPart(this)"/>
+                            <circle cx="210" cy="183" r="8" class="mandala-part" onclick="fillPart(this)"/>
+                        </g>
+                    </svg>
+                    <div class="mandala-controls">
+                        <button class="btn-game btn-secondary" onclick="resetMandala()">🔄 Réinitialiser</button>
+                        <button class="btn-game" onclick="saveMandala()">💾 Sauvegarder</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jeu 3: Puzzle Zen -->
+        <div class="game-card" id="game-puzzle" style="border-color: {{ gameStats.puzzle.color }}">
+            <div class="game-header" onclick="toggleGame('puzzle')">
+                <div class="game-icon" style="background: {{ gameStats.puzzle.color }}">
+                    🧩
+                </div>
+                <div class="game-title-section">
+                    <h3>{{ gameStats.puzzle.title }}</h3>
+                    <div class="game-meta">
+                        <span>⏱️ {{ gameStats.puzzle.duration }}</span>
+                        <span>📊 {{ gameStats.puzzle.difficulty }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="benefits-list">
+                {% for benefit in gameStats.puzzle.benefits %}
+                    <span class="benefit-tag">{{ benefit }}</span>
+                {% endfor %}
+            </div>
+            <div class="game-content" id="content-puzzle">
+                <p style="color: #4a5568; margin-bottom: 1.5rem;">{{ gameStats.puzzle.description }}</p>
+                <div class="puzzle-container">
+                    <div class="puzzle-stats">
+                        <div class="puzzle-stat">
+                            <div class="puzzle-stat-value" id="puzzle-moves">0</div>
+                            <div class="puzzle-stat-label">Mouvements</div>
+                        </div>
+                        <div class="puzzle-stat">
+                            <div class="puzzle-stat-value" id="puzzle-timer">00:00</div>
+                            <div class="puzzle-stat-label">Temps</div>
+                        </div>
+                    </div>
+                    <div class="puzzle-grid" id="puzzle-grid">
+                        <!-- Généré par JavaScript -->
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn-game" onclick="initPuzzle()">🔄 Nouveau Puzzle</button>
+                    </div>
+                    <div id="puzzle-complete" style="display: none;">
+                        <div class="completion-message">
+                            <h4>🎉 Félicitations !</h4>
+                            <p>Vous avez résolu le puzzle en <span id="puzzle-final-moves"></span> mouvements !</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jeu 4: Mémoire Positive -->
+        <div class="game-card" id="game-memoire" style="border-color: {{ gameStats.memoire.color }}">
+            <div class="game-header" onclick="toggleGame('memoire')">
+                <div class="game-icon" style="background: {{ gameStats.memoire.color }}">
+                    🌟
+                </div>
+                <div class="game-title-section">
+                    <h3>{{ gameStats.memoire.title }}</h3>
+                    <div class="game-meta">
+                        <span>⏱️ {{ gameStats.memoire.duration }}</span>
+                        <span>📊 {{ gameStats.memoire.difficulty }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="benefits-list">
+                {% for benefit in gameStats.memoire.benefits %}
+                    <span class="benefit-tag">{{ benefit }}</span>
+                {% endfor %}
+            </div>
+            <div class="game-content" id="content-memoire">
+                <p style="color: #4a5568; margin-bottom: 1.5rem;">{{ gameStats.memoire.description }}</p>
+                <div class="memory-container">
+                    <div class="memory-grid" id="memory-grid">
+                        <!-- Généré par JavaScript -->
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn-game" onclick="initMemory()">🔄 Nouvelle Partie</button>
+                    </div>
+                    <div id="memory-complete" style="display: none;">
+                        <div class="completion-message">
+                            <h4>💫 Magnifique !</h4>
+                            <p>Vous avez découvert toutes les affirmations positives ! La gratitude nourrit l'âme.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jeu 5: Bulles Anti-Stress -->
+        <div class="game-card" id="game-bulles" style="border-color: {{ gameStats.bulles.color }}">
+            <div class="game-header" onclick="toggleGame('bulles')">
+                <div class="game-icon" style="background: {{ gameStats.bulles.color }}">
+                    🫧
+                </div>
+                <div class="game-title-section">
+                    <h3>{{ gameStats.bulles.title }}</h3>
+                    <div class="game-meta">
+                        <span>⏱️ {{ gameStats.bulles.duration }}</span>
+                        <span>📊 {{ gameStats.bulles.difficulty }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="benefits-list">
+                {% for benefit in gameStats.bulles.benefits %}
+                    <span class="benefit-tag">{{ benefit }}</span>
+                {% endfor %}
+            </div>
+            <div class="game-content" id="content-bulles">
+                <p style="color: #4a5568; margin-bottom: 1.5rem;">{{ gameStats.bulles.description }}</p>
+                <div class="bubbles-container" id="bubbles-container">
+                    <div class="bubbles-stats">
+                        <div class="bubbles-score" id="bubbles-score">0</div>
+                        <div class="bubbles-label">Bulles éclatées</div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="btn-game" onclick="startBubbles()">▶️ Démarrer</button>
+                    <button class="btn-game btn-secondary" onclick="stopBubbles()">⏹️ Arrêter</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conseils du psychiatre -->
+        <div class="tips-section">
+            <div class="tips-header">
+                <div class="tips-icon">👨‍⚕️</div>
+                <h3>Conseils de nos spécialistes</h3>
+            </div>
+            {% for tip in psychiatristTips %}
+                <div class="tip-card">
+                    <h4>{{ tip.title }}</h4>
+                    <p>{{ tip.content }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    // ===== UTILITAIRES =====
+    function toggleGame(gameId) {
+        const content = document.getElementById('content-' + gameId);
+        const card = document.getElementById('game-' + gameId);
+        
+        // Fermer tous les autres jeux
+        document.querySelectorAll('.game-content').forEach(el => {
+            if (el.id !== 'content-' + gameId) {
+                el.classList.remove('active');
+            }
+        });
+        document.querySelectorAll('.game-card').forEach(el => {
+            el.classList.remove('active');
+        });
+        
+        // Toggle le jeu cliqué
+        content.classList.toggle('active');
+        if (content.classList.contains('active')) {
+            card.classList.add('active');
+        }
+    }
+
+    // ===== JEU 1: RESPIRATION GUIDÉE =====
+    let breathingInterval;
+    let breathingCycle = 0;
+    const breathingCycles = 3; // Nombre de cycles
+
+    function startBreathing() {
+        const btn = document.getElementById('btn-start-breathing');
+        btn.disabled = true;
+        document.getElementById('breathing-complete').style.display = 'none';
+        
+        breathingCycle = 0;
+        runBreathingCycle();
+    }
+
+    function runBreathingCycle() {
+        if (breathingCycle >= breathingCycles) {
+            document.getElementById('breathing-action').textContent = 'Terminé!';
+            document.getElementById('breathing-text').textContent = 'Exercice terminé. Vous vous sentez mieux?';
+            document.getElementById('breathing-circle').style.transform = 'scale(1)';
+            document.getElementById('breathing-complete').style.display = 'block';
+            document.getElementById('btn-start-breathing').disabled = false;
+            return;
+        }
+
+        breathingCycle++;
+        const circle = document.getElementById('breathing-circle');
+        const text = document.getElementById('breathing-text');
+        const action = document.getElementById('breathing-action');
+        const progress = document.getElementById('breathing-progress');
+
+        // Inspirez (4 secondes)
+        action.textContent = 'Inspirez';
+        text.textContent = 'Respirez lentement par le nez...';
+        circle.style.transition = 'transform 4s ease-in-out';
+        circle.style.transform = 'scale(1.5)';
+        animateProgress(4000);
+
+        setTimeout(() => {
+            // Retenez (4 secondes)
+            action.textContent = 'Retenez';
+            text.textContent = 'Maintenez votre souffle...';
+            animateProgress(4000);
+
+            setTimeout(() => {
+                // Expirez (4 secondes)
+                action.textContent = 'Expirez';
+                text.textContent = 'Soufflez doucement par la bouche...';
+                circle.style.transition = 'transform 4s ease-in-out';
+                circle.style.transform = 'scale(1)';
+                animateProgress(4000);
+
+                setTimeout(() => {
+                    runBreathingCycle();
+                }, 4000);
+            }, 4000);
+        }, 4000);
+    }
+
+    function animateProgress(duration) {
+        const progress = document.getElementById('breathing-progress');
+        progress.style.transition = `width ${duration}ms linear`;
+        progress.style.width = '100%';
+        setTimeout(() => {
+            progress.style.transition = 'none';
+            progress.style.width = '0%';
+        }, duration);
+    }
+
+    function stopBreathing() {
+        clearTimeout(breathingInterval);
+        document.getElementById('breathing-circle').style.transform = 'scale(1)';
+        document.getElementById('breathing-action').textContent = 'Prêt?';
+        document.getElementById('breathing-text').textContent = 'Cliquez sur Démarrer pour commencer';
+        document.getElementById('btn-start-breathing').disabled = false;
+    }
+
+    // ===== JEU 2: MANDALA =====
+    let selectedColor = '#E91E63';
+
+    function selectColor(btn) {
+        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedColor = btn.dataset.color;
+    }
+
+    function fillPart(element) {
+        element.style.fill = selectedColor;
+        element.classList.add('filled');
+    }
+
+    function resetMandala() {
+        document.querySelectorAll('.mandala-part').forEach(part => {
+            part.style.fill = 'white';
+            part.classList.remove('filled');
+        });
+    }
+
+    function saveMandala() {
+        alert('Votre mandala a été sauvegardé dans votre espace personnel !');
+    }
+
+    // ===== JEU 3: PUZZLE ZEN =====
+    let puzzleGrid = [];
+    let puzzleMoves = 0;
+    let puzzleTimer = null;
+    let puzzleSeconds = 0;
+    let emptyIndex = 8;
+
+    function initPuzzle() {
+        // Créer une grille 3x3 résoluble
+        puzzleGrid = [1, 2, 3, 4, 5, 6, 7, 8, 0]; // 0 représente la case vide
+        
+        // Mélanger en faisant des mouvements valides
+        for (let i = 0; i < 100; i++) {
+            const validMoves = getValidMoves(emptyIndex);
+            const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+            swapPieces(emptyIndex, randomMove);
+            emptyIndex = randomMove;
+        }
+
+        puzzleMoves = 0;
+        puzzleSeconds = 0;
+        document.getElementById('puzzle-moves').textContent = '0';
+        document.getElementById('puzzle-timer').textContent = '00:00';
+        document.getElementById('puzzle-complete').style.display = 'none';
+        
+        if (puzzleTimer) clearInterval(puzzleTimer);
+        puzzleTimer = setInterval(updatePuzzleTimer, 1000);
+        
+        renderPuzzle();
+    }
+
+    function getValidMoves(emptyIdx) {
+        const moves = [];
+        const row = Math.floor(emptyIdx / 3);
+        const col = emptyIdx % 3;
+        
+        if (row > 0) moves.push(emptyIdx - 3); // Haut
+        if (row < 2) moves.push(emptyIdx + 3); // Bas
+        if (col > 0) moves.push(emptyIdx - 1); // Gauche
+        if (col < 2) moves.push(emptyIdx + 1); // Droite
+        
+        return moves;
+    }
+
+    function swapPieces(idx1, idx2) {
+        const temp = puzzleGrid[idx1];
+        puzzleGrid[idx1] = puzzleGrid[idx2];
+        puzzleGrid[idx2] = temp;
+    }
+
+    function renderPuzzle() {
+        const grid = document.getElementById('puzzle-grid');
+        grid.innerHTML = '';
+        
+        puzzleGrid.forEach((num, idx) => {
+            const piece = document.createElement('div');
+            piece.className = 'puzzle-piece' + (num === 0 ? ' empty' : '');
+            if (num !== 0) {
+                piece.textContent = num;
+                piece.onclick = () => movePiece(idx);
+                if (num === idx + 1) piece.classList.add('correct');
+            }
+            grid.appendChild(piece);
+        });
+    }
+
+    function movePiece(idx) {
+        const validMoves = getValidMoves(emptyIndex);
+        if (validMoves.includes(idx)) {
+            swapPieces(emptyIndex, idx);
+            emptyIndex = idx;
+            puzzleMoves++;
+            document.getElementById('puzzle-moves').textContent = puzzleMoves;
+            renderPuzzle();
+            checkPuzzleComplete();
+        }
+    }
+
+    function updatePuzzleTimer() {
+        puzzleSeconds++;
+        const mins = Math.floor(puzzleSeconds / 60).toString().padStart(2, '0');
+        const secs = (puzzleSeconds % 60).toString().padStart(2, '0');
+        document.getElementById('puzzle-timer').textContent = `${mins}:${secs}`;
+    }
+
+    function checkPuzzleComplete() {
+        const isComplete = puzzleGrid.every((num, idx) => num === (idx + 1) % 9);
+        if (isComplete) {
+            clearInterval(puzzleTimer);
+            document.getElementById('puzzle-final-moves').textContent = puzzleMoves;
+            document.getElementById('puzzle-complete').style.display = 'block';
+        }
+    }
+
+    // ===== JEU 4: MÉMOIRE POSITIVE =====
+    const gratitudeCards = [
+        { emoji: '🌅', text: 'Je suis reconnaissant pour ce nouveau jour' },
+        { emoji: '💪', text: 'J\'ai la force de surmonter les défis' },
+        { emoji: '📚', text: 'Chaque jour est une opportunité d\'apprendre' },
+        { emoji: '❤️', text: 'Je m\'accepte tel que je suis' },
+        { emoji: '🌱', text: 'Je grandis et m\'améliore chaque jour' },
+        { emoji: '🌟', text: 'Mes efforts portent leurs fruits' },
+        { emoji: '🤝', text: 'Je suis entouré de soutien' },
+        { emoji: '🎯', text: 'Je suis concentré sur mes objectifs' }
+    ];
+
+    let memoryCards = [];
+    let flippedCards = [];
+    let matchedPairs = 0;
+
+    function initMemory() {
+        // Créer les paires
+        memoryCards = [];
+        gratitudeCards.forEach((card, idx) => {
+            memoryCards.push({ ...card, id: idx, pair: idx });
+            memoryCards.push({ ...card, id: idx + 8, pair: idx });
+        });
+        
+        // Mélanger
+        memoryCards.sort(() => Math.random() - 0.5);
+        
+        flippedCards = [];
+        matchedPairs = 0;
+        document.getElementById('memory-complete').style.display = 'none';
+        
+        renderMemory();
+    }
+
+    function renderMemory() {
+        const grid = document.getElementById('memory-grid');
+        grid.innerHTML = '';
+        
+        memoryCards.forEach((card, idx) => {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'memory-card';
+            cardEl.innerHTML = `
+                <div class="memory-card-face memory-card-front">✨</div>
+                <div class="memory-card-face memory-card-back">
+                    <div>${card.emoji}</div>
+                    <div class="gratitude-text">${card.text}</div>
+                </div>
+            `;
+            cardEl.onclick = () => flipCard(idx, cardEl);
+            grid.appendChild(cardEl);
+        });
+    }
+
+    function flipCard(idx, element) {
+        if (flippedCards.length >= 2) return;
+        if (element.classList.contains('flipped') || element.classList.contains('matched')) return;
+        
+        element.classList.add('flipped');
+        flippedCards.push({ idx, element, card: memoryCards[idx] });
+        
+        if (flippedCards.length === 2) {
+            checkMatch();
+        }
+    }
+
+    function checkMatch() {
+        const [card1, card2] = flippedCards;
+        
+        if (card1.card.pair === card2.card.pair) {
+            setTimeout(() => {
+                card1.element.classList.add('matched');
+                card2.element.classList.add('matched');
+                matchedPairs++;
+                flippedCards = [];
+                
+                if (matchedPairs === gratitudeCards.length) {
+                    document.getElementById('memory-complete').style.display = 'block';
+                }
+            }, 500);
+        } else {
+            setTimeout(() => {
+                card1.element.classList.remove('flipped');
+                card2.element.classList.remove('flipped');
+                flippedCards = [];
+            }, 1000);
+        }
+    }
+
+    // ===== JEU 5: BULLES ANTI-STRESS =====
+    let bubblesInterval;
+    let bubblesScore = 0;
+    let bubblesActive = false;
+
+    function startBubbles() {
+        if (bubblesActive) return;
+        bubblesActive = true;
+        bubblesScore = 0;
+        document.getElementById('bubbles-score').textContent = '0';
+        
+        bubblesInterval = setInterval(createBubble, 800);
+    }
+
+    function createBubble() {
+        const container = document.getElementById('bubbles-container');
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        
+        const size = Math.random() * 40 + 30;
+        const left = Math.random() * (container.offsetWidth - size);
+        const duration = Math.random() * 3 + 4;
+        
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+        bubble.style.left = `${left}px`;
+        bubble.style.animationDuration = `${duration}s`;
+        
+        bubble.onclick = function(e) {
+            e.stopPropagation();
+            popBubble(this);
+        };
+        
+        container.appendChild(bubble);
+        
+        // Supprimer après l'animation
+        setTimeout(() => {
+            if (bubble.parentNode) bubble.remove();
+        }, duration * 1000);
+    }
+
+    function popBubble(bubble) {
+        bubble.classList.add('pop');
+        bubblesScore++;
+        document.getElementById('bubbles-score').textContent = bubblesScore;
+        setTimeout(() => bubble.remove(), 300);
+    }
+
+    function stopBubbles() {
+        bubblesActive = false;
+        clearInterval(bubblesInterval);
+        document.querySelectorAll('.bubble').forEach(b => b.remove());
+    }
+
+    // Initialisation au chargement
+    document.addEventListener('DOMContentLoaded', function() {
+        initPuzzle();
+        initMemory();
+    });
+</script>
+{% endblock %}

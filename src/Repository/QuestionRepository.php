@@ -40,15 +40,4 @@ class QuestionRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
-
-    public function getTypeLabel(): string
-{
-    return match (true) {
-        $this instanceof QuestionChoix => 'QCM',
-        $this instanceof QuestionVraiFaux => 'Vrai/Faux',
-        $this instanceof QuestionTexteLibre => 'Texte Libre',
-        default => 'Unknown',
-    };
-}
-
 }

@@ -1,0 +1,295 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Consultation{% endblock %}
+
+{% block body %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilan d'Analyse - Consultation #{{ consultation.id }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 0 30px;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background: #f8fafc;
+            padding: 12px 20px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .section-body {
+            padding: 20px;
+        }
+        
+        .info-grid {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .info-box {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin: 0 10px;
+        }
+        
+        .info-box:first-child {
+            margin-left: 0;
+        }
+        
+        .info-box:last-child {
+            margin-right: 0;
+        }
+        
+        .info-label {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0ea5e9;
+        }
+        
+        .status-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .status-critical {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+        
+        .status-warning {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #92400e;
+        }
+        
+        .status-good {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+        
+        .status-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        ul {
+            margin-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 5px;
+        }
+        
+        .motivation-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #fcd34d;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .motivation-box h3 {
+            color: #92400e;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .motivation-box p {
+            color: #a16207;
+            font-size: 13px;
+            font-style: italic;
+            line-height: 1.8;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            font-size: 10px;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        td:first-child {
+            font-weight: bold;
+            width: 40%;
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Bilan d'Analyse Étudiant</h1>
+        <p>Consultation #{{ consultation.id }} - {{ consultation.dateDeConsultation|date('d/m/Y') }}</p>
+    </div>
+    
+    <div class="content">
+        <!-- Informations générales -->
+        <div class="section">
+            <div class="section-header">Informations de la Consultation</div>
+            <div class="section-body">
+                <table>
+                    <tr>
+                        <td>Date de consultation:</td>
+                        <td>{{ consultation.dateDeConsultation|date('d/m/Y H:i') }}</td>
+                    </tr>
+                    <tr>
+                        <td>Motif:</td>
+                        <td>{{ consultation.motif }}</td>
+                    </tr>
+                    <tr>
+                        <td>Genre:</td>
+                        <td>{{ consultation.genre }}</td>
+                    </tr>
+                    <tr>
+                        <td>Niveau:</td>
+                        <td>{{ consultation.niveau }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Données du sondage -->
+        <div class="section">
+            <div class="section-header">Données du Sondage</div>
+            <div class="section-body">
+                <div class="info-grid">
+                    <div class="info-box">
+                        <div class="info-label">Heures de sommeil</div>
+                        <div class="info-value">{{ sleepHours }}h</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Heures d'étude</div>
+                        <div class="info-value">{{ studyHours }}h</div>
+                    </div>
+                    {% if score is not null %}
+                    <div class="info-box">
+                        <div class="info-label">Score de bien-être</div>
+                        <div class="info-value">{{ score }}/100</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analyse du stress -->
+        {% if score is not null %}
+        <div class="section">
+            <div class="section-header">Analyse du Stress</div>
+            <div class="section-body">
+                <div class="status-box {% if bilan.etat == 'critique' %}status-critical{% elseif bilan.etat == 'attention' %}status-warning{% else %}status-good{% endif %}">
+                    <div class="status-title">Niveau de Stress: {{ bilan.niveau_stress }}</div>
+                    <ul>
+                        {% for rec in bilan.recommandations %}
+                            <li>{{ rec }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Analyse du sommeil -->
+        <div class="section">
+            <div class="section-header">Analyse du Sommeil</div>
+            <div class="section-body">
+                <div class="status-box {% if sleepHours < 6 %}status-critical{% elseif sleepHours < 7 %}status-warning{% else %}status-good{% endif %}">
+                    <div class="status-title">Statut: {{ bilan.sommeil_status }}</div>
+                    <p>{{ bilan.sommeil_conseil }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analyse des études -->
+        <div class="section">
+            <div class="section-header">Analyse des Études</div>
+            <div class="section-body">
+                <div class="status-box {% if studyHours > 10 %}status-critical{% elseif studyHours > 8 %}status-warning{% else %}status-good{% endif %}">
+                    <div class="status-title">Statut: {{ bilan.etude_status }}</div>
+                    <p>{{ bilan.etude_conseil }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Message de motivation -->
+        <div class="motivation-box">
+            <h3>Message de Motivation</h3>
+            <p>"{{ messageMotivation }}"</p>
+        </div>
+    </div>
+    
+    <div class="footer">
+        Document généré le {{ "now"|date('d/m/Y à H:i') }} | StudyFlow - Système de Gestion du Bien-être Étudiant
+    </div>
+</body>
+</html>
