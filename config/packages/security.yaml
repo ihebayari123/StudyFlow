@@ -33,7 +33,7 @@ security:
 
 
   # Tout le reste → utilisateur connecté suffit
-  - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
+    - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
   
 when@test:
