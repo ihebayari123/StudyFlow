@@ -2,47 +2,23 @@
 
 namespace App\Security;
 
-// src/Security/UserStatusChecker.php
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusException;
 use App\Entity\Utilisateur;
 use App\Service\UserRiskCalculator;
+use Doctrine\ORM\EntityManagerInterface; // ← AJOUTE CET IMPORT
 
 class UserStatusChecker implements UserCheckerInterface
 {
-
     private UserRiskCalculator $riskCalculator;
+    private EntityManagerInterface $entityManager; // ← AJOUTE CETTE PROPRIÉTÉ
 
-    public function __construct(UserRiskCalculator $riskCalculator)
+    // ✅ MODIFIE LE CONSTRUCTEUR
+    public function __construct(UserRiskCalculator $riskCalculator, EntityManagerInterface $entityManager)
     {
         $this->riskCalculator = $riskCalculator;
-    }
-
-    public function checkPreAuth(UserInterface $user)
-    {
-        // Make sure this is our Utilisateur entity
-        if (!$user instanceof Utilisateur) {
-            return;
-        }
-
-        // Skip admin accounts
-    if ($user->getRole() === 'ROLE_ADMIN') return;
-        // Rule 1 — Blocked
-        if ($user->getStatutCompte() === 'BLOQUE') {
-            throw new CustomUserMessageAccountStatusException(
-                'Your account is blocked. Contact admin.'
-            );
-        }
-
-        // Rule 2 — Inactive
-        if ($user->getStatutCompte() === 'INACTIF') {
-            throw new CustomUserMessageAccountStatusException(
-                'Your account is inactive. Please activate it.'
-            );
-        }
-
-        // Rule 3 — ACTIF => nothing to do
+        $this->entityManager = $entityManager; // ← INITIALISE ICI
     }
 
     public function checkPreAuth(UserInterface $user)
@@ -50,7 +26,7 @@ class UserStatusChecker implements UserCheckerInterface
         if (!$user instanceof Utilisateur) return;
 
         // Admins skip
-        if ($user->getRole() === 'ADMIN') return;
+        if ($user->getRole() === 'ROLE_ADMIN') return;
 
         // Rule 1 — status block
         if ($user->getStatutCompte() === 'BLOQUE') {
@@ -69,6 +45,10 @@ class UserStatusChecker implements UserCheckerInterface
         $risk = $this->riskCalculator->calculateRisk($user);
 
         if ($risk > 50) {
+            // 🔴 BLOQUE LE COMPTE EN BASE DE DONNÉES
+            $user->setStatutCompte('BLOQUE');
+            $this->entityManager->flush(); // ← UTILISE L'ENTITY MANAGER
+            
             throw new CustomUserMessageAccountStatusException(
                 'Your account is temporarily blocked due to unusual activity.'
             );
@@ -76,10 +56,9 @@ class UserStatusChecker implements UserCheckerInterface
 
         if ($risk > 30) {
             // optional: log or notify admin
-            // e.g., send email or create admin notification
+            error_log("⚠️ High risk user: " . $user->getEmail());
         }
     }
-
 
     public function checkPostAuth(UserInterface $user)
     {
