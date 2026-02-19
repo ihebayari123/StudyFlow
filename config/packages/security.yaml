@@ -21,13 +21,16 @@ security:
         logout:
             path: app_logout
             target: app_login
-        
+        user_checker: App\Security\UserStatusChecker
 
   access_control:
-  # Pages publiques (sans connexion)
-  - { path: ^/login$, roles: PUBLIC_ACCESS }
-  - { path: ^/register, roles: PUBLIC_ACCESS }
-  - { path: ^/logout$, roles: PUBLIC_ACCESS }
+    # Public routes
+    - { path: ^/login$, roles: PUBLIC_ACCESS }
+    - { path: ^/logout$, roles: PUBLIC_ACCESS }
+    - { path: ^/register, roles: PUBLIC_ACCESS }
+    - { path: ^/home, roles: PUBLIC_ACCESS }
+    - { path: ^/useradd, roles: PUBLIC_ACCESS }
+
 
   # Tout le reste → utilisateur connecté suffit
   - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
