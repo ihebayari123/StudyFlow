@@ -29,7 +29,9 @@ class ProduitType extends AbstractType
                 'class' => Utilisateur::class,
                 'choice_label' => 'role',
             ])
-            ->add('save',SubmitType::class)
+           ->add('save', SubmitType::class, [
+    'label' => '💾 Enregistrer le Produit'
+])
         ;
     }
 
