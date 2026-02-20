@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Merci{% endblock %}
+
+{% block body %}
+{% block header %}{% include 'home/navbar.html.twig' %}{% endblock %}
+
+<div class="container" style="padding:120px 20px; text-align:center;">
+  <h1>Merci pour votre commande 🎉</h1>
+  <p>Votre paiement a été confirmé.</p>
+  <p>Un email de confirmation a été envoyé à l'adresse que vous avez saisie.</p>
+  <a href="{{ path('app_home') }}" class="btn-cart">Retour à l'accueil</a>
+</div>
+
+{% endblock %}
