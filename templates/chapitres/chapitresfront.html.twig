@@ -677,19 +677,19 @@ function openChapterModal(chapterId) {
 
     // Add Video if exists
     if (chapter.videoUrl) {
-        console.log('Video URL found:', chapter.videoUrl);
-        const videoId = extractVideoId(chapter.videoUrl);
-        if (videoId) {
-            bodyContent += `
-                <div class="content-section">
-                    <h3><i class="fas fa-video"></i> Video Lecture</h3>
-                    <div class="video-container">
-                        ${videoId}
-                    </div>
-                </div>
-            `;
-        }
+    const videoEmbed = extractVideoId(chapter.videoUrl);
+    if (videoEmbed) {
+        // Check if it's an iframe embed or a fallback button div
+        const isEmbed = videoEmbed.startsWith('<iframe');
+        
+        bodyContent += `
+            <div class="content-section">
+                <h3><i class="fas fa-video"></i> Video Lecture</h3>
+                ${isEmbed ? `<div class="video-container">${videoEmbed}</div>` : videoEmbed}
+            </div>
+        `;
     }
+}
 
     // Add PDF/File if exists
     console.log('Checking fileName:', chapter.fileName);
@@ -782,27 +782,46 @@ function openChapterModal(chapterId) {
 
     // Extract video ID and create embed code
     function extractVideoId(url) {
-        if (!url) return null;
+    if (!url) return null;
 
-        // YouTube
-        let youtubeMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-        if (youtubeMatch) {
-            return `<iframe src="https://www.youtube.com/embed/${youtubeMatch[1]}" allowfullscreen></iframe>`;
-        }
-
-        // Vimeo
-        let vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
-        if (vimeoMatch) {
-            return `<iframe src="https://player.vimeo.com/video/${vimeoMatch[1]}" allowfullscreen></iframe>`;
-        }
-
-        // Direct video link
-        if (url.match(/\.(mp4|webm|ogg)$/i)) {
-            return `<video controls style="width: 100%; border-radius: 15px;"><source src="${url}"></video>`;
-        }
-
-        return null;
+    // YouTube watch URL
+    let youtubeMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+    if (youtubeMatch) {
+        return `<iframe src="https://www.youtube.com/embed/${youtubeMatch[1]}" allowfullscreen></iframe>`;
     }
+
+    // Vimeo
+    let vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) {
+        return `<iframe src="https://player.vimeo.com/video/${vimeoMatch[1]}" allowfullscreen></iframe>`;
+    }
+
+    // Direct video file
+    if (url.match(/\.(mp4|webm|ogg)$/i)) {
+        return `<video controls style="width:100%;border-radius:15px;"><source src="${url}"></video>`;
+    }
+
+    // YouTube search URL or any other URL — show as a clickable button
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        return `
+            <div style="text-align:center; padding:40px; background:#f8f9fa; border-radius:15px;">
+                <i class="fab fa-youtube" style="font-size:5rem; color:#ff0000; margin-bottom:20px; display:block;"></i>
+                <p style="color:#666; margin-bottom:20px;">Click below to watch the video on YouTube</p>
+                <a href="${url}" target="_blank" class="view-btn">
+                    <i class="fab fa-youtube"></i> Watch on YouTube
+                </a>
+            </div>`;
+    }
+
+    // Generic URL fallback
+    return `
+        <div style="text-align:center; padding:40px; background:#f8f9fa; border-radius:15px;">
+            <i class="fas fa-external-link-alt" style="font-size:3rem; color:#667eea; margin-bottom:20px; display:block;"></i>
+            <a href="${url}" target="_blank" class="view-btn">
+                <i class="fas fa-play"></i> Open Video
+            </a>
+        </div>`;
+}
 
     // Close modal when clicking outside
     window.onclick = function(event) {
