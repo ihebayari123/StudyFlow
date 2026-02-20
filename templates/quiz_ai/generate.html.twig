@@ -1,0 +1,183 @@
+{% extends 'admin/base_admin.html.twig' %}
+{% block title %}Générer Quiz par AI{% endblock %}
+
+{% block admin_content %}
+<div class="admin-main-content">
+    <div class="container-fluid py-4">
+
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ path('admin_show_quiz') }}" class="text-decoration-none">
+                        <i class="fas fa-question-circle me-1"></i>Quiz
+                    </a>
+                </li>
+                <li class="breadcrumb-item active">Générer par AI</li>
+            </ol>
+        </nav>
+
+        <h2 class="mb-4"><i class="fas fa-robot"></i> Générer des Questions par AI</h2>
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+
+        <div class="card shadow mb-4">
+            <div class="card-header bg-gradient text-white py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h5 class="mb-0"><i class="fas fa-upload me-2"></i>Uploader un PDF</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold">📄 Choisir un PDF</label>
+                            <input type="file" name="pdf" accept=".pdf" class="form-control" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold">🎯 Quiz cible</label>
+                            <select name="quiz_id" class="form-select" required>
+                                <option value="">-- Sélectionner un Quiz --</option>
+                                {% for quiz in quizzes %}
+                                    <option value="{{ quiz.id }}">{{ quiz.titre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-magic"></i> Générer
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        {% if questions %}
+        <form method="POST" action="{{ path('quiz_ai_confirm') }}">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">⚠️ {{ questions|length }} questions — Sélectionnez celles à enregistrer</h5>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-outline-dark me-2" onclick="toggleAll(true)">✅ Tout sélectionner</button>
+                        <button type="button" class="btn btn-sm btn-outline-dark" onclick="toggleAll(false)">❌ Tout désélectionner</button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>✔</th>
+                                <th>#</th>
+                                <th>Question</th>
+                                <th>Type</th>
+                                <th>Niveau</th>
+                                <th>Réponse</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i, q in questions %}
+                            <tr id="row-{{ i }}" class="table-success">
+                                <td>
+                                    <input type="checkbox" name="approved[]" value="{{ i }}"
+                                        class="form-check-input question-check" checked
+                                        onchange="toggleRow({{ i }}, this.checked)">
+                                </td>
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    {{ q.texte }}
+                                    {% if q.type == 'choix_multiple' %}
+                                    <div class="mt-1 small text-muted">
+                                        A: {{ q.choix_a ?? '—' }} |
+                                        B: {{ q.choix_b ?? '—' }} |
+                                        C: {{ q.choix_c ?? '—' }} |
+                                        D: {{ q.choix_d ?? '—' }}
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if q.type == 'vrai_faux' %}
+                                        <span class="badge bg-info">Vrai/Faux</span>
+                                    {% elseif q.type == 'choix_multiple' %}
+                                        <span class="badge bg-warning text-dark">Choix Multiple</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Texte Libre</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge bg-success">{{ q.niveau }}</span></td>
+                                <td>
+                                    {% if q.type == 'vrai_faux' %}
+                                        {% if q.bonne_reponse_bool is defined and q.bonne_reponse_bool is not null %}
+                                            {{ q.bonne_reponse_bool ? '✅ Vrai' : '❌ Faux' }}
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    {% elseif q.type == 'choix_multiple' %}
+                                        {% if q.bonne_reponse_choix is defined and q.bonne_reponse_choix is not null %}
+                                            <strong>{{ q.bonne_reponse_choix|upper }}</strong>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    {% else %}
+                                        {% if q.reponse_attendue is defined and q.reponse_attendue is not null %}
+                                            {{ q.reponse_attendue }}
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer text-end">
+                    <span class="me-3 text-muted" id="selected-count">
+                        {{ questions|length }} / {{ questions|length }} sélectionnées
+                    </span>
+                    <button type="submit" class="btn btn-success btn-lg">
+                        💾 Enregistrer les questions sélectionnées
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <script>
+        function toggleRow(index, checked) {
+            document.getElementById('row-' + index).className = checked ? 'table-success' : 'table-secondary';
+            updateCount();
+        }
+        function toggleAll(checked) {
+            document.querySelectorAll('.question-check').forEach(function(cb, i) {
+                cb.checked = checked;
+                toggleRow(i, checked);
+            });
+        }
+        function updateCount() {
+            const total = document.querySelectorAll('.question-check').length;
+            const selected = document.querySelectorAll('.question-check:checked').length;
+            document.getElementById('selected-count').textContent = selected + ' / ' + total + ' sélectionnées';
+        }
+        </script>
+
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+.admin-main-content {
+    margin-left: 280px;
+    padding: 100px 40px 40px 40px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+}
+@media (max-width: 768px) {
+    .admin-main-content { margin-left: 0; padding: 20px 15px; }
+}
+</style>
+
+{% endblock %}

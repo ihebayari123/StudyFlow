@@ -50,7 +50,7 @@ class Quiz
     /**
      * @var Collection<int, QuizAttempt>
      */
-    #[ORM\OneToMany(targetEntity: QuizAttempt::class, mappedBy: 'quiz')]
+    #[ORM\OneToMany(targetEntity: QuizAttempt::class, mappedBy: 'quiz' , orphanRemoval: true)]
     private Collection $quizAttempts;
 
     public function __construct()
