@@ -114,6 +114,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: StressSurvey::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $stressSurveys;
 
+    /**
+     * @var Collection<int, Notification>
+     */
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'user')]
+    private Collection $notifications;
+
     public function __construct()
     {
         $this->cours = new ArrayCollection();
@@ -121,6 +127,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->events = new ArrayCollection();
         $this->produits = new ArrayCollection();
         $this->stressSurveys = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -276,6 +283,36 @@ public function getFailedLoginAttempts(): ?int
 public function setFailedLoginAttempts(int $failedLoginAttempts): static
 {
     $this->failedLoginAttempts = $failedLoginAttempts;
+    return $this;
+}
+
+/**
+ * @return Collection<int, Notification>
+ */
+public function getNotifications(): Collection
+{
+    return $this->notifications;
+}
+
+public function addNotification(Notification $notification): static
+{
+    if (!$this->notifications->contains($notification)) {
+        $this->notifications->add($notification);
+        $notification->setUser($this);
+    }
+
+    return $this;
+}
+
+public function removeNotification(Notification $notification): static
+{
+    if ($this->notifications->removeElement($notification)) {
+        // set the owning side to null (unless already changed)
+        if ($notification->getUser() === $this) {
+            $notification->setUser(null);
+        }
+    }
+
     return $this;
 }
 

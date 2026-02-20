@@ -9,7 +9,7 @@ class UserRiskCalculator
     public function calculateRisk(Utilisateur $user): int
     {
         // Admins always safe
-        if ($user->getRole() === 'ADMIN') {
+        if ($user->getRole() === 'ROLE_ADMIN') {
             return 0;
         }
 

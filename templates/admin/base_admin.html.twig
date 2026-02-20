@@ -1367,6 +1367,47 @@
     <script src="{{ asset('assets2/vendors/js/circle-progress.min.js') }}"></script>
     <script src="{{ asset('assets2/js/common-init.min.js') }}"></script>
     <script src="{{ asset('assets2/js/dashboard-init.min.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ Script chargé');
+            
+            const markAllBtn = document.querySelector('.mark-all-read');
+            console.log('🔍 Bouton trouvé ?', markAllBtn);
+            
+            if (markAllBtn) {
+                markAllBtn.addEventListener('click', function(e) {
+                    console.log('🎯 Clic détecté !');
+                    e.preventDefault();
+                    
+                    const url = this.dataset.url;
+                    console.log('📡 URL:', url);
+                    
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('✅ Réponse:', data);
+                        if (data.success) {
+                            alert('Notifications marquées comme lues !');
+                            location.reload(); // Solution simple pour commencer
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ Erreur:', error);
+                    });
+                });
+            } else {
+                console.log('❌ Bouton non trouvé - vérifie la classe "mark-all-read"');
+            }
+        });
+        </script>
+    
+    
     {% block admin_javascripts %}{% endblock %}
     <script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
 {% endblock %}
