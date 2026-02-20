@@ -8,6 +8,7 @@ use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusExce
 use App\Entity\Utilisateur;
 use App\Service\UserRiskCalculator;
 use Doctrine\ORM\EntityManagerInterface; // ← AJOUTE CET IMPORT
+use App\Service\NotificationService;
 
 class UserStatusChecker implements UserCheckerInterface
 {
@@ -15,10 +16,11 @@ class UserStatusChecker implements UserCheckerInterface
     private EntityManagerInterface $entityManager; // ← AJOUTE CETTE PROPRIÉTÉ
 
     // ✅ MODIFIE LE CONSTRUCTEUR
-    public function __construct(UserRiskCalculator $riskCalculator, EntityManagerInterface $entityManager)
+    public function __construct(UserRiskCalculator $riskCalculator, EntityManagerInterface $entityManager,NotificationService $notificationService)
     {
         $this->riskCalculator = $riskCalculator;
         $this->entityManager = $entityManager; // ← INITIALISE ICI
+        $this->notificationService = $notificationService;
     }
 
     public function checkPreAuth(UserInterface $user)
@@ -45,6 +47,7 @@ class UserStatusChecker implements UserCheckerInterface
         $risk = $this->riskCalculator->calculateRisk($user);
 
         if ($risk > 50) {
+            $this->notificationService->notifyUserBlocked($user);
             // 🔴 BLOQUE LE COMPTE EN BASE DE DONNÉES
             $user->setStatutCompte('BLOQUE');
             $this->entityManager->flush(); // ← UTILISE L'ENTITY MANAGER
