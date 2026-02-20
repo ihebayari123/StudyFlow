@@ -191,21 +191,44 @@ if ($file) {
             }
             
             // Handle file upload
-            $uploadedFile = $request->files->get('fileUpload');
-            if ($uploadedFile) {
-                $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $newFilename = $originalFilename.'-'.uniqid().'.'.$uploadedFile->guessExtension();
-                
-                try {
-                    $uploadedFile->move(
-                        $this->getParameter('uploads_directory'), // You need to configure this
-                        $newFilename
-                    );
+$uploadedFile = $request->files->get('fileUpload');
+if ($uploadedFile) {
+    // Delete old file first
+    if ($chapitre->getFileName()) {
+        $oldFile = $this->getParameter('chapters_directory') . '/' . $chapitre->getFileName();
+        if (file_exists($oldFile)) {
+            unlink($oldFile);
+        }
+    }
+
+    // Sanitize filename (same as addChapitre)
+    $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+    $safeFilename = preg_replace('/[^A-Za-z0-9-]/', '_', $originalFilename);
+    $newFilename = $safeFilename . '-' . uniqid() . '.' . $uploadedFile->guessExtension();
+
+    try {
+        $uploadedFile->move(
+            $this->getParameter('chapters_directory'), // ✅ fixed
+            $newFilename
+        );
+        $chapitre->setFileName($newFilename);
+    } catch (FileException $e) {
+        $this->addFlash('error', 'File upload failed: ' . $e->getMessage());
+   
                     $chapitre->setFileName($newFilename);
                 } catch (\Exception $e) {
                     $this->addFlash('error', 'File upload failed: ' . $e->getMessage());
                 }
             }
+            if ($request->request->get('removeFile')) {
+    if ($chapitre->getFileName()) {
+        $oldFile = $this->getParameter('chapters_directory') . '/' . $chapitre->getFileName();
+        if (file_exists($oldFile)) {
+            unlink($oldFile);
+        }
+    }
+    $chapitre->setFileName(null);
+}
             
             // Handle links
             $linkTitles = $request->request->all('linkTitle');
