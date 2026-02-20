@@ -45,6 +45,41 @@
             $this->em->flush();
         }
 
+        public function notifyHighRiskUser(Utilisateur $user, int $riskScore): void
+{
+    $details = [];
+    
+    if ($user->getFailedLoginAttempts() > 3) {
+        $details[] = "{$user->getFailedLoginAttempts()} tentatives échouées";
+    }
+    
+    if ($user->getLastLogin() && (new \DateTime())->diff($user->getLastLogin())->days > 30) {
+        $details[] = "Dernière connexion il y a " . (new \DateTime())->diff($user->getLastLogin())->days . " jours";
+    }
+    
+    if ($user->getLoginFrequency() < 5) {
+        $details[] = "Faible fréquence de connexion";
+    }
+    
+    $detailsText = $details ? " Raisons : " . implode(", ", $details) : "";
+    
+    $notification = new Notification();
+    $notification->setTitle('⚠️ Utilisateur à risque élevé');
+    $notification->setMessage(sprintf(
+        'L\'utilisateur %s %s (%s) présente un risque de %d/100.%s',
+        $user->getPrenom(),
+        $user->getNom(),
+        $user->getEmail(),
+        $riskScore,
+        $detailsText
+    ));
+    $notification->setType('warning');
+    $notification->setUser(null);
+
+    $this->em->persist($notification);
+    $this->em->flush();
+}
+
         public function markAllAsRead(): void
 {
     $this->em->createQueryBuilder()

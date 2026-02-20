@@ -58,8 +58,13 @@ class UserStatusChecker implements UserCheckerInterface
         }
 
         if ($risk > 30) {
-            // optional: log or notify admin
-            error_log("⚠️ High risk user: " . $user->getEmail());
+            // Notifier l'admin
+            $this->notificationService->notifyHighRiskUser($user, $risk);
+            
+            // Log
+            error_log("⚠️ High risk user: " . $user->getEmail() . " (risk: $risk)");
+            
+            // Optionnel : on peut aussi incrémenter un compteur ou autre
         }
     }
 
