@@ -1,0 +1,988 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Calculateur de Score Bien-être{% endblock %}
+
+{% block body %}
+<!-- ======= Header ======= -->
+{% block header %}
+{% include 'home/navbar.html.twig' %}
+{% endblock %}
+
+<div class="score-section">
+    <div class="container">
+        <div class="header-with-button">
+            <div class="header-left">
+                <h1 class="section-title">📊 Calculateur de Score</h1>
+                <p class="section-subtitle">Évaluez votre équilibre vie étudiante en fonction de vos heures de sommeil et d'étude</p>
+            </div>
+            <a href="{{ path('app_studyflow') }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+        
+        <!-- Calculator Card -->
+        <div class="calculator-card">
+            <div class="card-header">
+                <h2 class="card-title">🎯 Entrez vos données</h2>
+            </div>
+            
+            <div class="card-body">
+                <form id="scoreForm" method="POST" action="{{ path('app_studyflow_score') }}">
+                    <div class="input-grid">
+                        <!-- Sleep Hours Input -->
+                        <div class="input-group">
+                            <label for="sleepHours">
+                                <i class="fas fa-moon"></i>
+                                Heures de sommeil par nuit
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="number" 
+                                       id="sleepHours" 
+                                       name="sleepHours" 
+                                       class="score-input" 
+                                       placeholder="Ex: 7.5" 
+                                       step="0.5" 
+                                       min="0" 
+                                       max="24"
+                                       value="{{ sleepHours ?? '' }}"
+                                       required>
+                                <span class="input-unit">heures</span>
+                            </div>
+                            <div class="input-hint">
+                                <i class="fas fa-info-circle"></i>
+                                Recommandé: 7-9 heures
+                            </div>
+                        </div>
+
+                        <!-- Study Hours Input -->
+                        <div class="input-group">
+                            <label for="studyHours">
+                                <i class="fas fa-book"></i>
+                                Heures d'étude par jour
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="number" 
+                                       id="studyHours" 
+                                       name="studyHours" 
+                                       class="score-input" 
+                                       placeholder="Ex: 6" 
+                                       step="0.5" 
+                                       min="0" 
+                                       max="24"
+                                       value="{{ studyHours ?? '' }}"
+                                       required>
+                                <span class="input-unit">heures</span>
+                            </div>
+                            <div class="input-hint">
+                                <i class="fas fa-info-circle"></i>
+                                Inclut cours et révisions
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="calculate-btn" onclick="showLoading(event)">
+                        <i class="fas fa-calculator"></i>
+                        Calculer mon score
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {% if score is defined %}
+        <!-- Result Card -->
+        <div class="result-card {{ scoreClass }}" id="resultSection">
+            <!-- Score Circle -->
+            <div class="score-display">
+                <div class="score-circle {{ scoreClass }}">
+                    <span class="score-number">{{ score }}</span>
+                    <span class="score-max">/100</span>
+                </div>
+                <div class="score-badge {{ scoreClass }}">
+                    {{ resultTitle }}
+                </div>
+            </div>
+            
+            <!-- Score Message -->
+            <div class="score-message">
+                <i class="fas fa-quote-left"></i>
+                <p>{{ resultMessage }}</p>
+            </div>
+
+            <!-- Progress Bars -->
+            <div class="progress-section">
+                <div class="progress-item">
+                    <div class="progress-header">
+                        <span class="progress-icon">
+                            <i class="fas fa-moon"></i>
+                        </span>
+                        <span class="progress-label">Qualité du sommeil</span>
+                        <span class="progress-value">{{ sleepScore }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill {{ scoreClass }}" style="width: {{ sleepScore }}%"></div>
+                    </div>
+                </div>
+                <div class="progress-item">
+                    <div class="progress-header">
+                        <span class="progress-icon">
+                            <i class="fas fa-book"></i>
+                        </span>
+                        <span class="progress-label">Équilibre étude</span>
+                        <span class="progress-value">{{ studyScore }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill {{ scoreClass }}" style="width: {{ studyScore }}%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            {% if recommendations is defined and recommendations|length > 0 %}
+            <div class="recommendations">
+                <h4 class="recommendations-title">
+                    <i class="fas fa-lightbulb"></i>
+                    Nos recommandations personnalisées
+                </h4>
+                <ul class="recommendation-list">
+                    {% for rec in recommendations %}
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        {{ rec }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- New Calculation Button -->
+            <div class="new-calculation">
+                <button onclick="resetForm()" class="new-calculation-btn">
+                    <i class="fas fa-redo-alt"></i>
+                    Nouveau calcul
+                </button>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Info Cards -->
+        <div class="info-cards">
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="fas fa-moon"></i>
+                </div>
+                <h3 class="info-title">Sommeil</h3>
+                <p class="info-text">Un bon sommeil améliore la mémoire, la concentration et réduit le stress. Visez 7-9 heures par nuit.</p>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h3 class="info-title">Étude</h3>
+                <p class="info-text">Une charge d'étude excessive peut mener au burnout. L'équilibre est essentiel pour réussir sereinement.</p>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="fas fa-balance-scale"></i>
+                </div>
+                <h3 class="info-title">Équilibre</h3>
+                <p class="info-text">Trouvez le juste milieu entre travail et repos pour optimiser vos performances académiques.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Calcul de votre score en cours...</div>
+</div>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    /* Keep navbar text white and make navbar background semi-transparent */
+    .header-area {
+        background: rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(10px);
+    }
+
+    .header-area .logo h1,
+    .header-area .nav a,
+    .header-area .menu-trigger span,
+    nav, .navbar, nav *, .navbar *, .nav-link {
+        color: white !important;
+    }
+
+    .score-section {
+        padding: 120px 20px 60px 20px;
+        background-color: transparent;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Header with Button */
+    .header-with-button {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 50px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .header-left {
+        flex: 1;
+    }
+
+    .section-title {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #ffffff;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .section-subtitle {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9);
+        margin-top: 10px;
+        font-weight: 400;
+    }
+
+    /* Back Button */
+    .back-btn {
+        padding: 12px 30px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        margin-top: 30px;
+    }
+
+    .back-btn:hover {
+        background: white;
+        color: #667eea;
+        transform: translateX(-5px);
+        border-color: white;
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .back-btn i {
+        font-size: 0.9rem;
+        transition: transform 0.3s ease;
+    }
+
+    .back-btn:hover i {
+        transform: translateX(-3px);
+    }
+
+    /* Calculator Card */
+    .calculator-card {
+        background: white;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        margin-bottom: 40px;
+        transition: all 0.3s ease;
+    }
+
+    .calculator-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-header {
+        padding: 30px 30px 20px;
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+        border-bottom: 2px solid #e0e4ff;
+    }
+
+    .card-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .card-title i {
+        color: #667eea;
+    }
+
+    .card-body {
+        padding: 30px;
+    }
+
+    /* Input Grid */
+    .input-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+
+    .input-group {
+        position: relative;
+    }
+
+    .input-group label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 12px;
+        font-size: 1rem;
+    }
+
+    .input-group label i {
+        color: #667eea;
+        font-size: 1.1rem;
+    }
+
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .score-input {
+        width: 100%;
+        padding: 15px 20px;
+        border: 2px solid #e0e4ff;
+        border-radius: 16px;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        background: #f8f9ff;
+    }
+
+    .score-input:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 25px rgba(102, 126, 234, 0.2);
+    }
+
+    .input-unit {
+        position: absolute;
+        right: 20px;
+        color: #999;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .input-hint {
+        font-size: 0.85rem;
+        color: #888;
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .input-hint i {
+        color: #667eea;
+        font-size: 0.9rem;
+    }
+
+    /* Calculate Button */
+    .calculate-btn {
+        width: 100%;
+        padding: 18px 35px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 16px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .calculate-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .calculate-btn:hover::before {
+        left: 100%;
+    }
+
+    .calculate-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+    }
+
+    .calculate-btn i {
+        font-size: 1.3rem;
+    }
+
+    /* Result Card */
+    .result-card {
+        background: white;
+        border-radius: 24px;
+        padding: 40px;
+        margin-bottom: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .result-card.excellent {
+        border: 3px solid #28a745;
+    }
+
+    .result-card.good {
+        border: 3px solid #ffc107;
+    }
+
+    .result-card.warning {
+        border: 3px solid #dc3545;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Score Display */
+    .score-display {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 40px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .score-circle {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        position: relative;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .score-circle::before {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        z-index: -1;
+        opacity: 0.3;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .score-number {
+        font-size: 4rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .result-card.excellent .score-number { color: #28a745; }
+    .result-card.good .score-number { color: #ffc107; }
+    .result-card.warning .score-number { color: #dc3545; }
+
+    .score-max {
+        font-size: 1rem;
+        color: #999;
+        margin-top: 5px;
+    }
+
+    .score-badge {
+        padding: 12px 35px;
+        border-radius: 30px;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: white;
+        display: inline-block;
+    }
+
+    .score-badge.excellent {
+        background: linear-gradient(135deg, #28a745, #20c997);
+    }
+
+    .score-badge.good {
+        background: linear-gradient(135deg, #ffc107, #fd7e14);
+    }
+
+    .score-badge.warning {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+    }
+
+    /* Score Message */
+    .score-message {
+        background: #f8f9ff;
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        border-left: 5px solid #667eea;
+    }
+
+    .score-message i {
+        font-size: 1.5rem;
+        color: #667eea;
+        opacity: 0.5;
+    }
+
+    .score-message p {
+        font-size: 1.1rem;
+        color: #555;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    /* Progress Section */
+    .progress-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    .progress-item {
+        background: #f8f9ff;
+        border-radius: 16px;
+        padding: 20px;
+    }
+
+    .progress-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+
+    .progress-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .progress-label {
+        flex: 1;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .progress-value {
+        font-weight: 700;
+        color: #667eea;
+        font-size: 1.2rem;
+    }
+
+    .progress-bar {
+        height: 12px;
+        background: #e0e4ff;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        border-radius: 6px;
+        transition: width 1s ease;
+    }
+
+    .progress-fill.excellent { background: linear-gradient(135deg, #28a745, #20c997); }
+    .progress-fill.good { background: linear-gradient(135deg, #ffc107, #fd7e14); }
+    .progress-fill.warning { background: linear-gradient(135deg, #dc3545, #c82333); }
+
+    /* Recommendations */
+    .recommendations {
+        background: #f8f9ff;
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+
+    .recommendations-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .recommendations-title i {
+        color: #667eea;
+    }
+
+    .recommendation-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .recommendation-list li {
+        padding: 15px 0;
+        border-bottom: 1px solid #e0e4ff;
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        color: #555;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .recommendation-list li:last-child {
+        border-bottom: none;
+    }
+
+    .recommendation-list li i {
+        color: #28a745;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        margin-top: 3px;
+    }
+
+    /* New Calculation Button */
+    .new-calculation {
+        text-align: center;
+    }
+
+    .new-calculation-btn {
+        padding: 15px 40px;
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+        border-radius: 30px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .new-calculation-btn:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: transparent;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    .new-calculation-btn i {
+        font-size: 1.1rem;
+    }
+
+    /* Info Cards */
+    .info-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .info-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .info-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .info-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .info-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        margin: 0 auto 20px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .info-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 15px;
+    }
+
+    .info-text {
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 20px;
+        z-index: 9999;
+    }
+
+    .loading-overlay.show {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .loading-spinner {
+        width: 80px;
+        height: 80px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-right-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .score-section {
+            padding: 100px 15px 40px;
+        }
+
+        .header-with-button {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+        }
+
+        .back-btn {
+            width: 100%;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .card-header {
+            padding: 25px;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        .input-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .score-display {
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+        }
+
+        .score-number {
+            font-size: 3rem;
+        }
+
+        .score-badge {
+            padding: 10px 25px;
+            font-size: 1.1rem;
+        }
+
+        .progress-section {
+            grid-template-columns: 1fr;
+        }
+
+        .info-cards {
+            grid-template-columns: 1fr;
+        }
+
+        .result-card {
+            padding: 25px;
+        }
+    }
+</style>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+    // Show loading animation
+    function showLoading(event) {
+        const sleepHours = document.getElementById('sleepHours').value;
+        const studyHours = document.getElementById('studyHours').value;
+        
+        if (sleepHours && studyHours) {
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
+    }
+
+    // Reset form
+    function resetForm() {
+        window.location.href = "{{ path('app_studyflow_score') }}";
+    }
+
+    // Animate progress bars on load
+    document.addEventListener('DOMContentLoaded', function() {
+        const progressFills = document.querySelectorAll('.progress-fill');
+        progressFills.forEach(fill => {
+            const width = fill.style.width;
+            fill.style.width = '0';
+            setTimeout(() => {
+                fill.style.width = width;
+            }, 300);
+        });
+
+        // Animate score number
+        const scoreNumber = document.querySelector('.score-number');
+        if (scoreNumber) {
+            const finalScore = parseInt(scoreNumber.textContent);
+            let currentScore = 0;
+            const increment = finalScore / 50;
+            const timer = setInterval(() => {
+                currentScore += increment;
+                if (currentScore >= finalScore) {
+                    currentScore = finalScore;
+                    clearInterval(timer);
+                }
+                scoreNumber.textContent = Math.round(currentScore);
+            }, 20);
+        }
+    });
+
+    // Input validation
+    document.getElementById('sleepHours')?.addEventListener('input', function() {
+        if (this.value > 24) this.value = 24;
+        if (this.value < 0) this.value = 0;
+    });
+
+    document.getElementById('studyHours')?.addEventListener('input', function() {
+        if (this.value > 24) this.value = 24;
+        if (this.value < 0) this.value = 0;
+    });
+</script>
+{% endblock %}
