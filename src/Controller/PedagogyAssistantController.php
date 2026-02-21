@@ -10,12 +10,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class ChatController extends AbstractController
+class PedagogyAssistantController extends AbstractController
 {
     #[Route('/front/chat', name: 'chat_index', methods: ['GET'])]
     public function index(): Response
     {
-        return $this->render('chat/index.html.twig');
+        return $this->render('Pedagogy_Assistant/index.html.twig');
     }
 
     #[Route('/chat/send', name: 'chat_send', methods: ['POST'])]
