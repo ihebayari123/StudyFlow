@@ -75,8 +75,8 @@
                      <a class="nxl-link" href="{{ path('app_showstresse') }}">
                          Voir les Étudiants
                      </a>
-                     <a class="nxl-link" href="{{ path('app_add_stresse') }}">
-                         Ajouter Étudiant
+                     <a class="nxl-link" href="{{ path('app_showconsultation') }}">
+                         voir_listes_des_consultations
                         </a>
                         <a class="nxl-link" href="{{ path('app_showscore') }}">
                             Suivi des Scores
@@ -84,8 +84,8 @@
                           <a class="nxl-link" href="{{ path('app_stresse_statistiques') }}">
                      Statistics
                       </a>
-                       <a class="nxl-link" href="{{ path('app_showstresse_recherche') }}">
-                         Recherche Par Date
+                       <a class="nxl-link" href="{{ path('app_showmedecin') }}">
+                         liste des medecins
                      </a>
                      </ul>
                     </li>
@@ -116,9 +116,13 @@
                             <span class="nxl-mtext">Customers</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="customers.html">Customers</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="customers-view.html">Customers View</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="customers-create.html">Customers Create</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ path('admin_show_quiz') }}">show Quiz</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ path('app_addformquiz') }}">add form quiz</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ path('app_showquestion') }}">showQuestion</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ path('admin_quiz_statistics_list') }}">statistics list</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ path('quiz_ai_generate') }}">quiz ai generate</a></li>
+                            
+                           
                         </ul>
                     </li>
                     <li class="nxl-item nxl-hasmenu">

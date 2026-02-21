@@ -1,0 +1,660 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Espace Bien-Être{% endblock %}
+
+{% block body %}
+<!-- ======= Header ======= -->
+{% block header %}
+{% include 'home/navbar.html.twig' %}
+{% endblock %}
+
+<div class="bienetre-section">
+    <div class="container">
+        <!-- Header avec titre et bouton A Propos -->
+        <div class="header-with-button">
+            <h1 class="section-title">Mon Espace Bien-Être</h1>
+            <a href="{{ path('app_studyflow_conclusion') }}" class="about-btn">
+                <i class="fas fa-calendar-check"></i>
+                A Propos
+            </a>
+        </div>
+        
+        <!-- Logos transformés en statistiques/cartes de fonctionnalités -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+                <h3 class="feature-title">Bilan PDF</h3>
+                <p class="feature-desc">Générez vos bilans de santé</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-lungs"></i>
+                </div>
+                <h3 class="feature-title">Respiration</h3>
+                <p class="feature-desc">Exercices de respiration guidés</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-stethoscope"></i>
+                </div>
+                <h3 class="feature-title">Consultation</h3>
+                <p class="feature-desc">Suivi médical personnalisé</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <h3 class="feature-title">Bien-être</h3>
+                <p class="feature-desc">Évaluez votre moral</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3 class="feature-title">Méditation</h3>
+                <p class="feature-desc">Séances de méditation</p>
+            </div>
+        </div>
+        
+        <!-- Boutons principaux style action-buttons -->
+        <div class="action-buttons">
+            <a href="{{ path('chat_page') }}" class="action-btn btn-pdf" style="text-decoration: none;">
+    <i class="fas fa-robot"></i>
+    Consulter medecin_bot
+</a>
+  <a href="{{ path('app_stresse_codabar') }}" class="action-btn btn-pdf" style="text-decoration: none;">
+    <i class="fas fa-user-md"></i>
+    Consulter_Cabinet
+</a>
+            
+            <button class="action-btn btn-respiration">
+                <i class="fas fa-wind"></i>
+                Exercice de respiration
+            </button>
+            
+            <a href="{{ path('app_studyflow_conclusion') }}" class="action-btn btn-about">
+                <i class="fas fa-calendar-check"></i>
+                A Propos
+            </a>
+        </div>
+        
+        <!-- Design alternatif avec cartes style courses-grid -->
+        <div class="alternative-section">
+            <h2 class="section-subtitle">Design Alternatif</h2>
+            
+            <div class="cards-grid">
+                <div class="alt-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h3>Bilan Santé</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Téléchargez votre bilan de santé complet au format PDF</p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="card-btn btn-pdf">
+                            <i class="fas fa-download"></i>
+                            Télécharger
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="alt-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-lungs"></i>
+                        </div>
+                        <h3>Respiration</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Exercice de respiration de 5 minutes pour vous détendre</p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="card-btn btn-respiration">
+                            <i class="fas fa-wind"></i>
+                            Commencer
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="alt-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-stethoscope"></i>
+                        </div>
+                        <h3>A Propos</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>En savoir plus sur StudyFlow et notre approche bien-être</p>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ path('app_studyflow_conclusion') }}" class="card-btn btn-about">
+                            <i class="fas fa-calendar-check"></i>
+                            Découvrir
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section options additionnelles -->
+        <div class="options-section">
+            <p class="options-title">Autres options disponibles</p>
+            <div class="options-grid">
+                <span class="option-tag">
+                    <i class="fas fa-chart-line"></i> 
+                    Historique
+                </span>
+                <span class="option-tag">
+                    <i class="fas fa-bell"></i> 
+                    Rappels
+                </span>
+                <span class="option-tag">
+                    <i class="fas fa-user-md"></i> 
+                    Médecin traitant
+                </span>
+                <span class="option-tag">
+                    <i class="fas fa-apple-alt"></i> 
+                    Nutrition
+                </span>
+                <span class="option-tag">
+                    <i class="fas fa-dumbbell"></i> 
+                    Sport
+                </span>
+                <span class="option-tag">
+                    <i class="fas fa-book"></i> 
+                    Ressources
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    /* Navbar styling */
+    .header-area {
+        background: rgba(0, 0, 0, 0.2) !important;
+        backdrop-filter: blur(10px);
+    }
+
+    .header-area .logo h1,
+    .header-area .nav a,
+    .header-area .menu-trigger span,
+    nav, .navbar, nav *, .navbar *, .nav-link {
+        color: white !important;
+    }
+
+    .bienetre-section {
+        padding: 120px 20px 60px 20px;
+        background-color: transparent;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Header with Button */
+    .header-with-button {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 60px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .section-title {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #ffffff;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .about-btn {
+        padding: 15px 35px;
+        background: white;
+        color: #667eea;
+        text-decoration: none;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+        border: none;
+        cursor: pointer;
+    }
+
+    .about-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(255, 255, 255, 0.4);
+        background: linear-gradient(135deg, #ffffff 0%, #f0f0ff 100%);
+    }
+
+    /* Features Grid */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 25px;
+        margin-bottom: 60px;
+    }
+
+    .feature-card {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 30px 25px;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 15px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .feature-icon {
+        width: 90px;
+        height: 90px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+    .feature-icon i {
+        font-size: 45px;
+        color: white;
+    }
+
+    .feature-title {
+        font-weight: 700;
+        color: #1a1a1a;
+        font-size: 1.2rem;
+        margin: 0;
+    }
+
+    .feature-desc {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 70px;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        padding: 16px 38px;
+        border: none;
+        border-radius: 30px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.3s ease;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        text-decoration: none;
+    }
+
+    .action-btn:hover {
+        background-color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(255, 255, 255, 0.4);
+    }
+
+    .action-btn.btn-pdf {
+        background: rgba(255, 71, 87, 0.2);
+        border-color: rgba(255, 71, 87, 0.5);
+    }
+    .action-btn.btn-pdf:hover {
+        background: white;
+        color: #ff4757;
+    }
+
+    .action-btn.btn-respiration {
+        background: rgba(29, 209, 161, 0.2);
+        border-color: rgba(29, 209, 161, 0.5);
+    }
+    .action-btn.btn-respiration:hover {
+        background: white;
+        color: #1dd1a1;
+    }
+
+    .action-btn.btn-about {
+        background: rgba(84, 160, 255, 0.2);
+        border-color: rgba(84, 160, 255, 0.5);
+    }
+    .action-btn.btn-about:hover {
+        background: white;
+        color: #54a0ff;
+    }
+
+    /* Alternative Section */
+    .alternative-section {
+        margin-bottom: 60px;
+    }
+
+    .section-subtitle {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ffffff;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        margin-bottom: 40px;
+        text-align: center;
+    }
+
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 30px;
+    }
+
+    .alt-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .alt-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-header {
+        padding: 30px 30px 20px;
+        text-align: center;
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+    }
+
+    .card-icon {
+        font-size: 60px;
+        color: #667eea;
+        margin-bottom: 15px;
+    }
+
+    .card-header h3 {
+        color: #1a1a1a;
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .card-body {
+        padding: 0 30px 20px;
+        text-align: center;
+    }
+
+    .card-body p {
+        color: #64748b;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .card-footer {
+        padding: 20px 30px 30px;
+        text-align: center;
+        background: white;
+    }
+
+    .card-btn {
+        padding: 14px 30px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: white;
+        width: 100%;
+        border: none;
+    }
+
+    .card-btn.btn-pdf {
+        background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
+    }
+    .card-btn.btn-respiration {
+        background: linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%);
+    }
+    .card-btn.btn-about {
+        background: linear-gradient(135deg, #54a0ff 0%, #2e86de 100%);
+    }
+
+    .card-btn:hover {
+        transform: scale(1.03);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Options Section */
+    .options-section {
+        margin-top: 40px;
+        padding-top: 40px;
+        border-top: 2px solid rgba(255, 255, 255, 0.2);
+        text-align: center;
+    }
+
+    .options-title {
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 25px;
+        opacity: 0.95;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .options-grid {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .option-tag {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 12px 28px;
+        border-radius: 30px;
+        font-size: 1rem;
+        color: white;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        cursor: default;
+    }
+
+    .option-tag:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-2px);
+    }
+
+    .option-tag i {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .section-title {
+            font-size: 2.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .bienetre-section {
+            padding: 100px 15px 40px 15px;
+        }
+
+        .header-with-button {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .about-btn {
+            width: 100%;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .action-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .cards-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .section-subtitle {
+            font-size: 1.8rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .section-title {
+            font-size: 1.8rem;
+        }
+
+        .feature-card {
+            padding: 25px 20px;
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+        }
+
+        .feature-icon i {
+            font-size: 40px;
+        }
+
+        .card-header h3 {
+            font-size: 1.4rem;
+        }
+
+        .options-grid {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .option-tag {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .feature-card, .alt-card, .action-btn, .option-tag {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .feature-card:nth-child(2) { animation-delay: 0.1s; }
+    .feature-card:nth-child(3) { animation-delay: 0.2s; }
+    .feature-card:nth-child(4) { animation-delay: 0.3s; }
+    .feature-card:nth-child(5) { animation-delay: 0.4s; }
+</style>
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+    // Boutons PDF
+    const pdfButtons = document.querySelectorAll('.btn-pdf, .card-btn.btn-pdf');
+    
+    // Boutons Respiration
+    const respButtons = document.querySelectorAll('.btn-respiration, .card-btn.btn-respiration');
+    respButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            window.location.href = "{{ path('app_exercice_respiration') }}";
+        });
+    });
+
+    // {# Ajout des routes pour les boutons PDF si nécessaire
+    // pdfButtons.forEach(button => {
+    //      button.addEventListener('click', () => {
+    //        window.location.href = "{{ path('app_bilan_download') }}";
+    //     });
+    // });#}
+</script>
+{% endblock %}

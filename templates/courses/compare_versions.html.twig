@@ -1,0 +1,502 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Compare Versions{% endblock %}
+
+{% block admin_content %}
+<div class="admin-main-content">
+    <div class="container-fluid mt-5">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ path('app_coursesback') }}">
+                        <i class="fas fa-book"></i> Courses
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ path('app_chapitres', {'courseId': currentChapitre.course.id}) }}">
+                        {{ currentChapitre.course.titre }}
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ path('app_chapitre_versions', {'id': currentChapitre.id}) }}">
+                        Version History
+                    </a>
+                </li>
+                <li class="breadcrumb-item active">Compare v{{ version.versionNumber }}</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="page-header mb-4">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h2 class="page-title">
+                        <i class="fas fa-code-compare"></i> Version Comparison
+                    </h2>
+                    <p class="text-muted">
+                        Comparing Version {{ version.versionNumber }} 
+                        {% if previousVersion %}
+                            with Version {{ previousVersion.versionNumber }}
+                        {% else %}
+                            (Initial Version)
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-auto">
+                    <a href="{{ path('app_chapitre_versions', {'id': currentChapitre.id}) }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to History
+                    </a>
+                    <a href="{{ path('app_restore_version', {'versionId': version.id}) }}" 
+                       class="btn btn-success"
+                       onclick="return confirm('Restore this version?')">
+                        <i class="fas fa-undo"></i> Restore This Version
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modification Summary Card -->
+        <div class="card mb-4 summary-card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3 text-center">
+                        <div class="modification-circle" style="--mod-percentage: {{ version.modificationPercentage }}%">
+                            <span class="percentage-text">{{ version.modificationPercentage|number_format(1) }}%</span>
+                        </div>
+                        <p class="mt-2 mb-0">
+                            <strong>Modification Rate</strong>
+                        </p>
+                    </div>
+                    <div class="col-md-9">
+                        <h5>
+                            {% if version.modificationPercentage >= 30 %}
+                                <span class="badge bg-danger">Major Change</span>
+                            {% else %}
+                                <span class="badge bg-info">Minor Update</span>
+                            {% endif %}
+                        </h5>
+                        <p class="mb-2">
+                            <strong>Changes:</strong> {{ version.changeDescription }}
+                        </p>
+                        <p class="mb-0 text-muted">
+                            <i class="fas fa-clock"></i> Modified on {{ version.createdAt|date('F j, Y - H:i') }}
+                            {% if version.modifiedBy %}
+                                by {{ version.modifiedBy }}
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side-by-Side Comparison -->
+        <div class="row">
+            <!-- Previous Version -->
+            <div class="col-md-6">
+                <div class="card version-panel previous-version">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history"></i> 
+                            {% if previousVersion %}
+                                Version {{ previousVersion.versionNumber }}
+                            {% else %}
+                                Original (No Previous Version)
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if previousVersion %}
+                            <div class="field-group">
+                                <label><i class="fas fa-heading"></i> Title</label>
+                                <div class="field-value">{{ previousVersion.titre }}</div>
+                            </div>
+
+                            <div class="field-group">
+                                <label><i class="fas fa-sort-numeric-up"></i> Order</label>
+                                <div class="field-value">{{ previousVersion.ordre }}</div>
+                            </div>
+
+                            <div class="field-group">
+                                <label><i class="fas fa-file-alt"></i> Content</label>
+                                <div class="field-value content-box">
+                                    {{ previousVersion.contenu }}
+                                </div>
+                            </div>
+
+                            {% if previousVersion.contentType %}
+                                <div class="field-group">
+                                    <label><i class="fas fa-tag"></i> Content Type</label>
+                                    <div class="field-value">{{ previousVersion.contentType }}</div>
+                                </div>
+                            {% endif %}
+
+                            {% if previousVersion.videoUrl %}
+                                <div class="field-group">
+                                    <label><i class="fas fa-video"></i> Video URL</label>
+                                    <div class="field-value">
+                                        <a href="{{ previousVersion.videoUrl }}" target="_blank">{{ previousVersion.videoUrl }}</a>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if previousVersion.durationMinutes %}
+                                <div class="field-group">
+                                    <label><i class="fas fa-clock"></i> Duration</label>
+                                    <div class="field-value">{{ previousVersion.durationMinutes }} minutes</div>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="text-center text-muted py-5">
+                                <i class="fas fa-info-circle fa-3x mb-3"></i>
+                                <p>This is the first version - no previous version to compare</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Version -->
+            <div class="col-md-6">
+                <div class="card version-panel current-version">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-star"></i> Version {{ version.versionNumber }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="field-group {% if previousVersion and version.titre != previousVersion.titre %}changed{% endif %}">
+                            <label><i class="fas fa-heading"></i> Title</label>
+                            <div class="field-value">{{ version.titre }}</div>
+                        </div>
+
+                        <div class="field-group {% if previousVersion and version.ordre != previousVersion.ordre %}changed{% endif %}">
+                            <label><i class="fas fa-sort-numeric-up"></i> Order</label>
+                            <div class="field-value">{{ version.ordre }}</div>
+                        </div>
+
+                        <div class="field-group {% if previousVersion and version.contenu != previousVersion.contenu %}changed{% endif %}">
+                            <label><i class="fas fa-file-alt"></i> Content</label>
+                            <div class="field-value content-box">
+                                {{ version.contenu }}
+                            </div>
+                        </div>
+
+                        {% if version.contentType %}
+                            <div class="field-group {% if previousVersion and version.contentType != previousVersion.contentType %}changed{% endif %}">
+                                <label><i class="fas fa-tag"></i> Content Type</label>
+                                <div class="field-value">{{ version.contentType }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if version.videoUrl %}
+                            <div class="field-group {% if previousVersion and version.videoUrl != previousVersion.videoUrl %}changed{% endif %}">
+                                <label><i class="fas fa-video"></i> Video URL</label>
+                                <div class="field-value">
+                                    <a href="{{ version.videoUrl }}" target="_blank">{{ version.videoUrl }}</a>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if version.durationMinutes %}
+                            <div class="field-group {% if previousVersion and version.durationMinutes != previousVersion.durationMinutes %}changed{% endif %}">
+                                <label><i class="fas fa-clock"></i> Duration</label>
+                                <div class="field-value">{{ version.durationMinutes }} minutes</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Content Diff -->
+        {% if contentDiff %}
+            <div class="card mt-4 diff-card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-code"></i> Line-by-Line Content Changes
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="diff-viewer">
+                        {% for change in contentDiff %}
+                            <div class="diff-line {{ change.type }}">
+                                <div class="line-number">{{ change.line }}</div>
+                                <div class="line-content">
+                                    {% if change.type == 'removed' %}
+                                        <span class="diff-marker">-</span>
+                                        <span class="old-text">{{ change.old }}</span>
+                                    {% elseif change.type == 'added' %}
+                                        <span class="diff-marker">+</span>
+                                        <span class="new-text">{{ change.new }}</span>
+                                    {% else %}
+                                        <div class="diff-comparison">
+                                            <div class="old-line">
+                                                <span class="diff-marker">-</span>
+                                                <span class="old-text">{{ change.old }}</span>
+                                            </div>
+                                            <div class="new-line">
+                                                <span class="diff-marker">+</span>
+                                                <span class="new-text">{{ change.new }}</span>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .admin-main-content {
+        margin-left: 280px;
+        padding-top: 100px;
+        min-height: 100vh;
+        background: #f5f7fa;
+    }
+
+    .breadcrumb {
+        background-color: transparent;
+        padding: 0;
+    }
+
+    .breadcrumb-item a {
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .page-header {
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 1rem;
+    }
+
+    .page-title {
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .page-title i {
+        color: #667eea;
+        margin-right: 10px;
+    }
+
+    /* Summary Card */
+    .summary-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .modification-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: conic-gradient(
+            #667eea 0%,
+            #667eea var(--mod-percentage),
+            #e9ecef var(--mod-percentage),
+            #e9ecef 100%
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .modification-circle::before {
+        content: '';
+        position: absolute;
+        width: 95px;
+        height: 95px;
+        border-radius: 50%;
+        background: white;
+    }
+
+    .percentage-text {
+        position: relative;
+        z-index: 1;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    /* Version Panels */
+    .version-panel {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+    }
+
+    .version-panel.previous-version .card-header {
+        background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        color: white;
+        border-radius: 15px 15px 0 0 !important;
+    }
+
+    .version-panel.current-version .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px 15px 0 0 !important;
+    }
+
+    .field-group {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .field-group.changed {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        animation: highlight 1s ease;
+    }
+
+    @keyframes highlight {
+        0%, 100% { background: #fff3cd; }
+        50% { background: #ffe69c; }
+    }
+
+    .field-group label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 0.9rem;
+    }
+
+    .field-group label i {
+        color: #667eea;
+        margin-right: 5px;
+    }
+
+    .field-value {
+        color: #2c3e50;
+        font-size: 1rem;
+    }
+
+    .content-box {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        max-height: 400px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+    }
+
+    /* Diff Viewer */
+    .diff-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    }
+
+    .diff-viewer {
+        background: #f8f9fa;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+    }
+
+    .diff-line {
+        display: flex;
+        border-bottom: 1px solid #e9ecef;
+        min-height: 35px;
+    }
+
+    .diff-line.removed {
+        background: #ffebee;
+    }
+
+    .diff-line.added {
+        background: #e8f5e9;
+    }
+
+    .diff-line.modified {
+        background: #fff3e0;
+    }
+
+    .line-number {
+        min-width: 60px;
+        padding: 8px 12px;
+        background: #e9ecef;
+        color: #6c757d;
+        text-align: center;
+        font-weight: 600;
+        border-right: 2px solid #dee2e6;
+    }
+
+    .line-content {
+        flex: 1;
+        padding: 8px 15px;
+        display: flex;
+        align-items: center;
+    }
+
+    .diff-marker {
+        font-weight: 700;
+        margin-right: 10px;
+        width: 20px;
+        display: inline-block;
+    }
+
+    .diff-line.removed .diff-marker {
+        color: #c62828;
+    }
+
+    .diff-line.added .diff-marker {
+        color: #2e7d32;
+    }
+
+    .old-text {
+        color: #c62828;
+        text-decoration: line-through;
+    }
+
+    .new-text {
+        color: #2e7d32;
+        font-weight: 500;
+    }
+
+    .diff-comparison {
+        width: 100%;
+    }
+
+    .old-line, .new-line {
+        padding: 4px 0;
+    }
+
+    @media (max-width: 768px) {
+        .admin-main-content {
+            margin-left: 0;
+            padding-top: 80px;
+        }
+
+        .modification-circle {
+            width: 100px;
+            height: 100px;
+        }
+
+        .modification-circle::before {
+            width: 80px;
+            height: 80px;
+        }
+
+        .percentage-text {
+            font-size: 1.2rem;
+        }
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}

@@ -1,0 +1,1658 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Emploi du Temps Avancé - StudyFlow{% endblock %}
+
+{% block body %}
+    <!-- Header -->
+    {% block header %}
+        {% include 'home/navbar.html.twig' %}
+    {% endblock %}
+
+    <!-- Main Content -->
+    <div class="schedule-section">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="header-with-button">
+                <h1 class="section-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    Générateur d'Emploi du Temps Avancé
+                </h1>
+                <div class="header-icon">
+                    <span class="emoji">📅</span>
+                </div>
+            </div>
+
+            <!-- Page Description -->
+            <div class="description-section">
+                <p class="description-text">
+                    Créez un emploi du temps personnalisé et optimisé en fonction de votre niveau de stress et de vos préférences
+                </p>
+            </div>
+
+            <!-- Quick Tip of the Day -->
+            <div class="daily-tip-card">
+                <div class="tip-label">
+                    <i class="fas fa-lightbulb"></i> Conseil du jour
+                </div>
+                <p class="tip-text">Un emploi du temps bien équilibré alterne périodes de travail intense et moments de repos pour une meilleure productivité !</p>
+            </div>
+
+            <!-- Formulaire de paramétrage -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h2 class="section-subtitle">
+                        <i class="fas fa-sliders-h"></i> Paramètres de Génération
+                    </h2>
+                </div>
+
+                <div class="form-card">
+                    <form method="GET" action="{{ path('app_stresse_emploie_avance') }}" id="scheduleForm">
+                        <div class="form-grid">
+                            <!-- Nombre de matières par jour -->
+                            <div class="form-group">
+                                <label for="matiere_par_jour">
+                                    <i class="fas fa-book"></i>
+                                    Matières par jour
+                                </label>
+                                <input type="number" id="matiere_par_jour" name="matiere_par_jour" 
+                                       class="form-control" min="1" max="8" 
+                                       value="{{ parametres.matiereParJour }}" required>
+                                <small>Entre 1 et 8 matières</small>
+                            </div>
+                            
+                            <!-- Heures par matière -->
+                            <div class="form-group">
+                                <label for="heure_par_matiere">
+                                    <i class="fas fa-clock"></i>
+                                    Heures par matière
+                                </label>
+                                <input type="number" id="heure_par_matiere" name="heure_par_matiere" 
+                                       class="form-control" step="0.5" min="0.5" max="4" 
+                                       value="{{ parametres.heureParMatiere }}" required>
+                                <small>En heures (0.5 = 30 min)</small>
+                            </div>
+                            
+                            <!-- Pause entre les matières -->
+                            <div class="form-group">
+                                <label for="pause">
+                                    <i class="fas fa-coffee"></i>
+                                    Pause entre matières
+                                </label>
+                                <input type="number" id="pause" name="pause" 
+                                       class="form-control" step="0.25" min="0.25" max="2" 
+                                       value="{{ parametres.pause }}" required>
+                                <small>En heures (0.25 = 15 min)</small>
+                            </div>
+                            
+                            <!-- Heure de début -->
+                            <div class="form-group">
+                                <label for="heure_debut">
+                                    <i class="fas fa-sun"></i>
+                                    Heure de début
+                                </label>
+                                <input type="number" id="heure_debut" name="heure_debut" 
+                                       class="form-control" min="6" max="22" 
+                                       value="{{ parametres.heureDebut }}" required>
+                                <small>Entre 6h et 22h</small>
+                            </div>
+                            
+                            <!-- Période -->
+                            <div class="form-group">
+                                <label for="periode">
+                                    <i class="fas fa-calendar-week"></i>
+                                    Période
+                                </label>
+                                <select id="periode" name="periode" class="form-control">
+                                    <option value="semaine" {% if parametres.periode == 'semaine' %}selected{% endif %}>Semaine</option>
+                                    <option value="quinzaine" {% if parametres.periode == 'quinzaine' %}selected{% endif %}>Quinzaine</option>
+                                    <option value="mois" {% if parametres.periode == 'mois' %}selected{% endif %}>Mois</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Niveau de stress -->
+                            <div class="form-group">
+                                <label for="niveau_stress">
+                                    <i class="fas fa-heartbeat"></i>
+                                    Niveau de stress
+                                </label>
+                                <div class="range-container">
+                                    <input type="range" id="niveau_stress" name="niveau_stress" 
+                                           class="form-control-range" min="1" max="10" 
+                                           value="{{ parametres.niveauStress }}" oninput="updateStressValue(this.value)">
+                                    <div class="stress-indicator">
+                                        <span id="stress_value">{{ parametres.niveauStress }}</span>/10
+                                        <span class="stress-label" id="stress_label">
+                                            {% if parametres.niveauStress <= 3 %}
+                                            (Faible)
+                                            {% elseif parametres.niveauStress <= 7 %}
+                                            (Moyen)
+                                            {% else %}
+                                            (Élevé)
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Inclure weekend -->
+                            <div class="form-group">
+                                <label>
+                                    <i class="fas fa-calendar-week"></i>
+                                    Inclure le weekend
+                                </label>
+                                <div class="radio-group">
+                                    <label class="radio-option">
+                                        <input type="radio" id="weekend_oui" name="inclure_weekend" 
+                                               value="1" {% if parametres.inclureWeekend %}checked{% endif %}>
+                                        <span class="radio-label">Oui</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" id="weekend_non" name="inclure_weekend" 
+                                               value="0" {% if not parametres.inclureWeekend %}checked{% endif %}>
+                                        <span class="radio-label">Non</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Matières à inclure -->
+                            <div class="form-group full-width">
+                                <label for="matieres">
+                                    <i class="fas fa-list-check"></i>
+                                    Matières à inclure
+                                </label>
+                                <div class="input-with-button">
+                                    <input type="text" id="matieres" name="matieres" 
+                                           class="form-control" 
+                                           value="{{ matieres|join(', ') }}">
+                                    <button type="button" class="btn-icon" onclick="ajouterMatiere()">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <small>Séparer les matières par des virgules</small>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-generate">
+                                <i class="fas fa-sync-alt"></i>
+                                Générer l'emploi du temps
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        
+            <!-- Affichage de l'emploi du temps -->
+            {% if emploiTemps is defined and emploiTemps|length > 0 %}
+            <div class="results-section">
+                <div class="section-header">
+                    <h2 class="section-subtitle">
+                        <i class="fas fa-calendar-check"></i>
+                        Votre Emploi du Temps Optimisé
+                    </h2>
+                </div>
+
+                <!-- Header Professionnel -->
+                <div class="professional-header">
+                    
+
+                    <div class="header-info">
+                        <div class="week-info">
+                            {% set currentDate = "now"|date("Y-m-d") %}
+                            Semaine du <strong>{{ currentDate|date("d F Y") }}</strong> au <strong>{{ currentDate|date_modify("+4 days")|date("d F Y") }}</strong>
+                        </div>
+                        <div class="view-options">
+                            <button class="view-btn active" title="Vue semaine" onclick="setView('week')">S</button>
+                            <button class="view-btn" title="Vue mois" onclick="setView('month')">M</button>
+                            <button class="view-btn" title="Vue jour" onclick="setView('day')">J</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content with Sidebar -->
+                <div class="professional-content">
+                    <!-- Sidebar - Résumé du jour -->
+                    <div class="professional-sidebar">
+                        <h3>Aujourd'hui</h3>
+                        
+                        {% for jour, cours in emploiTemps %}
+                            {% if loop.index == 1 %}
+                                {% for coursDetail in cours %}
+                                <div class="event-summary" onclick="showEventDetails('{{ coursDetail.matiere }}', '{{ coursDetail.heureDebut }}', '{{ coursDetail.heureFin }}', '{{ coursDetail.plage }}')">
+                                    <div class="event-summary-time">{{ coursDetail.heureDebut }} - {{ coursDetail.heureFin }}</div>
+                                    <div class="event-summary-title">{{ coursDetail.matiere }}</div>
+                                    <div class="event-summary-location">{{ coursDetail.plage }}</div>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e8ec;">
+                            <h3>Légende</h3>
+                            <div class="legend">
+                                <div class="legend-item">
+                                    <div class="legend-color meeting"></div>
+                                    <span>Matière principale</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color client"></div>
+                                    <span>Révision</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color project"></div>
+                                    <span>Exercices</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color break"></div>
+                                    <span>Pause</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Schedule Grid -->
+                    <div>
+                        <div class="schedule-wrapper">
+                            <div class="professional-schedule" id="scheduleTable">
+                                <!-- Headers -->
+                                <div class="time-column"></div>
+                                {% set joursSemaine = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'] %}
+                                {% if parametres.inclureWeekend %}
+                                    {% set joursSemaine = joursSemaine|merge(['Samedi', 'Dimanche']) %}
+                                {% endif %}
+                                
+                                {% for jour in joursSemaine %}
+                                <div class="day-header {% if loop.first %}today{% endif %}">
+                                    <span class="day-name">{{ jour }}</span>
+                                    <span class="day-date">{{ currentDate|date_modify("+" ~ (loop.index0) ~ " days")|date("d F") }}</span>
+                                </div>
+                                {% endfor %}
+
+                                <!-- Time Slots -->
+                                {% set heures = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] %}
+                                {% for heure in heures %}
+                                    <!-- Ligne d'heure -->
+                                    <div class="time-column">{{ "%02d:00"|format(heure) }}</div>
+                                    
+                                    {% for jourIndex, jour in joursSemaine %}
+                                    <div class="time-slot" id="slot-{{ jourIndex }}-{{ heure }}">
+                                        {% if emploiTemps[jour] is defined %}
+                                            {% for coursDetail in emploiTemps[jour] %}
+                                                {% set heureDebut = coursDetail.heureDebut|split(':')|first|number_format %}
+                                                {% if heureDebut == heure %}
+                                                <div class="event-block {% if loop.index is odd %}meeting{% else %}project{% endif %}" 
+                                                     onclick="showEventDetails('{{ coursDetail.matiere }}', '{{ coursDetail.heureDebut }}', '{{ coursDetail.heureFin }}', '{{ coursDetail.plage }}')">
+                                                    <div class="event-block-title">{{ coursDetail.matiere }}</div>
+                                                    <div class="event-block-meta">
+                                                        <span>{{ coursDetail.heureDebut }} - {{ coursDetail.heureFin }}</span>
+                                                        <span>{{ coursDetail.efficacite }}</span>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Details Panel -->
+                        <div class="details-panel" id="detailsPanel">
+                            <div class="details-title" id="detailsTitle">Sélectionnez un cours pour voir les détails</div>
+                            <div class="details-grid" id="detailsGrid">
+                                <div class="detail-item">
+                                    <div class="detail-label">Heure</div>
+                                    <div class="detail-value" id="detailTime">-</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Période</div>
+                                    <div class="detail-value" id="detailPeriod">-</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Efficacité</div>
+                                    <div class="detail-value" id="detailEfficiency">-</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Type</div>
+                                    <div class="detail-value" id="detailType">-</div>
+                                </div>
+                                <div class="detail-item" style="grid-column: 1 / -1;">
+                                    <div class="detail-label">Description</div>
+                                    <div class="detail-value" id="detailDescription">-</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Métriques -->
+                        <div class="metrics-grid" id="metricsContainer">
+                            <div class="metric-card">
+                                <div class="metric-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <h4>Heures de cours</h4>
+                                    <p class="metric-value">{{ metriques.total_heures }}h</p>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card">
+                                <div class="metric-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <h4>Moyenne par jour</h4>
+                                    <p class="metric-value">{{ metriques.moyenne_par_jour }}h</p>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card">
+                                <div class="metric-icon">
+                                    <i class="fas fa-calendar-day"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <h4>Nombre de jours</h4>
+                                    <p class="metric-value">{{ metriques.nb_jours }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card">
+                                <div class="metric-icon">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <h4>Score santé</h4>
+                                    <p class="metric-value">{{ metriques.score_sante }}/100</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Suggestions -->
+                        {% if suggestions is defined and suggestions|length > 0 %}
+                        <div class="suggestions-section" id="suggestionsContainer">
+                            <h3><i class="fas fa-lightbulb"></i> Suggestions d'Optimisation</h3>
+                            <div class="suggestions-grid">
+                                {% for suggestion in suggestions %}
+                                <div class="suggestion-card suggestion-{{ suggestion.type }}">
+                                    <div class="suggestion-icon">
+                                        {% if suggestion.type == 'warning' %}
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        {% elseif suggestion.type == 'info' %}
+                                        <i class="fas fa-info-circle"></i>
+                                        {% elseif suggestion.type == 'danger' %}
+                                        <i class="fas fa-times-circle"></i>
+                                        {% elseif suggestion.type == 'success' %}
+                                        <i class="fas fa-check-circle"></i>
+                                        {% else %}
+                                        <i class="fas fa-lightbulb"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="suggestion-content">
+                                        <h4>{{ suggestion.titre }}</h4>
+                                        <p>{{ suggestion.message }}</p>
+                                        {% if suggestion.action %}
+                                        <span class="suggestion-action">
+                                            <i class="fas fa-arrow-right"></i> {{ suggestion.action }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Contact Section -->
+            <div class="contact-section">
+                <h3><i class="fas fa-calendar-alt"></i> Besoin d'aide pour organiser votre temps ?</h3>
+                <p>Consultez nos ressources de gestion du temps ou contactez un coach</p>
+                <div class="contact-buttons">
+                    <a href="{{ path('app_stresse_coach') }}" class="btn-contact">
+                        <i class="fas fa-user-tie"></i>
+                        Voir le coach stress
+                    </a>
+                    <a href="{{ path('app_stresse_agenda', {
+                        'matiere_par_jour': parametres.matiereParJour,
+                        'heure_par_matiere': parametres.heureParMatiere,
+                        'pause': parametres.pause,
+                        'heure_debut': parametres.heureDebut,
+                        'periode': parametres.periode,
+                        'inclure_weekend': parametres.inclureWeekend ? 1 : 0,
+                        'niveau_stress': parametres.niveauStress,
+                        'matieres': matieres|join(',')
+                    }) }}" class="btn-contact btn-agenda">
+                        <i class="fas fa-calendar-check"></i>
+                        Voir l'agenda avec notifications
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Styles -->
+    {% block stylesheets %}
+        {{ parent() }}
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+            /* Reset & Base */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Inter', 'Segoe UI', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+            }
+
+            /* Header */
+            .header-area {
+                background: rgba(0, 0, 0, 0.3) !important;
+                backdrop-filter: blur(10px);
+            }
+
+            .header-area .logo h1,
+            .header-area .nav a,
+            .header-area .menu-trigger span,
+            nav, .navbar, nav *, .navbar *, .nav-link {
+                color: white !important;
+            }
+
+            /* Layout */
+            .schedule-section {
+                padding: 120px 20px 60px 20px;
+                background-color: transparent;
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+
+            /* Typography */
+            .section-title {
+                font-size: 2.5rem;
+                font-weight: 700;
+                color: #ffffff;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+                margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .section-subtitle {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #ffffff;
+                text-align: center;
+                margin-bottom: 30px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .description-text {
+                font-size: 1.2rem;
+                color: rgba(255, 255, 255, 0.9);
+                max-width: 800px;
+                margin: 0 auto;
+                line-height: 1.6;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            }
+
+            /* Header */
+            .header-with-button {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+
+            .header-icon .emoji {
+                font-size: 4rem;
+                filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
+            }
+
+            /* Description Section */
+            .description-section {
+                margin-bottom: 40px;
+                text-align: center;
+            }
+
+            /* Daily Tip Card */
+            .daily-tip-card {
+                background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+                color: white;
+                padding: 25px 35px;
+                border-radius: 20px;
+                margin-bottom: 40px;
+                box-shadow: 0 10px 30px rgba(255, 152, 0, 0.3);
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+            }
+
+            .tip-label {
+                font-weight: 600;
+                font-size: 1rem;
+                text-transform: uppercase;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .tip-text {
+                font-size: 1.3rem;
+                margin: 0;
+                line-height: 1.5;
+            }
+
+            /* Form Section */
+            .form-section {
+                margin-bottom: 50px;
+            }
+
+            .form-card {
+                background: white;
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            }
+
+            .form-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .form-group.full-width {
+                grid-column: span 3;
+            }
+
+            .form-group label {
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .form-group label i {
+                color: #667eea;
+            }
+
+            .form-control {
+                padding: 12px 15px;
+                border: 2px solid #e0e4ff;
+                border-radius: 12px;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+            }
+
+            .form-control:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            .form-group small {
+                font-size: 0.8rem;
+                color: #666;
+                margin-top: 5px;
+            }
+
+            /* Range Input */
+            .range-container {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .form-control-range {
+                width: 100%;
+                height: 8px;
+                border-radius: 4px;
+                background: linear-gradient(90deg, #4CAF50 0%, #FFC107 50%, #f44336 100%);
+                outline: none;
+                -webkit-appearance: none;
+            }
+
+            .form-control-range::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 20px;
+                height: 20px;
+                background: white;
+                border: 2px solid #667eea;
+                border-radius: 50%;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .form-control-range::-webkit-slider-thumb:hover {
+                transform: scale(1.2);
+                background: #667eea;
+            }
+
+            .stress-indicator {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                font-weight: 600;
+            }
+
+            /* Form Actions */
+            .form-actions {
+                text-align: center;
+            }
+
+            .btn-generate {
+                padding: 15px 40px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                border-radius: 30px;
+                font-size: 1.1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            }
+
+            .btn-generate:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+            }
+
+            /* Professional Header */
+            .professional-header {
+                background: white;
+                padding: 30px 40px;
+                border-bottom: 1px solid #e5e8ec;
+                margin-bottom: 30px;
+                border-radius: 8px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            }
+
+            .header-top {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .professional-title {
+                font-size: 1.8em;
+                color: #1a1a1a;
+                font-weight: 600;
+                letter-spacing: -0.5px;
+                margin: 0;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                border: 1px solid #d0d4da;
+                background: white;
+                color: #333;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 0.9em;
+                font-weight: 500;
+                transition: all 0.2s ease;
+            }
+
+            .btn-outline:hover {
+                background: #f0f1f3;
+                border-color: #b5bcc2;
+            }
+
+            .btn-primary {
+                background: #2d3436;
+                color: white;
+                border-color: #2d3436;
+            }
+
+            .btn-primary:hover {
+                background: #1a1a1a;
+                border-color: #1a1a1a;
+            }
+
+            .header-info {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .week-info {
+                color: #666;
+                font-size: 0.95em;
+            }
+
+            .week-info strong {
+                color: #2d3436;
+            }
+
+            .view-options {
+                display: flex;
+                gap: 5px;
+            }
+
+            .view-btn {
+                width: 32px;
+                height: 32px;
+                border: 1px solid #d0d4da;
+                background: white;
+                border-radius: 4px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.85em;
+                transition: all 0.2s ease;
+            }
+
+            .view-btn.active {
+                background: #2d3436;
+                color: white;
+                border-color: #2d3436;
+            }
+
+            /* Professional Content */
+            .professional-content {
+                display: grid;
+                grid-template-columns: 250px 1fr;
+                gap: 20px;
+            }
+
+            /* Sidebar */
+            .professional-sidebar {
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                height: fit-content;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            }
+
+            .professional-sidebar h3 {
+                font-size: 0.9em;
+                font-weight: 600;
+                color: #2d3436;
+                margin-bottom: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .event-summary {
+                padding: 12px;
+                border-left: 3px solid #2d3436;
+                background: #f9f9f9;
+                margin-bottom: 10px;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .event-summary:hover {
+                background: #efefef;
+                transform: translateX(4px);
+            }
+
+            .event-summary-time {
+                font-size: 0.8em;
+                color: #999;
+                font-weight: 600;
+            }
+
+            .event-summary-title {
+                font-size: 0.9em;
+                color: #2d3436;
+                font-weight: 500;
+                margin: 4px 0;
+            }
+
+            .event-summary-location {
+                font-size: 0.8em;
+                color: #666;
+            }
+
+            /* Legend */
+            .legend {
+                margin-top: 20px;
+                padding-top: 15px;
+                border-top: 1px solid #e5e8ec;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .legend-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 0.85em;
+            }
+
+            .legend-color {
+                width: 4px;
+                height: 20px;
+                border-radius: 2px;
+            }
+
+            .legend-color.meeting { background: #2d3436; }
+            .legend-color.client { background: #e74c3c; }
+            .legend-color.project { background: #3498db; }
+            .legend-color.break { background: #27ae60; }
+
+            /* Schedule */
+            .schedule-wrapper {
+                background: white;
+                border-radius: 8px;
+                overflow-x: auto;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            }
+
+            .professional-schedule {
+                display: grid;
+                grid-template-columns: 80px repeat(5, 1fr);
+                border-collapse: collapse;
+                width: 100%;
+                min-width: 800px;
+            }
+
+            .time-column {
+                border-right: 1px solid #e5e8ec;
+                padding: 15px;
+                background: #f9f9f9;
+                font-size: 0.85em;
+                font-weight: 600;
+                color: #666;
+                text-align: right;
+                position: sticky;
+                left: 0;
+                z-index: 10;
+            }
+
+            .day-header {
+                background: #2d3436;
+                color: white;
+                padding: 15px;
+                text-align: center;
+                border-right: 1px solid #1a1a1a;
+                font-weight: 600;
+                font-size: 0.95em;
+            }
+
+            .day-header.today {
+                background: #4a90e2;
+            }
+
+            .day-name {
+                display: block;
+                margin-bottom: 4px;
+            }
+
+            .day-date {
+                display: block;
+                font-size: 0.8em;
+                opacity: 0.8;
+            }
+
+            .time-slot {
+                min-height: 80px;
+                border: 1px solid #e5e8ec;
+                border-right: 1px solid #e5e8ec;
+                padding: 8px;
+                background: white;
+                position: relative;
+            }
+
+            /* Events */
+            .event-block {
+                background: #f0f0f0;
+                border-left: 4px solid #2d3436;
+                padding: 8px;
+                border-radius: 4px;
+                margin-bottom: 4px;
+                font-size: 0.8em;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .event-block:hover {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                transform: translateY(-2px);
+            }
+
+            .event-block.meeting {
+                border-left-color: #2d3436;
+                background: #f0f0f0;
+            }
+
+            .event-block.client {
+                border-left-color: #e74c3c;
+                background: #fde8e7;
+            }
+
+            .event-block.project {
+                border-left-color: #3498db;
+                background: #ecf5fb;
+            }
+
+            .event-block.break {
+                border-left-color: #27ae60;
+                background: #e8f5e9;
+            }
+
+            .event-block-title {
+                font-weight: 600;
+                color: #2d3436;
+                margin-bottom: 3px;
+            }
+
+            .event-block-meta {
+                color: #666;
+                font-size: 0.75em;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            /* Details Panel */
+            .details-panel {
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                margin-top: 20px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            }
+
+            .details-title {
+                font-size: 1.1em;
+                font-weight: 600;
+                color: #2d3436;
+                margin-bottom: 15px;
+            }
+
+            .details-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .detail-item {
+                padding-bottom: 12px;
+                border-bottom: 1px solid #e5e8ec;
+            }
+
+            .detail-label {
+                font-size: 0.8em;
+                color: #999;
+                font-weight: 600;
+                text-transform: uppercase;
+                margin-bottom: 4px;
+                letter-spacing: 0.3px;
+            }
+
+            .detail-value {
+                font-size: 0.95em;
+                color: #2d3436;
+                font-weight: 500;
+            }
+
+            /* Metrics */
+            .metrics-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 20px;
+                margin: 30px 0;
+            }
+
+            .metric-card {
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            }
+
+            .metric-icon {
+                width: 50px;
+                height: 50px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                color: white;
+            }
+
+            .metric-content h4 {
+                color: #666;
+                font-size: 0.9rem;
+                margin-bottom: 5px;
+            }
+
+            .metric-value {
+                color: #333;
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin: 0;
+            }
+
+            /* Suggestions */
+            .suggestions-section {
+                margin-top: 30px;
+            }
+
+            .suggestions-section h3 {
+                color: #333;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .suggestions-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+            }
+
+            .suggestion-card {
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                display: flex;
+                gap: 15px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                border-left: 4px solid;
+            }
+
+            .suggestion-warning { border-left-color: #ffc107; }
+            .suggestion-info { border-left-color: #17a2b8; }
+            .suggestion-danger { border-left-color: #dc3545; }
+            .suggestion-success { border-left-color: #28a745; }
+
+            .suggestion-icon {
+                font-size: 1.5rem;
+            }
+
+            .suggestion-warning .suggestion-icon { color: #ffc107; }
+            .suggestion-info .suggestion-icon { color: #17a2b8; }
+            .suggestion-danger .suggestion-icon { color: #dc3545; }
+            .suggestion-success .suggestion-icon { color: #28a745; }
+
+            .suggestion-content h4 {
+                color: #333;
+                font-size: 1rem;
+                margin-bottom: 5px;
+            }
+
+            .suggestion-content p {
+                color: #666;
+                font-size: 0.9rem;
+                margin-bottom: 8px;
+            }
+
+            .suggestion-action {
+                color: #667eea;
+                font-size: 0.8rem;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            /* Contact Section */
+            .contact-section {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 50px;
+                border-radius: 20px;
+                text-align: center;
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                margin-top: 50px;
+            }
+
+            .contact-section h3 {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .contact-section p {
+                font-size: 1.1rem;
+                opacity: 0.9;
+                margin-bottom: 25px;
+            }
+
+            .btn-contact {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                padding: 15px 35px;
+                background: white;
+                color: #667eea;
+                text-decoration: none;
+                border-radius: 30px;
+                font-weight: 600;
+                font-size: 1.1rem;
+                transition: all 0.3s ease;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn-contact:hover {
+                transform: scale(1.05);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+                color: #667eea;
+                text-decoration: none;
+            }
+
+            .btn-contact.btn-agenda {
+                background: linear-gradient(135deg, #2ed573 0%, #26af61 100%);
+                color: white;
+            }
+
+            .btn-contact.btn-agenda:hover {
+                box-shadow: 0 8px 25px rgba(46, 213, 115, 0.4);
+                color: white;
+            }
+
+            .contact-buttons {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            /* Responsive */
+            @media (max-width: 1024px) {
+                .professional-content {
+                    grid-template-columns: 1fr;
+                }
+
+                .professional-sidebar {
+                    display: none;
+                }
+
+                .form-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+
+                .form-group.full-width {
+                    grid-column: span 2;
+                }
+
+                .metrics-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+
+            @media (max-width: 768px) {
+                .schedule-section {
+                    padding: 100px 15px 40px 15px;
+                }
+
+                .header-with-button {
+                    flex-direction: column;
+                    text-align: center;
+                }
+
+                .section-title {
+                    font-size: 2rem;
+                    justify-content: center;
+                }
+
+                .section-subtitle {
+                    font-size: 1.6rem;
+                }
+
+                .description-text {
+                    font-size: 1rem;
+                }
+
+                .form-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .form-group.full-width {
+                    grid-column: span 1;
+                }
+
+                .professional-header {
+                    padding: 20px;
+                }
+
+                .header-top {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+
+                .header-actions {
+                    width: 100%;
+                }
+
+                .metrics-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .suggestions-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .details-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    {% endblock %}
+
+    <!-- JavaScript -->
+    {% block javascripts %}
+        {{ parent() }}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+        <script>
+            function previousWeek() {
+                alert('Fonctionnalité de navigation semaine précédente à implémenter');
+            }
+
+            function nextWeek() {
+                alert('Fonctionnalité de navigation semaine suivante à implémenter');
+            }
+
+            function setView(view) {
+                document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+                alert('Vue ' + view + ' activée');
+            }
+
+            function showEventDetails(matiere, heureDebut, heureFin, plage) {
+                document.getElementById('detailsTitle').textContent = matiere;
+                document.getElementById('detailTime').textContent = heureDebut + ' - ' + heureFin;
+                document.getElementById('detailPeriod').textContent = plage;
+                document.getElementById('detailEfficiency').textContent = document.querySelector('.event-block:hover .event-block-meta span:last-child')?.textContent || '-';
+                document.getElementById('detailType').textContent = plage === 'Matin' ? 'Cours principal' : 'Révision';
+                document.getElementById('detailDescription').textContent = 'Cours de ' + matiere + ' programmé en période ' + plage + '.';
+            }
+
+            function ajouterMatiere() {
+                const input = document.getElementById('matieres');
+                const matiere = prompt('Entrez le nom de la matière:');
+                if (matiere && matiere.trim()) {
+                    if (input.value.length > 0) {
+                        input.value += ', ';
+                    }
+                    input.value += matiere.trim();
+                }
+            }
+            
+            function updateStressValue(value) {
+                document.getElementById('stress_value').textContent = value;
+                const label = document.getElementById('stress_label');
+                if (value <= 3) {
+                    label.textContent = '(Faible)';
+                } else if (value <= 7) {
+                    label.textContent = '(Moyen)';
+                } else {
+                    label.textContent = '(Élevé)';
+                }
+            }
+
+            function exportToPDF() {
+                // Vérifier si l'emploi du temps existe
+                if (!document.querySelector('.professional-schedule')) {
+                    showNotification('Aucun emploi du temps à exporter', 'error');
+                    return;
+                }
+
+                showNotification('Génération du PDF en cours...', 'info');
+                
+                // Initialiser jsPDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'mm',
+                    format: 'a4',
+                    putOnlyUsedFonts: true,
+                    compress: true
+                });
+                
+                // Définir les couleurs professionnelles
+                const colors = {
+                    primary: [41, 128, 185],      // Bleu professionnel
+                    secondary: [52, 73, 94],       // Gris foncé
+                    accent: [46, 204, 113],         // Vert
+                    light: [236, 240, 241],         // Gris clair
+                    dark: [44, 62, 80]               // Noir bleuté
+                };
+
+                // ===== EN-TÊTE PROFESSIONNEL =====
+                
+                // Bandeau supérieur
+                doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+                doc.rect(0, 0, 297, 15, 'F');
+                
+                // Titre principal
+                doc.setFontSize(22);
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.text('EMPLOI DU TEMPS', 20, 10);
+                
+                // Sous-titre
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text('StudyFlow - Organisation Intelligente', 150, 10);
+                
+                // ===== INFORMATIONS GÉNÉRALES =====
+                
+                // Carte d'information
+                doc.setFillColor(245, 245, 245);
+                doc.roundedRect(15, 25, 267, 25, 3, 3, 'F');
+                
+                // Date de génération
+                const date = new Date();
+                doc.setFontSize(10);
+                doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
+                doc.setFont('helvetica', 'bold');
+                doc.text('📅 Date de génération:', 20, 35);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`${date.toLocaleDateString('fr-FR')} à ${date.toLocaleTimeString('fr-FR')}`, 60, 35);
+                
+                // Paramètres
+                const matiereParJour = document.getElementById('matiere_par_jour')?.value || '4';
+                const heureParMatiere = document.getElementById('heure_par_matiere')?.value || '1.5';
+                
+                doc.setFont('helvetica', 'bold');
+                doc.text('Matières/jour:', 130, 35);
+                doc.setFont('helvetica', 'normal');
+                doc.text(matiereParJour, 160, 35);
+                
+                doc.setFont('helvetica', 'bold');
+                doc.text('Durée:', 190, 35);
+                doc.setFont('helvetica', 'normal');
+                doc.text(heureParMatiere + 'h', 215, 35);
+
+                // ===== TABLEAU DE L'EMPLOI DU TEMPS =====
+                
+                // Récupérer les données
+                const headers = [['Jour', 'Matière', 'Horaire', 'Durée', 'Période']];
+                const tableData = [];
+                
+                {% for jour, cours in emploiTemps %}
+                    {% for coursDetail in cours %}
+                        tableData.push([
+                            '{{ jour }}',
+                            '{{ coursDetail.matiere }}',
+                            '{{ coursDetail.heureDebut }} - {{ coursDetail.heureFin }}',
+                            '{{ coursDetail.duree }}h',
+                            '{{ coursDetail.plage }}'
+                        ]);
+                    {% endfor %}
+                {% endfor %}
+
+                // Configuration du tableau
+                doc.autoTable({
+                    head: headers,
+                    body: tableData,
+                    startY: 60,
+                    theme: 'grid',
+                    styles: {
+                        fontSize: 9,
+                        cellPadding: 4,
+                        lineColor: [200, 200, 200],
+                        lineWidth: 0.1,
+                        font: 'helvetica',
+                        textColor: [50, 50, 50]
+                    },
+                    headStyles: {
+                        fillColor: [colors.primary[0], colors.primary[1], colors.primary[2]],
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        halign: 'center',
+                        fontSize: 10
+                    },
+                    bodyStyles: {
+                        alternateRow: true,
+                        alternateFillColor: [250, 250, 250]
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 40, fontStyle: 'bold' },
+                        1: { cellWidth: 70 },
+                        2: { cellWidth: 45, halign: 'center' },
+                        3: { cellWidth: 25, halign: 'center' },
+                        4: { cellWidth: 35, halign: 'center' }
+                    },
+                    margin: { left: 15, right: 15 }
+                });
+
+                // ===== MÉTRIQUES =====
+                
+                const finalY = doc.lastAutoTable.finalY + 15;
+                
+                doc.setFillColor(colors.light[0], colors.light[1], colors.light[2]);
+                doc.rect(15, finalY - 5, 70, 8, 'F');
+                doc.setFontSize(12);
+                doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
+                doc.setFont('helvetica', 'bold');
+                doc.text('📊 ANALYSE', 20, finalY);
+                
+                const metrics = [
+                    ['Total heures', '{{ metriques.total_heures }}h'],
+                    ['Moyenne/jour', '{{ metriques.moyenne_par_jour }}h'],
+                    ['Jours', '{{ metriques.nb_jours }}'],
+                    ['Score santé', '{{ metriques.score_sante }}/100']
+                ];
+
+                let metricY = finalY + 10;
+                metrics.forEach((metric, index) => {
+                    doc.setFontSize(9);
+                    doc.setTextColor(100, 100, 100);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(metric[0] + ':', 20, metricY);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+                    doc.text(metric[1], 50, metricY);
+                    metricY += 7;
+                });
+
+                // ===== SUGGESTIONS =====
+                
+                {% if suggestions is defined and suggestions|length > 0 %}
+                const suggestionsY = metricY + 10;
+                
+                doc.setFillColor(colors.light[0], colors.light[1], colors.light[2]);
+                doc.rect(15, suggestionsY - 5, 80, 8, 'F');
+                doc.setFontSize(12);
+                doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
+                doc.setFont('helvetica', 'bold');
+                doc.text('💡 SUGGESTIONS', 20, suggestionsY);
+                
+                let suggY = suggestionsY + 10;
+                {% for suggestion in suggestions %}
+                    doc.setFontSize(9);
+                    doc.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('• {{ suggestion.titre }}', 20, suggY);
+                    
+                    doc.setFontSize(8);
+                    doc.setTextColor(80, 80, 80);
+                    doc.setFont('helvetica', 'normal');
+                    const splitMessage = doc.splitTextToSize('{{ suggestion.message }}', 250);
+                    doc.text(splitMessage, 25, suggY + 5);
+                    
+                    suggY += 15 + (splitMessage.length * 4);
+                {% endfor %}
+                {% endif %}
+
+                // ===== PIED DE PAGE =====
+                
+                doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+                doc.rect(0, 200, 297, 10, 'F');
+                
+                doc.setFontSize(10);
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.text('✨ "Le succès est la somme de petits efforts répétés jour après jour." ✨', 50, 205);
+                
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'normal');
+                doc.text('StudyFlow - Générateur d\'emploi du temps intelligent', 100, 208);
+
+                // ===== TÉLÉCHARGEMENT =====
+                
+                const dateStr = date.toISOString().slice(0, 10);
+                doc.save(`Emploi_du_temps_${dateStr}.pdf`);
+                
+                showNotification('PDF généré avec succès !', 'success');
+            }
+
+            // Fonction utilitaire pour les notifications
+            function showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = 'fixed-top-right';
+                
+                let bgColor = '#4CAF50';
+                let icon = 'fa-check-circle';
+                
+                if (type === 'error') {
+                    bgColor = '#f44336';
+                    icon = 'fa-exclamation-circle';
+                } else if (type === 'info') {
+                    bgColor = '#2196F3';
+                    icon = 'fa-info-circle';
+                }
+                
+                notification.innerHTML = `
+                    <div class="notification" style="background: ${bgColor};">
+                        <div class="notification-content">
+                            <div class="notification-icon">
+                                <i class="fas ${icon}"></i>
+                            </div>
+                            <div class="notification-text">
+                                <strong>${type === 'success' ? 'Succès' : type === 'error' ? 'Erreur' : 'Information'}</strong><br>
+                                ${message}
+                            </div>
+                            <div class="notification-close">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                const closeBtn = notification.querySelector('.notification-close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => notification.remove());
+                }
+                
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        notification.remove();
+                    }
+                }, 4000);
+            }
+
+            // Style pour les notifications
+            const style = document.createElement('style');
+            style.textContent = `
+                .fixed-top-right {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 1000;
+                    max-width: 350px;
+                }
+                
+                .notification {
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 10px;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    animation: slideInRight 0.3s ease;
+                }
+                
+                .notification-content {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    flex: 1;
+                }
+                
+                .notification-icon {
+                    font-size: 24px;
+                }
+                
+                .notification-text {
+                    flex: 1;
+                    font-size: 14px;
+                    line-height: 1.4;
+                }
+                
+                .notification-close {
+                    cursor: pointer;
+                    font-size: 18px;
+                    opacity: 0.8;
+                    transition: opacity 0.3s ease;
+                }
+                
+                .notification-close:hover {
+                    opacity: 1;
+                }
+                
+                @keyframes slideInRight {
+                    from {
+                        opacity: 0;
+                        transform: translateX(100%);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Animation au chargement
+            document.addEventListener('DOMContentLoaded', function() {
+                const rows = document.querySelectorAll('.schedule-row');
+                rows.forEach((row, index) => {
+                    row.style.animation = `fadeInUp 0.5s ease forwards ${index * 0.1}s`;
+                });
+            });
+        </script>
+    {% endblock %}
+{% endblock %}

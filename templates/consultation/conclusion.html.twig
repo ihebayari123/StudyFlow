@@ -1,0 +1,1173 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bilan Moral - Consultations{% endblock %}
+
+{% block body %}
+<!-- ======= Header ======= -->
+{% block header %}
+{% include 'home/navbar.html.twig' %}
+{% endblock %}
+
+<div class="bilan-section">
+    <div class="container">
+        <div class="header-with-button">
+            <h1 class="section-title">Bilan Moral des Étudiants</h1>
+            <a href="{{ path('app_studyflow_affiche') }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Retour aux Consultations
+            </a>
+        </div>
+        
+        <!-- Statistiques générales -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-smile"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-value">78%</h3>
+                    <p class="stat-label">Moral positif</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-tired"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-value">22%</h3>
+                    <p class="stat-label">Signes de fatigue</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-value">45</h3>
+                    <p class="stat-label">Consultations</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-value">12</h3>
+                    <p class="stat-label">Médecins</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-bar" placeholder="Rechercher un étudiant, médecin ou date...">
+            <i class="fas fa-search search-icon"></i>
+        </div>
+        
+        <!-- Filter Buttons -->
+        <div class="filter-buttons">
+            <button class="filter-btn active">Tous les bilans</button>
+            <button class="filter-btn">Moral positif</button>
+            <button class="filter-btn">Signes de fatigue</button>
+            <button class="filter-btn">Besoin d'attention</button>
+            <button class="filter-btn">Urgent</button>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="bilan-grid">
+            <!-- Colonne gauche : Liste des bilans -->
+            <div class="bilan-list-column">
+                <h2 class="column-title">
+                    <i class="fas fa-file-medical-alt"></i>
+                    Derniers bilans
+                </h2>
+                
+                {% for i in 1..6 %}
+                <div class="bilan-card">
+                    <div class="bilan-header">
+                        <div class="student-info">
+                            <div class="student-avatar">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <div class="student-details">
+                                <h3 class="student-name">Thomas Martin</h3>
+                                <p class="consultation-date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    15 Février 2026
+                                </p>
+                            </div>
+                        </div>
+                        <div class="moral-indicator positif">
+                            <span class="moral-badge">
+                                <i class="fas fa-smile"></i>
+                                Positif
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="bilan-content">
+                        <div class="stress-level">
+                            <span class="stress-label">Niveau de stress:</span>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: 35%; background: #10b981;"></div>
+                            </div>
+                            <span class="stress-value">35%</span>
+                        </div>
+                        
+                        <div class="consultation-meta">
+                            <span class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                45 min
+                            </span>
+                            <span class="meta-item">
+                                <i class="fas fa-user-md"></i>
+                                Dr. Sophie Bernard
+                            </span>
+                            <span class="meta-item">
+                                <i class="fas fa-bed"></i>
+                                7h sommeil
+                            </span>
+                        </div>
+                        
+                        <div class="bilan-conclusion">
+                            <i class="fas fa-quote-left"></i>
+                            <p>Étudiant motivé, bonne gestion du stress. Quelques difficultés de concentration signalées mais globalement bon moral.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bilan-footer">
+                        <div class="doctor-comment">
+                            <i class="fas fa-comment-medical"></i>
+                            <span class="comment-preview">Continuer les exercices de respiration...</span>
+                        </div>
+                        <a href="#" class="view-detail-btn">
+                            Voir détails
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Colonne droite : Commentaires détaillés et conclusion -->
+            <div class="comments-column">
+                <!-- Carte de conclusion générale -->
+                <div class="conclusion-card">
+                    <div class="conclusion-header">
+                        <i class="fas fa-clipboard-check"></i>
+                        <h2>Conclusion Générale</h2>
+                    </div>
+                    <div class="conclusion-body">
+                        <div class="overall-stats">
+                            <div class="stat-row">
+                                <span class="stat-name">Moyenne bien-être</span>
+                                <span class="stat-number">72/100</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: 72%;"></div>
+                                </div>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-name">Heures sommeil moy.</span>
+                                <span class="stat-number">6.8h</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: 68%;"></div>
+                                </div>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-name">Heures étude moy.</span>
+                                <span class="stat-number">8.2h</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: 82%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="conclusion-text">
+                            <h4>Bilan moral collectif</h4>
+                            <p>La majorité des étudiants présentent un bon équilibre psychologique. On observe une légère augmentation du stress pendant les périodes d'examens. Les étudiants qui pratiquent des exercices de respiration montrent de meilleurs scores de bien-être.</p>
+                            <div class="recommendation-tag">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>Recommandation : Mettre en place des ateliers de gestion du stress hebdomadaires</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Carte des commentaires médecins -->
+                <div class="comments-card">
+                    <div class="comments-header">
+                        <i class="fas fa-comments"></i>
+                        <h2>Avis des médecins</h2>
+                        <span class="comment-count">12 commentaires</span>
+                    </div>
+                    
+                    <div class="comments-list">
+                        <div class="comment-item urgent">
+                            <div class="comment-avatar">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <strong>Dr. Philippe Moreau</strong>
+                                    <span class="comment-date">Hier, 14:30</span>
+                                    <span class="comment-tag urgent-tag">Urgent</span>
+                                </div>
+                                <p>"Étudiante présentant des signes d'épuisement importants. 4h de sommeil en moyenne, score de bien-être à 23/100. Recommandation : consultation psychologique et réduction de charge de travail."</p>
+                                <div class="comment-footer">
+                                    <span class="student-ref">
+                                        <i class="fas fa-user"></i>
+                                        Léa Dubois - M1 Psychologie
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="comment-item">
+                            <div class="comment-avatar">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <strong>Dr. Sophie Bernard</strong>
+                                    <span class="comment-date">2 jours</span>
+                                    <span class="comment-tag attention-tag">À surveiller</span>
+                                </div>
+                                <p>"Bon progrès depuis la dernière consultation. Le patient pratique la respiration 10min/jour. Score de bien-être passé de 45 à 62. Encouragements à poursuivre."</p>
+                                <div class="comment-footer">
+                                    <span class="student-ref">
+                                        <i class="fas fa-user"></i>
+                                        Thomas Martin - L3 Informatique
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="comment-item">
+                            <div class="comment-avatar">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <strong>Dr. Claire Lambert</strong>
+                                    <span class="comment-date">3 jours</span>
+                                    <span class="comment-tag positif-tag">Positif</span>
+                                </div>
+                                <p>"Très bon équilibre vie étudiante/vie personnelle. Sommeil régulier, activités sportives. Score de bien-être à 85. Étudiant résilient et bien organisé."</p>
+                                <div class="comment-footer">
+                                    <span class="student-ref">
+                                        <i class="fas fa-user"></i>
+                                        Hugo Petit - M2 Droit
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="comment-item">
+                            <div class="comment-avatar">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <strong>Dr. Marc Antoine</strong>
+                                    <span class="comment-date">5 jours</span>
+                                    <span class="comment-tag">Suivi régulier</span>
+                                </div>
+                                <p>"Anxiété modérée liée aux examens à venir. Prescription d'exercices de cohérence cardiaque. À revoir dans 2 semaines pour évaluation."</p>
+                                <div class="comment-footer">
+                                    <span class="student-ref">
+                                        <i class="fas fa-user"></i>
+                                        Emma Richard - L2 Biologie
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="view-all-comments">
+                        <a href="#" class="view-all-link">
+                            Voir tous les commentaires
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Carte des ressources recommandées -->
+                <div class="resources-card">
+                    <h3 class="resources-title">
+                        <i class="fas fa-heart"></i>
+                        Ressources Bien-être
+                    </h3>
+                    <div class="resources-list">
+                        <a href="#" class="resource-item">
+                            <i class="fas fa-lungs"></i>
+                            <span>Exercices de respiration</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        <a href="#" class="resource-item">
+                            <i class="fas fa-brain"></i>
+                            <span>Méditation guidée</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        <a href="#" class="resource-item">
+                            <i class="fas fa-book"></i>
+                            <span>Guide du sommeil</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        <a href="#" class="resource-item">
+                            <i class="fas fa-phone-alt"></i>
+                            <span>Ligne d'écoute étudiante</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+        min-height: 100vh;
+    }
+
+    /* Keep navbar text white and make navbar background semi-transparent */
+    .header-area {
+        background: rgba(0, 0, 0, 0.2) !important;
+        backdrop-filter: blur(10px);
+    }
+
+    .header-area .logo h1,
+    .header-area .nav a,
+    .header-area .menu-trigger span,
+    nav, .navbar, nav *, .navbar *, .nav-link {
+        color: white !important;
+    }
+
+    .bilan-section {
+        padding: 120px 20px 60px 20px;
+        background-color: transparent;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    /* Header with Back Button */
+    .header-with-button {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .section-title {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: #ffffff;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        margin: 0;
+    }
+
+    .back-btn {
+        padding: 15px 35px;
+        background: white;
+        color: #10b981;
+        text-decoration: none;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+        margin-top: 30px;
+    }
+
+    .back-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(255, 255, 255, 0.4);
+        background: linear-gradient(135deg, #ffffff 0%, #f0fff9 100%);
+        color: #047857;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 25px;
+        margin-bottom: 50px;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 25px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: white;
+    }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        color: #64748b;
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    /* Search Bar */
+    .search-container {
+        position: relative;
+        max-width: 600px;
+        margin: 0 auto 40px auto;
+    }
+
+    .search-bar {
+        width: 100%;
+        padding: 15px 50px 15px 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 30px;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .search-bar::placeholder {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .search-bar:focus {
+        outline: none;
+        background: white;
+        color: #333;
+        border-color: white;
+        box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .search-bar:focus::placeholder {
+        color: #999;
+    }
+
+    .search-icon {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.2rem;
+        pointer-events: none;
+    }
+
+    .search-bar:focus + .search-icon {
+        color: #10b981;
+    }
+
+    /* Filter Buttons */
+    .filter-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 50px;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 12px 30px;
+        border: none;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: 30px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        background-color: white;
+        color: #10b981;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Bilan Grid */
+    .bilan-grid {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 30px;
+        margin-top: 20px;
+    }
+
+    /* Bilan List Column */
+    .bilan-list-column {
+        background: transparent;
+    }
+
+    .column-title {
+        color: white;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .bilan-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .bilan-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .bilan-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+
+    .student-info {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .student-avatar {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+    }
+
+    .student-details {
+        flex: 1;
+    }
+
+    .student-name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 5px;
+    }
+
+    .consultation-date {
+        color: #64748b;
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    .consultation-date i {
+        margin-right: 5px;
+    }
+
+    .moral-badge {
+        padding: 8px 16px;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .moral-indicator.positif .moral-badge {
+        background: #d1fae5;
+        color: #059669;
+    }
+
+    .moral-indicator.attention .moral-badge {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .moral-indicator.urgent .moral-badge {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .bilan-content {
+        margin-bottom: 20px;
+    }
+
+    .stress-level {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .stress-label {
+        color: #64748b;
+        font-size: 0.9rem;
+        font-weight: 600;
+        min-width: 120px;
+    }
+
+    .progress-bar-container {
+        flex: 1;
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+
+    .stress-value {
+        color: #0f172a;
+        font-weight: 700;
+        min-width: 50px;
+    }
+
+    .consultation-meta {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        color: #64748b;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .bilan-conclusion {
+        background: #f8fafc;
+        padding: 15px 20px;
+        border-radius: 12px;
+        display: flex;
+        gap: 10px;
+        border-left: 4px solid #10b981;
+    }
+
+    .bilan-conclusion i {
+        color: #10b981;
+        font-size: 1.1rem;
+    }
+
+    .bilan-conclusion p {
+        color: #334155;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin: 0;
+        font-style: italic;
+    }
+
+    .bilan-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 15px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .doctor-comment {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .doctor-comment i {
+        color: #10b981;
+    }
+
+    .view-detail-btn {
+        color: #10b981;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .view-detail-btn:hover {
+        color: #047857;
+        gap: 10px;
+    }
+
+    /* Comments Column */
+    .comments-column {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .conclusion-card,
+    .comments-card,
+    .resources-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .conclusion-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .conclusion-header i {
+        font-size: 28px;
+        color: #10b981;
+    }
+
+    .conclusion-header h2 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .overall-stats {
+        margin-bottom: 30px;
+    }
+
+    .stat-row {
+        margin-bottom: 20px;
+    }
+
+    .stat-name {
+        display: block;
+        color: #64748b;
+        font-size: 0.95rem;
+        margin-bottom: 5px;
+    }
+
+    .stat-number {
+        float: right;
+        font-weight: 700;
+        color: #10b981;
+    }
+
+    .stat-bar {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+
+    .stat-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: 10px;
+    }
+
+    .conclusion-text h4 {
+        color: #0f172a;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .conclusion-text p {
+        color: #334155;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .recommendation-tag {
+        background: #fef3c7;
+        padding: 15px 20px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #92400e;
+        font-weight: 500;
+    }
+
+    .comments-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+    }
+
+    .comments-header i {
+        font-size: 24px;
+        color: #10b981;
+    }
+
+    .comments-header h2 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+        flex: 1;
+    }
+
+    .comment-count {
+        background: #e2e8f0;
+        padding: 5px 12px;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .comments-list {
+        max-height: 600px;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
+    .comment-item {
+        display: flex;
+        gap: 15px;
+        padding: 20px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .comment-item:last-child {
+        border-bottom: none;
+    }
+
+    .comment-avatar {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .comment-content {
+        flex: 1;
+    }
+
+    .comment-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
+    }
+
+    .comment-header strong {
+        color: #0f172a;
+        font-size: 1rem;
+    }
+
+    .comment-date {
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+
+    .comment-tag {
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        background: #e2e8f0;
+        color: #475569;
+    }
+
+    .urgent-tag {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .attention-tag {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .positif-tag {
+        background: #d1fae5;
+        color: #059669;
+    }
+
+    .comment-content p {
+        color: #334155;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 10px;
+    }
+
+    .comment-footer {
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+
+    .student-ref i {
+        margin-right: 5px;
+    }
+
+    .view-all-comments {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+        text-align: center;
+    }
+
+    .view-all-link {
+        color: #10b981;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .view-all-link:hover {
+        color: #047857;
+        gap: 12px;
+    }
+
+    .resources-title {
+        color: #0f172a;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .resources-title i {
+        color: #10b981;
+    }
+
+    .resources-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .resource-item {
+        padding: 12px 15px;
+        background: #f8fafc;
+        border-radius: 12px;
+        color: #334155;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+
+    .resource-item:hover {
+        background: white;
+        border-color: #10b981;
+        transform: translateX(5px);
+    }
+
+    .resource-item i:first-child {
+        color: #10b981;
+        font-size: 1.1rem;
+    }
+
+    .resource-item span {
+        flex: 1;
+        font-weight: 500;
+    }
+
+    .resource-item i:last-child {
+        color: #94a3b8;
+        font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+        .bilan-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .header-with-button {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+        }
+
+        .back-btn {
+            width: 100%;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .filter-btn {
+            width: 100%;
+        }
+
+        .bilan-header {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .consultation-meta {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .bilan-footer {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .view-detail-btn {
+            align-self: flex-end;
+        }
+
+        .comment-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    /* Scrollbar Styling */
+    .comments-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .comments-list::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+
+    .comments-list::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 10px;
+    }
+
+    .comments-list::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+    }
+</style>
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+    // Filter functionality
+    document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const bilanCards = document.querySelectorAll('.bilan-card');
+
+        bilanCards.forEach(card => {
+            const studentName = card.querySelector('.student-name').textContent.toLowerCase();
+            const doctorComment = card.querySelector('.doctor-comment span').textContent.toLowerCase();
+            
+            if (studentName.includes(searchValue) || doctorComment.includes(searchValue)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

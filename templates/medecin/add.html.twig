@@ -1,0 +1,617 @@
+{# templates/stresse/add.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Manage add - Admin{% endblock %}
+
+{% block admin_content %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+            --gray-color: #94a3b8;
+        }
+
+        .form-wrapper {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 800px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+        }
+
+        .form-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-header p {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-top: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-icon i {
+            font-size: 36px;
+        }
+
+        .form-body {
+            padding: 40px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--dark-color);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .required::after {
+            content: " *";
+            color: var(--danger-color);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: var(--light-color);
+            color: var(--dark-color);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+            transform: translateY(-1px);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-color);
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+
+        .form-control:focus + .input-icon {
+            color: var(--primary-color);
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 14px;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .error-message i {
+            font-size: 12px;
+        }
+
+        .form-control.is-invalid {
+            border-color: var(--danger-color);
+            background: rgba(239, 68, 68, 0.02);
+        }
+
+        .form-control.is-valid {
+            border-color: var(--success-color);
+        }
+
+        /* Style pour la disponibilité */
+        .availability-group {
+            grid-column: 1 / -1;
+        }
+
+        .availability-label {
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .availability-options {
+            display: flex;
+            gap: 20px;
+        }
+
+        @media (max-width: 576px) {
+            .availability-options {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+        .availability-option {
+            flex: 1;
+        }
+
+        .availability-input {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .availability-custom-radio {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px 20px;
+            background: var(--light-color);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            gap: 12px;
+        }
+
+        .availability-custom-radio:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .availability-input:checked + .availability-custom-radio {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .availability-custom-radio i {
+            font-size: 20px;
+        }
+
+        .availability-option[data-value="true"] .availability-custom-radio i {
+            color: var(--success-color);
+        }
+
+        .availability-option[data-value="false"] .availability-custom-radio i {
+            color: var(--danger-color);
+        }
+
+        .availability-input:checked + .availability-custom-radio i {
+            color: white !important;
+        }
+
+        /* Bouton de soumission */
+        .submit-group {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: 200px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit i {
+            font-size: 18px;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            animation: slideIn 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.4s; }
+        .availability-group { animation-delay: 0.5s; }
+        .submit-group { animation-delay: 0.6s; }
+
+        /* Tooltip info */
+        .info-tooltip {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-color);
+            cursor: help;
+            font-size: 14px;
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: var(--gray-color);
+            margin-top: 5px;
+            font-style: italic;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="form-wrapper">
+    <div class="form-card">
+        <!-- En-tête du formulaire -->
+        <div class="form-header">
+            <div class="form-icon">
+                <i class="fas fa-user-md"></i>
+            </div>
+            <h1>
+                {% if form.vars.value.id %}
+                    <i class="fas fa-edit me-2"></i>Modifier le Médecin
+                {% else %}
+                    <i class="fas fa-plus-circle me-2"></i>Nouveau Médecin
+                {% endif %}
+            </h1>
+            <p>Remplissez les informations du médecin pour l'ajouter au système</p>
+        </div>
+
+        <!-- Corps du formulaire -->
+        <div class="form-body">
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation'}}) }}
+            
+            <div class="form-grid">
+                <!-- Nom -->
+                <div class="form-group">
+                    {{ form_label(form.nom, null, {'label_attr': {'class': 'form-label required'}}) }}
+                    <div class="input-wrapper">
+                        {{ form_widget(form.nom, {
+                            'attr': {
+                                'class': 'form-control' ~ (form.nom.vars.errors|length > 0 ? ' is-invalid' : ''),
+                                'placeholder': 'ex: Dupont'
+                            }
+                        }) }}
+                        <span class="input-icon">
+                            <i class="fas fa-signature"></i>
+                        </span>
+                    </div>
+                    {% if form.nom.vars.errors %}
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form_errors(form.nom) }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Prénom -->
+                <div class="form-group">
+                    {{ form_label(form.prenom, null, {'label_attr': {'class': 'form-label required'}}) }}
+                    <div class="input-wrapper">
+                        {{ form_widget(form.prenom, {
+                            'attr': {
+                                'class': 'form-control' ~ (form.prenom.vars.errors|length > 0 ? ' is-invalid' : ''),
+                                'placeholder': 'ex: Jean'
+                            }
+                        }) }}
+                        <span class="input-icon">
+                            <i class="fas fa-user"></i>
+                        </span>
+                    </div>
+                    {% if form.prenom.vars.errors %}
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form_errors(form.prenom) }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    {{ form_label(form.email, null, {'label_attr': {'class': 'form-label required'}}) }}
+                    <div class="input-wrapper">
+                        {{ form_widget(form.email, {
+                            'attr': {
+                                'class': 'form-control' ~ (form.email.vars.errors|length > 0 ? ' is-invalid' : ''),
+                                'placeholder': 'exemple@clinique.fr'
+                            }
+                        }) }}
+                        <span class="input-icon">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+                        <span class="info-tooltip" title="Email professionnel requis">
+                            <i class="fas fa-info-circle"></i>
+                        </span>
+                    </div>
+                    {% if form.email.vars.errors %}
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form_errors(form.email) }}
+                        </div>
+                    {% endif %}
+                    <div class="info-text">Utilisez l'email professionnel de la clinique</div>
+                </div>
+
+                <!-- Téléphone -->
+                <div class="form-group">
+                    {{ form_label(form.telephone, null, {'label_attr': {'class': 'form-label required'}}) }}
+                    <div class="input-wrapper">
+                        {{ form_widget(form.telephone, {
+                            'attr': {
+                                'class': 'form-control' ~ (form.telephone.vars.errors|length > 0 ? ' is-invalid' : ''),
+                                'placeholder': '+33 1 23 45 67 89'
+                            }
+                        }) }}
+                        <span class="input-icon">
+                            <i class="fas fa-phone"></i>
+                        </span>
+                        <span class="info-tooltip" title="Format international">
+                            <i class="fas fa-info-circle"></i>
+                        </span>
+                    </div>
+                    {% if form.telephone.vars.errors %}
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form_errors(form.telephone) }}
+                        </div>
+                    {% endif %}
+                    <div class="info-text">Format international recommandé</div>
+                </div>
+
+                <!-- Disponibilité -->
+                <div class="form-group availability-group">
+                    {{ form_label(form.disponibilite, null, {'label_attr': {'class': 'form-label required availability-label'}}) }}
+                    <div class="availability-options">
+                        {% for child in form.disponibilite %}
+                            <div class="availability-option" data-value="{{ child.vars.value }}">
+                                {{ form_widget(child, {
+                                    'attr': {
+                                        'class': 'availability-input'
+                                    }
+                                }) }}
+                                <label for="{{ child.vars.id }}" class="availability-custom-radio">
+                                    <i class="fas {% if child.vars.value == '1' %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                                    <span>{{ child.vars.label }}</span>
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if form.disponibilite.vars.errors %}
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form_errors(form.disponibilite) }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Bouton de soumission -->
+                <div class="submit-group">
+                    {{ form_widget(form.save, {
+                        'label': form.vars.value.id ? 'Mettre à jour' : 'Enregistrer le médecin',
+                        'attr': {
+                            'class': 'btn-submit'
+                        }
+                    }) }}
+                </div>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Validation en temps réel
+            const forms = document.querySelectorAll('.needs-validation');
+            
+            Array.from(forms).forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    
+                    form.classList.add('was-validated');
+                }, false);
+            });
+
+            // Animation au focus
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('focused');
+                });
+
+                // Validation visuelle en temps réel
+                input.addEventListener('input', function() {
+                    this.classList.remove('is-invalid', 'is-valid');
+                    
+                    if (this.checkValidity()) {
+                        this.classList.add('is-valid');
+                    } else if (this.value.length > 0) {
+                        this.classList.add('is-invalid');
+                    }
+                });
+            });
+
+            // Effet sur les boutons radio de disponibilité
+            const radioInputs = document.querySelectorAll('.availability-input');
+            radioInputs.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    // Retirer la classe active de tous les boutons
+                    document.querySelectorAll('.availability-custom-radio').forEach(label => {
+                        label.classList.remove('active');
+                    });
+                    
+                    // Ajouter la classe active au bouton sélectionné
+                    if (this.checked) {
+                        this.nextElementSibling.classList.add('active');
+                    }
+                });
+                
+                // Initialiser l'état actif
+                if (radio.checked) {
+                    radio.nextElementSibling.classList.add('active');
+                }
+            });
+
+            // Tooltip info
+            const tooltips = document.querySelectorAll('.info-tooltip');
+            tooltips.forEach(tooltip => {
+                tooltip.addEventListener('mouseenter', function(e) {
+                    const title = this.getAttribute('title');
+                    if (title) {
+                        // Créer le tooltip
+                        const tooltipElement = document.createElement('div');
+                        tooltipElement.className = 'custom-tooltip';
+                        tooltipElement.textContent = title;
+                        tooltipElement.style.cssText = `
+                            position: absolute;
+                            background: var(--dark-color);
+                            color: white;
+                            padding: 8px 12px;
+                            border-radius: 6px;
+                            font-size: 12px;
+                            z-index: 1000;
+                            white-space: nowrap;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                        `;
+                        
+                        document.body.appendChild(tooltipElement);
+                        
+                        const rect = this.getBoundingClientRect();
+                        tooltipElement.style.top = (rect.top - tooltipElement.offsetHeight - 8) + 'px';
+                        tooltipElement.style.left = (rect.left + rect.width/2 - tooltipElement.offsetWidth/2) + 'px';
+                        
+                        this.dataset.tooltipId = 'tooltip-' + Date.now();
+                        tooltipElement.id = this.dataset.tooltipId;
+                    }
+                });
+                
+                tooltip.addEventListener('mouseleave', function() {
+                    if (this.dataset.tooltipId) {
+                        const tooltipElement = document.getElementById(this.dataset.tooltipId);
+                        if (tooltipElement) {
+                            tooltipElement.remove();
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}
