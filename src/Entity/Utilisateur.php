@@ -84,6 +84,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'integer')]
     private ?int $failedLoginAttempts = 0;
 
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $createdAt = null;
+
     /**
      * @var Collection<int, Cours>
      */
@@ -128,6 +131,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->produits = new ArrayCollection();
         $this->stressSurveys = new ArrayCollection();
         $this->notifications = new ArrayCollection();
+        $this->createdAt = new \DateTime(); 
     }
 
     public function getId(): ?int { return $this->id; }
@@ -313,6 +317,17 @@ public function removeNotification(Notification $notification): static
         }
     }
 
+    return $this;
+}
+
+public function getCreatedAt(): ?\DateTimeInterface
+{
+    return $this->createdAt;
+}
+
+public function setCreatedAt(?\DateTimeInterface $createdAt): static
+{
+    $this->createdAt = $createdAt;
     return $this;
 }
 
