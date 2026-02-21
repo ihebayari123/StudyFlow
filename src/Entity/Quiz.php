@@ -38,6 +38,12 @@ class Quiz
     #[ORM\OneToMany(targetEntity: Question::class, mappedBy: 'quiz', orphanRemoval: true)]
     private Collection $questions;
 
+    /**
+     * @var Collection<int, QuizAttempt>
+     */
+    #[ORM\OneToMany(targetEntity: QuizAttempt::class, mappedBy: 'quiz' , orphanRemoval: true)]
+    private Collection $quizAttempts;
+
     public function __construct()
     {
         $this->questions = new ArrayCollection();
