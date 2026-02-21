@@ -6,6 +6,8 @@
 parameters:
   images_directory: '%kernel.project_dir%/public/uploads'  # dossier pour stocker les images uploadées
   chapters_directory: '%kernel.project_dir%/public/uploads/chapters'
+  python_path: '%env(PYTHON_PATH)%'  # ← paramètre pour le chemin Python
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -31,6 +33,18 @@ services:
         arguments:
             $riskCalculator: '@App\Service\UserRiskCalculator'
             $entityManager: '@doctrine.orm.entity_manager'
+            $notificationService: '@App\Service\NotificationService'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    # ✅ CORRECTION ICI : arguments bien indentés
+    App\Service\PythonMlService:
+        arguments:
+            $python: '%python_path%'
+            $logger: '@logger'
+
+    App\Service\FeatureExtractor:
+        # Pas besoin d'arguments spécifiques
+
+    App\Service\UserRiskCalculator:
+        arguments:
+            $mlService: '@App\Service\PythonMlService'
+            $featureExtractor: '@App\Service\FeatureExtractor'

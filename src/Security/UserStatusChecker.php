@@ -7,69 +7,66 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusException;
 use App\Entity\Utilisateur;
 use App\Service\UserRiskCalculator;
-use Doctrine\ORM\EntityManagerInterface; // ← AJOUTE CET IMPORT
+use Doctrine\ORM\EntityManagerInterface;
 use App\Service\NotificationService;
 
 class UserStatusChecker implements UserCheckerInterface
 {
     private UserRiskCalculator $riskCalculator;
-    private EntityManagerInterface $entityManager; // ← AJOUTE CETTE PROPRIÉTÉ
+    private EntityManagerInterface $entityManager;
+    private NotificationService $notificationService;
 
-    // ✅ MODIFIE LE CONSTRUCTEUR
-    public function __construct(UserRiskCalculator $riskCalculator, EntityManagerInterface $entityManager,NotificationService $notificationService)
-    {
+    public function __construct(
+        UserRiskCalculator $riskCalculator,
+        EntityManagerInterface $entityManager,
+        NotificationService $notificationService
+    ) {
         $this->riskCalculator = $riskCalculator;
-        $this->entityManager = $entityManager; // ← INITIALISE ICI
+        $this->entityManager = $entityManager;
         $this->notificationService = $notificationService;
     }
 
-    public function checkPreAuth(UserInterface $user)
-    {
-        if (!$user instanceof Utilisateur) return;
+    public function checkPreAuth(UserInterface $user): void
+{
+    if (!$user instanceof Utilisateur) return;
 
-        // Admins skip
-        if ($user->getRole() === 'ROLE_ADMIN') return;
-
-        // Rule 1 — status block
-        if ($user->getStatutCompte() === 'BLOQUE') {
-            throw new CustomUserMessageAccountStatusException(
-                'Your account is blocked. Contact admin.'
-            );
-        }
-
-        if ($user->getStatutCompte() === 'INACTIF') {
-            throw new CustomUserMessageAccountStatusException(
-                'Your account is inactive. Please activate it.'
-            );
-        }
-
-        // ✅ AI: calculate risk score
-        $risk = $this->riskCalculator->calculateRisk($user);
-
-        if ($risk > 50) {
-            $this->notificationService->notifyUserBlocked($user);
-            // 🔴 BLOQUE LE COMPTE EN BASE DE DONNÉES
-            $user->setStatutCompte('BLOQUE');
-            $this->entityManager->flush(); // ← UTILISE L'ENTITY MANAGER
-            
-            throw new CustomUserMessageAccountStatusException(
-                'Your account is temporarily blocked due to unusual activity.'
-            );
-        }
-
-        if ($risk > 30) {
-            // Notifier l'admin
-            $this->notificationService->notifyHighRiskUser($user, $risk);
-            
-            // Log
-            error_log("⚠️ High risk user: " . $user->getEmail() . " (risk: $risk)");
-            
-            // Optionnel : on peut aussi incrémenter un compteur ou autre
-        }
+    $risk = $this->riskCalculator->calculateRisk($user);
+    
+    // 🟢 NIVEAU 1: RISQUE FAIBLE (0-30%)
+    if ($risk <= 30) {
+        return; // Connexion normale
     }
+    
+    // 🟡 NIVEAU 2: INACTIF (31-50%)
+    if ($risk > 30 && $risk <= 50) {
+        $user->setStatutCompte('INACTIF');
+        $this->entityManager->flush();
+        
+        throw new CustomUserMessageAccountStatusException(
+            'Compte inactif. Contactez l\'administration.'
+        );
+    }
+    
+    // 🟠 NIVEAU 3: WARNING (51-75%)
+    if ($risk > 50 && $risk <= 75) {
+        $this->notificationService->notifyHighRiskUser($user, $risk);
+        return; // Connexion autorisée mais surveillée
+    }
+    
+    // 🔴 NIVEAU 4: BLOQUE (76-100%)
+    if ($risk > 75) {
+        $this->notificationService->notifyUserBlocked($user);
+        $user->setStatutCompte('BLOQUE');
+        $this->entityManager->flush();
+        
+        throw new CustomUserMessageAccountStatusException(
+            'Compte bloqué. Contactez l\'administration.'
+        );
+    }
+}
 
-    public function checkPostAuth(UserInterface $user)
+    public function checkPostAuth(UserInterface $user): void
     {
-        // Optional: logic after login
+        // Rien à faire après l'authentification
     }
 }
