@@ -32,6 +32,6 @@ for i in random.sample(range(N), int(0.05 * N)):
     df.loc[i, "risk_label"] = 1 - df.loc[i, "risk_label"]
 
 # Save CSV
-df.to_csv("ml_models/training_data.csv", index=False)
+df.to_csv("training_data.csv", index=False)
 
 print("✅ training_data.csv created successfully")
