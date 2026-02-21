@@ -1,136 +1,247 @@
 {# templates/chat/index.html.twig #}
-{% extends 'admin/base_admin.html.twig' %}
-{% block title %}Chat AI - Mistral{% endblock %}
+{% extends 'base.html.twig' %}
 
-{% block admin_content %}
-<div class="admin-main-content">
-    <div class="container-fluid py-4">
+{% block title %}Chat AI - Pedagogy Assistant{% endblock %}
 
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item active">
-                    <i class="fas fa-robot me-1"></i>Chat AI
-                </li>
-            </ol>
-        </nav>
-
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-
-                    {# Header #}
-                    <div class="card-header text-white py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3 bg-white bg-opacity-25 rounded-circle p-2">
-                                <i class="fas fa-robot fa-lg"></i>
-                            </div>
-                            <div>
-                                <h5 class="mb-0 fw-bold">Pedagogy AI</h5>
-                                <small class="opacity-75">
-                                    <span class="badge bg-success me-1">●</span>En ligne
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-
-                    {# Messages #}
-                    <div class="card-body p-0">
-                        <div id="chat-messages" style="height: 500px; overflow-y: auto; padding: 20px; background: #f8f9fa;">
-
-                            {# Message de bienvenue #}
-                            <div class="d-flex mb-3">
-                                <div class="avatar-ai me-2">
-                                    <i class="fas fa-robot"></i>
-                                </div>
-                                <div class="message-bubble ai-bubble">
-                                    Bonjour ! Je suis Pedagogy_chat. Comment puis-je vous aider ? 🤖
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    {# Input #}
-                    <div class="card-footer bg-white border-top p-3">
-                        <div class="input-group">
-                            <input
-                                type="text"
-                                id="user-input"
-                                class="form-control form-control-lg border-2 rounded-3"
-                                placeholder="Écrivez votre message..."
-                                style="border-color: #667eea;"
-                            >
-                            <button id="send-btn" class="btn btn-lg ms-2 text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px;">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
-                        <small class="text-muted mt-2 d-block text-center">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Propulsé par Mistral via Ollama
-                        </small>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+{% block body %}
+<!-- ======= Header ======= -->
+{% block header %}
+{% include 'home/navbar.html.twig' %}
+{% endblock %}
 
 <style>
-.admin-main-content {
-    margin-left: 280px;
-    padding: 100px 40px 40px 40px;
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+    padding-top: 140px;
+}
+
+/* Header / Navbar */
+.header-area {
+    background: rgba(0, 0, 0, 0.3) !important;
+    backdrop-filter: blur(12px);
+    height: 90px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.35);
+}
+
+.main-nav .logo h1 {
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.main-nav .nav li a {
+    color: rgba(255,255,255,0.9);
+    font-size: 15px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.main-nav .nav li a:hover,
+.main-nav .nav li a.active {
+    color: #ffd166;
+}
+
+/* AI Pedagogy Button - Style spécial pour le bouton AI */
+.main-nav .nav li a.ai-button {
+    background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 30px;
+    margin-left: 15px;
+    box-shadow: 0 4px 15px rgba(255,107,107,0.4);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+}
+
+.main-nav .nav li a.ai-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255,107,107,0.6);
+    color: white;
+}
+
+.main-nav .nav li a.ai-button i {
+    font-size: 1.2rem;
+}
+
+/* Main Content */
+.main-content {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Page Header */
+.page-header {
+    text-align: center;
+    margin-bottom: 40px;
+     background-color: #667eea;  
+    padding: 20px;              
+    border-radius: 30px;
+    
+}
+
+.page-header h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.25);
+}
+
+.page-header p {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin-top: 10px;
+}
+
+/* Chat Card */
+.chat-card {
+    background: white;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+    margin-bottom: 30px;
+}
+
+/* Chat Header */
+.chat-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px 30px;
+    color: white;
+}
+
+.chat-header-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.chat-avatar {
+    width: 50px;
+    height: 50px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    backdrop-filter: blur(5px);
+}
+
+.chat-title h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.status-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    backdrop-filter: blur(5px);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.1); }
+}
+
+/* Chat Messages Area */
+.chat-messages {
+    height: 500px;
+    overflow-y: auto;
+    padding: 30px;
+    background: #f8fafc;
+    scroll-behavior: smooth;
+}
+
+/* Message Bubbles */
+.message-wrapper {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.message-wrapper.justify-end {
+    justify-content: flex-end;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.ai-avatar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    margin-right: 12px;
+}
+
+.user-avatar {
+    background: #2d3748;
+    color: white;
+    margin-left: 12px;
 }
 
 .message-bubble {
-    max-width: 75%;
-    padding: 12px 16px;
-    border-radius: 18px;
+    max-width: 70%;
+    padding: 15px 20px;
+    border-radius: 25px;
     font-size: 0.95rem;
-    line-height: 1.5;
+    line-height: 1.6;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
     word-wrap: break-word;
 }
 
-.ai-bubble {
+.ai-message {
     background: white;
-    color: #2d3748;
-    border-bottom-left-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    color: #1e293b;
+    border-bottom-left-radius: 5px;
 }
 
-.user-bubble {
+.user-message {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    border-bottom-right-radius: 4px;
-    margin-left: auto;
+    border-bottom-right-radius: 5px;
 }
 
-.avatar-ai {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 0.85rem;
-    flex-shrink: 0;
-}
-
-.avatar-user {
-    width: 36px;
-    height: 36px;
-    background: #2d3748;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 0.85rem;
-    flex-shrink: 0;
+/* Typing Indicator */
+.typing-indicator {
+    background: white;
+    padding: 15px 25px;
+    border-radius: 25px;
+    display: inline-flex;
+    gap: 4px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 
 .typing-indicator span {
@@ -139,39 +250,270 @@
     background: #667eea;
     border-radius: 50%;
     display: inline-block;
-    animation: typing 1s infinite;
+    animation: typing 1.4s infinite ease-in-out;
 }
+
+.typing-indicator span:nth-child(1) { animation-delay: 0s; }
 .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
 .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
 
 @keyframes typing {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-10px); }
 }
 
+/* Chat Footer */
+.chat-footer {
+    background: white;
+    padding: 25px 30px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.input-wrapper {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.input-wrapper input {
+    flex: 1;
+    padding: 16px 25px;
+    border: 2px solid #e2e8f0;
+    border-radius: 50px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+}
+
+.input-wrapper input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+    background: white;
+}
+
+.input-wrapper input::placeholder {
+    color: #94a3b8;
+}
+
+.send-btn {
+    width: 60px;
+    height: 60px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+}
+
+.send-btn:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(102,126,234,0.5);
+}
+
+.send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Info Footer */
+.info-footer {
+    margin-top: 20px;
+    text-align: center;
+    color: rgba(255,255,255,0.8);
+    font-size: 0.9rem;
+}
+
+.info-footer i {
+    margin-right: 5px;
+    color: #ffd166;
+}
+
+/* Features Grid */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.feature-card {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255,255,255,0.25);
+}
+
+.feature-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.feature-card h4 {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.feature-card p {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.9rem;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-    .admin-main-content { margin-left: 0; padding: 20px 15px; }
+    .page-header h1 {
+        font-size: 2rem;
+    }
+    
+    .chat-header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .message-bubble {
+        max-width: 85%;
+    }
+    
+    .input-wrapper {
+        flex-direction: column;
+    }
+    
+    .send-btn {
+        width: 100%;
+        border-radius: 50px;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
+
+<div class="main-content">
+    {# Page Header #}
+    <div class="page-header">
+        <h1>🤖 Pedagogy AI Assistant</h1>
+        <p>Posez vos questions pédagogiques et obtenez des réponses intelligentes</p>
+    </div>
+
+    {# Main Chat Card #}
+    <div class="chat-card">
+        {# Chat Header #}
+        <div class="chat-header">
+            <div class="chat-header-content">
+                <div class="chat-avatar">
+                    🤖
+                </div>
+                <div class="chat-title">
+                    <h2>Assistant Pédagogique IA</h2>
+                    <div class="status-badge">
+                        <span class="status-dot"></span>
+                        Connecté - Prêt à vous aider
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Chat Messages #}
+        <div class="chat-messages" id="chat-messages">
+            {# Message de bienvenue #}
+            <div class="message-wrapper">
+                <div class="message-avatar ai-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-bubble ai-message">
+                    Bonjour ! Je suis votre assistant pédagogique IA.  :<br>
+                   
+                    Comment puis-je vous aider aujourd'hui ?
+                </div>
+            </div>
+        </div>
+
+        {# Chat Footer #}
+        <div class="chat-footer">
+            <div class="input-wrapper">
+                <input
+                    type="text"
+                    id="user-input"
+                    placeholder="Écrivez votre message ici..."
+                    autocomplete="off"
+                >
+                <button id="send-btn" class="send-btn" disabled>
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {# Info Footer #}
+    <div class="info-footer">
+        <i class="fas fa-info-circle"></i>
+         Réponses générées par IA
+    </div>
+
+    {# Features Grid #}
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🎓</div>
+            <h4>Pédagogie adaptative</h4>
+            <p>Réponses personnalisées selon votre niveau d'enseignement</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h4>Réponses rapides</h4>
+            <p>Traitement local via Ollama pour des réponses instantanées</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h4>Confidentialité</h4>
+            <p>Vos conversations restent privées et sécurisées</p>
+        </div>
+    </div>
+</div>
 
 <script>
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
 
+// Activer/désactiver le bouton selon l'input
+userInput.addEventListener('input', function() {
+    sendBtn.disabled = this.value.trim() === '';
+});
+
 function addMessage(content, isUser) {
     const wrapper = document.createElement('div');
-    wrapper.className = 'd-flex mb-3' + (isUser ? ' justify-content-end' : '');
+    wrapper.className = 'message-wrapper' + (isUser ? ' justify-end' : '');
 
     if (!isUser) {
         wrapper.innerHTML = `
-            <div class="avatar-ai me-2"><i class="fas fa-robot"></i></div>
-            <div class="message-bubble ai-bubble">${content}</div>
+            <div class="message-avatar ai-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="message-bubble ai-message">${content}</div>
         `;
     } else {
         wrapper.innerHTML = `
-            <div class="message-bubble user-bubble">${content}</div>
-            <div class="avatar-user ms-2"><i class="fas fa-user"></i></div>
+            <div class="message-bubble user-message">${content}</div>
+            <div class="message-avatar user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
         `;
     }
 
@@ -181,12 +523,16 @@ function addMessage(content, isUser) {
 
 function showTyping() {
     const typing = document.createElement('div');
-    typing.className = 'd-flex mb-3';
+    typing.className = 'message-wrapper';
     typing.id = 'typing-indicator';
     typing.innerHTML = `
-        <div class="avatar-ai me-2"><i class="fas fa-robot"></i></div>
-        <div class="message-bubble ai-bubble typing-indicator">
-            <span></span><span></span><span></span>
+        <div class="message-avatar ai-avatar">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
         </div>
     `;
     chatMessages.appendChild(typing);
@@ -202,9 +548,12 @@ async function sendMessage() {
     const message = userInput.value.trim();
     if (!message) return;
 
+    // Ajouter le message utilisateur
     addMessage(message, true);
     userInput.value = '';
     sendBtn.disabled = true;
+    
+    // Afficher l'indicateur de frappe
     showTyping();
 
     try {
@@ -218,24 +567,40 @@ async function sendMessage() {
         removeTyping();
 
         if (data.reply) {
-            addMessage(data.reply, false);
+            // Formater la réponse avec des retours à la ligne
+            const formattedReply = data.reply.replace(/\n/g, '<br>');
+            addMessage(formattedReply, false);
         } else {
-            addMessage('❌ Erreur: ' + (data.error ?? 'Inconnue'), false);
+            addMessage('❌ Désolé, je n\'ai pas pu traiter votre demande. Veuillez réessayer.', false);
         }
 
     } catch (err) {
         removeTyping();
-        addMessage('❌ Impossible de contacter Ollama. Vérifiez qu\'il est lancé.', false);
+        addMessage('❌ Erreur de connexion. Vérifiez qu\'Ollama est bien lancé.', false);
     }
 
-    sendBtn.disabled = false;
     userInput.focus();
 }
 
 sendBtn.addEventListener('click', sendMessage);
 userInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') sendMessage();
+    if (e.key === 'Enter' && !sendBtn.disabled) {
+        sendMessage();
+    }
+});
+
+// Animation d'apparition des messages
+document.addEventListener('DOMContentLoaded', function() {
+    const messages = document.querySelectorAll('.message-wrapper');
+    messages.forEach((msg, index) => {
+        msg.style.opacity = '0';
+        msg.style.transform = 'translateY(20px)';
+        msg.style.transition = 'all 0.5s ease';
+        setTimeout(() => {
+            msg.style.opacity = '1';
+            msg.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
 });
 </script>
-
 {% endblock %}

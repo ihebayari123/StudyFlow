@@ -12,7 +12,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ChatController extends AbstractController
 {
-    #[Route('/chat', name: 'chat_index', methods: ['GET'])]
+    #[Route('/front/chat', name: 'chat_index', methods: ['GET'])]
     public function index(): Response
     {
         return $this->render('chat/index.html.twig');

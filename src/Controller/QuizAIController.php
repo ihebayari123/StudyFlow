@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class QuizAIController extends AbstractController
 {
     // ETAPE 1: génération + affichage sans sauvegarde
-    #[Route('/quiz/ai-generate', name: 'quiz_ai_generate', methods: ['GET', 'POST'])]
+    #[Route('/admin/quiz/ai-generate', name: 'quiz_ai_generate', methods: ['GET', 'POST'])]
     public function generate(
         Request $request,
         QuizRepository $quizRepo,
