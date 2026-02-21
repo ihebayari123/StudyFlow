@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Panier{% endblock %}
+
+{% block body %}
+{% block header %}{% include 'home/navbar.html.twig' %}{% endblock %}
+
+<div class="container" style="padding:120px 20px;">
+  <h1>Mon Panier</h1>
+
+  <div id="cart-items"></div>
+
+  <div style="margin-top:20px;">
+    <strong>Total: </strong><span id="cart-total">0</span> DT
+  </div>
+
+  <div style="margin-top:20px;">
+    <a href="{{ path('app_cart_checkout') }}" class="btn-cart" id="pay-button">Payer</a>
+  </div>
+</div>
+
+<script>
+function getCart(){ try{ return JSON.parse(localStorage.getItem('cart')||'[]'); }catch(e){ return []; } }
+function saveCart(c){ localStorage.setItem('cart', JSON.stringify(c)); }
+function renderCart(){
+  const items = getCart();
+  const container = document.getElementById('cart-items');
+  container.innerHTML = '';
+  if(items.length===0){ container.innerHTML = '<p>Votre panier est vide.</p>'; document.getElementById('cart-total').textContent = '0'; return; }
+
+  const ul = document.createElement('div');
+  items.forEach(it=>{
+    const row = document.createElement('div');
+    row.style.display='flex'; row.style.alignItems='center'; row.style.gap='15px'; row.style.padding='8px 0';
+    row.innerHTML = `<img src="${it.image||'https://via.placeholder.com/80'}" style="width:80px;height:60px;object-fit:cover;border-radius:8px;">`;
+    const info = document.createElement('div');
+    info.innerHTML = `<div><strong>${it.name}</strong></div><div>${it.price} DT x ${it.quantity||1}</div>`;
+    const remove = document.createElement('button'); remove.textContent='Supprimer';
+    remove.addEventListener('click', ()=>{ removeItem(it.id); });
+    row.appendChild(info); row.appendChild(remove);
+    container.appendChild(row);
+  });
+
+  const total = items.reduce((s,i)=>s + (parseFloat(i.price)||0)*(i.quantity||1),0);
+  document.getElementById('cart-total').textContent = total.toFixed(2);
+}
+
+function removeItem(id){
+  let items = getCart(); items = items.filter(i=>i.id!=id); saveCart(items); renderCart();
+  // update navbar badge if present
+  const cartCount = document.getElementById('cart-count'); if(cartCount) cartCount.textContent = items.reduce((s,i)=>s+(i.quantity||1),0);
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{ renderCart(); });
+</script>
+
+{% endblock %}

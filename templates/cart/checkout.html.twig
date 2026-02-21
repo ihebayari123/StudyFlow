@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paiement{% endblock %}
+
+{% block body %}
+{% block header %}{% include 'home/navbar.html.twig' %}{% endblock %}
+
+<div class="container" style="padding:120px 20px; max-width:700px;">
+  <h1>Paiement</h1>
+
+  <p>Entrez vos coordonnées et les informations de paiement (page de test).</p>
+
+  <form id="payment-form">
+    <p>Entrez vos coordonnées puis cliquez sur "Confirmation du paiement" — la saisie de la carte se fera ensuite sur la page Stripe (mode test).</p>
+    <div>
+      <label>Nom complet</label>
+      <input type="text" id="name" required style="width:100%;padding:8px;margin:6px 0;">
+    </div>
+    <div>
+      <label>Email</label>
+      <input type="email" id="email" required style="width:100%;padding:8px;margin:6px 0;">
+    </div>
+    <div>
+      <label>Adresse</label>
+      <input type="text" id="address" style="width:100%;padding:8px;margin:6px 0;">
+    </div>
+
+    <div style="margin-top:12px;">
+      <button id="confirm-payment" class="btn-cart">Confirmation du paiement</button>
+    </div>
+  </form>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+document.getElementById('payment-form').addEventListener('submit', async function(e){
+  e.preventDefault();
+    const items = JSON.parse(localStorage.getItem('cart') || '[]');
+  if(!items || items.length === 0){ alert('Votre panier est vide'); return; }
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const address = document.getElementById('address').value;
+
+  try{
+    const resp = await fetch('{{ path('app_create_checkout_session') }}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items, customer: { name, email, address } })
+    });
+    const data = await resp.json();
+    if(data.url){
+      // Clear cart locally before redirect
+      localStorage.removeItem('cart');
+      const cartCount = document.getElementById('cart-count'); if(cartCount) cartCount.textContent = '0';
+      window.location = data.url;
+    } else {
+      alert(data.error || 'Erreur lors de la création de la session de paiement.');
+    }
+  }catch(err){
+    alert('Erreur réseau: '+err.message);
+  }
+});
+</script>
+
+{% endblock %}

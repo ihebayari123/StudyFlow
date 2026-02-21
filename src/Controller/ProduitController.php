@@ -11,6 +11,8 @@ use App\Repository\ProduitRepository;
 use App\Entity\Produit;
 use App\Form\ProduitType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Service\PricePredictionService;
 
 final class ProduitController extends AbstractController
 {
@@ -133,6 +135,29 @@ public function showproduits(Request $request, ProduitRepository $produitRepo): 
         'listproduit1' => $produits,
         'search' => $search,
     ]);
+}
+
+#[Route('/produit/predict-price', name: 'app_predict_price', methods: ['POST'])]
+public function predictPrice(Request $request, PricePredictionService $predictionService): JsonResponse
+{
+    $data = json_decode($request->getContent(), true);
+
+    $nom = $data['nom'] ?? '';
+    $description = $data['description'] ?? '';
+    $categorie = $data['categorie'] ?? '';
+
+    // Validation
+    if (empty($nom) || empty($description) || empty($categorie)) {
+        return new JsonResponse([
+            'success' => false,
+            'error' => 'Paramètres manquants'
+        ], JsonResponse::HTTP_BAD_REQUEST);
+    }
+
+    // Appeler le service de prédiction
+    $result = $predictionService->predictPrice($nom, $description, $categorie);
+
+    return new JsonResponse($result);
 }
 
 
