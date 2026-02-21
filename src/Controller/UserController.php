@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Utilisateur;
 use App\Form\UtilisateurType;
 use App\Repository\UtilisateurRepository;
+use App\Service\UserRiskCalculator;  // ← AJOUTE CET IMPORT
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -52,7 +53,11 @@ final class UserController extends AbstractController
     }
 
     #[Route('/usersshow', name: 'app_users_show')]
-    public function showUsers(UtilisateurRepository $repo, Request $request): Response
+    public function showUsers(
+        UtilisateurRepository $repo, 
+        Request $request,
+        UserRiskCalculator $userRiskCalculator  // ← AJOUTE ICI
+    ): Response
     {
         // Récupération des paramètres de tri
         $sortBy = $request->query->get('sort', 'id');
@@ -87,6 +92,7 @@ final class UserController extends AbstractController
             'currentSort' => $sortBy,
             'currentOrder' => $order,
             'searchTerm' => $searchTerm,
+            'userRiskCalculator' => $userRiskCalculator  // ← PASSE AU TEMPLATE
         ]);
     }
 
@@ -122,62 +128,61 @@ final class UserController extends AbstractController
     }
 
     #[Route('/user/delete/{id}', name: 'app_user_delete')]
-public function deleteUser($id, ManagerRegistry $m, UtilisateurRepository $repo): Response
-{
-    $em = $m->getManager();
-    $utilisateur = $repo->find($id);
+    public function deleteUser($id, ManagerRegistry $m, UtilisateurRepository $repo): Response
+    {
+        $em = $m->getManager();
+        $utilisateur = $repo->find($id);
 
-    if (!$utilisateur) {
-        throw $this->createNotFoundException("Utilisateur introuvable pour l'ID $id");
-    }
+        if (!$utilisateur) {
+            throw $this->createNotFoundException("Utilisateur introuvable pour l'ID $id");
+        }
 
-    $conn = $em->getConnection();
-    
-    try {
-        // 1. Récupérer tous les IDs des cours de l'utilisateur
-        $cours = $conn->fetchAllAssociative('SELECT id FROM cours WHERE user_id = ?', [$id]);
-        $coursIds = array_column($cours, 'id');
+        $conn = $em->getConnection();
         
-        if (!empty($coursIds)) {
-            $placeholders = implode(',', array_fill(0, count($coursIds), '?'));
+        try {
+            // 1. Récupérer tous les IDs des cours de l'utilisateur
+            $cours = $conn->fetchAllAssociative('SELECT id FROM cours WHERE user_id = ?', [$id]);
+            $coursIds = array_column($cours, 'id');
             
-            // 2. Récupérer tous les IDs des quizzes de ces cours
-            $quizzes = $conn->fetchAllAssociative("SELECT id FROM quiz WHERE course_id IN ($placeholders)", $coursIds);
-            $quizIds = array_column($quizzes, 'id');
-            
-            if (!empty($quizIds)) {
-                $quizPlaceholders = implode(',', array_fill(0, count($quizIds), '?'));
+            if (!empty($coursIds)) {
+                $placeholders = implode(',', array_fill(0, count($coursIds), '?'));
                 
-                // 3. Supprimer les questions liées à ces quizzes
-                $conn->executeStatement("DELETE FROM question WHERE quiz_id IN ($quizPlaceholders)", $quizIds);
+                // 2. Récupérer tous les IDs des quizzes de ces cours
+                $quizzes = $conn->fetchAllAssociative("SELECT id FROM quiz WHERE course_id IN ($placeholders)", $coursIds);
+                $quizIds = array_column($quizzes, 'id');
                 
-                // 4. Supprimer les quizzes
-                $conn->executeStatement("DELETE FROM quiz WHERE id IN ($quizPlaceholders)", $quizIds);
+                if (!empty($quizIds)) {
+                    $quizPlaceholders = implode(',', array_fill(0, count($quizIds), '?'));
+                    
+                    // 3. Supprimer les questions liées à ces quizzes
+                    $conn->executeStatement("DELETE FROM question WHERE quiz_id IN ($quizPlaceholders)", $quizIds);
+                    
+                    // 4. Supprimer les quizzes
+                    $conn->executeStatement("DELETE FROM quiz WHERE id IN ($quizPlaceholders)", $quizIds);
+                }
+                
+                // 5. Supprimer les cours
+                $conn->executeStatement("DELETE FROM cours WHERE id IN ($placeholders)", $coursIds);
             }
             
-            // 5. Supprimer les cours
-            $conn->executeStatement("DELETE FROM cours WHERE id IN ($placeholders)", $coursIds);
+            // 6. Supprimer les autres entités liées directement à l'utilisateur
+            $conn->executeStatement('DELETE FROM stress_survey WHERE user_id = ?', [$id]);
+            $conn->executeStatement('DELETE FROM produit WHERE user_id = ?', [$id]);
+            $conn->executeStatement('DELETE FROM event WHERE user_id = ?', [$id]);
+            
+            // 7. Enfin, supprimer l'utilisateur
+            $conn->executeStatement('DELETE FROM utilisateur WHERE id = ?', [$id]);
+            
+            $this->addFlash('success', 'Utilisateur et toutes ses données associées (cours, quizzes, questions, etc.) supprimés avec succès !');
+            
+        } catch (\Exception $e) {
+            $conn->executeStatement('ROLLBACK');
+            $this->addFlash('error', 'Erreur : ' . $e->getMessage());
         }
-        
-        // 6. Supprimer les autres entités liées directement à l'utilisateur
-        $conn->executeStatement('DELETE FROM stress_survey WHERE user_id = ?', [$id]);
-        $conn->executeStatement('DELETE FROM produit WHERE user_id = ?', [$id]);
-        $conn->executeStatement('DELETE FROM event WHERE user_id = ?', [$id]);
-        
-        // 7. Enfin, supprimer l'utilisateur
-        $conn->executeStatement('DELETE FROM utilisateur WHERE id = ?', [$id]);
-        
-        $this->addFlash('success', 'Utilisateur et toutes ses données associées (cours, quizzes, questions, etc.) supprimés avec succès !');
-        
-    } catch (\Exception $e) {
-        $conn->executeStatement('ROLLBACK');
-        $this->addFlash('error', 'Erreur : ' . $e->getMessage());
+
+        return $this->redirectToRoute('app_users_show');
     }
 
-    return $this->redirectToRoute('app_users_show');
-}
-
-    
     public function __construct(EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher)
     {
         $this->em = $em;
