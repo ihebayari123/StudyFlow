@@ -1,0 +1,599 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Latest Courses{% endblock %}
+
+{% block body %}
+<!-- ======= Header ======= -->
+{% block header %}
+{% include 'home/navbar.html.twig' %}
+{% endblock %}
+
+<div class="courses-section">
+    <div class="container">
+        <div class="header-with-button">
+            <h1 class="section-title">Nouvelle Consultation</h1>
+            <a href="{{ path('app_studyflow') }}" class="add-course-btn">
+                <i class="fas fa-arrow-left"></i> Retour 
+            </a>
+        </div>
+
+        <!-- Formulaire dans une carte -->
+        <div class="course-card form-card">
+            <div class="card-body p-4 p-lg-5">
+                {{ form_start(form, {'attr': {'class': 'needs-validation form-content', 'novalidate': 'novalidate'}}) }}
+                
+                <!-- Section Informations Générales -->
+                <div class="form-section mb-5">
+                    <div class="section-header mb-4">
+                        <h4 class="section-title">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Informations Générales
+                        </h4>
+                        <div class="section-divider"></div>
+                    </div>
+                    
+                    <!-- Date de Consultation -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            {{ form_label(form.date_de_consultation, 'Date et Heure', {
+                                'label_attr': {'class': 'form-label fw-semibold form-label-custom'}
+                            }) }}
+                            <div class="input-group">
+                                <span class="input-group-text form-input-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </span>
+                                {{ form_widget(form.date_de_consultation, {
+                                    'attr': {
+                                        'class': 'form-control form-input',
+                                        'placeholder': 'Sélectionnez la date et l\'heure'
+                                    }
+                                }) }}
+                            </div>
+                            <div class="form-text text-muted small mt-1">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Date et heure prévues pour la consultation
+                            </div>
+                            {{ form_errors(form.date_de_consultation) }}
+                        </div>
+                        
+                        <!-- Genre -->
+                        <div class="col-md-6">
+                            {{ form_label(form.genre, 'Genre du Patient', {
+                                'label_attr': {'class': 'form-label fw-semibold form-label-custom'}
+                            }) }}
+                            <div class="input-group">
+                                <span class="input-group-text form-input-icon">
+                                    <i class="fas fa-user-tag"></i>
+                                </span>
+                                {{ form_widget(form.genre, {
+                                    'attr': {
+                                        'class': 'form-select form-select-custom',
+                                        'placeholder': 'Sélectionnez le genre'
+                                    }
+                                }) }}
+                            </div>
+                            {{ form_errors(form.genre) }}
+                        </div>
+                    </div>
+
+                    <!-- Motif de Consultation -->
+                    <div class="mb-4">
+                        {{ form_label(form.motif, 'Motif de Consultation', {
+                            'label_attr': {'class': 'form-label fw-semibold form-label-custom'}
+                        }) }}
+                        <div class="input-group">
+                            <span class="input-group-text form-input-icon align-items-start pt-3">
+                                <i class="fas fa-sticky-note"></i>
+                            </span>
+                            {{ form_widget(form.motif, {
+                                'attr': {
+                                    'class': 'form-control form-textarea',
+                                    'rows': 3,
+                                    'placeholder': 'Décrivez le motif de la consultation (symptômes, raison de la visite, etc.)'
+                                }
+                            }) }}
+                        </div>
+                        <div class="form-text text-muted small mt-1">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Décrivez les symptômes ou la raison de la visite
+                        </div>
+                        {{ form_errors(form.motif) }}
+                    </div>
+                </div>
+
+                <!-- Section Évaluation Médicale -->
+                <div class="form-section mb-5">
+                    <div class="section-header mb-4">
+                        <h4 class="section-title">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Évaluation Médicale
+                        </h4>
+                        <div class="section-divider"></div>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Niveau -->
+                        <div class="col-md-6 mb-4">
+                            {{ form_label(form.niveau, 'Niveau de Sévérité', {
+                                'label_attr': {'class': 'form-label fw-semibold form-label-custom'}
+                            }) }}
+                            <div class="input-group">
+                                <span class="input-group-text form-input-icon">
+                                    <i class="fas fa-chart-bar"></i>
+                                </span>
+                                {{ form_widget(form.niveau, {
+                                    'attr': {
+                                        'class': 'form-select form-select-custom',
+                                        'placeholder': 'Sélectionnez le niveau'
+                                    }
+                                }) }}
+                            </div>
+                            <div class="form-text text-muted small mt-1">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Évaluation initiale de la sévérité
+                            </div>
+                            {{ form_errors(form.niveau) }}
+                        </div>
+                        
+                        <!-- Stress Survey -->
+                        <div class="col-md-6 mb-4">
+                            {{ form_label(form.stress_survey, 'Évaluation du Stress', {
+                                'label_attr': {'class': 'form-label fw-semibold form-label-custom'}
+                            }) }}
+                            <div class="input-group">
+                                <span class="input-group-text form-input-icon">
+                                    <i class="fas fa-heartbeat"></i>
+                                </span>
+                                {{ form_widget(form.stress_survey, {
+                                    'attr': {
+                                        'class': 'form-select form-select-custom',
+                                        'placeholder': 'Sélectionnez une évaluation'
+                                    }
+                                }) }}
+                            </div>
+                            <div class="form-text text-muted small mt-1">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Sélectionnez une évaluation de stress existante
+                            </div>
+                            {{ form_errors(form.stress_survey) }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Médecin Responsable -->
+                <div class="form-section mb-5">
+                    <div class="section-header mb-4">
+                        <h4 class="section-title">
+                            <i class="fas fa-user-md me-2"></i>
+                            Médecin Responsable
+                        </h4>
+                        <div class="section-divider"></div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        {{ form_label(form.medecin, 'Médecin Assigné', {
+                            'label_attr': {'class': 'form-label fw-semibold form-label-custom'}
+                        }) }}
+                        <div class="input-group">
+                            <span class="input-group-text form-input-icon">
+                                <i class="fas fa-user-md"></i>
+                            </span>
+                            {{ form_widget(form.medecin, {
+                                'attr': {
+                                    'class': 'form-select form-select-custom',
+                                    'placeholder': 'Sélectionnez le médecin'
+                                }
+                            }) }}
+                        </div>
+                        <div class="form-text text-muted small mt-1">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Sélectionnez le médecin responsable de cette consultation
+                        </div>
+                        {{ form_errors(form.medecin) }}
+                    </div>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="form-actions mt-5 pt-4 border-top">
+                    <div class="d-flex justify-content-between">
+                        <button type="reset" class="btn btn-outline-primary filter-btn">
+                            <i class="fas fa-redo me-2"></i>
+                            Réinitialiser
+                        </button>
+                        <div class="d-flex gap-3">
+                            <a href="{{ path('app_showconsultation') }}" class="btn filter-btn">
+                                <i class="fas fa-times me-2"></i>
+                                Annuler
+                            </a>
+                            {{ form_widget(form.save, {
+                                'label': 'Enregistrer la Consultation',
+                                'attr': {
+                                    'class': 'add-course-btn',
+                                    'formaction': path('app_studyflow_affiche')
+                                }
+                            }) }}
+                        </div>
+                    </div>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+
+        <!-- Informations supplémentaires -->
+        <div class="course-card info-card mt-4">
+            <div class="course-content">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-info-circle fa-2x me-3" style="color: #7b68ee;"></i>
+                    <div>
+                        <h3 class="course-title mb-2">Informations importantes</h3>
+                        <p class="course-author mb-2">Tous les champs marqués d'un astérisque (*) sont obligatoires.</p>
+                        <p class="course-author mb-0">Les données médicales sont traitées conformément aux normes de confidentialité.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    /* Keep navbar text white */
+    .header-area {
+        background: rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(10px);
+    }
+
+    .header-area .logo h1,
+    .header-area .nav a,
+    .header-area .menu-trigger span,
+    nav, .navbar, nav *, .navbar *, .nav-link {
+        color: white !important;
+    }
+
+    .courses-section {
+        padding: 120px 20px 60px 20px;
+        background-color: transparent;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Header with Add Button */
+    .header-with-button {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 50px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .section-title {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #ffffff;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        margin: 0;
+    }
+
+    /* Add Course Button */
+    .add-course-btn {
+        padding: 15px 35px;
+        background: white;
+        color: #667eea;
+        text-decoration: none;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+        margin-top: 30px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .add-course-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(255, 255, 255, 0.4);
+        background: linear-gradient(135deg, #ffffff 0%, #f0f0ff 100%);
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .add-course-btn i {
+        font-size: 1.3rem;
+    }
+
+    /* Filter Buttons */
+    .filter-btn {
+        padding: 12px 30px;
+        border: none;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: 30px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        background-color: white;
+        color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+        text-decoration: none;
+    }
+
+    /* Form Cards */
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        margin-bottom: 30px;
+    }
+
+    .form-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Form Content */
+    .form-content {
+        padding: 20px;
+    }
+
+    /* Sections du formulaire */
+    .form-section {
+        position: relative;
+    }
+
+    .section-header {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #667eea;
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .section-divider {
+        height: 2px;
+        background: linear-gradient(90deg, #667eea 0%, transparent 100%);
+        opacity: 0.3;
+        margin-top: 10px;
+    }
+
+    /* Labels */
+    .form-label-custom {
+        color: #374151;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-label-custom::after {
+        content: ' *';
+        color: #f44336;
+    }
+
+    /* Champs de formulaire */
+    .form-input, .form-select-custom, .form-textarea {
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+        width: 100%;
+    }
+
+    .form-input:focus, .form-select-custom:focus, .form-textarea:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+        outline: none;
+    }
+
+    .form-input-icon {
+        background: #e8f2ff;
+        border: 2px solid #e5e7eb;
+        border-right: none;
+        color: #667eea;
+        font-size: 1rem;
+        border-radius: 10px 0 0 10px;
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    /* Groupes d'input */
+    .input-group:focus-within .form-input-icon {
+        border-color: #667eea;
+        background: #667eea;
+        color: white;
+    }
+
+    /* Messages d'erreur */
+    .form-error {
+        color: #f44336;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Textes d'aide */
+    .form-text {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 5px;
+    }
+
+    /* Actions du formulaire */
+    .form-actions {
+        border-top: 2px solid #e5e7eb;
+    }
+
+    /* Course Content (pour la carte info) */
+    .course-content {
+        padding: 25px 30px 30px;
+        background: white;
+    }
+
+    .course-author {
+        color: #7b68ee;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .course-title {
+        color: #1a1a1a;
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1.4;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .header-with-button {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .add-course-btn {
+            width: 100%;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .filter-btn {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .form-actions .d-flex {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .form-actions .d-flex > div,
+        .form-actions .d-flex > a,
+        .form-actions .d-flex > button {
+            width: 100%;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-section {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .form-section:nth-child(1) { animation-delay: 0.1s; }
+    .form-section:nth-child(2) { animation-delay: 0.2s; }
+    .form-section:nth-child(3) { animation-delay: 0.3s; }
+</style>
+
+<!-- Inclure FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<!-- Inclure les styles pour les sélecteurs de date -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+
+<script>
+    // Initialiser le sélecteur de date
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateField = document.querySelector('#consultation_type_date_de_consultation');
+        if (dateField) {
+            flatpickr(dateField, {
+                enableTime: true,
+                dateFormat: 'Y-m-d H:i',
+                time_24hr: true,
+                locale: 'fr',
+                minDate: 'today',
+                defaultDate: 'today',
+                minuteIncrement: 15,
+                disableMobile: true,
+                static: true
+            });
+        }
+    });
+
+    // Validation personnalisée
+    const form = document.querySelector('form.needs-validation');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!this.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // Ajouter la classe was-validated pour afficher les messages
+                this.classList.add('was-validated');
+                
+                // Faire défiler jusqu'au premier champ invalide
+                const firstInvalid = this.querySelector(':invalid');
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalid.focus();
+                }
+            }
+        }, false);
+    }
+</script>
+{% endblock %}

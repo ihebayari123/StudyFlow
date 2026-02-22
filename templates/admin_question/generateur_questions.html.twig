@@ -1,0 +1,326 @@
+{# templates/question/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Questions Mathématiques{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .question-card {
+        margin-bottom: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .question-header {
+        background-color: #f8f9fa;
+        padding: 10px 15px;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 10px 10px 0 0;
+    }
+    .question-body {
+        padding: 15px;
+    }
+    .badge-niveau {
+        padding: 5px 10px;
+        border-radius: 5px;
+        color: white;
+        font-size: 0.8em;
+    }
+    .niveau-facile { background-color: #28a745; }
+    .niveau-moyen { background-color: #ffc107; color: #212529; }
+    .niveau-difficile { background-color: #dc3545; }
+    .type-badge {
+        padding: 3px 8px;
+        border-radius: 3px;
+        font-size: 0.8em;
+        background-color: #6c757d;
+        color: white;
+    }
+    .choice-option {
+        padding: 8px 12px;
+        margin: 5px 0;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .choice-option:hover {
+        background-color: #e9ecef;
+    }
+    .choice-option.correct {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+    }
+    .stat-card {
+        text-align: center;
+        padding: 20px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin-bottom: 20px;
+    }
+    .stat-number {
+        font-size: 2.5em;
+        font-weight: bold;
+    }
+    .stat-label {
+        font-size: 1em;
+        opacity: 0.9;
+    }
+    .file-selector {
+        margin-bottom: 30px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">📚 Questions Mathématiques Générées</h1>
+            
+            <!-- Sélecteur de fichier -->
+            <div class="file-selector">
+                <div class="row align-items-end">
+                    <div class="col-md-8">
+                        <label for="fileSelect" class="form-label">Choisir un fichier de questions</label>
+                        <select class="form-select" id="fileSelect">
+                            <option value="">Chargement des fichiers...</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-primary w-100" onclick="loadSelectedFile()">
+                            <i class="fas fa-search"></i> Charger
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Statistiques -->
+            <div class="row mb-4" id="statsContainer" style="display: none;">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalQuestions">0</div>
+                        <div class="stat-label">Questions totales</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);">
+                        <div class="stat-number" id="totalVrai">0</div>
+                        <div class="stat-label">Vrai/Faux</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%);">
+                        <div class="stat-number" id="totalChoix">0</div>
+                        <div class="stat-label">Choix multiples</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Liste des questions -->
+            <div id="questionsContainer"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Template pour les questions Vrai/Faux -->
+<template id="templateVrai">
+    <div class="question-card">
+        <div class="question-header">
+            <span class="type-badge me-2">✅ VRAI/FAUX</span>
+            <span class="badge-niveau niveau-facile">Facile</span>
+        </div>
+        <div class="question-body">
+            <p class="question-text"></p>
+            <div class="alert alert-info">
+                <strong>Réponse:</strong> <span class="reponse"></span>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Template pour les questions Choix -->
+<template id="templateChoix">
+    <div class="question-card">
+        <div class="question-header">
+            <span class="type-badge me-2">🔤 CHOIX MULTIPLES</span>
+            <span class="badge-niveau niveau-facile">Facile</span>
+        </div>
+        <div class="question-body">
+            <p class="question-text"></p>
+            <div class="choices-container mt-3"></div>
+            <div class="mt-3">
+                <small class="text-muted">💡 <span class="indice"></span></small>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Template pour les questions Texte -->
+<template id="templateTexte">
+    <div class="question-card">
+        <div class="question-header">
+            <span class="type-badge me-2">✍️ TEXTE</span>
+            <span class="badge-niveau niveau-facile">Facile</span>
+        </div>
+        <div class="question-body">
+            <p class="question-text"></p>
+            <div class="alert alert-success">
+                <strong>Réponse attendue:</strong> <span class="reponse-attendue"></span>
+            </div>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+// Charger la liste des fichiers au démarrage
+document.addEventListener('DOMContentLoaded', function() {
+    loadFileList();
+});
+
+function loadFileList() {
+    fetch('/questions/list')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('fileSelect');
+            select.innerHTML = '<option value="">Sélectionnez un fichier...</option>';
+            
+            if (data.success && data.files.length > 0) {
+                data.files.forEach(file => {
+                    const option = document.createElement('option');
+                    option.value = file.name;
+                    option.textContent = `${file.name} (${file.size} octets)`;
+                    select.appendChild(option);
+                });
+            } else {
+                select.innerHTML = '<option value="">Aucun fichier trouvé</option>';
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            document.getElementById('fileSelect').innerHTML = '<option value="">Erreur de chargement</option>';
+        });
+}
+
+function loadSelectedFile() {
+    const select = document.getElementById('fileSelect');
+    const filename = select.value;
+    
+    if (!filename) {
+        alert('Veuillez sélectionner un fichier');
+        return;
+    }
+    
+    fetch(`/questions/load/${filename}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayQuestions(data);
+            } else {
+                alert('Erreur: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Erreur lors du chargement du fichier');
+        });
+}
+
+function displayQuestions(data) {
+    // Afficher les statistiques
+    document.getElementById('statsContainer').style.display = 'flex';
+    document.getElementById('totalQuestions').textContent = data.total || data.questions.length;
+    
+    // Calculer les stats par type
+    const stats = { vrai: 0, choix: 0, texte: 0 };
+    data.questions.forEach(q => {
+        if (stats.hasOwnProperty(q.type)) stats[q.type]++;
+    });
+    
+    document.getElementById('totalVrai').textContent = stats.vrai;
+    document.getElementById('totalChoix').textContent = stats.choix + stats.texte;
+    
+    // Afficher les questions
+    const container = document.getElementById('questionsContainer');
+    container.innerHTML = '';
+    
+    data.questions.forEach((question, index) => {
+        const questionElement = createQuestionElement(question, index);
+        container.appendChild(questionElement);
+    });
+}
+
+function createQuestionElement(question, index) {
+    let template;
+    
+    switch(question.type) {
+        case 'vrai':
+            template = document.getElementById('templateVrai');
+            break;
+        case 'choix':
+            template = document.getElementById('templateChoix');
+            break;
+        case 'texte':
+            template = document.getElementById('templateTexte');
+            break;
+        default:
+            return document.createElement('div');
+    }
+    
+    const clone = template.content.cloneNode(true);
+    const card = clone.querySelector('.question-card');
+    
+    // Ajouter le numéro
+    const header = clone.querySelector('.question-header');
+    header.innerHTML = `<strong>Question #${index + 1}</strong> - ` + header.innerHTML;
+    
+    // Niveau
+    const niveauSpan = clone.querySelector('.badge-niveau');
+    niveauSpan.textContent = question.niveau.charAt(0).toUpperCase() + question.niveau.slice(1);
+    niveauSpan.className = `badge-niveau niveau-${question.niveau}`;
+    
+    // Texte de la question
+    clone.querySelector('.question-text').textContent = question.texte;
+    
+    switch(question.type) {
+        case 'vrai':
+            const reponseSpan = clone.querySelector('.reponse');
+            reponseSpan.textContent = question.bonne_reponse_boole === 1 ? 'Vrai' : 'Faux';
+            break;
+            
+        case 'choix':
+            const choicesContainer = clone.querySelector('.choices-container');
+            const lettres = ['A', 'B', 'C', 'D'];
+            
+            ['choix_a', 'choix_b', 'choix_c', 'choix_d'].forEach((choix, i) => {
+                if (question[choix]) {
+                    const div = document.createElement('div');
+                    div.className = 'choice-option';
+                    if (question.bonne_reponse_choix === lettres[i]) {
+                        div.classList.add('correct');
+                    }
+                    div.innerHTML = `<strong>${lettres[i]}.</strong> ${question[choix]}`;
+                    choicesContainer.appendChild(div);
+                }
+            });
+            
+            const indiceSpan = clone.querySelector('.indice');
+            indiceSpan.textContent = question.indice || 'Aucun indice';
+            break;
+            
+        case 'texte':
+            clone.querySelector('.reponse-attendue').textContent = question.reponse_attente;
+            break;
+    }
+    
+    return clone;
+}
+</script>
+{% endblock %}

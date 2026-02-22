@@ -1,74 +1,329 @@
 {# templates/admin/event_edit_admin.html.twig #}
 {% extends 'admin/base_admin.html.twig' %}
 
-{% block title %}Modifier l'événement - Admin{% endblock %}
+{% block title %}Update Event - Admin{% endblock %}
 
 {% block admin_content %}
-{# Spacer pour navbar fixe - ajuster la hauteur selon ton navbar #}
-<div style="height: 80px;"></div>
-
-<div class="container py-5">
-
-    <h1 class="mb-4 text-primary fw-bold text-center">Modifier l'événement</h1>
-
-    {# Messages flash #}
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endfor %}
-
-    <div class="row g-4">
-        {# Partie gauche : image actuelle #}
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0">
-                {% if event.image and event.image != 'default.png' %}
-                    <img src="{{ asset('uploads/' ~ event.image) }}" 
-                         class="card-img-top rounded-top" 
-                         alt="{{ event.titre }}" 
-                         style="object-fit: cover; height: 250px;">
-                    <div class="card-body text-center">
-                        <p class="card-text fw-semibold">Image actuelle</p>
-                    </div>
-                {% else %}
-                    <div class="card-body text-center bg-light border rounded">
-                        <p class="text-muted fw-medium mb-0">Aucune image disponible</p>
-                    </div>
-                {% endif %}
-            </div>
+<div class="admin-main-content">
+    <div class="container-fluid mt-5">
+        <!-- En-tête de page -->
+        <div class="page-header mb-4">
+            <h2 class="page-title">
+                <i class="fas fa-edit"></i> Update Event
+            </h2>
+            <p class="text-muted">Edit the event details below</p>
         </div>
 
-        {# Partie droite : formulaire #}
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0 p-4">
-                {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
+        {# Messages flash #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
 
-                {% for field in ['titre', 'description', 'dateCreation', 'type'] %}
-                    <div class="mb-3">
-                        {{ form_label(attribute(form, field), null, {'label_attr': {'class': 'form-label fw-bold text-secondary'}}) }}
-                        {{ form_widget(attribute(form, field), {'attr': {'class': 'form-control rounded-3 shadow-sm'}}) }}
-                        {{ form_errors(attribute(form, field)) }}
+        <div class="row g-4">
+            {# Partie gauche : image actuelle #}
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-image"></i> Current Image</h5>
                     </div>
-                {% endfor %}
-
-                <div class="mb-4">
-                    {{ form_label(form.image, 'Nouvelle image (optionnel)', {'label_attr': {'class': 'form-label fw-bold text-secondary'}}) }}
-                    {{ form_widget(form.image, {'attr': {'class': 'form-control rounded-3 shadow-sm', 'accept': 'image/*'}}) }}
-                    {{ form_errors(form.image) }}
-                    <small class="text-muted d-block mt-1">Laissez vide pour conserver l'image actuelle.</small>
+                    <div class="card-body p-0">
+                        {% if event.image and event.image != 'default.png' %}
+                            <img src="{{ asset('uploads/' ~ event.image) }}" 
+                                 class="img-fluid w-100" 
+                                 alt="{{ event.titre }}" 
+                                 style="object-fit: cover; height: 300px;">
+                            <div class="p-3 text-center bg-light">
+                                <p class="mb-0 fw-semibold text-secondary">
+                                    <i class="fas fa-check-circle text-success"></i> Image uploaded
+                                </p>
+                            </div>
+                        {% else %}
+                            <div class="p-5 text-center bg-light">
+                                <i class="fas fa-image fa-3x text-muted mb-3"></i>
+                                <p class="text-muted fw-medium mb-0">No image available</p>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
+            </div>
 
-                <div class="d-flex flex-wrap gap-2">
-                    <button type="submit" class="btn btn-primary btn-lg shadow-sm">Mettre à jour</button>
-                    <a href="{{ path('app_events') }}" class="btn btn-outline-secondary btn-lg shadow-sm">Annuler</a>
+            {# Partie droite : formulaire #}
+            <div class="col-lg-8">
+                <div class="form-card">
+                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.titre, 'Event Title', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.titre, {'attr': {'class': 'form-control', 'placeholder': 'Enter event title'}}) }}
+                                    {{ form_errors(form.titre) }}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.type, 'Event Type', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.type, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.type) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Enter event description', 'rows': '4'}}) }}
+                            {{ form_errors(form.description) }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.dateCreation, 'Creation Date', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.dateCreation, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.dateCreation) }}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.image, 'Update Image (Optional)', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.image, {'attr': {'class': 'form-control', 'accept': 'image/*'}}) }}
+                                    {{ form_errors(form.image) }}
+                                    <small class="form-text text-muted">Leave empty to keep current image</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <a href="{{ path('app_events') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                        </div>
+
+                    {{ form_end(form) }}
                 </div>
-
-                {{ form_end(form) }}
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* ========== CONTENEUR PRINCIPAL ADMIN ========== */
+    .admin-main-content {
+        margin-left: 280px;
+        padding-top: 100px;
+    }
+
+    /* ========== EN-TÊTE DE PAGE ========== */
+    .page-header {
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-title i {
+        color: #667eea;
+        margin-right: 10px;
+    }
+
+    .text-muted {
+        color: #6c757d;
+    }
+
+    /* ========== CARTE DE FORMULAIRE ========== */
+    .form-card {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    /* ========== CARTE D'IMAGE ========== */
+    .card {
+        border-radius: 10px;
+        border: none;
+        overflow: hidden;
+    }
+
+    .card-header {
+        border-radius: 10px 10px 0 0;
+        padding: 1rem;
+    }
+
+    .card-header h5 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .card-header i {
+        margin-right: 8px;
+    }
+
+    /* ========== FORMULAIRE ========== */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+        padding: 10px 15px;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        outline: none;
+    }
+
+    .form-control:hover {
+        border-color: #b0b0b0;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    /* Messages d'erreur */
+    .form-error-message,
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    /* Texte d'aide */
+    .form-text {
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    /* ========== BOUTONS ========== */
+    .btn {
+        padding: 10px 25px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        margin-right: 10px;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+    .btn i {
+        margin-right: 8px;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #0cebeb 0%, #20e3b2 100%);
+        color: white;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(32, 227, 178, 0.3);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+
+    /* ========== SELECT PERSONNALISÉ ========== */
+    select.form-control {
+        cursor: pointer;
+        appearance: none;
+        background-color: white;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        padding-right: 40px;
+    }
+
+    /* ========== ACTIONS DU FORMULAIRE ========== */
+    .form-actions {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #e9ecef;
+    }
+
+    /* ========== ALERTS ========== */
+    .alert {
+        border-radius: 8px;
+        border: none;
+    }
+
+    /* ========== GRILLE ========== */
+    .row {
+        margin-bottom: 0;
+    }
+
+    .g-4 {
+        gap: 1.5rem;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 768px) {
+        .admin-main-content {
+            margin-left: 0;
+            padding-top: 80px;
+        }
+
+        .form-card {
+            padding: 1.5rem;
+        }
+
+        .btn {
+            width: 100%;
+            margin-bottom: 10px;
+            margin-right: 0;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
