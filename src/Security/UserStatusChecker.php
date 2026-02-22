@@ -31,6 +31,12 @@ class UserStatusChecker implements UserCheckerInterface
     if (!$user instanceof Utilisateur) return;
 
     $risk = $this->riskCalculator->calculateRisk($user);
+
+    // ✅ EXCEPTION : Si le compte vient d'être créé (jamais connecté)
+    if ($user->getLastLogin() === null) {
+        // Première connexion - on laisse passer
+        return;
+    }
     
     // 🟢 NIVEAU 1: RISQUE FAIBLE (0-30%)
     if ($risk <= 30) {

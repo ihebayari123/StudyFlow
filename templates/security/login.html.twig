@@ -46,8 +46,10 @@
                 <button class="btn btn-primary btn-block" type="submit">Sign in</button>
             </form>
 
-            <div class="auth-footer">
-                Don't have an account? <a href="{{ path('app_register') }}">Register</a>
+            <div class="auth-footer" style="margin-top: 15px;">
+                <a href="{{ path('app_forgot_password_request') }}" style="color: var(--primary-color); text-decoration: none; font-size: 0.9rem;">
+                Mot de passe oublié ?
+                </a>
             </div>
         </div>
     </div>

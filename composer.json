@@ -79,10 +79,14 @@
             "importmap:install": "symfony-cmd"
         },
         "post-install-cmd": [
-            "@auto-scripts"
+            "@auto-scripts",
+            "Composer\\Config::disableProcessTimeout",
+            "start-consumer.bat"
         ],
         "post-update-cmd": [
-            "@auto-scripts"
+            "@auto-scripts",
+            "Composer\\Config::disableProcessTimeout",
+            "start-consumer.bat"
         ]
     },
     "conflict": {
