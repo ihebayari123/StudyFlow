@@ -26,6 +26,7 @@ security:
   access_control:
     # ===== ROUTES 100% PUBLIQUES ===== (sans aucun login)
     - { path: ^/$, roles: PUBLIC_ACCESS }
+    - { path: ^/captcha, roles: PUBLIC_ACCESS }
     - { path: ^/login, roles: PUBLIC_ACCESS }
     - { path: ^/logout, roles: PUBLIC_ACCESS }
     - { path: ^/register, roles: PUBLIC_ACCESS }

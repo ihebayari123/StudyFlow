@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Utilisateur;
+use Gregwar\CaptchaBundle\Type\CaptchaType; // ← AJOUTE CET IMPORT
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -32,7 +33,7 @@ class RegistrationFormType extends AbstractType
                 'label' => 'Mot de passe',
                 'mapped' => false,
                 'attr' => ['autocomplete' => 'new-password'],
-                'constraints' => [ // AJOUTEZ CES CONTRAINTES
+                'constraints' => [
                     new NotBlank([
                         'message' => 'Veuillez saisir un mot de passe',
                         'groups' => ['registration']
@@ -54,6 +55,16 @@ class RegistrationFormType extends AbstractType
                         'groups' => ['registration']
                     ]),
                 ],
+            ])
+            // ✅ AJOUT DU CAPTCHA
+            ->add('captcha', CaptchaType::class, [
+                'label' => 'Code de sécurité',
+                'mapped' => false,
+                'width' => 300,           # Doit correspondre à la config
+                'height' => 100,
+                'length' => 6,
+                'keep_value' => true,
+                'invalid_message' => 'Le code captcha est incorrect.'
             ]);
     }
 

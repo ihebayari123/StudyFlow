@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Login</title>
+</head>
+<body>
+    <h1>Formulaire de test</h1>
+    
+    <form method="post" action="{{ path('test_login') }}">
+        <div style="margin: 10px 0;">
+            <label>Email:</label>
+            <input type="email" name="email" required>
+        </div>
+        
+        <div style="margin: 10px 0;">
+            <label>Password:</label>
+            <input type="password" name="password" required>
+        </div>
+        
+        <button type="submit">Envoyer</button>
+    </form>
+</body>
+</html>

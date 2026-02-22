@@ -3,6 +3,7 @@
 
 namespace App\Form;
 
+use Gregwar\CaptchaBundle\Type\CaptchaType; // ← AJOUTE CET IMPORT
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
@@ -38,6 +39,16 @@ class ResetPasswordType extends AbstractType
                         'message' => 'Le mot de passe doit contenir une majuscule, une minuscule et un chiffre'
                     ])
                 ]
+            ])
+            // ✅ AJOUT DU CAPTCHA
+            ->add('captcha', CaptchaType::class, [
+                'label' => 'Code de sécurité',
+                'mapped' => false,
+                'width' => 300,           # Doit correspondre à la config
+                'height' => 100,
+                'length' => 6,
+                'keep_value' => true,
+                'invalid_message' => 'Le code captcha est incorrect.'
             ]);
     }
 

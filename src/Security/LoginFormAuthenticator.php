@@ -16,6 +16,8 @@ use Symfony\Component\Security\Http\Util\TargetPathTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\FormFactoryInterface; // ← IMPORTANT
+use App\Form\LoginType;
 
 class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 {
@@ -25,29 +27,72 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
     private EntityManagerInterface $entityManager;
     private UrlGeneratorInterface $urlGenerator;
+    private FormFactoryInterface $formFactory;
 
-    public function __construct(EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator)
-    {
-        $this->entityManager = $entityManager;
-        $this->urlGenerator = $urlGenerator;
+public function __construct(
+    EntityManagerInterface $entityManager,
+    UrlGeneratorInterface $urlGenerator,
+    FormFactoryInterface $formFactory
+) {
+    $this->entityManager = $entityManager;
+    $this->urlGenerator = $urlGenerator;
+    $this->formFactory = $formFactory;
+}
+
+public function authenticate(Request $request): Passport
+{
+    // Créer le formulaire avec le FormFactory
+    $form = $this->formFactory->createNamed('', LoginType::class);
+    $form->handleRequest($request);
+
+    if (!$form->isSubmitted()) {
+        throw new AuthenticationException('Formulaire non soumis');
     }
 
-    public function authenticate(Request $request): Passport
-    {
-        $email = $request->request->get('email', '');
-        $password = $request->request->get('password', '');
-        $csrfToken = $request->request->get('_csrf_token');
+    // ✅ DEBUG : Voir les erreurs du CAPTCHA
+    $captchaErrors = $form->get('captcha')->getErrors();
+    foreach ($captchaErrors as $error) {
+        error_log('CAPTCHA ERROR: ' . $error->getMessage());
+    }
+    
+    // ✅ DEBUG : Voir la valeur en session
+    $sessionValue = $request->getSession()->get('captcha');
+    error_log('Session captcha value: ' . ($sessionValue ?? 'NULL'));
+    
+    // ✅ DEBUG : Voir la valeur soumise
+    $submittedValue = $request->request->get('captcha');
+    error_log('Submitted captcha value: ' . ($submittedValue ?? 'NULL'));
 
-        return new Passport(
-            new UserBadge($email),
-            new PasswordCredentials($password),
-            [
-                new CsrfTokenBadge('authenticate', $csrfToken),
-                new RememberMeBadge(),
-            ]
-        );
+    if (count($captchaErrors) > 0) {
+        throw new AuthenticationException('Le code captcha est incorrect. Veuillez réessayer.');
     }
 
+    // ✅ Vérification spécifique du CAPTCHA
+    $captchaError = $form->get('captcha')->getErrors();
+    if (count($captchaError) > 0) {
+        throw new AuthenticationException('Le code captcha est incorrect. Veuillez réessayer.');
+    }
+
+    // Vérification globale (optionnelle)
+    if (!$form->isValid()) {
+        // Log pour debug
+        error_log('Formulaire invalide mais CAPTCHA OK');
+    }
+
+    $data = $form->getData();
+    $email = $data['email'] ?? '';
+    $password = $data['password'] ?? '';
+    $csrfToken = $request->request->get('_token', '');
+
+    return new Passport(
+        new UserBadge($email),
+        new PasswordCredentials($password),
+        [
+            new CsrfTokenBadge('authenticate', $csrfToken),
+            new RememberMeBadge(),
+        ]
+    );
+}
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?RedirectResponse
     {
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
@@ -90,32 +135,30 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
-{
-    // Récupérer l'email depuis la requête
-    $email = $request->request->get('email', '');
-    
-    if ($email) {
-        try {
-            $user = $this->entityManager->getRepository(\App\Entity\Utilisateur::class)
-                ->findOneBy(['email' => $email]);
-                
-            if ($user) {
-                $user->setFailedLoginAttempts($user->getFailedLoginAttempts() + 1);
-                $this->entityManager->flush();
-                
-                // Log pour debug
-                error_log("🔴 Failed login attempt recorded for $email - New total: " . $user->getFailedLoginAttempts());
-            } else {
-                error_log("🔴 User not found for email: $email");
+    {
+        // Récupérer l'email depuis la requête
+        $email = $request->request->get('email', '');
+        
+        if ($email) {
+            try {
+                $user = $this->entityManager->getRepository(\App\Entity\Utilisateur::class)
+                    ->findOneBy(['email' => $email]);
+                    
+                if ($user) {
+                    $user->setFailedLoginAttempts($user->getFailedLoginAttempts() + 1);
+                    $this->entityManager->flush();
+                    
+                    error_log("🔴 Failed login attempt recorded for $email - New total: " . $user->getFailedLoginAttempts());
+                } else {
+                    error_log("🔴 User not found for email: $email");
+                }
+            } catch (\Exception $e) {
+                error_log("🔴 Error recording failed login: " . $e->getMessage());
             }
-        } catch (\Exception $e) {
-            error_log("🔴 Error recording failed login: " . $e->getMessage());
         }
-    }
 
-    // Rediriger vers la page de login avec message d'erreur
-    $request->getSession()->set('_security.last_error', $exception);
-    
-    return new RedirectResponse($this->urlGenerator->generate('app_login'));
-}
+        $request->getSession()->set('_security.last_error', $exception);
+        
+        return new RedirectResponse($this->urlGenerator->generate('app_login'));
+    }
 }

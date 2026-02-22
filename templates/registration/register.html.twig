@@ -46,6 +46,18 @@
                 <div class="form-error">{{ form_errors(registrationForm.plainPassword) }}</div>
             </div>
 
+            {# ✅ CAPTCHA avec bouton "Recharger" (as_url=false) #}
+            <div class="form-group captcha-group">
+                {{ form_label(registrationForm.captcha, 'Code de sécurité', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="captcha-wrapper">
+                    {{ form_widget(registrationForm.captcha, {'attr': {'class': 'captcha-image'}}) }}
+                    <button type="button" class="btn-reload" onclick="window.location.reload()" title="Recharger le code">
+                        <i class="fas fa-sync-alt"></i> Recharger
+                    </button>
+                </div>
+                {{ form_errors(registrationForm.captcha) }}
+            </div>
+
             <div class="form-group form-checkbox">
                 {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'checkbox-input'}}) }}
                 {{ form_label(registrationForm.agreeTerms, null, {'label_attr': {'class': 'checkbox-label'}}) }}
@@ -189,6 +201,48 @@
     .checkbox-label {
         font-size: 0.95rem;
         color: var(--gray-600);
+    }
+
+    /* ✅ Styles pour le CAPTCHA */
+    .captcha-group {
+        margin-bottom: 10px;
+    }
+
+    .captcha-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .captcha-wrapper img {
+        width: auto;
+        max-width: 100%;
+        height: 100px;
+        object-fit: contain;
+        border: 2px solid var(--gray-200);
+        border-radius: 10px;
+        background: white;
+    }
+
+    .btn-reload {
+        padding: 12px 20px;
+        background: var(--gray-200);
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+    }
+
+    .btn-reload:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
     }
 
     .btn {
