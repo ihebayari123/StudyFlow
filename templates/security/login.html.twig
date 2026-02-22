@@ -15,7 +15,10 @@
                 <p class="auth-subtitle">Sign in to continue learning</p>
             </div>
 
-            <form method="post" class="auth-form">
+            {# Formulaire Symfony #}
+            {{ form_start(form, {'attr': {'class': 'auth-form'}}) }}
+                
+                {# Affichage des erreurs #}
                 {% if error %}
                     <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
                 {% endif %}
@@ -27,29 +30,38 @@
                     </div>
                 {% endif %}
 
+                {# Champs du formulaire #}
                 <div class="form-group">
-                    <label for="inputEmail" class="form-label">Email</label>
-                    <input type="email" value="{{ last_username }}" name="email" id="inputEmail" 
-                           class="form-input" autocomplete="email" required autofocus
-                           placeholder="you@example.com">
+                    {{ form_label(form.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.email, {'attr': {'class': 'form-input', 'placeholder': 'you@example.com', 'value': last_username}}) }}
+                    {{ form_errors(form.email) }}
                 </div>
 
                 <div class="form-group">
-                    <label for="inputPassword" class="form-label">Password</label>
-                    <input type="password" name="password" id="inputPassword" 
-                           class="form-input" autocomplete="current-password" required
-                           placeholder="Enter your password">
+                    {{ form_label(form.password, 'Password', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.password, {'attr': {'class': 'form-input', 'placeholder': 'Enter your password'}}) }}
+                    {{ form_errors(form.password) }}
                 </div>
 
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                {# CAPTCHA avec bouton recharger (HORS du formulaire) #}
+                <div class="form-group captcha-group">
+                    {{ form_label(form.captcha, 'Code de sécurité', {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="captcha-wrapper">
+                        {{ form_widget(form.captcha, {'attr': {'class': 'captcha-image'}}) }}
+                        <a href="{{ path('app_login') }}" class="btn-reload" title="Recharger le code">
+                            <i class="fas fa-sync-alt"></i> Recharger
+                        </a>
+                    </div>
+                    {{ form_errors(form.captcha) }}
+                </div>
 
-                <button class="btn btn-primary btn-block" type="submit">Sign in</button>
-            </form>
+                <button type="submit" class="btn btn-primary btn-block">
+                    Se connecter
+                </button>
+            {{ form_end(form) }}
 
-            <div class="auth-footer" style="margin-top: 15px;">
-                <a href="{{ path('app_forgot_password_request') }}" style="color: var(--primary-color); text-decoration: none; font-size: 0.9rem;">
-                Mot de passe oublié ?
-                </a>
+            <div class="auth-footer">
+                <a href="{{ path('app_forgot_password_request') }}">Mot de passe oublié ?</a>
             </div>
         </div>
     </div>
@@ -160,6 +172,56 @@
         color: var(--gray-400);
     }
 
+    .form-error {
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 4px;
+    }
+
+    /* ✅ Styles pour le CAPTCHA */
+    .captcha-group {
+        margin-bottom: 10px;
+    }
+
+    .captcha-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .captcha-wrapper img {
+        width: auto;
+        max-width: 100%;
+        height: 100px;
+        object-fit: contain;
+        border: 2px solid var(--gray-200);
+        border-radius: 10px;
+        background: white;
+    }
+
+    .btn-reload {
+        padding: 12px 20px;
+        background: var(--gray-200);
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: var(--gray-700);
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+    }
+
+    .btn-reload:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+    }
+
     .btn {
         padding: 14px 24px;
         border: none;
@@ -206,6 +268,7 @@
         padding: 12px 18px;
         border-radius: 50px;
         font-size: 0.95rem;
+        margin-bottom: 20px;
     }
 
     .alert-danger {
