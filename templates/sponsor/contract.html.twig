@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Contrat_{{ sponsor.nomSponsor }}_{{ today|date("d-m-Y") }}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { font-family: Georgia, serif; background: #eef2f7; color: #2c3e50; }
+
+        .barre-actions {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+            background: #2c3e50; padding: 12px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .barre-actions .titre-barre { color: #ecf0f1; font-size: 14px; font-weight: bold; }
+        .btn-pdf {
+            background: #e74c3c; color: white; border: none;
+            padding: 9px 28px; border-radius: 6px; font-size: 14px;
+            cursor: pointer; font-weight: bold;
+        }
+        .btn-pdf:hover { background: #c0392b; }
+        .btn-pdf:disabled { background: #95a5a6; cursor: not-allowed; }
+        .btn-retour {
+            background: transparent; color: #ecf0f1;
+            border: 1px solid #ecf0f1; padding: 9px 20px;
+            border-radius: 6px; font-size: 13px; text-decoration: none;
+        }
+
+        .page-wrapper { padding: 80px 20px 50px; display: flex; justify-content: center; }
+
+        #contrat-pdf {
+            width: 700px;
+            background: white;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+        }
+
+        .entete-top {
+            background: #2c3e50; padding: 20px 28px 16px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo-zone h1 { color: white; font-size: 22px; letter-spacing: 4px; }
+        .logo-zone p  { color: #aab7c4; font-size: 9px; letter-spacing: 1px; margin-top: 3px; text-transform: uppercase; }
+        .ref-zone { text-align: right; color: #aab7c4; font-size: 10px; line-height: 1.7; }
+        .ref-zone strong { color: #ecf0f1; }
+
+        .entete-band {
+            background: #3d5a73; padding: 8px 28px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .band-txt { color: #ecf0f1; font-size: 10px; letter-spacing: 1.5px; }
+        .badge-n { display: inline-block; padding: 2px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; color: white; }
+
+        .corps { padding: 20px 28px; }
+
+        .titre-contrat { text-align: center; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 2px dashed #dce3ec; }
+        .titre-contrat h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 3px; color: #2c3e50; margin-bottom: 4px; }
+        .titre-contrat p  { font-size: 10px; color: #7f8c8d; font-style: italic; }
+
+        .recap-box {
+            background: #f7f9fc; border: 1px solid #dce3ec;
+            border-left: 4px solid #2c3e50; border-radius: 3px;
+            padding: 11px 15px; margin: 10px 0 13px;
+        }
+        .recap-box h4 { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: #7f8c8d; margin-bottom: 8px; }
+        .recap-box table { width: 100%; border-collapse: collapse; }
+        .recap-box td { padding: 5px 4px; font-size: 11px; border-bottom: 1px solid #eaecef; vertical-align: middle; }
+        .recap-box td:first-child { color: #7f8c8d; width: 38%; }
+        .recap-box td:last-child { font-weight: bold; }
+        .recap-box tr:last-child td { border-bottom: none; }
+
+        .article { margin: 6px 0; padding: 9px 13px; background: #fafbfc; border-radius: 3px; border: 1px solid #eaecef; }
+        .article h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #2c3e50; margin-bottom: 5px; padding-left: 8px; border-left: 3px solid #2c3e50; }
+        .article p  { font-size: 11px; line-height: 1.7; color: #444; text-align: justify; }
+
+        .avantages-box { background: #f0f4f8; border-radius: 3px; padding: 6px 12px; margin-top: 6px; font-size: 10.5px; line-height: 1.65; }
+        .avantages-box ul { padding-left: 14px; }
+
+        .sig-section { margin-top: 16px; padding-top: 14px; border-top: 2px solid #eaecef; }
+        .sig-section h4 { text-align: center; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: #7f8c8d; margin-bottom: 12px; }
+        .sig-grid { display: flex; gap: 16px; }
+        .sig-block { flex: 1; border: 1px solid #dce3ec; border-radius: 5px; padding: 11px; text-align: center; background: #fafbfc; }
+        .sig-titre { font-size: 11px; font-weight: bold; color: #2c3e50; margin-bottom: 2px; }
+        .sig-sous  { font-size: 9px; color: #95a5a6; margin-bottom: 7px; }
+        .canvas-zone { border: 2px dashed #bdc3c7; border-radius: 3px; height: 68px; background: white; cursor: crosshair; overflow: hidden; }
+        .canvas-zone canvas { display: block; }
+        .sig-actions { display: flex; justify-content: center; margin-top: 5px; }
+        .btn-eff { background: #ecf0f1; border: 1px solid #bdc3c7; color: #7f8c8d; font-size: 10px; padding: 2px 10px; border-radius: 3px; cursor: pointer; }
+        .sig-date { font-size: 9px; color: #95a5a6; margin-top: 5px; }
+
+        .pied-page { background: #f7f9fc; border-top: 1px solid #dce3ec; padding: 9px 28px; text-align: center; font-size: 8px; color: #aab7c4; }
+
+        /* Spinner chargement */
+        .spinner { display: none; width: 16px; height: 16px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; margin-left: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<!-- BARRE -->
+<div class="barre-actions">
+    <span class="titre-barre">📄 StudyFlow · Contrat de Partenariat</span>
+    <div style="display:flex;gap:10px;align-items:center;">
+        <a href="{{ path('sponsor_index') }}" class="btn-retour">← Retour</a>
+        <button class="btn-pdf" id="btn-telecharger" onclick="genererPDF()">
+            ⬇ Télécharger PDF
+            <span class="spinner" id="spinner"></span>
+        </button>
+    </div>
+</div>
+
+<!-- FORMULAIRE caché pour envoyer le HTML au serveur -->
+<form id="form-pdf" method="POST" action="{{ path('sponsor_contract_pdf', {'id': sponsor.id}) }}" style="display:none;">
+    <input type="hidden" name="html_content" id="html-content-input">
+</form>
+
+<div class="page-wrapper">
+<div id="contrat-pdf">
+
+    {% set color = '#2c3e50' %}
+    {% if sponsor.type == 'Or' or sponsor.type == 'Gold' %}{% set color = '#e67e22' %}
+    {% elseif sponsor.type == 'Argent' or sponsor.type == 'Silver' %}{% set color = '#7f8c8d' %}
+    {% elseif sponsor.type == 'Bronze' %}{% set color = '#a04000' %}
+    {% endif %}
+
+    <div class="entete-top">
+        <div class="logo-zone">
+            <h1>StudyFlow</h1>
+            <p>Plateforme éducative dédiée aux étudiants</p>
+        </div>
+        <div class="ref-zone">
+            <div>Réf : <strong>SF-{{ sponsor.id }}-{{ "now"|date("Y") }}</strong></div>
+            <div>Date : <strong>{{ today|date("d/m/Y") }}</strong></div>
+            <div>Statut : <strong style="color:#2ecc71;">✔ Actif</strong></div>
+        </div>
+    </div>
+
+    <div class="entete-band">
+        <span class="band-txt">CONTRAT DE PARTENARIAT ÉDUCATIF</span>
+        <span class="badge-n" style="background:{{ color }};">Niveau {{ sponsor.type }}</span>
+    </div>
+
+    <div class="corps">
+
+        <div class="titre-contrat">
+            <h2>Accord de Partenariat</h2>
+            <p>Conclu entre StudyFlow et {{ sponsor.nomSponsor }} · « {{ sponsor.eventTitre ? sponsor.eventTitre.titre : 'Non défini' }} »</p>
+        </div>
+
+        <div class="recap-box">
+            <h4>Récapitulatif du partenariat</h4>
+            <table>
+                <tr><td>Sponsor</td><td>{{ sponsor.nomSponsor }}</td></tr>
+                <tr><td>Événement</td><td>{{ sponsor.eventTitre ? sponsor.eventTitre.titre : 'Non défini' }}</td></tr>
+                <tr><td>Niveau</td><td><span class="badge-n" style="background:{{ color }};font-size:9px;">{{ sponsor.type }}</span></td></tr>
+                <tr><td>Contribution financière</td><td style="color:#27ae60;">{{ sponsor.montant }} DT</td></tr>
+                <tr><td>Date de signature</td><td>{{ today|date("d/m/Y") }}</td></tr>
+            </table>
+        </div>
+
+        <div class="article">
+            <h3>Article 1 — Les Parties</h3>
+            <p><strong>StudyFlow</strong>, plateforme numérique dédiée aux étudiants, ci-après <em>« la Plateforme »</em>, ET <strong>{{ sponsor.nomSponsor }}</strong>, partenaire financier, ci-après <em>« le Sponsor »</em>.</p>
+        </div>
+
+        <div class="article">
+            <h3>Article 2 — Objet</h3>
+            <p>Formaliser le soutien financier de <strong>{{ sponsor.nomSponsor }}</strong> à StudyFlow dans le cadre de l'événement <strong>« {{ sponsor.eventTitre ? sponsor.eventTitre.titre : 'Non défini' }} »</strong> destiné à la communauté étudiante.</p>
+        </div>
+
+        <div class="article">
+            <h3>Article 3 — Obligations du Sponsor</h3>
+            <p>Verser <strong>{{ sponsor.montant }} DT</strong> selon les modalités convenues, respecter les valeurs pédagogiques de StudyFlow et ne pas agir contre les intérêts de la communauté étudiante.</p>
+        </div>
+
+        <div class="article">
+            <h3>Article 4 — Obligations de la Plateforme</h3>
+            <p>StudyFlow assure la visibilité du Sponsor selon le niveau <strong>{{ sponsor.type }}</strong> :</p>
+            <div class="avantages-box">
+                {% if sponsor.type == 'Or' or sponsor.type == 'Gold' %}
+                <ul>
+                    <li>Logo premium sur tous les supports de communication</li>
+                    <li>Mention orale à l'ouverture et à la clôture de l'événement</li>
+                    <li>Stand dédié lors de l'événement</li>
+                    <li>3 publications sur les réseaux sociaux StudyFlow</li>
+                    <li>Accès aux statistiques post-événement</li>
+                </ul>
+                {% elseif sponsor.type == 'Argent' or sponsor.type == 'Silver' %}
+                <ul>
+                    <li>Logo sur les supports principaux de l'événement</li>
+                    <li>Mention lors de la cérémonie d'ouverture</li>
+                    <li>1 publication sur les réseaux sociaux StudyFlow</li>
+                    <li>Présence dans le programme officiel</li>
+                </ul>
+                {% elseif sponsor.type == 'Bronze' %}
+                <ul>
+                    <li>Logo sur le programme officiel</li>
+                    <li>Mention sur le site web StudyFlow</li>
+                    <li>Remerciements dans les communications post-événement</li>
+                </ul>
+                {% else %}
+                <ul>
+                    <li>Visibilité selon accord bilatéral</li>
+                    <li>Mention dans les communications officielles</li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="article">
+            <h3>Article 5 — Durée</h3>
+            <p>Prend effet à la date de signature et reste valable jusqu'à la clôture de <strong>« {{ sponsor.eventTitre ? sponsor.eventTitre.titre : 'Non défini' }} »</strong>. Reconductible par accord mutuel écrit.</p>
+        </div>
+
+        <div class="article">
+            <h3>Article 6 — Confidentialité</h3>
+            <p>Les parties s'engagent à garder confidentielles toutes les informations échangées et à ne pas les divulguer sans accord écrit préalable de l'autre partie.</p>
+        </div>
+
+        <div class="article">
+            <h3>Article 7 — Résiliation</h3>
+            <p>En cas de manquement, résiliation possible avec préavis de 15 jours par lettre recommandée avec accusé de réception, sans préjudice de tout recours en dommages et intérêts.</p>
+        </div>
+
+        <!-- SIGNATURES -->
+        <div class="sig-section">
+            <h4>Signatures des parties</h4>
+            <div class="sig-grid">
+                <div class="sig-block">
+                    <div class="sig-titre">Pour StudyFlow</div>
+                    <div class="sig-sous">Représentant légal</div>
+                    <div class="canvas-zone" id="zone-sf"><canvas id="canvas-sf"></canvas></div>
+                    <div class="sig-actions"><button class="btn-eff" onclick="effacer('canvas-sf','zone-sf')">✕ Effacer</button></div>
+                    <div class="sig-date">Tunis, le {{ today|date("d/m/Y") }}</div>
+                </div>
+                <div class="sig-block">
+                    <div class="sig-titre">Pour {{ sponsor.nomSponsor }}</div>
+                    <div class="sig-sous">Représentant habilité</div>
+                    <div class="canvas-zone" id="zone-sp"><canvas id="canvas-sp"></canvas></div>
+                    <div class="sig-actions"><button class="btn-eff" onclick="effacer('canvas-sp','zone-sp')">✕ Effacer</button></div>
+                    <div class="sig-date">Tunis, le {{ today|date("d/m/Y") }}</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="pied-page">
+        Généré par StudyFlow · Plateforme éducative dédiée aux étudiants &nbsp;|&nbsp;
+        Réf. SF-{{ sponsor.id }}-{{ "now"|date("Y") }} &nbsp;|&nbsp; © {{ "now"|date("Y") }} StudyFlow
+    </div>
+
+</div>
+</div>
+
+<script>
+const pads = {};
+
+function initPad(cId, zId) {
+    const zone   = document.getElementById(zId);
+    const canvas = document.getElementById(cId);
+    canvas.width  = zone.clientWidth;
+    canvas.height = zone.clientHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.strokeStyle = '#1a252f';
+    ctx.lineWidth = 1.8;
+    ctx.lineCap = ctx.lineJoin = 'round';
+    let draw = false, lx = 0, ly = 0;
+
+    function pt(e) {
+        const r  = canvas.getBoundingClientRect();
+        const sx = canvas.width / r.width;
+        const sy = canvas.height / r.height;
+        return e.touches
+            ? { x:(e.touches[0].clientX-r.left)*sx, y:(e.touches[0].clientY-r.top)*sy }
+            : { x:(e.clientX-r.left)*sx,            y:(e.clientY-r.top)*sy };
+    }
+
+    canvas.onmousedown  = e => { draw=true; const p=pt(e); lx=p.x; ly=p.y; };
+    canvas.onmousemove  = e => { if(!draw) return; const p=pt(e); ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(p.x,p.y); ctx.stroke(); lx=p.x; ly=p.y; };
+    canvas.onmouseup    = () => draw=false;
+    canvas.onmouseleave = () => draw=false;
+    canvas.ontouchstart = e => { e.preventDefault(); draw=true; const p=pt(e); lx=p.x; ly=p.y; };
+    canvas.ontouchmove  = e => { e.preventDefault(); if(!draw) return; const p=pt(e); ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(p.x,p.y); ctx.stroke(); lx=p.x; ly=p.y; };
+    canvas.ontouchend   = () => draw=false;
+
+    pads[cId] = { canvas, ctx };
+}
+
+function effacer(cId) {
+    const {canvas, ctx} = pads[cId];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+window.addEventListener('load', () => {
+    initPad('canvas-sf', 'zone-sf');
+    initPad('canvas-sp', 'zone-sp');
+});
+
+function genererPDF() {
+    const btn     = document.getElementById('btn-telecharger');
+    const spinner = document.getElementById('spinner');
+
+    // UI : loading
+    btn.disabled       = true;
+    btn.innerHTML      = '⏳ Génération en cours... <span class="spinner" id="spinner" style="display:inline-block;"></span>';
+
+    // 1. Récupère les signatures en base64
+    const sigSF = document.getElementById('canvas-sf').toDataURL('image/png');
+    const sigSP = document.getElementById('canvas-sp').toDataURL('image/png');
+
+    // 2. Construit un HTML propre avec les signatures intégrées en <img>
+    //    (sans la barre de boutons ni les canvas)
+    const htmlPropre = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Georgia, serif; color: #2c3e50; background: white; }
+#contrat-pdf { width: 700px; margin: 0 auto; background: white; }
+.entete-top { background: #2c3e50; padding: 20px 28px 16px; display: flex; justify-content: space-between; align-items: center; }
+.logo-zone h1 { color: white; font-size: 22px; letter-spacing: 4px; }
+.logo-zone p  { color: #aab7c4; font-size: 9px; letter-spacing: 1px; margin-top: 3px; text-transform: uppercase; }
+.ref-zone { text-align: right; color: #aab7c4; font-size: 10px; line-height: 1.7; }
+.ref-zone strong { color: #ecf0f1; }
+.entete-band { background: #3d5a73; padding: 8px 28px; display: flex; justify-content: space-between; align-items: center; }
+.band-txt { color: #ecf0f1; font-size: 10px; letter-spacing: 1.5px; }
+.badge-n { display: inline-block; padding: 2px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; color: white; }
+.corps { padding: 20px 28px; }
+.titre-contrat { text-align: center; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 2px dashed #dce3ec; }
+.titre-contrat h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 3px; color: #2c3e50; margin-bottom: 4px; }
+.titre-contrat p  { font-size: 10px; color: #7f8c8d; font-style: italic; }
+.recap-box { background: #f7f9fc; border: 1px solid #dce3ec; border-left: 4px solid #2c3e50; border-radius: 3px; padding: 11px 15px; margin: 10px 0 13px; }
+.recap-box h4 { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: #7f8c8d; margin-bottom: 8px; }
+.recap-box table { width: 100%; border-collapse: collapse; }
+.recap-box td { padding: 5px 4px; font-size: 11px; border-bottom: 1px solid #eaecef; vertical-align: middle; }
+.recap-box td:first-child { color: #7f8c8d; width: 38%; }
+.recap-box td:last-child { font-weight: bold; }
+.recap-box tr:last-child td { border-bottom: none; }
+.article { margin: 6px 0; padding: 9px 13px; background: #fafbfc; border-radius: 3px; border: 1px solid #eaecef; }
+.article h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #2c3e50; margin-bottom: 5px; padding-left: 8px; border-left: 3px solid #2c3e50; }
+.article p  { font-size: 11px; line-height: 1.7; color: #444; text-align: justify; }
+.avantages-box { background: #f0f4f8; border-radius: 3px; padding: 6px 12px; margin-top: 6px; font-size: 10.5px; line-height: 1.65; }
+.avantages-box ul { padding-left: 14px; }
+.sig-section { margin-top: 16px; padding-top: 14px; border-top: 2px solid #eaecef; }
+.sig-section h4 { text-align: center; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: #7f8c8d; margin-bottom: 12px; }
+.sig-grid { display: flex; gap: 16px; }
+.sig-block { flex: 1; border: 1px solid #dce3ec; border-radius: 5px; padding: 11px; text-align: center; background: #fafbfc; }
+.sig-titre { font-size: 11px; font-weight: bold; color: #2c3e50; margin-bottom: 2px; }
+.sig-sous  { font-size: 9px; color: #95a5a6; margin-bottom: 7px; }
+.sig-img-zone { border: 1px solid #dce3ec; border-radius: 3px; height: 68px; background: white; overflow: hidden; }
+.sig-img-zone img { width: 100%; height: 68px; object-fit: contain; }
+.sig-date { font-size: 9px; color: #95a5a6; margin-top: 5px; }
+.pied-page { background: #f7f9fc; border-top: 1px solid #dce3ec; padding: 9px 28px; text-align: center; font-size: 8px; color: #aab7c4; }
+</style>
+</head>
+<body>
+<div id="contrat-pdf">
+` + document.getElementById('contrat-pdf').innerHTML
+    // Remplace les zones canvas par les images de signature
+    .replace(
+        /<div class="canvas-zone" id="zone-sf">[\s\S]*?<\/div>/,
+        `<div class="sig-img-zone"><img src="${sigSF}" alt="signature StudyFlow"></div>`
+    )
+    .replace(
+        /<div class="canvas-zone" id="zone-sp">[\s\S]*?<\/div>/,
+        `<div class="sig-img-zone"><img src="${sigSP}" alt="signature Sponsor"></div>`
+    )
+    // Supprime les boutons effacer
+    .replace(/<div class="sig-actions">[\s\S]*?<\/div>/g, '')
++ `
+</div>
+</body>
+</html>`;
+
+    // 3. Envoie le HTML propre au serveur via le formulaire caché
+    document.getElementById('html-content-input').value = htmlPropre;
+    document.getElementById('form-pdf').submit();
+
+    // 4. Remet le bouton en état normal après 3 secondes
+    setTimeout(() => {
+        btn.disabled  = false;
+        btn.innerHTML = '⬇ Télécharger PDF';
+    }, 3000);
+}
+</script>
+
+</body>
+</html>
