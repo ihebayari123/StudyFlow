@@ -24,13 +24,32 @@
                 <li class="scroll-to-section">
                   <a href="{{ path('app_showproduit1') }}">Boutique</a>
                 </li>
-                <li class="scroll-to-section">
-                  <a href="#events">Events</a>
+     <li class="scroll-to-section">
+    <a href="https://127.0.0.1:8000/events/front">Events</a>
+</li>
+<li class="scroll-to-section">
+              <a href="{{ path('app_login') }}">Log in</a>
+            {% if is_granted('ROLE_ETUDIANT') %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ path('app_profile_edit') }}">
+                <i class="fas fa-user"></i> Mon profil
+              </a>
+            </li>
+            {% endif %}
+            <li class="scroll-to-section">
+                  <a href="/front/showquiz">Quiz&Question</a>
                 </li>
-                <li class="scroll-to-section">
-                  <a href="{{ path('app_register') }}">Register Now!</a>
-                </li>
+
+                
               </ul>
+              
+              <div class="nav-cart">
+                <a href="{{ path('app_cart') }}" class="cart-link">
+                  <i class="fas fa-shopping-cart"></i>
+                  <span id="cart-count" class="cart-count">0</span>
+                </a>
+              </div>
+              
 
               <!-- Mobile Menu -->
               <a class="menu-trigger">

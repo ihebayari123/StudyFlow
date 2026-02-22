@@ -82,6 +82,15 @@
                                     Modifier
                                 </a>
 
+                                <!-- ✅ NOUVEAU : Générer Contrat -->
+                                <a href="{{ path('sponsor_contract', {'id': sponsor.id}) }}"
+                                   class="btn btn-dark btn-sm rounded-3 shadow-sm d-inline-flex justify-content-center align-items-center"
+                                   style="min-width: 100px; transition: transform 0.2s;"
+                                   onmouseover="this.style.transform='scale(1.05)'"
+                                   onmouseout="this.style.transform='scale(1)'">
+                                    📄 Contrat
+                                </a>
+
                                 <!-- Supprimer -->
                                 <form method="post"
                                       action="{{ path('sponsor_delete', {'id': sponsor.id}) }}"

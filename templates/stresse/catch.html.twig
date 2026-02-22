@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Coach Stress - Gestion du Stress Scolaire{% endblock %}
+{% block title %}Agenda des Cours - StudyFlow{% endblock %}
 
 {% block body %}
     <!-- Header -->
@@ -9,322 +9,279 @@
     {% endblock %}
 
     <!-- Main Content -->
-    <div class="coach-section">
+    <div class="agenda-section">
         <div class="container">
             <!-- Page Header -->
             <div class="header-with-button">
-                <h1 class="section-title">🧘 Coach Stress</h1>
+                <h1 class="section-title">📅 Agenda des Cours</h1>
                 <div class="header-icon">
-                    <span class="emoji">🌿</span>
+                    <span class="emoji">⏰</span>
                 </div>
             </div>
 
             <!-- Page Description -->
             <div class="description-section">
                 <p class="description-text">
-                    Votre assistant personnel pour gérer la pression scolaire et retrouver votre équilibre.
+                    Votre agenda personnalisé avec notifications pour chaque cours
                 </p>
             </div>
 
-            <!-- Quick Tip of the Day -->
+            <!-- Quick Stats -->
+            <div class="quick-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ coursAVoir|length }}</span>
+                        <span class="stat-label">Cours à voir</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ notifications|length }}</span>
+                        <span class="stat-label">Notifications</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ "now"|date("d F") }}</span>
+                        <span class="stat-label">Aujourd'hui</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Tip Card -->
             <div class="daily-tip-card">
                 <div class="tip-label">
-                    <i class="fas fa-lightbulb"></i> Conseil du jour
+                    <i class="fas fa-lightbulb"></i> Conseil anti-stress du jour
                 </div>
-                <p class="tip-text">{{ dailyTips[0] }}</p>
+                <p class="tip-text">Prenez 5 minutes entre chaque cours pour respirer profondément et vous recentrer.</p>
             </div>
 
-            <!-- Navigation Tabs -->
-            <div class="tabs-container">
-                <ul class="nav nav-tabs" id="coachTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="breathing-tab" data-bs-toggle="tab" data-bs-target="#breathing" type="button" role="tab">
-                            <i class="fas fa-lungs"></i> Respiration
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="relaxation-tab" data-bs-toggle="tab" data-bs-target="#relaxation" type="button" role="tab">
-                            <i class="fas fa-spa"></i> Relaxation
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="time-tab" data-bs-toggle="tab" data-bs-target="#time" type="button" role="tab">
-                            <i class="fas fa-clock"></i> Organisation
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="workshops-tab" data-bs-toggle="tab" data-bs-target="#workshops" type="button" role="tab">
-                            <i class="fas fa-users"></i> Ateliers
-                        </button>
-                    </li>
-                </ul>
+            <!-- Notifications Section -->
+            {% if notifications|length > 0 %}
+            <div class="notifications-section">
+                <div class="section-header">
+                    <h2 class="section-subtitle">
+                        <i class="fas fa-bell"></i> Notifications
+                    </h2>
+                </div>
+
+                <div class="notifications-grid">
+                    {% for notification in notifications %}
+                        <div class="notification-card notification-{{ notification.type }}">
+                            <div class="notification-header">
+                                <div class="notification-icon">
+                                    {% if notification.type == 'en_cours' %}
+                                        <i class="fas fa-play-circle"></i>
+                                    {% elseif notification.type == 'imminent' %}
+                                        <i class="fas fa-exclamation-circle"></i>
+                                    {% elseif notification.type == 'proche' %}
+                                        <i class="fas fa-clock"></i>
+                                    {% else %}
+                                        <i class="fas fa-calendar-alt"></i>
+                                    {% endif %}
+                                </div>
+                                <span class="notification-badge badge-{{ notification.priorite }}">{{ notification.priorite }}</span>
+                            </div>
+                            
+                            <div class="notification-body">
+                                <h3 class="notification-title">{{ notification.matiere }}</h3>
+                                <p class="notification-message">{{ notification.message }}</p>
+                                <div class="notification-meta">
+                                    <span><i class="far fa-calendar"></i> {{ notification.jour }}</span>
+                                    <span><i class="far fa-clock"></i> {{ notification.heureDebut }} - {{ notification.heureFin }}</span>
+                                </div>
+                            </div>
+                            
+                            {% if notification.conseils|length > 0 %}
+                            <div class="notification-tips">
+                                <h4><i class="fas fa-lightbulb"></i> Conseils</h4>
+                                <ul>
+                                    {% for conseil in notification.conseils %}
+                                        <li>{{ conseil }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
+            {% endif %}
 
-            <!-- Tab Content -->
-            <div class="tab-content" id="coachTabContent">
-                <!-- Breathing Techniques -->
-                <div class="tab-pane fade show active" id="breathing" role="tabpanel">
-                    <div class="section-header">
-                        <h2 class="section-subtitle">
-                            <i class="fas fa-lungs"></i> Techniques de Respiration
-                        </h2>
-                        <p class="section-description">Des exercices simples pour calmer votre esprit</p>
-                    </div>
-                    
-                    <div class="techniques-grid">
-                        {% for technique in breathingTechniques %}
-                        <div class="technique-card">
-                            <div class="technique-image">
-                                <div class="technique-logo">
-                                    <div class="logo-container logo-primary">
-                                        {% if technique.icon == 'lungs' %}
-                                            <i class="fas fa-lungs"></i>
-                                        {% elseif technique.icon == 'clock' %}
-                                            <i class="fas fa-hourglass-half"></i>
-                                        {% else %}
-                                            <i class="fas fa-circle"></i>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <span class="technique-category">Respiration</span>
-                            </div>
-                            <div class="technique-content">
-                                <h3 class="technique-title">{{ technique.name }}</h3>
-                                <p class="technique-description">{{ technique.description }}</p>
-                                <div class="technique-meta">
-                                    <span class="duration-badge">
-                                        <i class="far fa-clock"></i> {{ technique.duration }}
-                                    </span>
-                                </div>
-                                <div class="technique-steps">
-                                    <h4><i class="fas fa-list-ol"></i> Étapes :</h4>
-                                    <ol>
-                                        {% for step in technique.steps %}
-                                        <li>{{ step }}</li>
-                                        {% endfor %}
-                                    </ol>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
+            <!-- Schedule Section -->
+            <div class="schedule-section">
+                <div class="section-header">
+                    <h2 class="section-subtitle">
+                        <i class="fas fa-calendar-week"></i> Emploi du Temps
+                    </h2>
                 </div>
 
-                <!-- Relaxation Techniques -->
-                <div class="tab-pane fade" id="relaxation" role="tabpanel">
-                    <div class="section-header">
-                        <h2 class="section-subtitle">
-                            <i class="fas fa-spa"></i> Techniques de Relaxation
-                        </h2>
-                        <p class="section-description">Détendez votre corps et votre esprit</p>
-                    </div>
-                    
-                    <div class="techniques-grid">
-                        {% for technique in relaxationTechniques %}
-                        <div class="technique-card">
-                            <div class="technique-image">
-                                <div class="technique-logo">
-                                    <div class="logo-container logo-secondary">
-                                        {% if technique.icon == 'spa' %}
-                                            <i class="fas fa-spa"></i>
-                                        {% elseif technique.icon == 'sun' %}
-                                            <i class="fas fa-sun"></i>
-                                        {% else %}
-                                            <i class="fas fa-leaf"></i>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <span class="technique-category">Relaxation</span>
+                <!-- Filter Form -->
+                <div class="filter-card">
+                    <form method="GET" action="{{ path('app_stresse_agenda') }}">
+                        <div class="filter-grid">
+                            <div class="filter-group">
+                                <label for="matiere_par_jour">
+                                    <i class="fas fa-book"></i> Matières/jour
+                                </label>
+                                <input type="number" id="matiere_par_jour" name="matiere_par_jour" 
+                                       class="filter-input" min="1" max="8" 
+                                       value="{{ parametres.matiereParJour }}">
                             </div>
-                            <div class="technique-content">
-                                <h3 class="technique-title">{{ technique.name }}</h3>
-                                <p class="technique-description">{{ technique.description }}</p>
-                                <div class="technique-meta">
-                                    <span class="duration-badge">
-                                        <i class="far fa-clock"></i> {{ technique.duration }}
-                                    </span>
-                                </div>
-                                <div class="technique-steps">
-                                    <h4><i class="fas fa-list-ol"></i> Étapes :</h4>
-                                    <ol>
-                                        {% for step in technique.steps %}
-                                        <li>{{ step }}</li>
-                                        {% endfor %}
-                                    </ol>
-                                </div>
+                            
+                            <div class="filter-group">
+                                <label for="heure_debut">
+                                    <i class="fas fa-sun"></i> Début
+                                </label>
+                                <input type="number" id="heure_debut" name="heure_debut" 
+                                       class="filter-input" min="6" max="22" 
+                                       value="{{ parametres.heureDebut }}">
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="periode">
+                                    <i class="fas fa-calendar-week"></i> Période
+                                </label>
+                                <select id="periode" name="periode" class="filter-select">
+                                    <option value="semaine" {% if parametres.periode == 'semaine' %}selected{% endif %}>Semaine</option>
+                                    <option value="quinzaine" {% if parametres.periode == 'quinzaine' %}selected{% endif %}>Quinzaine</option>
+                                    <option value="mois" {% if parametres.periode == 'mois' %}selected{% endif %}>Mois</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="niveau_stress">
+                                    <i class="fas fa-heartbeat"></i> Stress
+                                </label>
+                                <input type="range" id="niveau_stress" name="niveau_stress" 
+                                       class="filter-range" min="1" max="10" 
+                                       value="{{ parametres.niveauStress }}">
+                                <span class="range-value">{{ parametres.niveauStress }}/10</span>
                             </div>
                         </div>
-                        {% endfor %}
-                    </div>
+                        
+                        <div class="filter-actions">
+                            <button type="submit" class="btn-filter">
+                                <i class="fas fa-sync-alt"></i> Actualiser
+                            </button>
+                            <a href="{{ path('app_stresse_emploie_avance') }}" class="btn-filter btn-secondary">
+                                <i class="fas fa-cog"></i> Avancé
+                            </a>
+                        </div>
+                    </form>
                 </div>
 
-                <!-- Time Organization -->
-                <div class="tab-pane fade" id="time" role="tabpanel">
-                    <div class="section-header">
-                        <h2 class="section-subtitle">
-                            <i class="fas fa-clock"></i> Organisation du Temps
-                        </h2>
-                        <p class="section-description">Gérez efficacement vos études et votre repos</p>
-                    </div>
+                <!-- Schedule Display -->
+                <div class="schedule-grid">
+                    {% set joursSemaine = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'] %}
+                    {% if parametres.inclureWeekend %}
+                        {% set joursSemaine = joursSemaine|merge(['Samedi', 'Dimanche']) %}
+                    {% endif %}
                     
-                    <div class="techniques-grid">
-                        {% for technique in timeOrganization %}
-                        <div class="technique-card">
-                            <div class="technique-image">
-                                <div class="technique-logo">
-                                    <div class="logo-container logo-tertiary">
-                                        {% if technique.icon == 'tomato' %}
-                                            <i class="fas fa-clock"></i>
-                                        {% elseif technique.icon == 'matrix' %}
-                                            <i class="fas fa-th"></i>
-                                        {% else %}
-                                            <i class="fas fa-calendar-alt"></i>
-                                        {% endif %}
+                    {% for jour in joursSemaine %}
+                        <div class="day-column {% if jour == "now"|date('l')|replace({'Monday': 'Lundi', 'Tuesday': 'Mardi', 'Wednesday': 'Mercredi', 'Thursday': 'Jeudi', 'Friday': 'Vendredi', 'Saturday': 'Samedi', 'Sunday': 'Dimanche'}) %}today{% endif %}">
+                            <div class="day-header">{{ jour }}</div>
+                            <div class="day-courses">
+                                {% if emploiTemps[jour] is defined %}
+                                    {% for cours in emploiTemps[jour] %}
+                                        <div class="course-card">
+                                            <div class="course-time">
+                                                <i class="far fa-clock"></i>
+                                                {{ cours.heureDebut }} - {{ cours.heureFin }}
+                                            </div>
+                                            <div class="course-info">
+                                                <span class="course-name">{{ cours.matiere }}</span>
+                                                <span class="efficiency-badge efficiency-{{ cours.efficacite|lower }}">
+                                                    {{ cours.efficacite }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="no-courses">
+                                        <i class="fas fa-coffee"></i>
+                                        <span>Pas de cours</span>
                                     </div>
-                                </div>
-                                <span class="technique-category">Organisation</span>
-                            </div>
-                            <div class="technique-content">
-                                <h3 class="technique-title">{{ technique.name }}</h3>
-                                <p class="technique-description">{{ technique.description }}</p>
-                                <div class="technique-steps">
-                                    <h4><i class="fas fa-list-ol"></i> Étapes :</h4>
-                                    <ol>
-                                        {% for step in technique.steps %}
-                                        <li>{{ step }}</li>
-                                        {% endfor %}
-                                    </ol>
-                                </div>
-                                {% if technique.tips %}
-                                <div class="technique-tips">
-                                    <h4><i class="fas fa-lightbulb"></i> Conseils :</h4>
-                                    <ul>
-                                        {% for tip in technique.tips %}
-                                        <li>{{ tip }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
                                 {% endif %}
                             </div>
                         </div>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- Workshops -->
-                <div class="tab-pane fade" id="workshops" role="tabpanel">
-                    <div class="section-header">
-                        <h2 class="section-subtitle">
-                            <i class="fas fa-users"></i> Ateliers de Gestion du Stress
-                        </h2>
-                        <p class="section-description">Participez à nos ateliers interactifs</p>
-                    </div>
-                    
-                    <div class="workshops-grid">
-                        <!-- Atelier Gestion du Temps -->
-                        <div class="workshop-card">
-                            <div class="workshop-image">
-                                <div class="workshop-logo">
-                                    <div class="logo-container" style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);">
-                                        <i class="fas fa-clock"></i>
-                                    </div>
-                                </div>
-                                <div class="workshop-level">
-                                    <span class="level-badge intermédiaire">Intermédiaire</span>
-                                </div>
-                            </div>
-                            <div class="workshop-content">
-                                <h3 class="workshop-title">Gestion du Temps</h3>
-                                <p class="workshop-description">
-                                    Apprenez à organiser votre emploi du temps pour réduire le stress lié aux échéances.
-                                </p>
-                                <div class="workshop-meta">
-                                    <span class="duration-badge">
-                                        <i class="far fa-clock"></i> 2 heures
-                                    </span>
-                                </div>
-                                <div class="workshop-topics">
-                                    <h4><i class="fas fa-tags"></i> Au programme :</h4>
-                                    <ul>
-                                        <li>Priorisation des tâches</li>
-                                        <li>Technique Pomodoro</li>
-                                        <li>Planification efficace</li>
-                                        <li>Éviter la procrastination</li>
-                                    </ul>
-                                </div>
-                                <a href="{{ path('app_stresse_gestion_temps') }}" class="workshop-btn btn-organization">
-                                    <i class="fas fa-clock"></i>
-                                    <span>Gestion du Temps</span>
-                                    <i class="fas fa-arrow-right"></i>
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Atelier Préparation Examens -->
-                        <div class="workshop-card">
-                            <div class="workshop-image">
-                                <div class="workshop-logo">
-                                    <div class="logo-container" style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);">
-                                        <i class="fas fa-graduation-cap"></i>
-                                    </div>
-                                </div>
-                                <div class="workshop-level">
-                                    <span class="level-badge tous">Tous niveaux</span>
-                                </div>
-                            </div>
-                            <div class="workshop-content">
-                                <h3 class="workshop-title">Préparation aux Examens</h3>
-                                <p class="workshop-description">
-                                    Techniques de révision et stratégies pour aborder sereinement vos examens.
-                                </p>
-                                <div class="workshop-meta">
-                                    <span class="duration-badge">
-                                        <i class="far fa-clock"></i> 3 heures
-                                    </span>
-                                </div>
-                                <div class="workshop-topics">
-                                    <h4><i class="fas fa-tags"></i> Au programme :</h4>
-                                    <ul>
-                                        <li>Méthodes de révision efficaces</li>
-                                        <li>Gestion du stress avant l'examen</li>
-                                        <li>Techniques de mémorisation</li>
-                                        <li>Stratégies le jour J</li>
-                                    </ul>
-                                </div>
-                                <a href="{{ path('app_stresse_preparation_examens') }}" class="workshop-btn btn-preparation">
-                                    <i class="fas fa-graduation-cap"></i>
-                                    <span>Préparation Examens</span>
-                                    <i class="fas fa-arrow-right"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Additional Tips Section -->
-            <div class="additional-tips">
-                <h2 class="section-subtitle">
-                    <i class="fas fa-lightbulb"></i> Autres Conseils Utiles
-                </h2>
-                <div class="tips-grid">
-                    {% for tip in dailyTips %}
-                    <div class="tip-card">
-                        <div class="tip-icon">
-                            <span class="tip-number">{{ loop.index }}</span>
-                        </div>
-                        <p class="tip-text">{{ tip }}</p>
-                    </div>
                     {% endfor %}
                 </div>
             </div>
 
+            <!-- Upcoming Courses -->
+            <div class="upcoming-section">
+                <div class="section-header">
+                    <h2 class="section-subtitle">
+                        <i class="fas fa-forward"></i> Cours à Venir
+                    </h2>
+                </div>
+
+                <div class="upcoming-grid">
+                    {% for cours in coursAVoir %}
+                        <div class="upcoming-card {% if cours.estAujourdhui %}today{% endif %}">
+                            <div class="upcoming-date">
+                                {% if cours.estAujourdhui %}
+                                    <span class="date-badge">Aujourd'hui</span>
+                                {% else %}
+                                    <span class="date-badge">{{ cours.jour }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="upcoming-content">
+                                <h4 class="upcoming-title">{{ cours.matiere }}</h4>
+                                <p class="upcoming-time">
+                                    <i class="far fa-clock"></i>
+                                    {{ cours.heureDebut }} - {{ cours.heureFin }}
+                                </p>
+                            </div>
+                            <span class="efficiency-badge efficiency-{{ cours.efficacite|lower }}">
+                                {{ cours.efficacite }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="{{ path('app_stresse_emploie_avance', {
+                    'matiere_par_jour': parametres.matiereParJour,
+                    'heure_par_matiere': parametres.heureParMatiere,
+                    'pause': parametres.pause,
+                    'heure_debut': parametres.heureDebut,
+                    'periode': parametres.periode,
+                    'inclure_weekend': parametres.inclureWeekend ? 1 : 0,
+                    'niveau_stress': parametres.niveauStress,
+                    'matieres': matieres|join(',')
+                }) }}" class="btn-action btn-primary">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Modifier les paramètres</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+                <a href="{{ path('app_stresse_coach') }}" class="btn-action btn-secondary">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Conseils anti-stress</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
             <!-- Contact Section -->
             <div class="contact-section">
-                <h3><i class="fas fa-hand-holding-heart"></i> Besoin d'aide supplémentaire ?</h3>
-                <p>N'hésitez pas à contacter un professionnel de santé si le stress devient trop intense.</p>
-                <a href="{{ path('app_stresse') }}" class="btn-contact">
-                    <i class="fas fa-chart-line"></i> Évaluer mon niveau de stress
+                <h3><i class="fas fa-hand-holding-heart"></i> Besoin d'aide pour gérer votre stress ?</h3>
+                <p>Consultez notre coach stress pour des conseils personnalisés</p>
+                <a href="{{ path('app_stresse_coach') }}" class="btn-contact">
+                    <i class="fas fa-spa"></i> Voir le coach stress
                 </a>
             </div>
         </div>
@@ -362,7 +319,7 @@
             }
 
             /* Layout */
-            .coach-section {
+            .agenda-section {
                 padding: 120px 20px 60px 20px;
                 background-color: transparent;
                 min-height: 100vh;
@@ -390,19 +347,12 @@
                 font-weight: 700;
                 color: #ffffff;
                 text-align: center;
-                margin-bottom: 20px;
+                margin-bottom: 30px;
                 text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 gap: 10px;
-            }
-
-            .section-description {
-                font-size: 1.2rem;
-                color: rgba(255, 255, 255, 0.9);
-                text-align: center;
-                margin-bottom: 40px;
             }
 
             .description-text {
@@ -412,6 +362,7 @@
                 margin: 0 auto;
                 line-height: 1.6;
                 text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+                text-align: center;
             }
 
             /* Header */
@@ -429,10 +380,58 @@
                 filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
             }
 
-            /* Description Section */
-            .description-section {
+            /* Quick Stats */
+            .quick-stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
                 margin-bottom: 40px;
-                text-align: center;
+            }
+
+            .stat-card {
+                background: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 25px;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                transition: all 0.3s ease;
+                border: 2px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+            .stat-icon {
+                width: 60px;
+                height: 60px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.8rem;
+                color: white;
+            }
+
+            .stat-content {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+                font-weight: 700;
+                color: white;
+                line-height: 1.2;
+            }
+
+            .stat-label {
+                font-size: 0.9rem;
+                color: rgba(255, 255, 255, 0.8);
             }
 
             /* Daily Tip Card */
@@ -444,7 +443,6 @@
                 margin-bottom: 40px;
                 box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
                 border: 2px solid rgba(255, 255, 255, 0.2);
-                backdrop-filter: blur(10px);
             }
 
             .tip-label {
@@ -462,303 +460,424 @@
             }
 
             .tip-text {
-                font-size: 1.3rem;
+                font-size: 1.2rem;
                 margin: 0;
                 line-height: 1.5;
             }
 
-            /* Tabs */
-            .tabs-container {
-                margin-bottom: 40px;
-            }
-
-            .nav-tabs {
-                border: none;
-                display: flex;
-                gap: 10px;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .nav-tabs .nav-link {
-                border: none;
-                padding: 15px 30px;
-                border-radius: 30px;
-                background: rgba(255, 255, 255, 0.15);
-                color: white;
-                font-weight: 600;
-                transition: all 0.3s ease;
-                backdrop-filter: blur(10px);
-                border: 2px solid rgba(255, 255, 255, 0.1);
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-
-            .nav-tabs .nav-link:hover {
-                background: rgba(255, 255, 255, 0.25);
-                transform: translateY(-2px);
-            }
-
-            .nav-tabs .nav-link.active {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                border: 2px solid rgba(255, 255, 255, 0.2);
-            }
-
-            /* Techniques Grid */
-            .techniques-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-                gap: 30px;
+            /* Notifications */
+            .notifications-section {
                 margin-bottom: 50px;
             }
 
-            .technique-card {
+            .notifications-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                gap: 25px;
+            }
+
+            .notification-card {
                 background: white;
                 border-radius: 20px;
-                overflow: hidden;
+                padding: 25px;
                 transition: all 0.3s ease;
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            }
-
-            .technique-card:hover {
-                transform: translateY(-10px);
-                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-            }
-
-            .technique-image {
                 position: relative;
-                height: 180px;
-                background: linear-gradient(135deg, #f0f4ff 0%, #e6e9ff 100%);
+                overflow: hidden;
+            }
+
+            .notification-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            }
+
+            .notification-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 4px;
+                height: 100%;
+            }
+
+            .notification-en_cours::before { background: #ff4757; }
+            .notification-imminent::before { background: #ffa502; }
+            .notification-proche::before { background: #ffa502; }
+            .notification-avenir::before { background: #2ed573; }
+
+            .notification-header {
                 display: flex;
+                justify-content: space-between;
                 align-items: center;
-                justify-content: center;
+                margin-bottom: 15px;
             }
 
-            .technique-logo {
-                text-align: center;
-            }
-
-            .logo-container {
-                width: 90px;
-                height: 90px;
+            .notification-icon {
+                width: 45px;
+                height: 45px;
+                background: #f0f4ff;
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 2.2rem;
-                color: white;
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+                color: #667eea;
+                font-size: 1.3rem;
             }
 
-            .logo-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-            .logo-secondary { background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%); }
-            .logo-tertiary { background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%); }
-            .logo-quaternary { background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%); }
-
-            .technique-category {
-                position: absolute;
-                top: 15px;
-                left: 15px;
-                background: white;
-                color: #7b68ee;
-                padding: 8px 20px;
-                border-radius: 25px;
+            .notification-badge {
+                padding: 5px 15px;
+                border-radius: 30px;
+                font-size: 0.75rem;
                 font-weight: 600;
-                font-size: 0.8rem;
                 text-transform: uppercase;
-                letter-spacing: 0.5px;
             }
 
-            .technique-content {
-                padding: 25px;
+            .badge-haute { background: #ff4757; color: white; }
+            .badge-moyenne { background: #ffa502; color: white; }
+            .badge-basse { background: #2ed573; color: white; }
+
+            .notification-body {
+                margin-bottom: 15px;
             }
 
-            .technique-title {
-                color: #1a1a1a;
-                font-size: 1.5rem;
+            .notification-title {
+                font-size: 1.2rem;
                 font-weight: 700;
-                margin-bottom: 10px;
+                color: #1a1a1a;
+                margin-bottom: 5px;
             }
 
-            .technique-description {
+            .notification-message {
                 color: #666;
                 font-size: 0.95rem;
+                margin-bottom: 10px;
                 line-height: 1.5;
-                margin-bottom: 15px;
             }
 
-            .technique-meta {
-                margin-bottom: 15px;
+            .notification-meta {
+                display: flex;
+                gap: 15px;
+                color: #888;
+                font-size: 0.85rem;
             }
 
-            .duration-badge {
-                display: inline-flex;
-                align-items: center;
-                gap: 5px;
-                background: #f0f4ff;
+            .notification-meta i {
+                margin-right: 5px;
+            }
+
+            .notification-tips {
+                background: #f8f9ff;
+                padding: 15px;
+                border-radius: 12px;
+                margin-top: 15px;
+            }
+
+            .notification-tips h4 {
                 color: #667eea;
-                padding: 5px 12px;
-                border-radius: 20px;
-                font-size: 0.9rem;
-                font-weight: 600;
-            }
-
-            .duration-badge i {
-                font-size: 0.9rem;
-            }
-
-            .technique-steps h4,
-            .technique-tips h4 {
-                color: #333;
-                font-size: 1rem;
+                font-size: 0.95rem;
                 margin-bottom: 10px;
                 display: flex;
                 align-items: center;
                 gap: 5px;
             }
 
-            .technique-steps ol,
-            .technique-tips ul {
-                padding-left: 25px;
-                margin-bottom: 0;
+            .notification-tips ul {
+                padding-left: 20px;
+                margin: 0;
             }
 
-            .technique-steps li,
-            .technique-tips li {
+            .notification-tips li {
                 color: #555;
+                font-size: 0.9rem;
                 margin-bottom: 5px;
-                line-height: 1.5;
             }
 
-            .technique-tips {
-                margin-top: 15px;
-                padding-top: 15px;
-                border-top: 1px solid #eee;
+            /* Filter Card */
+            .filter-card {
+                background: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 30px;
+                margin-bottom: 40px;
+                border: 2px solid rgba(255, 255, 255, 0.2);
             }
 
-            .technique-tips li {
-                color: #4CAF50;
-            }
-
-            /* Workshops Grid */
-            .workshops-grid {
+            .filter-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-                gap: 30px;
-                margin-bottom: 50px;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 25px;
+                margin-bottom: 25px;
             }
 
-            .workshop-card {
+            .filter-group {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .filter-group label {
+                color: white;
+                font-size: 0.9rem;
+                margin-bottom: 8px;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            .filter-input,
+            .filter-select {
+                padding: 12px 15px;
+                border: none;
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.9);
+                font-size: 1rem;
+                transition: all 0.3s ease;
+            }
+
+            .filter-input:focus,
+            .filter-select:focus {
+                outline: none;
                 background: white;
+                box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+            }
+
+            .filter-range {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .range-value {
+                color: white;
+                font-size: 0.9rem;
+                text-align: right;
+            }
+
+            .filter-actions {
+                display: flex;
+                gap: 15px;
+                justify-content: flex-end;
+                flex-wrap: wrap;
+            }
+
+            .btn-filter {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 12px 25px;
+                background: #2ed573;
+                color: white;
+                border: none;
+                border-radius: 30px;
+                font-weight: 600;
+                font-size: 0.95rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-decoration: none;
+            }
+
+            .btn-filter:hover {
+                background: #26af61;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(46, 213, 115, 0.3);
+                color: white;
+            }
+
+            .btn-filter.btn-secondary {
+                background: rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(5px);
+            }
+
+            .btn-filter.btn-secondary:hover {
+                background: rgba(255, 255, 255, 0.3);
+            }
+
+            /* Schedule Grid */
+            .schedule-grid {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 15px;
+                margin-bottom: 40px;
+            }
+
+            @media (max-width: 1200px) {
+                .schedule-grid { grid-template-columns: repeat(3, 1fr); }
+            }
+            @media (max-width: 768px) {
+                .schedule-grid { grid-template-columns: repeat(2, 1fr); }
+            }
+            @media (max-width: 480px) {
+                .schedule-grid { grid-template-columns: 1fr; }
+            }
+
+            .day-column {
+                background: rgba(255, 255, 255, 0.95);
                 border-radius: 20px;
                 overflow: hidden;
                 transition: all 0.3s ease;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-                display: flex;
-                flex-direction: column;
             }
 
-            .workshop-card:hover {
-                transform: translateY(-10px);
-                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            .day-column.today {
+                box-shadow: 0 0 0 3px #2ed573, 0 10px 30px rgba(0, 0, 0, 0.3);
             }
 
-            .workshop-image {
-                position: relative;
-                height: 180px;
-                background: linear-gradient(135deg, #f0f4ff 0%, #e6e9ff 100%);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .workshop-logo {
+            .day-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px;
+                font-weight: 700;
                 text-align: center;
+                font-size: 1rem;
             }
 
-            .workshop-level {
-                position: absolute;
-                top: 15px;
-                right: 15px;
+            .day-column.today .day-header {
+                background: linear-gradient(135deg, #2ed573 0%, #26af61 100%);
             }
 
-            .level-badge {
-                padding: 8px 15px;
-                border-radius: 25px;
+            .day-courses {
+                padding: 15px;
+                min-height: 250px;
+            }
+
+            .course-card {
+                background: #f8f9fa;
+                border-radius: 12px;
+                padding: 12px;
+                margin-bottom: 10px;
+                transition: all 0.3s ease;
+                border-left: 3px solid #667eea;
+            }
+
+            .course-card:hover {
+                transform: translateX(3px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .course-time {
+                color: #667eea;
                 font-size: 0.8rem;
                 font-weight: 600;
-                background: white;
+                margin-bottom: 5px;
             }
 
-            .level-badge.débutant {
-                color: #2e7d32;
+            .course-time i {
+                margin-right: 3px;
             }
 
-            .level-badge.intermédiaire {
-                color: #ef6c00;
-            }
-
-            .level-badge.tous {
-                color: #1565c0;
-            }
-
-            .workshop-content {
-                padding: 25px;
-                flex: 1;
+            .course-info {
                 display: flex;
-                flex-direction: column;
+                justify-content: space-between;
+                align-items: center;
             }
 
-            .workshop-title {
-                color: #1a1a1a;
-                font-size: 1.4rem;
-                font-weight: 700;
-                margin-bottom: 10px;
-            }
-
-            .workshop-description {
-                color: #666;
-                font-size: 0.95rem;
-                line-height: 1.5;
-                margin-bottom: 15px;
-            }
-
-            .workshop-meta {
-                margin-bottom: 15px;
-            }
-
-            .workshop-topics {
-                margin-bottom: 20px;
-            }
-
-            .workshop-topics h4 {
+            .course-name {
+                font-weight: 600;
                 color: #333;
-                font-size: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .efficiency-badge {
+                padding: 3px 10px;
+                border-radius: 20px;
+                font-size: 0.7rem;
+                font-weight: 600;
+            }
+
+            .efficiency-haute { background: #ff4757; color: white; }
+            .efficiency-normale { background: #ffa502; color: white; }
+            .efficiency-basse { background: #2ed573; color: white; }
+
+            .no-courses {
+                text-align: center;
+                padding: 30px 10px;
+                color: #999;
+            }
+
+            .no-courses i {
+                font-size: 2rem;
                 margin-bottom: 10px;
+                display: block;
+            }
+
+            /* Upcoming Courses */
+            .upcoming-section {
+                margin-bottom: 50px;
+            }
+
+            .upcoming-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 15px;
+            }
+
+            .upcoming-card {
+                background: white;
+                border-radius: 15px;
+                padding: 20px;
                 display: flex;
                 align-items: center;
-                gap: 5px;
+                gap: 15px;
+                transition: all 0.3s ease;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
             }
 
-            .workshop-topics ul {
-                padding-left: 25px;
+            .upcoming-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             }
 
-            .workshop-topics li {
-                color: #555;
+            .upcoming-card.today {
+                border-left: 4px solid #2ed573;
+            }
+
+            .upcoming-date {
+                min-width: 100px;
+            }
+
+            .date-badge {
+                display: inline-block;
+                padding: 5px 12px;
+                background: #f0f4ff;
+                color: #667eea;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                font-weight: 600;
+            }
+
+            .upcoming-content {
+                flex: 1;
+            }
+
+            .upcoming-title {
+                font-size: 1rem;
+                font-weight: 700;
+                color: #333;
                 margin-bottom: 3px;
             }
 
-            /* Styles des boutons d'atelier */
-            .workshop-btn {
+            .upcoming-time {
+                color: #666;
+                font-size: 0.85rem;
+                margin: 0;
+            }
+
+            .upcoming-time i {
+                margin-right: 3px;
+            }
+
+            /* Action Buttons */
+            .action-buttons {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                flex-wrap: wrap;
+                margin-bottom: 50px;
+            }
+
+            .btn-action {
                 display: inline-flex;
                 align-items: center;
-                justify-content: space-between;
-                width: 100%;
-                padding: 14px 20px;
-                margin-top: auto;
+                gap: 10px;
+                padding: 15px 30px;
                 border: none;
                 border-radius: 50px;
                 font-weight: 600;
@@ -766,132 +885,39 @@
                 cursor: pointer;
                 transition: all 0.3s ease;
                 text-decoration: none;
-                color: white;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-                position: relative;
-                overflow: hidden;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
             }
 
-            .workshop-btn i:first-child {
-                font-size: 1.2rem;
-            }
-
-            .workshop-btn i:last-child {
+            .btn-action i:last-child {
                 opacity: 0;
                 transform: translateX(-10px);
                 transition: all 0.3s ease;
             }
 
-            .workshop-btn:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-                text-decoration: none;
-                color: white;
+            .btn-action:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
             }
 
-            .workshop-btn:hover i:last-child {
+            .btn-action:hover i:last-child {
                 opacity: 1;
                 transform: translateX(0);
             }
 
-            .workshop-btn:active {
-                transform: translateY(0);
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
             }
 
-            /* Bouton Organisation/Gestion du temps */
-            .btn-organization {
-                background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
-            }
-
-            .btn-organization:hover {
-                background: linear-gradient(135deg, #F57C00 0%, #EF6C00 100%);
-            }
-
-            /* Bouton Préparation Examens */
-            .btn-preparation {
-                background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-            }
-
-            .btn-preparation:hover {
-                background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
-            }
-
-            /* Animation d'onde pour les boutons */
-            .workshop-btn::after {
-                content: '';
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                width: 300px;
-                height: 300px;
+            .btn-secondary {
                 background: rgba(255, 255, 255, 0.2);
-                border-radius: 50%;
-                transform: translate(-50%, -50%) scale(0);
-                opacity: 0;
-                transition: transform 0.5s, opacity 0.3s;
-            }
-
-            .workshop-btn:active::after {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-                transition: 0s;
-            }
-
-            /* Additional Tips */
-            .additional-tips {
-                margin: 50px 0;
-                padding: 40px;
-                background: rgba(255, 255, 255, 0.1);
-                border-radius: 20px;
                 backdrop-filter: blur(10px);
+                color: white;
                 border: 2px solid rgba(255, 255, 255, 0.2);
             }
 
-            .tips-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 20px;
-                margin-top: 30px;
-            }
-
-            .tip-card {
-                background: rgba(255, 255, 255, 0.15);
-                border-radius: 15px;
-                padding: 20px;
-                display: flex;
-                align-items: flex-start;
-                gap: 15px;
-                transition: all 0.3s ease;
-                border: 2px solid rgba(255, 255, 255, 0.1);
-            }
-
-            .tip-card:hover {
-                background: rgba(255, 255, 255, 0.25);
-                transform: translateY(-5px);
-            }
-
-            .tip-icon {
-                flex-shrink: 0;
-            }
-
-            .tip-number {
-                width: 35px;
-                height: 35px;
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                font-weight: 700;
-                font-size: 1.1rem;
-            }
-
-            .tip-card p {
-                margin: 0;
-                color: white;
-                font-size: 0.95rem;
-                line-height: 1.5;
+            .btn-secondary:hover {
+                background: rgba(255, 255, 255, 0.3);
             }
 
             /* Contact Section */
@@ -917,9 +943,6 @@
                 font-size: 1.1rem;
                 opacity: 0.9;
                 margin-bottom: 25px;
-                max-width: 600px;
-                margin-left: auto;
-                margin-right: auto;
             }
 
             .btn-contact {
@@ -946,7 +969,7 @@
 
             /* Responsive */
             @media (max-width: 768px) {
-                .coach-section {
+                .agenda-section {
                     padding: 100px 15px 40px 15px;
                 }
 
@@ -964,41 +987,25 @@
                     font-size: 1.6rem;
                 }
 
-                .description-text,
-                .section-description {
+                .description-text {
                     font-size: 1rem;
                 }
 
-                .daily-tip-card {
-                    padding: 20px;
-                }
-
-                .tip-text {
-                    font-size: 1.1rem;
-                }
-
-                .nav-tabs {
-                    flex-direction: column;
-                }
-
-                .nav-tabs .nav-link {
-                    justify-content: center;
-                }
-
-                .techniques-grid,
-                .workshops-grid {
+                .quick-stats {
                     grid-template-columns: 1fr;
                 }
 
-                .technique-image,
-                .workshop-image {
-                    height: 160px;
+                .notifications-grid,
+                .upcoming-grid {
+                    grid-template-columns: 1fr;
                 }
 
-                .logo-container {
-                    width: 80px;
-                    height: 80px;
-                    font-size: 2rem;
+                .filter-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .filter-actions {
+                    justify-content: center;
                 }
 
                 .contact-section {
@@ -1007,11 +1014,6 @@
 
                 .contact-section h3 {
                     font-size: 1.5rem;
-                }
-
-                .workshop-btn {
-                    padding: 12px 16px;
-                    font-size: 0.95rem;
                 }
             }
 
@@ -1024,20 +1026,30 @@
                     font-size: 3rem;
                 }
 
-                .technique-title,
-                .workshop-title {
-                    font-size: 1.3rem;
+                .daily-tip-card {
+                    padding: 20px;
                 }
 
-                .tip-card {
+                .tip-text {
+                    font-size: 1rem;
+                }
+
+                .notification-card {
+                    padding: 20px;
+                }
+
+                .upcoming-card {
                     flex-direction: column;
-                    align-items: center;
                     text-align: center;
                 }
 
-                .workshop-btn {
-                    padding: 10px 14px;
-                    font-size: 0.9rem;
+                .upcoming-date {
+                    width: 100%;
+                }
+
+                .btn-action {
+                    width: 100%;
+                    justify-content: center;
                 }
             }
         </style>
