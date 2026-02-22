@@ -10,7 +10,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class PedagogyAssistantController extends AbstractController
 {
-    //  Front Office
+    // ✅ Front Office
     #[Route('/front/chat', name: 'chat_index', methods: ['GET'])]
     public function index(): Response
     {
