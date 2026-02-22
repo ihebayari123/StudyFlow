@@ -19,6 +19,10 @@ class SponsorType extends AbstractType
         $builder
             ->add('nomSponsor', TextType::class, [
                 'label' => 'Nom du sponsor',
+                'attr' => [
+                    'placeholder' => 'Ex: Entreprise ABC',
+                    'class' => 'form-control'
+                ]
             ])
             
             ->add('type', ChoiceType::class, [
@@ -29,10 +33,18 @@ class SponsorType extends AbstractType
                     'Bronze' => 'Bronze',
                 ],
                 'placeholder' => 'Sélectionnez un type',
+                'attr' => [
+                    'class' => 'form-select'
+                ]
             ])
             
             ->add('montant', NumberType::class, [
                 'label' => 'Montant',
+                'attr' => [
+                    'placeholder' => 'Ex: 5000',
+                    'class' => 'form-control',
+                    'min' => 1
+                ]
             ])
             
             ->add('eventTitre', EntityType::class, [
@@ -40,6 +52,9 @@ class SponsorType extends AbstractType
                 'choice_label' => 'titre',
                 'label' => 'Événement associé',
                 'placeholder' => 'Sélectionnez un événement',
+                'attr' => [
+                    'class' => 'form-select'
+                ]
             ])
         ;
     }
