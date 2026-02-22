@@ -1,0 +1,231 @@
+{% extends 'admin/base_admin.html.twig' %}
+{% block title %}Chat AI - Pedagogy Assistant{% endblock %}
+
+{% block admin_content %}
+<div class="admin-main-content">
+    <div class="container-fluid py-4">
+
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active">
+                    <i class="fas fa-robot me-1"></i>Pedagogy AI Assistant
+                </li>
+            </ol>
+        </nav>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+
+                {# Chat Card #}
+                <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+
+                    {# Header #}
+                    <div class="card-header py-3 text-white"
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="width:50px; height:50px; background:rgba(255,255,255,0.2);
+                                border-radius:50%; display:flex; align-items:center;
+                                justify-content:center; font-size:1.5rem;">
+                                🤖
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Assistant Pédagogique IA</h5>
+                                <small style="opacity:0.85;">
+                                    <span style="display:inline-block; width:8px; height:8px;
+                                        background:#22c55e; border-radius:50; margin-right:5px;"></span>
+                                    Connecté via Ollama - Mistral
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Messages #}
+                    <div id="chat-messages"
+                        style="height:500px; overflow-y:auto; padding:25px; background:#f8fafc;">
+
+                        {# Message de bienvenue #}
+                        <div style="display:flex; margin-bottom:20px;">
+                            <div style="width:40px; height:40px; border-radius:50%;
+                                background:linear-gradient(135deg,#667eea,#764ba2);
+                                color:white; display:flex; align-items:center;
+                                justify-content:center; margin-right:12px; flex-shrink:0;">
+                                🤖
+                            </div>
+                            <div style="background:white; padding:15px 20px; border-radius:20px 20px 20px 4px;
+                                max-width:70%; box-shadow:0 2px 10px rgba(0,0,0,0.08);
+                                font-size:0.95rem; line-height:1.6; color:#1e293b;">
+                                Bonjour ! Je suis votre assistant pédagogique IA.<br>
+                                Comment puis-je vous aider aujourd'hui ?
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {# Input #}
+                    <div class="card-footer bg-white p-4 border-top">
+                        <div class="d-flex gap-3 align-items-center">
+                            <input type="text" id="user-input"
+                                class="form-control form-control-lg"
+                                placeholder="Écrivez votre message..."
+                                style="border-radius:50px; border:2px solid #e2e8f0; padding:14px 24px;"
+                                autocomplete="off">
+                            <button id="send-btn" disabled
+                                style="width:55px; height:55px; border:none; border-radius:50%;
+                                background:linear-gradient(135deg,#667eea,#764ba2);
+                                color:white; font-size:1.1rem; cursor:pointer;
+                                box-shadow:0 4px 15px rgba(102,126,234,0.4);
+                                transition:all 0.3s ease; flex-shrink:0;">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted mt-2 d-block text-center">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Réponses générées par Mistral via Ollama
+                        </small>
+                    </div>
+                </div>
+
+                {# Feature Cards #}
+                <div class="row g-3 mt-2">
+                    <div class="col-md-4">
+                        <div class="card border-0 text-center p-3"
+                            style="background:rgba(102,126,234,0.1); border-radius:16px;">
+                            <div style="font-size:2rem;">🎓</div>
+                            <h6 class="fw-bold mt-2">Pédagogie adaptative</h6>
+                            <small class="text-muted">Réponses personnalisées</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 text-center p-3"
+                            style="background:rgba(102,126,234,0.1); border-radius:16px;">
+                            <div style="font-size:2rem;">⚡</div>
+                            <h6 class="fw-bold mt-2">Réponses rapides</h6>
+                            <small class="text-muted">Traitement local Ollama</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 text-center p-3"
+                            style="background:rgba(102,126,234,0.1); border-radius:16px;">
+                            <div style="font-size:2rem;">🔒</div>
+                            <h6 class="fw-bold mt-2">Confidentialité</h6>
+                            <small class="text-muted">Données privées et sécurisées</small>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-main-content {
+    margin-left: 280px;
+    padding: 100px 40px 40px 40px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+}
+@media (max-width: 768px) {
+    .admin-main-content { margin-left: 0; padding: 20px 15px; }
+}
+</style>
+
+<script>
+const chatMessages = document.getElementById('chat-messages');
+const userInput    = document.getElementById('user-input');
+const sendBtn      = document.getElementById('send-btn');
+
+userInput.addEventListener('input', function() {
+    sendBtn.disabled = this.value.trim() === '';
+});
+
+function addMessage(content, isUser) {
+    const d = document.createElement('div');
+    d.style.cssText = 'display:flex; margin-bottom:20px;'
+        + (isUser ? 'justify-content:flex-end;' : '');
+
+    if (isUser) {
+        d.innerHTML = `
+            <div style="background:linear-gradient(135deg,#667eea,#764ba2); color:white;
+                padding:15px 20px; border-radius:20px 20px 4px 20px;
+                max-width:70%; font-size:0.95rem; line-height:1.6;">
+                ${content}
+            </div>
+            <div style="width:40px; height:40px; border-radius:50%; background:#2d3748;
+                color:white; display:flex; align-items:center; justify-content:center;
+                margin-left:12px; flex-shrink:0;">
+                <i class="fas fa-user"></i>
+            </div>`;
+    } else {
+        d.innerHTML = `
+            <div style="width:40px; height:40px; border-radius:50%;
+                background:linear-gradient(135deg,#667eea,#764ba2);
+                color:white; display:flex; align-items:center; justify-content:center;
+                margin-right:12px; flex-shrink:0;">🤖</div>
+            <div style="background:white; padding:15px 20px; border-radius:20px 20px 20px 4px;
+                max-width:70%; box-shadow:0 2px 10px rgba(0,0,0,0.08);
+                font-size:0.95rem; line-height:1.6; color:#1e293b; white-space:pre-wrap;">
+                ${content}
+            </div>`;
+    }
+
+    chatMessages.appendChild(d);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function showTyping() {
+    const d = document.createElement('div');
+    d.id = 'typing';
+    d.style.cssText = 'display:flex; margin-bottom:20px;';
+    d.innerHTML = `
+        <div style="width:40px; height:40px; border-radius:50%;
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            color:white; display:flex; align-items:center;
+            justify-content:center; margin-right:12px;">🤖</div>
+        <div style="background:white; padding:15px 20px; border-radius:20px;
+            box-shadow:0 2px 10px rgba(0,0,0,0.08); display:flex; gap:5px; align-items:center;">
+            <span class="spinner-grow spinner-grow-sm text-primary"></span>
+            <span class="spinner-grow spinner-grow-sm text-primary" style="animation-delay:.2s"></span>
+            <span class="spinner-grow spinner-grow-sm text-primary" style="animation-delay:.4s"></span>
+        </div>`;
+    chatMessages.appendChild(d);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function removeTyping() {
+    document.getElementById('typing')?.remove();
+}
+
+async function sendMessage() {
+    const message = userInput.value.trim();
+    if (!message) return;
+
+    addMessage(message, true);
+    userInput.value = '';
+    sendBtn.disabled = true;
+    showTyping();
+
+    try {
+        const res = await fetch('{{ path("chat_send") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message })
+        });
+        const data = await res.json();
+        removeTyping();
+        addMessage(data.reply ?? '❌ Erreur', false);
+    } catch(e) {
+        removeTyping();
+        addMessage('❌ Ollama non disponible. Lancez: ollama serve', false);
+    }
+
+    userInput.focus();
+}
+
+sendBtn.addEventListener('click', sendMessage);
+userInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter' && !sendBtn.disabled) sendMessage();
+});
+</script>
+{% endblock %}
+
