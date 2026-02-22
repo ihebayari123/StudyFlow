@@ -1,0 +1,37 @@
+{# templates/bundles/TwigBundle/Exception/error403.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Accès refusé{% endblock %}
+
+{% block body %}
+<div style="text-align: center; padding: 50px;">
+    <h1 style="color: #dc3545;">⛔ Accès refusé</h1>
+    
+    <p style="font-size: 1.2rem; margin: 30px 0;">
+        Vous n'avez pas les permissions nécessaires pour accéder à cette page.
+    </p>
+    
+    {% if is_granted('ROLE_ENSEIGNANT') %}
+        <p>En tant qu'enseignant, vous ne pouvez accéder qu'aux sections :</p>
+        <ul style="list-style: none; padding: 0;">
+            <li>📚 Cours & Chapitres</li>
+            <li>❓ Quiz & Questions</li>
+        </ul>
+        <br>
+        <a href="{{ path('app_coursesback') }}" class="btn btn-primary">Aller aux Cours</a>
+        <a href="{{ path('admin_show_quiz') }}" class="btn btn-info">Aller aux Quiz</a>
+    
+    {% elseif is_granted('ROLE_ETUDIANT') %}
+        <p>Vous êtes connecté en tant qu'étudiant.</p>
+        <br>
+        <a href="{{ path('app_home') }}" class="btn btn-primary">Retour à l'accueil</a>
+    
+    {% elseif is_granted('ROLE_ADMIN') %}
+        <p style="color: #666;">Cette section vous est normalement accessible. Si le problème persiste, contactez le support.</p>
+    {% endif %}
+    
+    <br><br>
+    <a href="javascript:history.back()" class="btn btn-secondary">← Retour</a>
+    <a href="{{ path('app_logout') }}" class="btn btn-danger">Déconnexion</a>
+</div>
+{% endblock %}

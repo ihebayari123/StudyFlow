@@ -25,6 +25,12 @@ final class ProfileController extends AbstractController
     #[Route('/profil', name: 'app_profile_edit')]
     public function edit(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
     {
+        $session = $request->getSession();
+        $flashBag = $session->getFlashBag();
+    
+    // Méthode 1: Supprimer des clés spécifiques
+        $flashBag->set('forgot_success', []);  // Vide le message
+        $flashBag->set('reset_success', []);   // Vide le message
         $user = $this->getUser();
 
         if (!$user) {
