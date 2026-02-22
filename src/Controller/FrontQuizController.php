@@ -7,6 +7,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\QuizAttempt;
 use App\Entity\Quiz;
 use App\Entity\Question;
 use App\Entity\QuestionChoix;
@@ -83,100 +85,100 @@ public function quizPlay(
         'questions' => $questions,
     ]);
 }
-  #[Route('/front/quiz/{id}/submit', name: 'quiz_submit', methods: ['POST'])]
+  
+
+#[Route('/front/quiz/{id}/submit', name: 'quiz_submit', methods: ['POST'])]
 public function quizSubmit(
     int $id,
     Request $request,
     QuizRepository $quizRepository,
-    QuestionRepository $questionRepository
-): Response
-{
+    QuestionRepository $questionRepository,
+    EntityManagerInterface $em
+): Response {
     $quiz = $quizRepository->find($id);
+    if (!$quiz) throw $this->createNotFoundException('Quiz introuvable');
 
-    if (!$quiz) {
-        throw $this->createNotFoundException('Quiz introuvable');
-    }
-
-    $questions = $questionRepository->findBy([
-        'quiz' => $quiz
-    ]);
-
+    $questions = $questionRepository->findBy(['quiz' => $quiz]);
     $answers = $request->request->all('answers') ?? [];
 
     $scoreQuestions = 0;
     $scorePoints = 0;
     $total = count($questions);
     $maxPoints = 0;
+    $questionsData = []; 
 
     foreach ($questions as $question) {
+        $userAnswer = $answers[$question->getId()] ?? null;
+        $isCorrect = false;
+        $correctAnswer = '';
 
-    $userAnswer = $answers[$question->getId()] ?? null;
-    $isCorrect = false;
+        if ($question instanceof QuestionChoix) {
+            $correctAnswer = $question->getBonneReponseChoix();
+            $isCorrect = $userAnswer === $correctAnswer;
+        } elseif ($question instanceof QuestionVraiFaux) {
+            $userBool = $userAnswer === "1";
+            $correctAnswer = $question->getBonneReponseBool() ? 'Vrai' : 'Faux';
+            $userAnswer = $userBool ? 'Vrai' : 'Faux';
+            $isCorrect = $userBool === $question->getBonneReponseBool();
+        } elseif ($question instanceof QuestionTexteLibre) {
+            $correctAnswer = $question->getReponseAttendue();
+            $isCorrect = strtolower(trim($userAnswer)) === strtolower(trim($correctAnswer));
+        }
 
-    // ===== QCM =====
-    if ($question instanceof QuestionChoix) {
-        $isCorrect = $userAnswer === $question->getBonneReponseChoix();
-    }
+        switch (strtolower($question->getNiveau())) {
+            case 'facile':   $maxPoints += 1; break;
+            case 'moyen':    $maxPoints += 2; break;
+            case 'difficile': $maxPoints += 3; break;
+        }
 
-    // ===== VRAI / FAUX =====
-    elseif ($question instanceof QuestionVraiFaux) {
-        $userBool = $userAnswer === "1";
-        $isCorrect = $userBool === $question->getBonneReponseBool();
-    }
-
-    // ===== TEXTE LIBRE =====
-    elseif ($question instanceof QuestionTexteLibre) {
-
-        $bonneReponse = $question->getReponseAttendue();
-
-        $isCorrect =
-            strtolower(trim($userAnswer)) ===
-            strtolower(trim($bonneReponse));
-    }
-     
-
-    switch (strtolower($question->getNiveau())) {
-    case 'facile':
-        $maxPoints += 1;
-        break;
-    case 'moyen':
-        $maxPoints += 2;
-        break;
-    case 'difficile':
-        $maxPoints += 3;
-        break;
-}
-
-    // ===== score=====
-    if ($isCorrect) {
-
-        $scoreQuestions++;
+        if ($isCorrect) {
+            $scoreQuestions++;
+            switch (strtolower($question->getNiveau())) {
+                case 'facile':   $scorePoints += 1; break;
+                case 'moyen':    $scorePoints += 2; break;
+                case 'difficile': $scorePoints += 3; break;
+            }
+        }
 
         
-        switch (strtolower($question->getNiveau())) {
-            case 'facile':
-                $scorePoints += 1;
-                break;
-            case 'moyen':
-                $scorePoints += 2;
-                break;
-            case 'difficile':
-                $scorePoints += 3;
-                break;
-        }
+        $questionsData[] = [
+            'texte'       => $question->getTexte(),
+            'type'        => $question->getType(),
+            'niveau'      => $question->getNiveau(),
+            'userAnswer'  => $userAnswer,
+            'correct'     => $correctAnswer,
+            'isCorrect'   => $isCorrect,
+        ];
     }
-}
 
+    
+    $attempt = new QuizAttempt();
+    $attempt->setQuiz($quiz);
+    $attempt->setScoreQuestions($scoreQuestions);
+    $attempt->setScorePoints($scorePoints);
+    $attempt->setTotalQuestions($total);
+    $attempt->setStartedAt(new \DateTimeImmutable());
+    $attempt->setFinishedAt(new \DateTimeImmutable());
 
+    
+    if ($this->getUser()) {
+        $attempt->setUser($this->getUser());
+    }
 
-    return $this->render('front_quiz/quiz_result.html.twig', [
-    'quiz' => $quiz,
+    $em->persist($attempt);
+    $em->flush();
+
+    
+    $request->getSession()->set('coach_data_' . $attempt->getId(), $questionsData);
+
+    
+   return $this->render('front_quiz/quiz_result.html.twig', [
+    'quiz'           => $quiz,
     'scoreQuestions' => $scoreQuestions,
-    'scorePoints' => $scorePoints,
-    'maxPoints' => $maxPoints,
-    'total' => $total,
+    'scorePoints'    => $scorePoints,
+    'maxPoints'      => $maxPoints,
+    'total'          => $total,
+    'attempt'        => $attempt,  
 ]);
-
 }
-
 }

@@ -1,6 +1,4 @@
 <?php
-// src/Controller/ChatController.php
-
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -12,12 +10,21 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class PedagogyAssistantController extends AbstractController
 {
+    // ✅ Front Office
     #[Route('/front/chat', name: 'chat_index', methods: ['GET'])]
     public function index(): Response
     {
         return $this->render('Pedagogy_Assistant/index.html.twig');
     }
 
+    
+    #[Route('/admin/chat', name: 'admin_chat_index', methods: ['GET'])]
+    public function adminIndex(): Response
+    {
+        return $this->render('Pedagogy_Assistant/admin_index.html.twig');
+    }
+
+    
     #[Route('/chat/send', name: 'chat_send', methods: ['POST'])]
     public function send(Request $request, HttpClientInterface $http): JsonResponse
     {

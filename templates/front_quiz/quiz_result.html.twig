@@ -513,6 +513,9 @@ body {
             <a href="{{ path('app_quiz_play', {id: quiz.id}) }}" class="btn btn-primary">
                 🔄 Réessayer le quiz
             </a>
+             <a href="{{ path('quiz_coach', {attemptId: attempt.id}) }}" class="btn btn-primary">
+        🤖 Analyser avec Coach AI
+    </a>
             <a href="{{ path('app_frontshowquiz') }}" class="btn btn-secondary">
                 📚 Voir tous les quiz
             </a>

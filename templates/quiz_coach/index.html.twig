@@ -1,0 +1,365 @@
+{% extends 'base.html.twig' %}
+{% block title %}Quiz Coach{% endblock %}
+
+{% block body %}
+
+{% block header %}
+{% include 'home/navbar.html.twig' %}
+{% endblock %}
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding-top: 140px;
+}
+
+.header-area {
+    background: rgba(0,0,0,0.3) !important;
+    backdrop-filter: blur(12px);
+    height: 90px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.35);
+}
+
+.main-nav .logo h1 { color: #ffffff; font-size: 28px; font-weight: 800; }
+.main-nav .nav li a { color: rgba(255,255,255,0.9); font-weight: 500; transition: color 0.3s ease; }
+.main-nav .nav li a:hover { color: #ffd166; }
+
+.coach-container {
+    max-width: 1300px;
+    margin: auto;
+    padding: 0 20px 60px;
+}
+
+.page-title {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+}
+
+.page-title h1 { font-size: 2.5rem; font-weight: 800; text-shadow: 2px 2px 6px rgba(0,0,0,0.25); }
+.page-title p  { font-size: 1.1rem; color: rgba(255,255,255,0.85); margin-top: 8px; }
+
+/* Score Cards */
+.score-glass {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 25px;
+    text-align: center;
+    color: white;
+    transition: transform 0.3s ease;
+}
+.score-glass:hover { transform: translateY(-5px); }
+.score-glass .big-num { font-size: 3rem; font-weight: 900; line-height: 1; }
+.score-glass .label  { font-size: 0.9rem; opacity: 0.85; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
+
+/* White Cards */
+.white-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+}
+.white-card .card-head {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 16px 20px;
+    font-weight: 700;
+    font-size: 1rem;
+}
+.white-card .card-head.dark { background: #1e293b; }
+
+/* Table */
+.table-scroll { max-height: 400px; overflow-y: auto; }
+table { width: 100%; border-collapse: collapse; }
+table tr:hover { background: #f8fafc; }
+table td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; vertical-align: middle; }
+
+.badge-niveau {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: white;
+}
+.badge-facile   { background: #22c55e; }
+.badge-moyen    { background: #f59e0b; }
+.badge-difficile{ background: #ef4444; }
+
+/* Chat */
+#chat-messages { height: 260px; overflow-y: auto; padding: 15px; background: #f8fafc; }
+
+.bubble-user {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 18px 18px 4px 18px;
+    max-width: 75%;
+    margin-left: auto;
+    margin-bottom: 10px;
+    font-size: 0.92rem;
+}
+.bubble-ai {
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+    padding: 10px 15px;
+    border-radius: 18px 18px 18px 4px;
+    max-width: 75%;
+    margin-bottom: 10px;
+    font-size: 0.92rem;
+    white-space: pre-wrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+/* Progress */
+.progress-wrap { background: rgba(255,255,255,0.25); border-radius: 30px; height: 14px; overflow: hidden; }
+.progress-fill {
+    height: 100%;
+    background: white;
+    border-radius: 30px;
+    transition: width 1s ease;
+}
+
+/* Bouton retour */
+.btn-retour {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    color: #667eea;
+    padding: 14px 35px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+.btn-retour:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(102,126,234,0.4);
+}
+</style>
+
+<div class="coach-container">
+
+    {# Titre #}
+    <div class="page-title">
+        <h1>🤖 Quiz Coach AI</h1>
+        <p>Analyse personnalisée de vos résultats par Mistral</p>
+    </div>
+
+    {# Score Cards #}
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="score-glass">
+                <div class="big-num">{{ attempt.scoreQuestions }}/{{ attempt.totalQuestions }}</div>
+                <div class="label">Questions correctes</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="score-glass">
+                <div class="big-num">{{ attempt.scorePoints }}</div>
+                <div class="label">Points obtenus</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="score-glass" style="text-align:left;">
+                {% set percent = attempt.totalQuestions > 0
+                    ? ((attempt.scoreQuestions / attempt.totalQuestions) * 100)|round : 0 %}
+                <div style="font-size:0.9rem; margin-bottom:8px; opacity:0.85;">
+                    📊 Progression — {{ quiz.titre }}
+                </div>
+                <div class="progress-wrap">
+                    <div class="progress-fill" style="width:{{ percent }}%"></div>
+                </div>
+                <div style="font-size:1.8rem; font-weight:800; margin-top:8px;">{{ percent }}%</div>
+            </div>
+        </div>
+    </div>
+
+    {# Contenu Principal #}
+    <div class="row g-4">
+
+        {# Détail des réponses #}
+        <div class="col-md-5">
+            <div class="white-card">
+                <div class="card-head">📋 Détail des réponses</div>
+                <div class="table-scroll">
+                    <table>
+                        {% for q in questionsData %}
+                        <tr>
+                            <td style="font-size:1.2rem;">{{ q.isCorrect ? '✅' : '❌' }}</td>
+                            <td>
+                                <div class="fw-semibold" style="color:#1e293b; font-size:0.88rem;">
+                                    {{ q.texte|slice(0,65) }}...
+                                </div>
+                                <div style="color:#94a3b8; font-size:0.8rem; margin-top:3px;">
+                                    Votre réponse: <em>{{ q.userAnswer ?: 'Sans réponse' }}</em>
+                                </div>
+                                {% if not q.isCorrect %}
+                                <div style="color:#22c55e; font-size:0.8rem;">✓ {{ q.correct }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge-niveau badge-{{ q.niveau }}">{{ q.niveau }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {# Coach AI + Chat #}
+        <div class="col-md-7 d-flex flex-column gap-4">
+
+            {# Feedback Mistral #}
+            <div class="white-card">
+                <div class="card-head">🤖 Analyse Coach AI (Mistral)</div>
+                <div style="padding:20px;">
+                    <div id="ai-feedback">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary mb-3" style="width:3rem;height:3rem;"></div>
+                            <p class="text-muted">Mistral analyse vos résultats...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Chat #}
+            <div class="white-card">
+                <div class="card-head dark">💬 Posez vos questions au Coach</div>
+                <div id="chat-messages"></div>
+                <div style="padding:15px; border-top:1px solid #f1f5f9;">
+                    <div class="input-group">
+                        <input type="text" id="chat-input" class="form-control"
+                            placeholder="Ex: Pourquoi j'ai eu faux à Q3 ?"
+                            style="border-radius:30px 0 0 30px; border:2px solid #667eea; padding:12px 20px;">
+                        <button id="chat-send" class="btn text-white"
+                            style="background:linear-gradient(135deg,#667eea,#764ba2); border-radius:0 30px 30px 0; padding:12px 20px;">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {# Bouton Retour #}
+    <div class="text-center mt-5">
+        <a href="{{ path('app_frontshowquiz') }}" class="btn-retour">
+            📚 Retour à la liste des Quiz
+        </a>
+    </div>
+
+</div>
+
+<script>
+const questionsData = {{ questionsData|json_encode|raw }};
+const score  = {{ attempt.scoreQuestions }};
+const total  = {{ attempt.totalQuestions }};
+const points = {{ attempt.scorePoints }};
+
+let chatHistory = [];
+
+// Analyse automatique au chargement
+window.addEventListener('load', async () => {
+    try {
+        const res = await fetch('{{ path("quiz_coach_analyze") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ questions: questionsData, score, total, points })
+        });
+        const data = await res.json();
+
+        if (data.feedback) {
+            document.getElementById('ai-feedback').innerHTML =
+                '<div style="white-space:pre-wrap; line-height:1.9; color:#1e293b; font-size:0.95rem;">'
+                + data.feedback + '</div>';
+            chatHistory.push({ role: 'assistant', content: data.feedback });
+        } else {
+            document.getElementById('ai-feedback').innerHTML =
+                '<div class="alert alert-danger">❌ ' + (data.error ?? 'Erreur inconnue') + '</div>';
+        }
+    } catch(e) {
+        document.getElementById('ai-feedback').innerHTML =
+            '<div class="alert alert-danger">❌ Ollama non disponible. Lancez: <code>ollama serve</code></div>';
+    }
+});
+
+// Chat
+document.getElementById('chat-send').addEventListener('click', sendChat);
+document.getElementById('chat-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') sendChat();
+});
+
+async function sendChat() {
+    const input = document.getElementById('chat-input');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    addMsg(msg, true);
+    input.value = '';
+    chatHistory.push({ role: 'user', content: msg });
+    addTyping();
+
+    try {
+        const res = await fetch('{{ path("quiz_coach_chat") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ history: chatHistory })
+        });
+        const data = await res.json();
+        removeTyping();
+        addMsg(data.reply ?? '❌ Erreur', false);
+        chatHistory.push({ role: 'assistant', content: data.reply });
+    } catch(e) {
+        removeTyping();
+        addMsg('❌ Erreur de connexion', false);
+    }
+}
+
+function addMsg(text, isUser) {
+    const chat = document.getElementById('chat-messages');
+    const d = document.createElement('div');
+    d.style.display = 'flex';
+    d.style.justifyContent = isUser ? 'flex-end' : 'flex-start';
+    d.style.padding = '4px 15px';
+    const bubble = document.createElement('div');
+    bubble.className = isUser ? 'bubble-user' : 'bubble-ai';
+    bubble.textContent = text;
+    d.appendChild(bubble);
+    chat.appendChild(d);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function addTyping() {
+    const chat = document.getElementById('chat-messages');
+    const d = document.createElement('div');
+    d.id = 'typing';
+    d.style.padding = '4px 15px';
+    d.innerHTML = `<div class="bubble-ai">
+        <span class="spinner-grow spinner-grow-sm text-primary"></span>
+        <span class="spinner-grow spinner-grow-sm text-primary" style="animation-delay:.2s"></span>
+        <span class="spinner-grow spinner-grow-sm text-primary" style="animation-delay:.4s"></span>
+    </div>`;
+    chat.appendChild(d);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function removeTyping() {
+    document.getElementById('typing')?.remove();
+}
+</script>
+
+{% endblock %}
