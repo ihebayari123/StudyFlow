@@ -41,18 +41,23 @@
                         <small class="text-muted">Give your course a clear, descriptive title</small>
                     </div>
 
-                    <!-- Image Upload Section - Redesigned with clear button -->
+                    <!-- Image Upload Section -->
                     <div class="mb-4">
                         <label class="form-label fw-semibold">Course Image</label>
                         
-                        <!-- Hidden file input - Make sure it's accessible -->
-                       {{ form_widget(f.imageFile, {
-    'attr': {
-        'accept': 'image/*',
-        'id': 'courseImage',
-        'style': 'display: none;'
-    }
-}) }}
+                        {#
+                            KEY FIX: Do NOT pass a custom id here.
+                            Symfony generates its own id (e.g. "course_imageFile").
+                            We wrap the widget in a div with a known id so we can
+                            find the real input reliably via querySelector.
+                        #}
+                        <div id="imageFileWrapper" style="display: none;">
+                            {{ form_widget(f.imageFile, {
+                                'attr': {
+                                    'accept': 'image/*'
+                                }
+                            }) }}
+                        </div>
                         
                         <div class="upload-area border rounded-3 p-4 text-center" id="uploadArea">
                             <div class="upload-content" id="uploadContent">
@@ -60,8 +65,7 @@
                                 <h5 class="mb-2">Click to upload or drag and drop</h5>
                                 <p class="text-muted mb-3">JPG, PNG or GIF (Max 2MB)</p>
                                 
-                                <!-- Custom upload button -->
-                                <button type="button" class="btn btn-primary px-4" id="uploadButton" onclick="document.getElementById('courseImage').click(); return false;">
+                                <button type="button" class="btn btn-primary px-4" id="uploadButton">
                                     <i class="fas fa-upload me-2"></i>Choose Image
                                 </button>
                             </div>
@@ -71,10 +75,10 @@
                                 <div class="position-relative">
                                     <img src="#" alt="Preview" class="img-fluid rounded-3" style="max-height: 200px;">
                                     <div class="mt-3">
-                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeImage()">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" id="removeImageBtn">
                                             <i class="fas fa-trash me-1"></i>Remove
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="changeImage()">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="changeImageBtn">
                                             <i class="fas fa-exchange-alt me-1"></i>Change
                                         </button>
                                     </div>
@@ -178,7 +182,6 @@
 
 <!-- Custom Styles -->
 <style>
-    /* Adjust container for sidebar */
     .container-fluid {
         margin-left: 280px;
         width: calc(100% - 280px);
@@ -186,7 +189,6 @@
         transition: all 0.3s;
     }
 
-    /* Modern card styles */
     .card {
         transition: transform 0.2s, box-shadow 0.2s;
     }
@@ -196,7 +198,6 @@
         box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.1) !important;
     }
 
-    /* Upload Area Styling */
     .upload-area {
         background-color: #f8f9fa;
         border: 2px dashed #dee2e6 !important;
@@ -214,14 +215,12 @@
         border-color: #4f46e5 !important;
     }
 
-    /* Image preview styling */
     .image-preview img {
         border: 3px solid #4f46e5;
         padding: 3px;
         background: white;
     }
 
-    /* Form field enhancements */
     .form-control, .form-select {
         border: 1px solid #e0e0e0;
         transition: border-color 0.2s, box-shadow 0.2s;
@@ -244,16 +243,10 @@
         transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
     }
 
-    /* Badge styling */
-    .badge.bg-gradient-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
     .bg-gradient-primary {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
 
-    /* Button hover effects */
     .btn-primary {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border: none;
@@ -270,7 +263,6 @@
         border-color: #6c757d;
     }
 
-    /* List styling */
     .list-unstyled li {
         padding: 8px 12px;
         background: #f8f9fa;
@@ -282,7 +274,6 @@
         background: #e9ecef;
     }
 
-    /* Responsive adjustments */
     @media (max-width: 991.98px) {
         .container-fluid {
             margin-left: 0;
@@ -291,12 +282,10 @@
         }
     }
 
-    /* Loading animation */
     .btn-primary:active {
         transform: scale(0.95);
     }
 
-    /* Error message styling */
     .form-error {
         color: #dc3545;
         font-size: 0.875rem;
@@ -307,103 +296,109 @@
 
 <!-- JavaScript for Image Upload -->
 <script>
-    // Wait for the DOM to be fully loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get elements
-        const uploadArea = document.getElementById('uploadArea');
-        const uploadButton = document.getElementById('uploadButton');
-        const fileInput = document.getElementById('courseImage');
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // ── KEY FIX ──────────────────────────────────────────────────────────
+        // Symfony generates its own id for the file input (e.g. "course_imageFile").
+        // Instead of guessing it, we find the <input type="file"> inside our wrapper.
+        const wrapper      = document.getElementById('imageFileWrapper');
+        const fileInput    = wrapper ? wrapper.querySelector('input[type="file"]') : null;
+        // ─────────────────────────────────────────────────────────────────────
+
+        const uploadArea    = document.getElementById('uploadArea');
+        const uploadButton  = document.getElementById('uploadButton');
         const uploadContent = document.getElementById('uploadContent');
-        const imagePreview = document.getElementById('imagePreview');
-        
-        console.log('File input found:', fileInput); // Debug: check if file input exists
-        
+        const imagePreview  = document.getElementById('imagePreview');
+        const removeBtn     = document.getElementById('removeImageBtn');
+        const changeBtn     = document.getElementById('changeImageBtn');
+
         if (!fileInput) {
-            console.error('File input not found!');
+            console.error('Image file input not found inside #imageFileWrapper');
             return;
         }
-        
-        // Direct click handler for upload button
-        uploadButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Upload button clicked'); // Debug
-            fileInput.click();
-        });
-        
-        // Click on upload area (but not on button)
-        uploadArea.addEventListener('click', function(e) {
-            // Don't trigger if clicking on the button (button has its own handler)
-            if (e.target === uploadButton || uploadButton.contains(e.target)) {
+
+        // Show the preview for a given File object
+        function showPreview(file) {
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File size must be less than 2MB');
+                fileInput.value = '';
                 return;
             }
-            console.log('Upload area clicked'); // Debug
+            if (!file.type.match('image.*')) {
+                alert('Please select an image file');
+                fileInput.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                uploadContent.style.display = 'none';
+                imagePreview.style.display  = 'block';
+                imagePreview.querySelector('img').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Upload button
+        uploadButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
             fileInput.click();
         });
-        
-        // Handle file selection
-        fileInput.addEventListener('change', function(e) {
-            console.log('File selected'); // Debug
-            const file = e.target.files[0];
-            if (file) {
-                // Check file size (2MB limit)
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('File size must be less than 2MB');
-                    fileInput.value = '';
-                    return;
-                }
-                
-                // Check file type
-                if (!file.type.match('image.*')) {
-                    alert('Please select an image file');
-                    fileInput.value = '';
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    // Hide upload content, show preview
-                    uploadContent.style.display = 'none';
-                    imagePreview.style.display = 'block';
-                    imagePreview.querySelector('img').src = e.target.result;
-                }
-                reader.readAsDataURL(file);
+
+        // Click anywhere on the upload area
+        uploadArea.addEventListener('click', function (e) {
+            if (uploadButton.contains(e.target) ||
+                removeBtn.contains(e.target)    ||
+                changeBtn.contains(e.target)) {
+                return;
+            }
+            fileInput.click();
+        });
+
+        // File selected via dialog
+        fileInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                showPreview(this.files[0]);
             }
         });
-        
-        // Remove image function
-        window.removeImage = function() {
+
+        // Remove image
+        removeBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
             fileInput.value = '';
             uploadContent.style.display = 'block';
-            imagePreview.style.display = 'none';
-        };
-        
-        // Change image function
-        window.changeImage = function() {
+            imagePreview.style.display  = 'none';
+            imagePreview.querySelector('img').src = '#';
+        });
+
+        // Change image
+        changeBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
             fileInput.click();
-        };
-        
-        // Drag and drop functionality
-        uploadArea.addEventListener('dragover', function(e) {
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', function (e) {
             e.preventDefault();
             this.classList.add('dragover');
         });
-        
-        uploadArea.addEventListener('dragleave', function(e) {
+
+        uploadArea.addEventListener('dragleave', function (e) {
             e.preventDefault();
             this.classList.remove('dragover');
         });
-        
-        uploadArea.addEventListener('drop', function(e) {
+
+        uploadArea.addEventListener('drop', function (e) {
             e.preventDefault();
             this.classList.remove('dragover');
-            
             const files = e.dataTransfer.files;
             if (files.length > 0) {
-                fileInput.files = files;
-                // Trigger change event
-                const event = new Event('change', { bubbles: true });
-                fileInput.dispatchEvent(event);
+                // Assign dropped file to the real input via DataTransfer
+                const dt = new DataTransfer();
+                dt.items.add(files[0]);
+                fileInput.files = dt.files;
+                showPreview(files[0]);
             }
         });
     });
