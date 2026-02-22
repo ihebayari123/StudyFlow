@@ -14,7 +14,7 @@ use App\Entity\Question;
 use App\Entity\QuestionChoix;
 use App\Entity\QuestionVraiFaux;
 use App\Entity\QuestionTexteLibre;
-
+use App\Service\SmartValidatorService;
 use App\Repository\UtilisateurRepository;
 use App\Repository\QuestionRepository;
 
@@ -93,7 +93,8 @@ public function quizSubmit(
     Request $request,
     QuizRepository $quizRepository,
     QuestionRepository $questionRepository,
-    EntityManagerInterface $em
+    EntityManagerInterface $em,
+     SmartValidatorService $validator 
 ): Response {
     $quiz = $quizRepository->find($id);
     if (!$quiz) throw $this->createNotFoundException('Quiz introuvable');
@@ -122,7 +123,15 @@ public function quizSubmit(
             $isCorrect = $userBool === $question->getBonneReponseBool();
         } elseif ($question instanceof QuestionTexteLibre) {
             $correctAnswer = $question->getReponseAttendue();
-            $isCorrect = strtolower(trim($userAnswer)) === strtolower(trim($correctAnswer));
+           $validation  = $validator->validate(
+                $question->getTexte(),
+                $correctAnswer,
+                $userAnswer ?? ''
+            );
+
+            $isCorrect   = $validation['isCorrect'];
+            $explanation = $validation['explanation'];
+            $confidence  = $validation['confidence'];
         }
 
         switch (strtolower($question->getNiveau())) {
@@ -148,6 +157,8 @@ public function quizSubmit(
             'userAnswer'  => $userAnswer,
             'correct'     => $correctAnswer,
             'isCorrect'   => $isCorrect,
+            'explanation' => $explanation,  
+            'confidence'  => $confidence,
         ];
     }
 

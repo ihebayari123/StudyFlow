@@ -208,6 +208,17 @@ table td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9r
                                 {% if not q.isCorrect %}
                                 <div style="color:#22c55e; font-size:0.8rem;">✓ {{ q.correct }}</div>
                                 {% endif %}
+
+                                 {% if q.explanation is defined and q.explanation %}
+            <div class="mt-1 p-2 rounded" style="background:#f0f4ff; font-size:0.78rem; color:#4f46e5;">
+                🧠 <em>{{ q.explanation }}</em>
+                {% if q.confidence is defined %}
+                    <span class="ms-1 badge" style="background:#667eea; color:white; font-size:0.7rem;">
+                        {{ q.confidence }}%
+                    </span>
+                {% endif %}
+            </div>
+        {% endif %}
                             </td>
                             <td>
                                 <span class="badge-niveau badge-{{ q.niveau }}">{{ q.niveau }}</span>
