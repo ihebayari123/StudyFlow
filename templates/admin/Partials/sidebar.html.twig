@@ -1,5 +1,3 @@
-{# templates/admin/partials/sidebar.html.twig #}
-
 {% block body %}
 <!--! ================================================================ !-->
 <!--! [Start] Navigation Manu !-->
@@ -19,41 +17,40 @@
                     <label>Navigation</label>
                 </li>
 
-                {# Dashboard – visible to both admin and teacher? 
-                   If teacher should NOT see it, wrap with admin check. 
-                   We'll hide for now to match requirement. #}
-                {% if is_granted('ROLE_ADMIN') %}
+                <!-- Dashboards -->
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-airplay"></i></span>
-                        <span class="nxl-mtext">Dashboards</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        <span class="nxl-mtext">Dashboards</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
                         <li class="nxl-item"><a class="nxl-link" href="/admin">CRM</a></li>
                         <li class="nxl-item"><a class="nxl-link" href="analytics.html">Analytics</a></li>
                     </ul>
                 </li>
-                {% endif %}
 
-                {# Utilisateurs – admin only #}
-                {% if is_granted('ROLE_ADMIN') %}
+                <!-- Utilisateurs -->
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-users"></i></span>
-                        <span class="nxl-mtext">Utilisateurs</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        <span class="nxl-mtext">Utilisateurs</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
-                        <li class="nxl-item"><a class="nxl-link" href="{{ path('app_users_show') }}">Liste des utilisateurs</a></li>
-                        <li class="nxl-item"><a class="nxl-link" href="{{ path('app_useradd') }}">Ajouter un utilisateur</a></li>
+                        <li class="nxl-item"><a class="nxl-link">Liste des utilisateurs</a></li>
+                        <li class="nxl-item">
+                            <a class="nxl-link" href="{{ path('app_useradd') }}">Ajouter un utilisateur</a>
+                        </li>
                     </ul>
                 </li>
-                {% endif %}
 
-                {# Cours – visible to both admin and teacher #}
+                <!-- Cours -->
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-cast"></i></span>
-                        <span class="nxl-mtext">Cours</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        <span class="nxl-mtext">Cours</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
                         <li class="nxl-item"><a class="nxl-link" href="/addcoursback">add Cours</a></li>
@@ -63,42 +60,53 @@
                     </ul>
                 </li>
 
-                {# Quiz&Question – visible to both admin and teacher #}
+                <!-- Quiz & Question -->
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-users"></i></span>
-                        <span class="nxl-mtext">Quiz&Question</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        <span class="nxl-mtext">Quiz&Question</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
                         <li class="nxl-item"><a class="nxl-link" href="{{ path('admin_show_quiz') }}">show Quiz</a></li>
                         <li class="nxl-item"><a class="nxl-link" href="{{ path('app_addformquiz') }}">add form quiz</a></li>
                         <li class="nxl-item"><a class="nxl-link" href="{{ path('app_showquestion') }}">showQuestion</a></li>
-                        
+                        <li class="nxl-item"><a class="nxl-link" href="{{ path('app_addformquestion') }}">add form question</a></li>
                     </ul>
                 </li>
 
-                {# All remaining sections – admin only #}
-                {% if is_granted('ROLE_ADMIN') %}
+                <!-- Gestionnaire Stress -->
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-layout"></i></span>
-                        <span class="nxl-mtext">Gestionnaire_Stresse</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        <span class="nxl-mtext">Gestionnaire_Stresse</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
                         <li class="nxl-item">
                             <a class="nxl-link" href="{{ path('app_showstresse') }}">Voir les Étudiants</a>
-                            <a class="nxl-link" href="{{ path('app_add_stresse') }}">Ajouter Étudiant</a>
+                        </li>
+                        <li class="nxl-item">
+                            <a class="nxl-link" href="{{ path('app_showconsultation') }}">voir_listes_des_consultations</a>
+                        </li>
+                        <li class="nxl-item">
                             <a class="nxl-link" href="{{ path('app_showscore') }}">Suivi des Scores</a>
+                        </li>
+                        <li class="nxl-item">
                             <a class="nxl-link" href="{{ path('app_stresse_statistiques') }}">Statistics</a>
-                            <a class="nxl-link" href="{{ path('app_showstresse_recherche') }}">Recherche Par Date</a>
+                        </li>
+                        <li class="nxl-item">
+                            <a class="nxl-link" href="{{ path('app_showmedecin') }}">liste des medecins</a>
                         </li>
                     </ul>
                 </li>
 
+                <!-- Produits -->
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-at-sign"></i></span>
-                        <span class="nxl-mtext">Produits</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        <span class="nxl-mtext">Produits</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
                         <li class="nxl-item"><a class="nxl-link" href="{{ path('app_showproduit') }}">Produits</a></li>
@@ -106,10 +114,12 @@
                     </ul>
                 </li>
 
+                <!-- Payment -->
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-dollar-sign"></i></span>
-                        <span class="nxl-mtext">Payment</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        <span class="nxl-mtext">Payment</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
                         <li class="nxl-item"><a class="nxl-link" href="payment.html">Payment</a></li>
@@ -118,22 +128,51 @@
                     </ul>
                 </li>
 
+                <!-- Customers (HEAD / main) -->
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-users"></i></span>
-                        <span class="nxl-mtext">Customers</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        <span class="nxl-mtext">Customers</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
-                        <li class="nxl-item"><a class="nxl-link" href="customers.html">Customers</a></li>
-                        <li class="nxl-item"><a class="nxl-link" href="customers-view.html">Customers View</a></li>
-                        <li class="nxl-item"><a class="nxl-link" href="customers-create.html">Customers Create</a></li>
+                        <li class="nxl-item"><a class="nxl-link" href="{{ path('admin_show_quiz') }}">show Quiz</a></li>
+                        <li class="nxl-item"><a class="nxl-link" href="{{ path('app_addformquiz') }}">add form quiz</a></li>
+                        <li class="nxl-item"><a class="nxl-link" href="{{ path('app_showquestion') }}">showQuestion</a></li>
+                        <li class="nxl-item"><a class="nxl-link" href="{{ path('admin_quiz_statistics_list') }}">statistics list</a></li>
+                        <li class="nxl-item"><a class="nxl-link" href="{{ path('quiz_ai_generate') }}">quiz ai generate</a></li>
                     </ul>
                 </li>
 
+                <!-- Events et Sponsors (Gestion_eventv2) -->
+                <li class="nxl-item nxl-hasmenu">
+                    <a href="javascript:void(0);" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-calendar"></i></span>
+                        <span class="nxl-mtext">Events et Sponsors</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                    </a>
+                    <ul class="nxl-submenu">
+                        <li class="nxl-item">
+                            <a class="nxl-link" href="https://127.0.0.1:8000/events">Show Events</a>
+                        </li>
+                        <li class="nxl-item">
+                            <a class="nxl-link" href="https://127.0.0.1:8000/events/create">Add Event</a>
+                        </li>
+                        <li class="nxl-item">
+                            <a class="nxl-link" href="https://127.0.0.1:8000/sponsor/list">Show Sponsors</a>
+                        </li>
+                        <li class="nxl-item">
+                            <a class="nxl-link" href="https://127.0.0.1:8000/sponsor/create">Add Sponsor</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Leads -->
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-alert-circle"></i></span>
-                        <span class="nxl-mtext">Leads</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        <span class="nxl-mtext">Leads</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
                         <li class="nxl-item"><a class="nxl-link" href="leads.html">Leads</a></li>
@@ -142,10 +181,12 @@
                     </ul>
                 </li>
 
+                <!-- Projects -->
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-briefcase"></i></span>
-                        <span class="nxl-mtext">Projects</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        <span class="nxl-mtext">Projects</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
                         <li class="nxl-item"><a class="nxl-link" href="projects.html">Projects</a></li>
@@ -154,10 +195,12 @@
                     </ul>
                 </li>
 
+                <!-- Widgets -->
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-layout"></i></span>
-                        <span class="nxl-mtext">Widgets</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        <span class="nxl-mtext">Widgets</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
                         <li class="nxl-item"><a class="nxl-link" href="widgets-lists.html">Lists</a></li>
@@ -168,10 +211,12 @@
                     </ul>
                 </li>
 
+                <!-- Settings -->
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-settings"></i></span>
-                        <span class="nxl-mtext">Settings</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        <span class="nxl-mtext">Settings</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
                         <li class="nxl-item"><a class="nxl-link" href="settings-general.html">General</a></li>
@@ -190,15 +235,18 @@
                     </ul>
                 </li>
 
+                <!-- Authentication -->
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-power"></i></span>
-                        <span class="nxl-mtext">Authentication</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        <span class="nxl-mtext">Authentication</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
                         <li class="nxl-item nxl-hasmenu">
                             <a href="javascript:void(0);" class="nxl-link">
-                                <span class="nxl-mtext">Login</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                                <span class="nxl-mtext">Login</span>
+                                <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                             </a>
                             <ul class="nxl-submenu">
                                 <li class="nxl-item"><a class="nxl-link" href="./auth-login-cover.html">Cover</a></li>
@@ -208,7 +256,8 @@
                         </li>
                         <li class="nxl-item nxl-hasmenu">
                             <a href="javascript:void(0);" class="nxl-link">
-                                <span class="nxl-mtext">Register</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                                <span class="nxl-mtext">Register</span>
+                                <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                             </a>
                             <ul class="nxl-submenu">
                                 <li class="nxl-item"><a class="nxl-link" href="./auth-register-cover.html">Cover</a></li>
@@ -218,7 +267,8 @@
                         </li>
                         <li class="nxl-item nxl-hasmenu">
                             <a href="javascript:void(0);" class="nxl-link">
-                                <span class="nxl-mtext">Error-404</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                                <span class="nxl-mtext">Error-404</span>
+                                <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                             </a>
                             <ul class="nxl-submenu">
                                 <li class="nxl-item"><a class="nxl-link" href="./auth-404-cover.html">Cover</a></li>
@@ -228,7 +278,8 @@
                         </li>
                         <li class="nxl-item nxl-hasmenu">
                             <a href="javascript:void(0);" class="nxl-link">
-                                <span class="nxl-mtext">Reset Pass</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                                <span class="nxl-mtext">Reset Pass</span>
+                                <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                             </a>
                             <ul class="nxl-submenu">
                                 <li class="nxl-item"><a class="nxl-link" href="./auth-reset-cover.html">Cover</a></li>
@@ -238,7 +289,8 @@
                         </li>
                         <li class="nxl-item nxl-hasmenu">
                             <a href="javascript:void(0);" class="nxl-link">
-                                <span class="nxl-mtext">Verify OTP</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                                <span class="nxl-mtext">Verify OTP</span>
+                                <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                             </a>
                             <ul class="nxl-submenu">
                                 <li class="nxl-item"><a class="nxl-link" href="./auth-verify-cover.html">Cover</a></li>
@@ -248,7 +300,8 @@
                         </li>
                         <li class="nxl-item nxl-hasmenu">
                             <a href="javascript:void(0);" class="nxl-link">
-                                <span class="nxl-mtext">Maintenance</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                                <span class="nxl-mtext">Maintenance</span>
+                                <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                             </a>
                             <ul class="nxl-submenu">
                                 <li class="nxl-item"><a class="nxl-link" href="./auth-maintenance-cover.html">Cover</a></li>
@@ -259,10 +312,12 @@
                     </ul>
                 </li>
 
+                <!-- Help Center -->
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-life-buoy"></i></span>
-                        <span class="nxl-mtext">Help Center</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        <span class="nxl-mtext">Help Center</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
                     <ul class="nxl-submenu">
                         <li class="nxl-item"><a class="nxl-link" href="#!">Support</a></li>
@@ -270,7 +325,6 @@
                         <li class="nxl-item"><a class="nxl-link" href="/docs/documentations">Documentations</a></li>
                     </ul>
                 </li>
-                {% endif %} {# end admin-only sections #}
 
             </ul>
             <div class="card text-center">

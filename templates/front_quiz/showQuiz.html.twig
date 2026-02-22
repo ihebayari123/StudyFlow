@@ -1,28 +1,21 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des Quiz - Plateforme Éducative{% endblock %}
+{% block title %}Liste des Quiz{% endblock %}
 
 {% block body %}
-<!-- ======= Header ======= -->
-{% block header %}
-{% include 'home/navbar.html.twig' %}
-{% endblock %}
-
 <style>
-/* Reset */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+    body {
+        font-family: 'Arial', sans-serif;
+        background: #f5f5f5;
+        margin: 0;
+        padding: 0;
+    }
 
-/* Body */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    padding-top: 140px;
-}
+    .container {
+        max-width: 1200px;
+        margin: 50px auto;
+        padding: 0 20px;
+    }
 
 /* Header / Navbar */
 .header-area {
@@ -48,6 +41,30 @@ body {
 .main-nav .nav li a:hover,
 .main-nav .nav li a.active {
     color: #ffd166;
+}
+
+/* AI Pedagogy Button - Style spécial pour le bouton AI */
+.main-nav .nav li a.ai-button {
+    background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 30px;
+    margin-left: 15px;
+    box-shadow: 0 4px 15px rgba(255,107,107,0.4);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+}
+
+.main-nav .nav li a.ai-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255,107,107,0.6);
+    color: white;
+}
+
+.main-nav .nav li a.ai-button i {
+    font-size: 1.2rem;
 }
 
 /* Container */
@@ -126,257 +143,147 @@ body {
     padding: 10px;
     margin-bottom: 40px;
     display: flex;
-    flex-wrap: wrap;
     gap: 10px;
-    align-items: center;
-    border: 1px solid rgba(255,255,255,0.2);
-}
-
-.search-form {
-    flex: 2;
-    min-width: 250px;
-    display: flex;
-    gap: 8px;
 }
 
 .search-form input {
     flex: 1;
-    padding: 12px 20px;
-    border-radius: 30px;
-    border: 2px solid rgba(255,255,255,0.3);
-    background: rgba(255,255,255,0.2);
-    backdrop-filter: blur(10px);
-    color: white;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-}
-
-.search-form input::placeholder {
-    color: rgba(255,255,255,0.7);
-}
-
-.search-form input:focus {
-    outline: none;
-    background: white;
-    color: #333;
-    border-color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
 }
 
 .search-form button {
-    padding: 12px 24px;
-    border-radius: 30px;
+    padding: 8px 12px;
     border: none;
-    background: white;
-    color: #667eea;
-    font-weight: 600;
+    background-color: #4f46e5;
+    color: #fff;
+    border-radius: 6px;
     cursor: pointer;
-    transition: all 0.3s ease;
 }
 
-.search-form button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255,255,255,0.35);
-}
+    .header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
 
-/* Sort Dropdown */
-.sort-wrapper {
-    flex: 1;
-    min-width: 180px;
-}
+    .header h1 {
+        font-size: 48px;
+        color: #fbbd08; 
+        margin-bottom: 10px;
+    }
 
-.sort-select {
-    width: 100%;
-    padding: 12px 20px;
-    border-radius: 30px;
-    border: 2px solid rgba(255,255,255,0.3);
-    background: rgba(255,255,255,0.2);
-    color: white;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 15px center;
-}
+    .header p {
+        font-size: 20px;
+        color: #555;
+    }
 
-.sort-select option {
-    background: #667eea;
-    color: white;
-}
+    .quiz-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+    }
 
-.sort-select:focus {
-    outline: none;
-    background: white;
-    color: #333;
-    border-color: white;
-}
+    .quiz-card {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        padding: 25px;
+        transition: transform 0.3s, box-shadow 0.3s;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
 
-/* View Toggle */
-.view-toggle {
+    .quiz-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+    }
+
+    .quiz-card h2 {
+        color: #4a4a4a;
+        margin: 0 0 15px 0;
+        font-size: 22px;
+    }
+
+    .quiz-card p {
+        margin: 5px 0;
+        color: #777;
+        font-size: 16px;
+    }
+
+    .quiz-card .actions {
+        margin-top: 20px;
+    }
+
+    .quiz-card .actions a {
+        text-decoration: none;
+        padding: 10px 15px;
+        margin-right: 10px;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: background 0.3s;
+    }
+
+    .quiz-card .actions .edit {
+        background: #2185d0;
+        color: #fff;
+    }
+
+    .quiz-card .actions .edit:hover {
+        background: #1678c2;
+    }
+
+    .quiz-card .actions .delete {
+        background: #db2828;
+        color: #fff;
+    }
+
+    .quiz-card .actions .delete:hover {
+        background: #b71c1c;
+    }
+
+    .actions {
     display: flex;
-    gap: 5px;
-    background: rgba(255,255,255,0.2);
-    padding: 5px;
-    border-radius: 30px;
+    flex-direction: column; 
+    margin-top: 20px;
 }
 
-.view-btn {
-    padding: 8px 16px;
-    border: none;
-    background: transparent;
-    color: rgba(255,255,255,0.7);
-    border-radius: 25px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-}
 
-.view-btn.active {
-    background: white;
-    color: #667eea;
-    font-weight: 600;
-}
 
-/* Quiz Grid */
-.quiz-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 30px;
-    margin-bottom: 40px;
-}
 
-/* Quiz Card */
-.quiz-card {
-    background: white;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
-    transition: all 0.35s ease;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
 
-.quiz-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 25px 60px rgba(0,0,0,0.35);
-}
 
-/* Quiz Header */
-.quiz-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 20px;
-    color: white;
-    position: relative;
-}
 
-.quiz-badge {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: rgba(255,255,255,0.2);
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    backdrop-filter: blur(5px);
-}
 
-.quiz-header h2 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 5px;
-    padding-right: 60px;
-}
 
-.quiz-meta {
-    display: flex;
-    gap: 15px;
-    font-size: 0.85rem;
-    opacity: 0.9;
-}
-
-/* Quiz Body */
-.quiz-body {
-    padding: 20px;
-    flex: 1;
-}
-
-.quiz-info {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.info-item {
-    text-align: center;
-}
-
-.info-label {
-    font-size: 0.75rem;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.info-value {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #1e293b;
-}
-
-.quiz-course {
-    background: #f1f5f9;
-    padding: 10px;
-    border-radius: 10px;
-    text-align: center;
-    color: #475569;
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin-bottom: 15px;
-}
-
-.quiz-description {
-    color: #64748b;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    margin-bottom: 20px;
-}
-
-/* Actions */
-.actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.actions a {
-    text-decoration: none;
-    padding: 12px;
-    border-radius: 12px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-align: center;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-
-/* Play Button */
 .actions .play-quiz {
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
-    color: white;
-    grid-column: span 2;
+    display: block;
+    background: #2185d0;
+    color: #fff;
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 16px;
+    text-decoration: none;
+    transition: background 0.3s;
 }
 
 .actions .play-quiz:hover {
+    background: #1678c2;
+}
+
+/* AI Pedagogy Button dans les actions */
+.actions .ai-pedagogy {
+    background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+    color: white;
+    grid-column: span 2;
+    margin-top: 5px;
+}
+
+.actions .ai-pedagogy:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(99,102,241,0.5);
+    box-shadow: 0 8px 20px rgba(255,107,107,0.5);
 }
 
 /* Edit Button */
@@ -503,61 +410,22 @@ body {
 </style>
 
 <div class="container">
-    {# Statistiques #}
-    <div class="stats-container">
-        <div class="stat-card">
-            <div class="stat-icon">📚</div>
-            <div class="stat-value">{{ listQuiz|length }}</div>
-            <div class="stat-label">Quiz disponibles</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">⏱️</div>
-            <div class="stat-value">{{ listQuiz|reduce((carry, quiz) => carry + quiz.duree, 0) }}</div>
-            <div class="stat-label">Minutes totales</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">📊</div>
-            <div class="stat-value">{{ listQuiz|reduce((carry, quiz) => carry + (quiz.questions is defined ? quiz.questions|length : 0), 0) }}</div>
-            <div class="stat-label">Questions totales</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">🎯</div>
-            <div class="stat-value">{{ listQuiz|reduce((carry, quiz) => carry + (quiz.tentatives is defined ? quiz.tentatives|length : 0), 0) }}</div>
-            <div class="stat-label">Tentatives</div>
-        </div>
+    <div class="header">
+        <h1>Liste des Quiz</h1>
+        <p>Consultez tous vos quiz disponibles</p>
     </div>
+    <form method="get" class="search-form">
+        <input
+            type="text"
+            name="q"
+            placeholder="Recherche par titre..."
+            value="{{ app.request.get('q') }}"
+        >
+        <button type="submit">🔍</button>
+    </form>
+    
 
-    {# Barre de recherche et filtres #}
-    <div class="search-filter-bar">
-        <form method="get" class="search-form">
-            <input
-                type="text"
-                name="q"
-                placeholder="Rechercher un quiz par titre..."
-                value="{{ app.request.get('q') }}"
-            >
-            <button type="submit">🔍 Rechercher</button>
-        </form>
-        
-        <div class="sort-wrapper">
-            <select name="sort" class="sort-select" onchange="this.form.submit()">
-                <option value="date_desc" {{ app.request.get('sort') == 'date_desc' ? 'selected' : '' }}>📅 Plus récents</option>
-                <option value="date_asc" {{ app.request.get('sort') == 'date_asc' ? 'selected' : '' }}>📅 Plus anciens</option>
-                <option value="title_asc" {{ app.request.get('sort') == 'title_asc' ? 'selected' : '' }}>🔤 Titre (A-Z)</option>
-                <option value="title_desc" {{ app.request.get('sort') == 'title_desc' ? 'selected' : '' }}>🔤 Titre (Z-A)</option>
-                <option value="duration_asc" {{ app.request.get('sort') == 'duration_asc' ? 'selected' : '' }}>⏱️ Durée (croissante)</option>
-                <option value="duration_desc" {{ app.request.get('sort') == 'duration_desc' ? 'selected' : '' }}>⏱️ Durée (décroissante)</option>
-            </select>
-        </div>
-        
-        <div class="view-toggle">
-            <button class="view-btn active" onclick="changeView('grid')">📱 Grille</button>
-            <button class="view-btn" onclick="changeView('list')">📋 Liste</button>
-        </div>
-    </div>
-
-    {# Grille des quiz #}
-    <div class="quiz-grid" id="quizGrid">
+    <div class="quiz-grid">
         {% for quiz in listQuiz %}
             <div class="quiz-card">
                 <div class="quiz-header">
@@ -598,17 +466,28 @@ body {
                             ▶️ Commencer le Quiz
                         </a>
                         
+                        {# Bouton AI Pedagogy - Commenté si vous voulez l'ajouter aussi ici
+                        <a href="{{ path('chat_index') }}" class="ai-pedagogy">
+                            🤖 AI Pedagogy Assistant
+                        </a>
+                        #}
                     </div>
                 </div>
             </div>
         {% else %}
-            <div class="empty-state">
-                <div class="empty-state-icon">📭</div>
-                <h3>Aucun quiz trouvé</h3>
-                <p>Il n'y a pas encore de quiz disponibles. Soyez le premier à en créer un !</p>
-                <a href="{{ path('quiz_new') }}" class="btn-create">➕ Créer un quiz</a>
-            </div>
+            
         {% endfor %}
+    </div>
+
+    {# Bouton AI Pedagogy flottant (optionnel) #}
+    <div style="position: fixed; bottom: 30px; right: 30px; z-index: 1000;">
+        <a href="{{ path('chat_index') }}" 
+           style="display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #ff6b6b, #ff8e53); color: white; padding: 15px 30px; border-radius: 50px; text-decoration: none; font-weight: 600; box-shadow: 0 10px 30px rgba(255,107,107,0.5); transition: all 0.3s ease;"
+           onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 40px rgba(255,107,107,0.7)';"
+           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(255,107,107,0.5)';">
+            <span style="font-size: 1.5rem;">🤖</span>
+            <span>AI Pedagogy Assistant</span>
+        </a>
     </div>
 
     {# Pagination #}
@@ -626,60 +505,10 @@ body {
     {% endif %}
 </div>
 
-<script>
-// Fonction pour changer l'affichage (grille/liste)
-function changeView(view) {
-    const grid = document.getElementById('quizGrid');
-    const buttons = document.querySelectorAll('.view-btn');
-    
-    buttons.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-    
-    if (view === 'list') {
-        grid.style.gridTemplateColumns = '1fr';
-        document.querySelectorAll('.quiz-card').forEach(card => {
-            card.style.display = 'grid';
-            card.style.gridTemplateColumns = '200px 1fr';
-        });
-    } else {
-        grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
-        document.querySelectorAll('.quiz-card').forEach(card => {
-            card.style.display = 'flex';
-            card.style.gridTemplateColumns = 'none';
-        });
-    }
-}
-
-// Animation au scroll
-document.addEventListener('DOMContentLoaded', function() {
-    const cards = document.querySelectorAll('.quiz-card');
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    });
-    
-    cards.forEach(card => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        card.style.transition = 'all 0.5s ease';
-        observer.observe(card);
-    });
-});
-
-// Auto-submit du formulaire lors du changement de tri
-document.querySelector('.sort-select').addEventListener('change', function() {
-    const form = document.querySelector('.search-form');
-    const hiddenInput = document.createElement('input');
-    hiddenInput.type = 'hidden';
-    hiddenInput.name = 'sort';
-    hiddenInput.value = this.value;
-    form.appendChild(hiddenInput);
-    form.submit();
-});
-</script>
+            </div>
+        {% else %}
+            <p>Aucun quiz trouvé.</p>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

@@ -1,96 +1,415 @@
+{# templates/admin/events.html.twig #}
 {% extends 'admin/base_admin.html.twig' %}
 
-{% block title %}Liste des événements - Admin{% endblock %}
+{% block title %}Manage Events - Admin{% endblock %}
 
 {% block admin_content %}
-{# Spacer pour navbar fixe #}
-<div style="height: 80px;"></div> {# Ajuster la hauteur selon ton navbar #}
-
-<div class="container py-5 d-flex flex-column align-items-center">
-
-    <h1 class="mb-5 text-primary fw-bold text-center">Événements</h1>
-
-    {# Messages flash #}
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm w-100" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="admin-main-content">
+    <div class="container-fluid mt-5">
+        <!-- Header -->
+        <div class="page-header mb-4">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h2 class="page-title"><i class="fas fa-calendar-alt"></i> Manage Events</h2>
+                    <p class="text-muted">View and manage all events</p>
+                </div>
+                <div class="col-auto">
+                    <a href="{{ path('event_create') }}" class="btn btn-primary">
+                        <i class="fas fa-plus-circle"></i> Add New Event
+                    </a>
+                </div>
             </div>
-        {% endfor %}
-    {% endfor %}
+        </div>
 
-    {# Formulaire de recherche et tri combiné #}
-    <form method="get" action="{{ path('app_events') }}" class="row mb-4 g-3 w-100 justify-content-center">
-        <div class="col-md-5">
-            <input type="text" name="search" class="form-control shadow-sm rounded-3" placeholder="Rechercher par titre ou type" value="{{ search }}">
-        </div>
-        <div class="col-md-4">
-            <select name="sort" class="form-select shadow-sm rounded-3" onchange="this.form.submit()">
-                <option value="">Trier par date</option>
-                <option value="asc" {% if sort == 'asc' %}selected{% endif %}>Du plus ancien au plus récent</option>
-                <option value="desc" {% if sort == 'desc' %}selected{% endif %}>Du plus récent au plus ancien</option>
-            </select>
-        </div>
-        <div class="col-md-2 text-end">
-            <button class="btn btn-outline-primary w-100 shadow-sm rounded-3">Appliquer</button>
-        </div>
-    </form>
-
-    {% if events is empty %}
-        <div class="alert alert-secondary text-center shadow-sm rounded-3 w-100">
-            Aucun événement trouvé.
-        </div>
-    {% else %}
-        <div class="row g-4 w-100 justify-content-center">
-            {% for event in events %}
-                <div class="col-md-6 col-lg-4">
-                    <div class="card shadow-sm border-0 h-100 rounded-4 overflow-hidden">
-                        {% if event.image %}
-                            <img src="{{ asset('uploads/' ~ event.image) }}" class="card-img-top" style="height: 180px; object-fit: cover;" alt="{{ event.titre }}">
-                        {% else %}
-                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
-                                <span class="text-muted">Aucune image</span>
-                            </div>
-                        {% endif %}
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title fw-bold">{{ event.titre }}</h5>
-                            <p class="card-text text-truncate">{{ event.description }}</p>
-                            <p class="mb-2">
-                                <small class="text-muted">Créé le {{ event.dateCreation|date('d/m/Y H:i') }}</small>
-                            </p>
-                            <div class="mb-3">
-                                {% if event.type == 'Conférence' %}
-                                    <span class="badge bg-primary">{{ event.type }}</span>
-                                {% elseif event.type == 'Atelier' %}
-                                    <span class="badge bg-success">{{ event.type }}</span>
-                                {% elseif event.type == 'Séminaire' %}
-                                    <span class="badge bg-info text-dark">{{ event.type }}</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">{{ event.type }}</span>
-                                {% endif %}
-                            </div>
-                            <div class="mt-auto d-flex justify-content-between">
-                                <a href="{{ path('event_edit', {'id': event.id}) }}" class="btn btn-warning btn-sm rounded-3 shadow-sm flex-grow-1 me-1">
-                                    Modifier
-                                </a>
-                                <form method="post" action="{{ path('event_delete', {'id': event.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?');" class="flex-grow-1 ms-1">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ event.id) }}">
-                                    <button class="btn btn-danger btn-sm rounded-3 shadow-sm w-100">Supprimer</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+        <!-- Messages flash -->
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
+        {% endfor %}
+
+        <!-- Search and Filter Bar -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" action="{{ path('app_events') }}" class="row g-3">
+                    <div class="col-md-5">
+                        <input type="text" 
+                               name="search" 
+                               id="searchTable" 
+                               class="form-control" 
+                               placeholder="Search by title or type..." 
+                               value="{{ search }}">
+                    </div>
+                    <div class="col-md-5">
+                        <select name="sort" class="form-select" id="sortSelect">
+                            <option value="">Sort by date</option>
+                            <option value="asc" {% if sort == 'asc' %}selected{% endif %}>Oldest to Newest</option>
+                            <option value="desc" {% if sort == 'desc' %}selected{% endif %}>Newest to Oldest</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter"></i> Apply
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    {% endif %}
 
-    <div class="mt-5 text-center w-100">
-        <a href="{{ path('event_create') }}" class="btn btn-primary btn-lg shadow-sm rounded-3">
-            Ajouter un nouvel événement
-        </a>
+        <!-- Events Table -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="eventsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Type</th>
+                                <th>Created Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for event in events %}
+                            <tr class="event-row" data-event-id="{{ event.id }}">
+                                <td>{{ event.id }}</td>
+                                <td>
+                                    {% if event.image %}
+                                        <img src="{{ asset('uploads/' ~ event.image) }}" 
+                                             alt="{{ event.titre }}" 
+                                             class="event-thumb">
+                                    {% else %}
+                                        <div class="event-thumb-placeholder">
+                                            <i class="fas fa-image"></i>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ event.titre }}</strong></td>
+                                <td>{{ event.description|slice(0, 50) }}...</td>
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-tag"></i> {{ event.type }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> 
+                                        {{ event.dateCreation|date('d/m/Y H:i') }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ path('event_edit', {'id': event.id}) }}" 
+                                           class="btn btn-sm btn-warning" 
+                                           title="Edit"
+                                           onclick="event.stopPropagation()">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="post" 
+                                              action="{{ path('event_delete', {'id': event.id}) }}" 
+                                              style="display: inline;"
+                                              onsubmit="event.stopPropagation(); return confirm('Are you sure you want to delete this event?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ event.id) }}">
+                                            <button type="submit" 
+                                                    class="btn btn-sm btn-danger" 
+                                                    title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                                    <p>No events found</p>
+                                    <a href="{{ path('event_create') }}" class="btn btn-primary">
+                                        Add Your First Event
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ events|length }}</h3>
+                        <p>Total Events</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-success">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ events|filter(e => e.type == 'education')|length }}</h3>
+                        <p>Éducation</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-info">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ events|filter(e => e.type == 'bien-etre')|length }}</h3>
+                        <p>Bien-être</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-warning">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ events|filter(e => e.type == 'culture')|length }}</h3>
+                        <p>Culture</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
 </div>
+
+<style>
+    /* ========== STYLES GÉNÉRAUX ========== */
+    .admin-main-content {
+        margin-left: 280px;
+        padding-top: 100px;
+        transition: margin-left 0.3s ease;
+    }
+
+    /* ========== EN-TÊTE DE PAGE ========== */
+    .page-header {
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 1rem;
+    }
+
+    .page-title {
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .page-title i {
+        color: #667eea;
+        margin-right: 10px;
+    }
+
+    /* ========== CARTES ========== */
+    .card {
+        border-radius: 10px;
+        border: none;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    /* ========== TABLEAUX ========== */
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    /* Ligne cliquable */
+    .event-row {
+        cursor: pointer;
+    }
+
+    .event-row:hover {
+        background-color: #f0f4ff !important;
+        transform: scale(1.01);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+    }
+
+    /* Miniature d'image */
+    .event-thumb {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+    }
+
+    .event-thumb-placeholder {
+        width: 60px;
+        height: 60px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #adb5bd;
+        font-size: 1.5rem;
+    }
+
+    /* ========== BOUTONS ========== */
+    .btn-group {
+        display: flex;
+        gap: 5px;
+    }
+
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.875rem;
+    }
+
+    .badge {
+        padding: 6px 12px;
+        font-weight: 500;
+    }
+
+    /* ========== CARTE DE STATISTIQUES ========== */
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .stat-icon.bg-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .stat-icon.bg-success {
+        background: linear-gradient(135deg, #0cebeb 0%, #20e3b2 100%);
+    }
+
+    .stat-icon.bg-info {
+        background: linear-gradient(135deg, #209cff 0%, #68e0cf 100%);
+    }
+
+    .stat-icon.bg-warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .stat-info h3 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .stat-info p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    /* ========== BARRE DE RECHERCHE ========== */
+    #searchTable,
+    #sortSelect {
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+        padding: 10px 15px;
+    }
+
+    #searchTable:focus,
+    #sortSelect:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    /* ========== ALERTS ========== */
+    .alert {
+        border-radius: 10px;
+        border: none;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 768px) {
+        .admin-main-content {
+            margin-left: 0;
+            padding-top: 80px;
+        }
+
+        .page-header .row {
+            flex-direction: column;
+        }
+
+        .page-header .col-auto {
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+    // Search functionality (client-side filter)
+    document.getElementById('searchTable').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const tableRows = document.querySelectorAll('#eventsTable tbody tr:not(:last-child)');
+
+        tableRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchValue) ? '' : 'none';
+        });
+    });
+
+    // Auto-submit form when sort option changes
+    document.getElementById('sortSelect').addEventListener('change', function() {
+        this.closest('form').submit();
+    });
+
+    // Make rows clickable - redirect to edit page
+    document.querySelectorAll('.event-row').forEach(row => {
+        row.addEventListener('click', function() {
+            const eventId = this.dataset.eventId;
+            window.location.href = "{{ path('event_edit', {'id': '__EVENT_ID__'}) }}".replace('__EVENT_ID__', eventId);
+        });
+    });
+</script>
 {% endblock %}

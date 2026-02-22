@@ -45,6 +45,7 @@ security:
     # ===== TOUT LE RESTE ===== (nécessite juste d'être connecté)
     - { path: ^/, roles: ROLE_USER }
 
+  
 when@test:
   security:
     password_hashers:

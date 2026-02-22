@@ -425,7 +425,8 @@ body {
 <div class="result-wrapper">
     <div class="result-card">
         {# Badge de performance #}
-        {% set percentage = (scoreQuestions / total * 100)|round %}
+        {% set percentage = (scorePoints / maxPoints * 100)|round %}
+
         {% if percentage >= 80 %}
             <div class="success-badge badge-excellent">
                 🏆 Excellent ! Félicitations !

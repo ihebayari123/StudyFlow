@@ -1,0 +1,330 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Gestion Médecins{% endblock %}
+
+{% block admin_content %}
+<div style="padding: 60px; margin-left: 210px; overflow-x: auto;">
+ 
+<div class="container-fluid px-4">
+<style>
+
+body{
+    background:#f5f7fb;
+    font-family: Arial, sans-serif;
+}
+
+/* Container */
+.page{
+    max-width:1200px;
+    margin:40px auto;
+    padding:20px;
+}
+
+/* Header */
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
+
+.header h1{
+    color:#2c3e50;
+}
+
+.btn-add{
+    background:#2563eb;
+    color:white;
+    padding:10px 15px;
+    border-radius:5px;
+    text-decoration:none;
+}
+
+/* Stats */
+.stats{
+    display:flex;
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.stat-box{
+    background:white;
+    flex:1;
+    padding:15px;
+    text-align:center;
+    border-radius:6px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.stat-box h3{
+    font-size:22px;
+    color:#2563eb;
+}
+
+.stat-box p{
+    color:#666;
+}
+
+/* Controls */
+.controls{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:15px;
+}
+
+.controls form{
+    display:flex;
+    gap:10px;
+}
+
+.controls input{
+    padding:7px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+.btn{
+    padding:7px 12px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.btn-search{
+    background:#2563eb;
+    color:white;
+}
+
+.btn-reset{
+    background:#eee;
+}
+
+/* Table */
+.table-box{
+    background:white;
+    border-radius:6px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+    overflow:hidden;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#2563eb;
+    color:white;
+    padding:10px;
+}
+
+td{
+    padding:10px;
+    border-top:1px solid #eee;
+}
+
+tr:hover{
+    background:#f1f5ff;
+}
+
+/* Status */
+.ok{
+    color:green;
+    font-weight:bold;
+}
+
+.no{
+    color:red;
+    font-weight:bold;
+}
+
+/* Actions */
+.actions{
+    display:flex;
+    gap:6px;
+}
+
+.edit{
+    background:#22c55e;
+    color:white;
+}
+
+.delete{
+    background:#ef4444;
+    color:white;
+}
+
+/* Empty */
+.empty{
+    text-align:center;
+    padding:40px;
+    color:#777;
+}
+
+</style>
+
+
+<div class="page">
+
+    <!-- Header -->
+    <div class="header">
+        <h1>Gestion des Médecins</h1>
+
+        <a href="{{ path('app_add_medecin') }}" class="btn-add">
+            + Ajouter
+        </a>
+    </div>
+
+
+    <!-- Stats -->
+    <div class="stats">
+
+        <div class="stat-box">
+            <h3>{{ listmedecin|length }}</h3>
+            <p>Médecins</p>
+        </div>
+
+        <div class="stat-box">
+            <h3>{{ listmedecin|filter(m => m.disponibilite)|length }}</h3>
+            <p>Disponibles</p>
+        </div>
+
+        <div class="stat-box">
+            <h3>{{ listmedecin|filter(m => not m.disponibilite)|length }}</h3>
+            <p>Non disponibles</p>
+        </div>
+
+    </div>
+
+
+    <!-- Controls -->
+    <div class="controls">
+
+        <!-- Search -->
+        <form method="get" action="{{ path('app_showmedecin') }}">
+
+            <input type="text"
+                   name="search"
+                   placeholder="Rechercher..."
+                   value="{{ search }}">
+
+            <input type="hidden" name="sort" value="{{ sort }}">
+            <input type="hidden" name="order" value="{{ order }}">
+
+            <button class="btn btn-search">
+                Chercher
+            </button>
+
+            {% if search %}
+                <a href="{{ path('app_showmedecin') }}" class="btn btn-reset">
+                    Reset
+                </a>
+            {% endif %}
+
+        </form>
+
+
+        <!-- Sort -->
+        <div>
+
+            Trier :
+
+            <a href="{{ path('app_showmedecin',{
+                search:search,
+                sort:'nom',
+                order: order == 'ASC' and sort=='nom' ? 'DESC':'ASC'
+            }) }}">Nom</a> |
+
+            <a href="{{ path('app_showmedecin',{
+                search:search,
+                sort:'prenom',
+                order: order == 'ASC' and sort=='prenom' ? 'DESC':'ASC'
+            }) }}">Prénom</a> |
+
+            <a href="{{ path('app_showmedecin',{
+                search:search,
+                sort:'disponibilite',
+                order: order == 'ASC' and sort=='disponibilite' ? 'DESC':'ASC'
+            }) }}">Dispo</a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Table -->
+    <div class="table-box">
+
+        {% if listmedecin|length > 0 %}
+
+        <table>
+
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+
+
+            {% for m in listmedecin %}
+
+            <tr>
+
+                <td>{{ m.id }}</td>
+                <td>{{ m.nom }}</td>
+                <td>{{ m.prenom }}</td>
+                <td>{{ m.email }}</td>
+                <td>{{ m.telephone }}</td>
+
+                <td>
+                    {% if m.disponibilite %}
+                        <span class="ok">Disponible</span>
+                    {% else %}
+                        <span class="no">Indisponible</span>
+                    {% endif %}
+                </td>
+
+                <td>
+
+                    <div class="actions">
+
+                        <a href="{{ path('app_updatemedecin',{id:m.id}) }}"
+                           class="btn edit">
+                           Modifier
+                        </a>
+
+                       
+
+                        {#<a href="{{ path('app_delete_medecin',{id:m.id}) }}"
+                           class="btn delete"
+                           onclick="return confirm('Supprimer ?')">
+                           Supprimer
+                        </a>#}
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+        {% else %}
+
+            <div class="empty">
+                Aucun médecin trouvé.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
