@@ -99,4 +99,8 @@ abstract class Question
     };
 }
 
+<<<<<<< gestion_utilisateurs
 }
+=======
+}
+>>>>>>> main

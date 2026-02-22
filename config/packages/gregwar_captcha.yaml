@@ -1,0 +1,12 @@
+gregwar_captcha:
+    as_url: false
+    width: 300
+    height: 100
+    length: 6
+    quality: 100
+    distortion: false
+    keep_value: true  # ← IMPORTANT : garde la valeur en session
+    session_key: 'captcha'  # ← Nom de la clé en session
+    invalid_message: 'Le code captcha est incorrect.'
+    gc_freq: 100
+    expiration: 60

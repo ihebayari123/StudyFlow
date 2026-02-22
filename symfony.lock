@@ -35,6 +35,9 @@
             "./migrations/.gitignore"
         ]
     },
+    "gregwar/captcha-bundle": {
+        "version": "v1.0.0"
+    },
     "phpunit/phpunit": {
         "version": "11.5",
         "recipe": {
