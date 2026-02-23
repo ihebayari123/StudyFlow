@@ -112,6 +112,8 @@ public function quizSubmit(
         $userAnswer = $answers[$question->getId()] ?? null;
         $isCorrect = false;
         $correctAnswer = '';
+        $explanation   = '';
+        $confidence    = 100;
 
         if ($question instanceof QuestionChoix) {
             $correctAnswer = $question->getBonneReponseChoix();
