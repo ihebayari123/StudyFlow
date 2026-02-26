@@ -448,6 +448,94 @@
         border-color: #667eea;
     }
 
+    /* Prediction Analysis Styles */
+    .prediction-analysis {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border: none;
+        padding: 20px;
+        margin: 15px 0;
+    }
+
+    .prediction-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+    }
+
+    .prediction-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .prediction-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .prediction-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .prediction-icon {
+        font-size: 24px;
+    }
+
+    .prediction-title {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 16px;
+    }
+
+    .prediction-score {
+        font-size: 36px;
+        font-weight: 700;
+        text-align: center;
+        margin: 10px 0;
+    }
+
+    .prediction-level {
+        text-align: center;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 14px;
+        margin: 10px 0;
+    }
+
+    .prediction-bar {
+        width: 100%;
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 15px;
+    }
+
+    .prediction-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.5s ease;
+        animation: fillBar 0.8s ease-out;
+    }
+
+    @keyframes fillBar {
+        from {
+            width: 0;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .prediction-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
     @media (max-width: 640px) {
         .chat-container {
             padding: 0;
@@ -500,10 +588,10 @@
         </div>
 
         <div class="quick-replies">
+            <span class="quick-reply" onclick="sendQuickReply('questionnaire')">📊 Questionnaire</span>
             <span class="quick-reply" onclick="sendQuickReply('Bonjour')">👋 Bonjour</span>
             <span class="quick-reply" onclick="sendQuickReply('Je me sens stressé')">😰 Je me sens stressé</span>
             <span class="quick-reply" onclick="sendQuickReply('Conseils relaxation')">🧘 Conseils relaxation</span>
-            <span class="quick-reply" onclick="sendQuickReply('Aide')">❓ Aide</span>
         </div>
 
         <div class="chat-input-container">
@@ -705,7 +793,14 @@
         .then(data => {
             hideTypingIndicator();
             setTimeout(() => {
+                // Display the reply with predictions
                 addMessage(data.reply, false);
+                
+                // Display prediction analysis if available
+                if (data.stress_analysis || data.happiness_analysis) {
+                    displayPredictionAnalysis(data.stress_analysis, data.happiness_analysis);
+                }
+                
                 // Save conversation to history
                 saveMessageToHistory(msg, data.reply);
             }, 300);
@@ -713,8 +808,101 @@
         .catch(error => {
             hideTypingIndicator();
             addMessage("Désolé, une erreur s'est produite. Veuillez réessayer.", false);
+            console.error('Chat error:', error);
         });
     }
+
+    // Function to display prediction analysis with visual indicators
+    function displayPredictionAnalysis(stressAnalysis, happinessAnalysis) {
+        const chatBox = document.getElementById('chat-box');
+        const analysisDiv = document.createElement('div');
+        analysisDiv.className = 'message bot-message prediction-analysis';
+        
+        let analysisHTML = '<div class="prediction-container">';
+        
+        // Stress Analysis
+        if (stressAnalysis && stressAnalysis.success) {
+            const stressColor = getStressColor(stressAnalysis.score);
+            const stressEmoji = getStressEmoji(stressAnalysis.score);
+            
+            analysisHTML += `
+                <div class="prediction-card stress-card">
+                    <div class="prediction-header">
+                        <span class="prediction-icon">${stressEmoji}</span>
+                        <span class="prediction-title">Niveau de Stress</span>
+                    </div>
+                    <div class="prediction-score" style="color: ${stressColor}">
+                        ${stressAnalysis.score}%
+                    </div>
+                    <div class="prediction-level" style="background: ${stressColor}20; color: ${stressColor}">
+                        ${stressAnalysis.level}
+                    </div>
+                    <div class="prediction-bar">
+                        <div class="prediction-bar-fill" style="width: ${stressAnalysis.score}%; background: ${stressColor}"></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Happiness Analysis
+        if (happinessAnalysis && happinessAnalysis.success) {
+            const happinessColor = getHappinessColor(happinessAnalysis.score);
+            const happinessEmoji = getHappinessEmoji(happinessAnalysis.score);
+            
+            analysisHTML += `
+                <div class="prediction-card happiness-card">
+                    <div class="prediction-header">
+                        <span class="prediction-icon">${happinessEmoji}</span>
+                        <span class="prediction-title">Niveau de Bonheur</span>
+                    </div>
+                    <div class="prediction-score" style="color: ${happinessColor}">
+                        ${happinessAnalysis.score}%
+                    </div>
+                    <div class="prediction-level" style="background: ${happinessColor}20; color: ${happinessColor}">
+                        ${happinessAnalysis.level}
+                    </div>
+                    <div class="prediction-bar">
+                        <div class="prediction-bar-fill" style="width: ${happinessAnalysis.score}%; background: ${happinessColor}"></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        analysisHTML += '</div>';
+        analysisDiv.innerHTML = analysisHTML;
+        chatBox.appendChild(analysisDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Helper functions for colors and emojis
+    function getStressColor(score) {
+        if (score >= 80) return '#ef4444';
+        if (score >= 60) return '#f97316';
+        if (score >= 40) return '#eab308';
+        return '#22c55e';
+    }
+
+    function getHappinessColor(score) {
+        if (score >= 80) return '#22c55e';
+        if (score >= 60) return '#3b82f6';
+        if (score >= 40) return '#eab308';
+        return '#ef4444';
+    }
+
+    function getStressEmoji(score) {
+        if (score >= 80) return '🔴';
+        if (score >= 60) return '🟠';
+        if (score >= 40) return '🟡';
+        return '🟢';
+    }
+
+    function getHappinessEmoji(score) {
+        if (score >= 80) return '😄';
+        if (score >= 60) return '🙂';
+        if (score >= 40) return '😐';
+        return '😔';
+    }
+
     // Initialize history count on page load
     document.addEventListener('DOMContentLoaded', function() {
         updateHistoryCount();
