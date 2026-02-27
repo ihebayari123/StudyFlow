@@ -38,7 +38,7 @@ class PedagogyAssistantController extends AbstractController
         try {
             $response = $http->request('POST', 'http://localhost:11434/api/chat', [
                 'json' => [
-                    'model' => 'mistral',
+                    'model' => 'gemma:2b',
                     'messages' => [
                         ['role' => 'user', 'content' => $message]
                     ],

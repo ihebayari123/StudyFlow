@@ -70,7 +70,7 @@ class QuizCoachController extends AbstractController
             $response = $http->request('POST', 'http://localhost:11434/api/chat', [
                 'timeout' => 120,
                 'json' => [
-                    'model' => 'mistral',
+                    'model' => 'gemma:2b',
                     'messages' => [['role' => 'user', 'content' => $context]],
                     'stream' => false
                 ]
@@ -94,7 +94,7 @@ class QuizCoachController extends AbstractController
             $response = $http->request('POST', 'http://localhost:11434/api/chat', [
                 'timeout' => 120,
                 'json' => [
-                    'model' => 'mistral',
+                    'model' => 'gemma:2b',
                     'messages' => $history,
                     'stream' => false
                 ]
