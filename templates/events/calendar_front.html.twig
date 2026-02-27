@@ -1,0 +1,658 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        background: #0d0d1a;
+        font-family: 'DM Sans', sans-serif;
+        min-height: 100vh;
+        color: #fff;
+    }
+
+    .cal-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 24px 60px;
+    }
+
+    .cal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 48px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .cal-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 50px;
+        color: rgba(255,255,255,0.7);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.25s;
+    }
+
+    .cal-back-btn:hover {
+        background: rgba(102,126,234,0.2);
+        border-color: rgba(102,126,234,0.5);
+        color: #fff;
+        transform: translateX(-3px);
+    }
+
+    .cal-title-block {
+        text-align: center;
+        flex: 1;
+    }
+
+    .cal-month-label {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        font-weight: 700;
+        background: linear-gradient(135deg, #a78bfa, #60a5fa, #f472b6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.5px;
+    }
+
+    .cal-year-label {
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.3);
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-top: 4px;
+    }
+
+    .cal-nav {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .cal-nav-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 50%;
+        color: rgba(255,255,255,0.7);
+        text-decoration: none;
+        font-size: 1.1rem;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .cal-nav-btn:hover {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-color: transparent;
+        color: #fff;
+        transform: scale(1.1);
+        box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+    }
+
+    .cal-stats {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-bottom: 36px;
+        flex-wrap: wrap;
+    }
+
+    .cal-stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .cal-stat-number {
+        font-size: 1.6rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #a78bfa, #60a5fa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .cal-stat-label {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.35);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+
+    .cal-stat-divider {
+        width: 1px;
+        height: 40px;
+        background: rgba(255,255,255,0.08);
+        align-self: center;
+    }
+
+    .cal-grid-wrapper {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+    }
+
+    .cal-day-headers {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        background: rgba(255,255,255,0.04);
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .cal-day-header {
+        padding: 16px 0;
+        text-align: center;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.3);
+    }
+
+    .cal-day-header.weekend { color: rgba(167,139,250,0.5); }
+
+    .cal-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+    }
+
+    .cal-cell {
+        min-height: 130px;
+        border-right: 1px solid rgba(255,255,255,0.05);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        padding: 12px 10px;
+        position: relative;
+        transition: background 0.2s;
+        vertical-align: top;
+    }
+
+    .cal-cell:nth-child(7n) { border-right: none; }
+    .cal-cell:hover { background: rgba(255,255,255,0.03); }
+    .cal-cell.empty { background: rgba(0,0,0,0.1); }
+
+    .cal-cell.today .day-num {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        box-shadow: 0 4px 15px rgba(102,126,234,0.5);
+    }
+
+    .cal-cell.weekend-cell { background: rgba(167,139,250,0.02); }
+    .cal-cell.has-events { background: rgba(102,126,234,0.04); }
+
+    .day-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 6px;
+        transition: all 0.2s;
+    }
+
+    .cal-cell:hover .day-num { color: rgba(255,255,255,0.8); }
+    .weekend-cell .day-num { color: rgba(167,139,250,0.5); }
+
+    .event-chip {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        background: linear-gradient(135deg, rgba(102,126,234,0.25), rgba(118,75,162,0.25));
+        border: 1px solid rgba(102,126,234,0.3);
+        border-left: 3px solid #a78bfa;
+        border-radius: 6px;
+        padding: 5px 7px;
+        margin-bottom: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .event-chip::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(167,139,250,0.15), transparent);
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .event-chip:hover {
+        transform: translateX(2px);
+        border-left-color: #60a5fa;
+        box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+    }
+
+    .event-chip:hover::before { opacity: 1; }
+
+    .event-chip-title {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #e0d7ff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    .event-chip-time {
+        font-size: 0.62rem;
+        color: rgba(167,139,250,0.7);
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+
+    .event-chip[data-type="conference"] { border-left-color: #60a5fa; }
+    .event-chip[data-type="concert"]    { border-left-color: #f472b6; }
+    .event-chip[data-type="workshop"]   { border-left-color: #34d399; }
+    .event-chip[data-type="festival"]   { border-left-color: #fbbf24; }
+    .event-chip[data-type="sport"]      { border-left-color: #f87171; }
+
+    .more-events {
+        font-size: 0.65rem;
+        color: rgba(167,139,250,0.6);
+        padding: 2px 6px;
+        background: rgba(167,139,250,0.08);
+        border-radius: 10px;
+        cursor: pointer;
+        display: inline-block;
+        margin-top: 2px;
+        transition: all 0.2s;
+    }
+
+    .more-events:hover {
+        background: rgba(167,139,250,0.15);
+        color: #a78bfa;
+    }
+
+    #eventModal {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    #eventModal.open {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .modal-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(5,5,15,0.8);
+        backdrop-filter: blur(8px);
+    }
+
+    .modal-card {
+        position: relative;
+        z-index: 1;
+        background: #13111f;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 20px;
+        width: 100%;
+        max-width: 480px;
+        padding: 32px;
+        transform: translateY(20px) scale(0.97);
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+    }
+
+    #eventModal.open .modal-card {
+        transform: translateY(0) scale(1);
+    }
+
+    .modal-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea, #a78bfa, #f472b6);
+        border-radius: 20px 20px 0 0;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 16px; right: 16px;
+        width: 32px; height: 32px;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 50%;
+        color: rgba(255,255,255,0.5);
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+        background: rgba(245,87,108,0.2);
+        border-color: rgba(245,87,108,0.4);
+        color: #f5576c;
+        transform: rotate(90deg);
+    }
+
+    .modal-type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 12px;
+        background: rgba(167,139,250,0.12);
+        border: 1px solid rgba(167,139,250,0.25);
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #a78bfa;
+        margin-bottom: 16px;
+    }
+
+    .modal-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.45rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 20px;
+        line-height: 1.3;
+    }
+
+    .modal-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .modal-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.88rem;
+        color: rgba(255,255,255,0.55);
+    }
+
+    .modal-meta-icon {
+        width: 32px; height: 32px;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(255,255,255,0.05);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .modal-meta-value {
+        color: rgba(255,255,255,0.85);
+        font-weight: 500;
+    }
+
+    .modal-desc {
+        font-size: 0.88rem;
+        color: rgba(255,255,255,0.45);
+        line-height: 1.7;
+        border-top: 1px solid rgba(255,255,255,0.07);
+        padding-top: 16px;
+        margin-top: 4px;
+    }
+
+    .modal-sponsors {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 16px;
+    }
+
+    .modal-sponsor-badge {
+        padding: 4px 12px;
+        background: rgba(96,165,250,0.1);
+        border: 1px solid rgba(96,165,250,0.2);
+        border-radius: 20px;
+        font-size: 0.75rem;
+        color: #60a5fa;
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .cal-cell { min-height: 80px; padding: 8px 6px; }
+        .event-chip-time { display: none; }
+        .cal-month-label { font-size: 1.5rem; }
+        .cal-stats { gap: 16px; }
+        .cal-stat-divider { display: none; }
+    }
+
+    @media (max-width: 480px) {
+        .cal-cell { min-height: 60px; padding: 6px 4px; }
+        .event-chip { padding: 3px 5px; }
+        .event-chip-title { font-size: 0.62rem; }
+        .day-num { width: 22px; height: 22px; font-size: 0.72rem; }
+    }
+</style>
+
+{% set monthNames = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'] %}
+{% set today = date() %}
+{% set totalEvents = events|length %}
+
+<div class="cal-wrapper">
+
+    <!-- HEADER -->
+    <div class="cal-header">
+        <a href="https://127.0.0.1:8000/events/front" class="cal-back-btn">
+            <i class="bi bi-arrow-left"></i> Événements
+        </a>
+
+        <div class="cal-title-block">
+            <div class="cal-month-label">{{ monthNames[month - 1] }}</div>
+            <div class="cal-year-label">{{ year }}</div>
+        </div>
+
+        <div class="cal-nav">
+            <a href="?month={{ month == 1 ? 12 : month - 1 }}&year={{ month == 1 ? year - 1 : year }}" class="cal-nav-btn" title="Mois précédent">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            <a href="?month={{ today|date('m') }}&year={{ today|date('Y') }}" class="cal-nav-btn" title="Aujourd'hui" style="font-size:0.8rem; font-weight:700; width:auto; padding:0 14px; border-radius:20px;">
+                Auj.
+            </a>
+            <a href="?month={{ month == 12 ? 1 : month + 1 }}&year={{ month == 12 ? year + 1 : year }}" class="cal-nav-btn" title="Mois suivant">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="cal-stats">
+        <div class="cal-stat-item">
+            <span class="cal-stat-number">{{ totalEvents }}</span>
+            <span class="cal-stat-label">Événements</span>
+        </div>
+        <div class="cal-stat-divider"></div>
+        <div class="cal-stat-item">
+            <span class="cal-stat-number">{{ month }}/{{ year }}</span>
+            <span class="cal-stat-label">Période</span>
+        </div>
+        <div class="cal-stat-divider"></div>
+        <div class="cal-stat-item">
+            <span class="cal-stat-number">
+                {% set daysWithEvents = [] %}
+                {% for event in events %}
+                    {% set d = event.dateCreation|date('j') %}
+                    {% if d not in daysWithEvents %}
+                        {% set daysWithEvents = daysWithEvents|merge([d]) %}
+                    {% endif %}
+                {% endfor %}
+                {{ daysWithEvents|length }}
+            </span>
+            <span class="cal-stat-label">Jours actifs</span>
+        </div>
+    </div>
+
+    <!-- CALENDRIER -->
+    <div class="cal-grid-wrapper">
+
+        <div class="cal-day-headers">
+            <div class="cal-day-header">Lun</div>
+            <div class="cal-day-header">Mar</div>
+            <div class="cal-day-header">Mer</div>
+            <div class="cal-day-header">Jeu</div>
+            <div class="cal-day-header">Ven</div>
+            <div class="cal-day-header weekend">Sam</div>
+            <div class="cal-day-header weekend">Dim</div>
+        </div>
+
+        {% set firstDay = date(year ~ '-' ~ (month < 10 ? '0' ~ month : month) ~ '-01') %}
+        {% set daysInMonth = firstDay|date('t')|number_format %}
+        {% set startDay = firstDay|date('N') %}
+
+        <div class="cal-grid">
+
+            {% for i in 1..(startDay - 1) %}
+                <div class="cal-cell empty"></div>
+            {% endfor %}
+
+            {% for day in 1..daysInMonth %}
+                {% set isToday = (day == today|date('j') and month == today|date('n') and year == today|date('Y')) %}
+                {% set dayOfWeek = ((day + startDay - 2) % 7) + 1 %}
+                {% set isWeekend = (dayOfWeek == 6 or dayOfWeek == 7) %}
+
+                {% set dayEvents = [] %}
+                {% for event in events %}
+                    {% if event.dateCreation|date('j') == day
+                        and event.dateCreation|date('n') == month
+                        and event.dateCreation|date('Y') == year %}
+                        {% set dayEvents = dayEvents|merge([event]) %}
+                    {% endif %}
+                {% endfor %}
+
+                <div class="cal-cell {{ isToday ? 'today' : '' }} {{ isWeekend ? 'weekend-cell' : '' }} {{ dayEvents|length > 0 ? 'has-events' : '' }}">
+
+                    <div class="day-num">{{ day }}</div>
+
+                    {% for event in dayEvents|slice(0, 2) %}
+                        <div class="event-chip"
+                             data-type="{{ event.type|lower }}"
+                             onclick="openModal(
+                                 '{{ event.titre|e('js') }}',
+                                 '{{ event.type|upper|e('js') }}',
+                                 '{{ event.dateCreation|date('d/m/Y')|e('js') }}',
+                                 '{{ event.dateCreation|date('H:i')|e('js') }}',
+                                 '{{ event.description|e('js') }}',
+                                 '{{ event.getSponsors() is not empty ? event.getSponsors()|map(s => s.nomSponsor)|join(', ')|e('js') : 'Aucun sponsor' }}'
+                             )">
+                            <span class="event-chip-title">{{ event.titre }}</span>
+                            <span class="event-chip-time">
+                                <i class="bi bi-clock"></i>
+                                {{ event.dateCreation|date('H:i') }}
+                            </span>
+                        </div>
+                    {% endfor %}
+
+                    {% if dayEvents|length > 2 %}
+                        <span class="more-events">
+                            +{{ dayEvents|length - 2 }} autres
+                        </span>
+                    {% endif %}
+
+                </div>
+            {% endfor %}
+
+            {% set totalCells = startDay - 1 + daysInMonth %}
+            {% set remainingCells = 7 - (totalCells % 7) %}
+            {% if remainingCells < 7 %}
+                {% for i in 1..remainingCells %}
+                    <div class="cal-cell empty"></div>
+                {% endfor %}
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL -->
+<div id="eventModal" onclick="handleModalClick(event)">
+    <div class="modal-overlay"></div>
+    <div class="modal-card">
+        <button class="modal-close" onclick="closeModal()">
+            <i class="bi bi-x"></i>
+        </button>
+        <div class="modal-type-badge" id="modalType">—</div>
+        <div class="modal-title" id="modalTitle">—</div>
+        <div class="modal-meta">
+            <div class="modal-meta-row">
+                <div class="modal-meta-icon">📅</div>
+                <span class="modal-meta-value" id="modalDate">—</span>
+            </div>
+            <div class="modal-meta-row">
+                <div class="modal-meta-icon">🕐</div>
+                <span class="modal-meta-value" id="modalTime">—</span>
+            </div>
+            <div class="modal-meta-row">
+                <div class="modal-meta-icon">🏷️</div>
+                <div class="modal-sponsors" id="modalSponsors"></div>
+            </div>
+        </div>
+        <div class="modal-desc" id="modalDesc">—</div>
+    </div>
+</div>
+
+<script>
+function openModal(titre, type, date, time, desc, sponsors) {
+    document.getElementById('modalTitle').textContent = titre;
+    document.getElementById('modalType').textContent  = type;
+    document.getElementById('modalDate').textContent  = date;
+    document.getElementById('modalTime').textContent  = time || 'Heure non définie';
+    document.getElementById('modalDesc').textContent  = desc || 'Aucune description disponible.';
+
+    const sponsorsEl   = document.getElementById('modalSponsors');
+    sponsorsEl.innerHTML = sponsors !== 'Aucun sponsor'
+        ? sponsors.split(', ').map(s => `<span class="modal-sponsor-badge">${s}</span>`).join('')
+        : '<span style="color:rgba(255,255,255,0.3); font-size:0.8rem;">Aucun sponsor</span>';
+
+    document.getElementById('eventModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    document.getElementById('eventModal').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+function handleModalClick(e) {
+    if (e.target.classList.contains('modal-overlay')) closeModal();
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+});
+</script>
+
+{% endblock %}

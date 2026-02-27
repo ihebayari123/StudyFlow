@@ -34,7 +34,7 @@ class QuizAttempt
     private ?\DateTimeImmutable $finishedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'quizAttempts')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Utilisateur $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'quizAttempts')]
