@@ -54,7 +54,7 @@ class AiCourseController extends AbstractController
                 return $this->json(['error' => 'Incomplete data.'], 400);
             }
 
-            $user = $this->getUser(); // ✅ built-in — no import needed
+            $user = $this->getUser();
             if (!$user) {
                 return $this->json(['error' => 'You must be logged in.'], 401);
             }

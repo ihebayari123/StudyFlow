@@ -32,7 +32,7 @@ class SmartValidatorService
             $response = $this->http->request('POST', 'http://localhost:11434/api/chat', [
                 'timeout' => 30,
                 'json' => [
-                    'model' => 'mistral',
+                    'model' => 'gemma:2b',
                     'messages' => [['role' => 'user', 'content' => $prompt]],
                     'stream' => false
                 ]

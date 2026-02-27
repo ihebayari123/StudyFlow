@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Repository\StressSurveyRepository;
 use App\Entity\StressSurvey;
 use App\Form\StressSurveyType;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 final class StresseController extends AbstractController
 {
@@ -36,6 +37,11 @@ final class StresseController extends AbstractController
     {
         $em = $m->getManager();
         $del = $authorrepo->find($id);
+        
+        if (!$del) {
+            throw $this->createNotFoundException('Sondage Stress non trouvé avec l\'ID: ' . $id);
+        }
+        
         $em->remove($del);
         $em->flush();
         return $this->redirectToRoute('app_showstresse');
@@ -52,7 +58,7 @@ final class StresseController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em->persist($stresse);
             $em->flush();
-            return $this->redirectToRoute('app_showstresse');
+            return $this->redirectToRoute('app_studyflow_score');
         }
         
         return $this->render('stresse/add.html.twig', [
@@ -2115,5 +2121,309 @@ private function genererEmploiTempsAvance(array $matieres, int $matiereParJour, 
     return $emploiTemps;
 }
 
+/**
+ * Sélectionne une matière optimale en évitant la répétition excessive
+ */
+private function selectionnerMatiereOptimale(array $matieres, array $utilisees, int $index): string
+{
+    // Si toutes les matières ont été utilisées récemment, on prend la suivante
+    if (count($utilisees) >= count($matieres) / 2) {
+        // On vide partiellement l'historique pour éviter la répétition
+        $utilisees = array_slice($utilisees, -3);
+    }
+    
+    // Filtrer les matières récemment utilisées
+    $disponibles = array_diff($matieres, $utilisees);
+    
+    if (empty($disponibles)) {
+        // Si toutes ont été utilisées, prendre la prochaine dans l'ordre
+        return $matieres[$index % count($matieres)];
+    }
+    
+    // Convertir en tableau indexé
+    $disponibles = array_values($disponibles);
+    
+    // Prendre une matière aléatoire parmi les disponibles
+    return $disponibles[array_rand($disponibles)];
+}
 
+/**
+ * Détermine la plage horaire pour adapter la durée
+ */
+private function determinerPlageHoraire(float $heure, array $plages): array
+{
+    if ($heure >= $plages['matin']['debut'] && $heure < $plages['matin']['fin']) {
+        return ['nom' => 'Matin', 'coefficient' => $plages['matin']['coefficient']];
+    } elseif ($heure >= $plages['apresMidi']['debut'] && $heure < $plages['apresMidi']['fin']) {
+        return ['nom' => 'Après-midi', 'coefficient' => $plages['apresMidi']['coefficient']];
+    } else {
+        return ['nom' => 'Soir', 'coefficient' => $plages['soir']['coefficient']];
+    }
+}
+
+/**
+ * Calcule le facteur d'adaptation basé sur le niveau de stress
+ */
+private function calculerFacteurStress(int $niveauStress): array
+{
+    // Facteurs par défaut (stress modéré)
+    $facteurs = [
+        'duree' => 1.0,
+        'pause' => 1.0,
+        'matieres' => 1.0
+    ];
+    
+    if ($niveauStress <= 3) {
+        // Stress faible: on peut travailler plus longtemps
+        $facteurs['duree'] = 1.2;
+        $facteurs['pause'] = 0.8;
+        $facteurs['matieres'] = 1.1;
+    } elseif ($niveauStress <= 6) {
+        // Stress modéré: équilibre
+        $facteurs['duree'] = 1.0;
+        $facteurs['pause'] = 1.0;
+        $facteurs['matieres'] = 1.0;
+    } else {
+        // Stress élevé: séances plus courtes, pauses plus longues
+        $facteurs['duree'] = 0.7;
+        $facteurs['pause'] = 1.5;
+        $facteurs['matieres'] = 0.8;
+    }
+    
+    return $facteurs;
+}
+
+/**
+ * Calcule les métriques de l'emploi du temps
+ */
+private function calculerMetriquesEmploiTemps(array $emploiTemps): array
+{
+    $totalHeures = 0;
+    $heuresParJour = [];
+    $matieresCount = [];
+    
+    foreach ($emploiTemps as $jour => $seances) {
+        $heuresJour = 0;
+        
+        foreach ($seances as $seance) {
+            $duree = $seance['duree'] ?? 0;
+            $heuresJour += $duree;
+            $totalHeures += $duree;
+            
+            $matiere = $seance['matiere'];
+            if (!isset($matieresCount[$matiere])) {
+                $matieresCount[$matiere] = 0;
+            }
+            $matieresCount[$matiere] += $duree;
+        }
+        
+        $heuresParJour[$jour] = round($heuresJour, 1);
+    }
+    
+    // Calcul des moyennes
+    $nbJours = count($heuresParJour);
+    $moyenneParJour = $nbJours > 0 ? round($totalHeures / $nbJours, 1) : 0;
+    
+    // Trouver le jour le plus chargé et le moins chargé
+    $jourPlusCharge = array_keys($heuresParJour, max($heuresParJour))[0] ?? 'N/A';
+    $jourMoinsCharge = array_keys($heuresParJour, min($heuresParJour))[0] ?? 'N/A';
+    
+    // Trier les matières par temps passé
+    arsort($matieresCount);
+    $topMatieres = array_slice($matieresCount, 0, 3, true);
+    
+    // Évaluation de l'équilibre
+    $equilibre = $this->evaluerEquilibreEmploiTemps($heuresParJour, $moyenneParJour);
+    
+    return [
+        'total_heures' => round($totalHeures, 1),
+        'moyenne_par_jour' => $moyenneParJour,
+        'heures_par_jour' => $heuresParJour,
+        'nb_jours' => $nbJours,
+        'jour_plus_charge' => $jourPlusCharge,
+        'jour_moins_charge' => $jourMoinsCharge,
+        'top_matieres' => $topMatieres,
+        'equilibre' => $equilibre,
+        'score_sante' => $this->calculerScoreSante($heuresParJour, $moyenneParJour)
+    ];
+}
+
+/**
+ * Évalue l'équilibre de l'emploi du temps
+ */
+private function evaluerEquilibreEmploiTemps(array $heuresParJour, float $moyenne): string
+{
+    $ecarts = [];
+    foreach ($heuresParJour as $heures) {
+        $ecarts[] = abs($heures - $moyenne);
+    }
+    
+    $ecartMoyen = count($ecarts) > 0 ? array_sum($ecarts) / count($ecarts) : 0;
+    
+    if ($ecartMoyen <= 1) {
+        return 'Excellent équilibre';
+    } elseif ($ecartMoyen <= 2) {
+        return 'Bon équilibre';
+    } elseif ($ecartMoyen <= 3) {
+        return 'Équilibre moyen';
+    } else {
+        return 'Déséquilibré';
+    }
+}
+
+/**
+ * Calcule un score de santé de 0-100 pour l'emploi du temps
+ */
+private function calculerScoreSante(array $heuresParJour, float $moyenne): int
+{
+    $score = 100;
+    
+    // Pénalité pour les journées trop chargées (>8h)
+    foreach ($heuresParJour as $heures) {
+        if ($heures > 8) {
+            $score -= ($heures - 8) * 5;
+        }
+    }
+    
+    // Pénalité pour moyenne trop élevée (>6h)
+    if ($moyenne > 6) {
+        $score -= ($moyenne - 6) * 10;
+    }
+    
+    // Pénalité pour trop de variabilité
+    $ecartType = $this->calculerEcartType($heuresParJour);
+    if ($ecartType > 2) {
+        $score -= ($ecartType - 2) * 5;
+    }
+    
+    return max(0, min(100, round($score)));
+}
+
+/**
+ * Calcule l'écart type des heures par jour
+ */
+private function calculerEcartType(array $heuresParJour): float
+{
+    $moyenne = array_sum($heuresParJour) / count($heuresParJour);
+    $variance = 0;
+    
+    foreach ($heuresParJour as $heures) {
+        $variance += pow($heures - $moyenne, 2);
+    }
+    
+    $variance /= count($heuresParJour);
+    return sqrt($variance);
+}
+
+/**
+ * Génère des suggestions d'optimisation
+ */
+private function genererSuggestionsOptimisation(array $metriques, int $niveauStress): array
+{
+    $suggestions = [];
+    
+    // Suggestions basées sur la charge totale
+    if ($metriques['total_heures'] > 40) {
+        $suggestions[] = [
+            'type' => 'warning',
+            'titre' => 'Charge hebdomadaire élevée',
+            'message' => 'Vous dépassez 40h de travail par semaine. Pensez à réduire pour éviter l\'épuisement.',
+            'action' => 'Réduire de ' . round($metriques['total_heures'] - 35) . 'h'
+        ];
+    } elseif ($metriques['total_heures'] < 20) {
+        $suggestions[] = [
+            'type' => 'info',
+            'titre' => 'Charge légère',
+            'message' => 'Vous pourriez augmenter légèrement votre temps d\'étude pour de meilleurs résultats.',
+            'action' => 'Ajouter 5-10h par semaine'
+        ];
+    }
+    
+    // Suggestions basées sur l'équilibre
+    if ($metriques['equilibre'] === 'Déséquilibré') {
+        $suggestions[] = [
+            'type' => 'warning',
+            'titre' => 'Répartition inégale',
+            'message' => 'Votre charge est très variable selon les jours. Essayez de mieux répartir.',
+            'action' => 'Uniformiser les journées'
+        ];
+    }
+    
+    // Suggestions basées sur le stress
+    if ($niveauStress > 7) {
+        $suggestions[] = [
+            'type' => 'danger',
+            'titre' => 'Stress élevé détecté',
+            'message' => 'Votre niveau de stress est élevé. Intégrez plus de pauses et réduisez la charge.',
+            'action' => 'Ajouter des pauses de 15min'
+        ];
+    }
+    
+    // Suggestion de pauses actives
+    $suggestions[] = [
+        'type' => 'success',
+        'titre' => 'Pauses actives',
+        'message' => 'Profitez des pauses pour faire des exercices de respiration ou une courte marche.',
+        'action' => 'Voir les exercices'
+    ];
+    
+    // Suggestion de révision
+    $suggestions[] = [
+        'type' => 'info',
+        'titre' => 'Optimisation des révisions',
+        'message' => 'Alternez les matières difficiles et faciles pour maintenir la motivation.',
+        'action' => 'Réorganiser'
+    ];
+    
+    return $suggestions;
+}
+
+/**
+ * Récupère la liste des jours selon les paramètres
+ */
+private function getJoursSemaine(bool $inclureWeekend, string $periode): array
+{
+    $jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+    
+    if ($inclureWeekend) {
+        $jours = array_merge($jours, ['Samedi', 'Dimanche']);
+    }
+    
+    if ($periode === 'weekend') {
+        $jours = ['Samedi', 'Dimanche'];
+    } elseif ($periode === 'jour_unique') {
+        $jours = ['Aujourd\'hui'];
+    }
+    
+    return $jours;
+}
+
+/**
+ * Formate une heure décimale en format HH:MM
+ */
+private function formatHeure(float $heure): string
+{
+    $heures = floor($heure);
+    $minutes = round(($heure - $heures) * 60);
+    
+    return sprintf('%02d:%02d', $heures, $minutes);
+}
+
+/**
+ * Valide un entier dans une plage donnée
+ */
+private function validateInt($value, int $min, int $max): int
+{
+    $int = intval($value);
+    return max($min, min($max, $int));
+}
+
+/**
+ * Valide un float dans une plage donnée
+ */
+private function validateFloat($value, float $min, float $max): float
+{
+    $float = floatval($value);
+    return max($min, min($max, $float));
+}
 }
