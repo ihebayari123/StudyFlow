@@ -35,6 +35,8 @@ security:
     - { path: ^/mot-de-passe-oublie, roles: PUBLIC_ACCESS }
     - { path: ^/reinitialiser-mot-de-passe, roles: PUBLIC_ACCESS }
     - { path: ^/test, roles: PUBLIC_ACCESS }
+    - { path: ^/chat, roles: PUBLIC_ACCESS }
+    - { path: ^/chat/send, roles: PUBLIC_ACCESS }
     
     # ===== BACKOFFICE ===== (enseignants + admins)
     - { path: ^/admin, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }

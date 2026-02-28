@@ -1,417 +1,388 @@
 <?php
+// src/Controller/ChatController.php
 
 namespace App\Controller;
 
-use App\Service\PredictionService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\ProcessBuilder;
+use Psr\Log\LoggerInterface;
+use App\Service\WellbeingPredictionService;
 
 class ChatController extends AbstractController
 {
-    private $predictionService;
+    // URL du serveur Flask
+    private const FLASK_URL = 'http://127.0.0.1:5000';
+    
+    private WellbeingPredictionService $wellbeingService;
 
-    public function __construct(PredictionService $predictionService)
+    public function __construct(WellbeingPredictionService $wellbeingService)
     {
-        $this->predictionService = $predictionService;
+        $this->wellbeingService = $wellbeingService;
     }
 
     #[Route('/chat', name: 'chat_page')]
     public function index()
     {
-        $modelsStatus = $this->predictionService->getModelsStatus();
-        return $this->render('chat/index.html.twig', [
-            'modelsStatus' => $modelsStatus
-        ]);
+        return $this->render('chat/index.html.twig');
     }
 
-    #[Route('/chat/send', name: 'chat_send', methods: ['GET', 'POST'])]
+    #[Route('/chat/send', name: 'chat_send', methods: ['POST'])]
     public function send(
         Request $request,
         HttpClientInterface $client
-    ) {
-        // Si c'est une requête GET, on affiche la page du chat
-        if ($request->isMethod('GET')) {
-            $modelsStatus = $this->predictionService->getModelsStatus();
-            return $this->render('chat/index.html.twig', [
-                'modelsStatus' => $modelsStatus
-            ]);
-        }
-
-        // 1. On récupère le message envoyé par le formulaire
-        $message = $request->request->get('message');
-
-        if (empty($message)) {
-            return new JsonResponse([
-                'reply' => 'Veuillez entrer un message.',
-                'stress_analysis' => ['success' => false, 'error' => 'Message vide'],
-                'happiness_analysis' => ['success' => false, 'error' => 'Message vide'],
-                'models_status' => $this->predictionService->getModelsStatus()
-            ], 400);
-        }
-
-        // 2. GESTION DE L'ID UTILISATEUR VIA SESSION
-        // On récupère la session Symfony
-        $session = $request->getSession();
+    ): JsonResponse {
+        // Vérifier si c'est une demande de prédiction de bien-être EN PREMIER
+        $isWellbeingRequest = $request->request->has('wellbeing_mode') && 
+                              $request->request->get('wellbeing_mode') === 'true';
         
-        // Si l'utilisateur n'a pas encore d'ID de chat, on lui en crée un unique
+        if ($isWellbeingRequest) {
+            return $this->handleWellbeingPrediction($request);
+        }
+        
+        $message = $request->request->get('message');
+        
+        // Récupérer les informations de prédiction de prix si présentes
+        $productName = $request->request->get('product_name');
+        $description = $request->request->get('description');
+        $category = $request->request->get('category');
+
+        $session = $request->getSession();
         if (!$session->has('chat_user_id')) {
             $session->set('chat_user_id', 'user_' . bin2hex(random_bytes(5)));
         }
-        
         $userId = $session->get('chat_user_id');
 
-        // Check if user wants to start questionnaire
-        $messageLower = strtolower(trim($message));
-        if (strpos($messageLower, 'questionnaire') !== false ||
-            strpos($messageLower, 'évaluation') !== false ||
-            strpos($messageLower, 'test') !== false ||
-            strpos($messageLower, 'analyse') !== false) {
-            
-            // Initialize questionnaire in session
-            $session->set('questionnaire_active', true);
-            $session->set('questionnaire_step', 1);
-            $session->remove('questionnaire_data');
-            
-            return new JsonResponse([
-                'reply' => $this->getQuestionnaireQuestion(1),
-                'questionnaire_active' => true,
-                'questionnaire_step' => 1,
-                'models_status' => $this->predictionService->getModelsStatus()
-            ]);
-        }
-
-        // Handle questionnaire flow
-        if ($session->get('questionnaire_active', false)) {
-            return $this->handleQuestionnaireResponse($request, $session);
-        }
-
-        // 3. ANALYSE AVEC LES MODÈLES DE PRÉDICTION (mode normal)
-        $stressAnalysis = $this->predictionService->analyzeStress($message);
-        $happinessAnalysis = $this->predictionService->analyzeHappiness($message);
-
-        // 4. Construire une réponse enrichie avec les prédictions
-        $enrichedReply = $this->buildEnrichedReply($message, $stressAnalysis, $happinessAnalysis);
-
-        // 5. ENVOI À L'API FLASK (optionnel)
         try {
-            $response = $client->request('POST', 'http://127.0.0.1:5000/api/chat', [
-                'json' => [
-                    'message' => $message,
-                    'user_id' => $userId,
-                    'stress_analysis' => $stressAnalysis,
-                    'happiness_analysis' => $happinessAnalysis
-                ],
-                'timeout' => 3 // Timeout de 3 secondes
-            ]);
+            // Vérifier si c'est une demande de prédiction de bien-être
+            if ($isWellbeingRequest) {
+                return $this->handleWellbeingPrediction($request);
+            }
 
-            $apiResponse = $response->toArray();
+            // Vérifier si c'est une demande de prédiction de prix
+            $priceKeywords = ['prix', 'prédire', 'prediction', 'combien', 'cout', 'coût'];
+            $isPriceRequest = false;
+            
+            if ($message) {
+                foreach ($priceKeywords as $keyword) {
+                    if (stripos($message, $keyword) !== false) {
+                        $isPriceRequest = true;
+                        break;
+                    }
+                }
+            }
 
-            // 6. CONSTRUIRE LA RÉPONSE FINALE avec Flask
-            $finalResponse = [
-                'reply' => $apiResponse['reply'] ?? $enrichedReply,
-                'stress_analysis' => $stressAnalysis,
-                'happiness_analysis' => $happinessAnalysis,
-                'models_status' => $this->predictionService->getModelsStatus()
-            ];
+            // Si tous les paramètres de prédiction sont présents, utiliser l'endpoint de prédiction
+            if ($productName && $description && $category) {
+                return $this->handlePricePrediction($client, $productName, $description, $category);
+            }
 
-            return new JsonResponse($finalResponse);
+            // Sinon, utiliser l'endpoint de chat standard (si Flask est disponible)
+            try {
+                $response = $client->request('POST', self::FLASK_URL . '/api/chat', [
+                    'json' => [
+                        'message' => $message,
+                        'user_id' => $userId,
+                        'product_name' => $productName,
+                        'description' => $description,
+                        'category' => $category
+                    ],
+                    'timeout' => 30
+                ]);
+
+                $data = $response->toArray();
+                
+                return new JsonResponse([
+                    'reply' => $data['reply'] ?? 'Réponse reçue'
+                ]);
+            } catch (\Exception $e) {
+                // Si Flask n'est pas disponible, retourner un message par défaut
+                return new JsonResponse([
+                    'reply' => "Bonjour ! Je suis MediBot.\n\nJe peux vous aider à:\n- Évaluer votre bien-être (stress et bonheur)\n- Vous donner des conseils santé\n\nCliquez sur 'Faire le test' pour commencer l'évaluation de bien-être!"
+                ]);
+            }
             
         } catch (\Exception $e) {
-            // En cas d'erreur (si Flask est éteint par exemple), utiliser la réponse enrichie
-            $finalResponse = [
-                'reply' => $enrichedReply,
-                'stress_analysis' => $stressAnalysis,
-                'happiness_analysis' => $happinessAnalysis,
-                'models_status' => $this->predictionService->getModelsStatus(),
-                'flask_status' => 'offline'
-            ];
-            
-            return new JsonResponse($finalResponse);
-        }
-    }
-
-    /**
-     * Construit une réponse enrichie avec les analyses de prédiction
-     */
-    private function buildEnrichedReply(string $message, array $stressAnalysis, array $happinessAnalysis): string
-    {
-        $reply = "📊 **Analyse de votre message :**\n\n";
-
-        // Analyse du stress
-        if ($stressAnalysis['success']) {
-            $stressEmoji = $this->getStressEmoji($stressAnalysis['score']);
-            $reply .= "🧠 **Niveau de stress** : {$stressEmoji} {$stressAnalysis['level']} ({$stressAnalysis['score']}%)\n";
-            $reply .= "💡 {$stressAnalysis['advice']['message']}\n\n";
-        } else {
-            $reply .= "⚠️ Analyse du stress indisponible : {$stressAnalysis['error']}\n\n";
-        }
-
-        // Analyse du bonheur
-        if ($happinessAnalysis['success']) {
-            $happinessEmoji = $this->getHappinessEmoji($happinessAnalysis['score']);
-            $reply .= "😊 **Niveau de bonheur** : {$happinessEmoji} {$happinessAnalysis['level']} ({$happinessAnalysis['score']}%)\n";
-            $reply .= "💡 {$happinessAnalysis['advice']['message']}\n\n";
-        } else {
-            $reply .= "⚠️ Analyse du bonheur indisponible : {$happinessAnalysis['error']}\n\n";
-        }
-
-        $reply .= "---\n\n";
-        $reply .= "💬 Comment puis-je vous aider davantage ?";
-
-        return $reply;
-    }
-
-    /**
-     * Retourne un emoji en fonction du niveau de stress
-     */
-    private function getStressEmoji(int $score): string
-    {
-        if ($score >= 80) return "🔴";
-        if ($score >= 60) return "🟠";
-        if ($score >= 40) return "🟡";
-        return "🟢";
-    }
-
-    /**
-     * Retourne un emoji en fonction du niveau de bonheur
-     */
-    private function getHappinessEmoji(int $score): string
-    {
-        if ($score >= 80) return "😄";
-        if ($score >= 60) return "🙂";
-        if ($score >= 40) return "😐";
-        return "😔";
-    }
-
-    /**
-     * Handle questionnaire response flow
-     */
-    private function handleQuestionnaireResponse(Request $request, $session): JsonResponse
-    {
-        $message = trim($request->request->get('message'));
-        $currentStep = $session->get('questionnaire_step', 1);
-        $questionnaireData = $session->get('questionnaire_data', []);
-
-        // Validate and store the answer
-        $validationResult = $this->validateQuestionnaireAnswer($currentStep, $message);
-        
-        if (!$validationResult['valid']) {
             return new JsonResponse([
-                'reply' => $validationResult['error'] . "\n\n" . $this->getQuestionnaireQuestion($currentStep),
-                'questionnaire_active' => true,
-                'questionnaire_step' => $currentStep,
-                'models_status' => $this->predictionService->getModelsStatus()
-            ]);
+                'reply' => 'Désolé, une erreur est survenue. Erreur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Gère la prédiction de bien-être (stress et bonheur) via les modèles ML
+     */
+    private function handleWellbeingPrediction(Request $request): JsonResponse
+    {
+        // Récupérer les 5 paramètres
+        $sleepHours = (float) $request->request->get('sleep_hours', 0);
+        $studyHours = (float) $request->request->get('study_hours', 0);
+        $coffeeCups = (int) $request->request->get('coffee_cups', 0);
+        $age = (int) $request->request->get('age', 0);
+        $sportHours = (float) $request->request->get('sport_hours', 0);
+
+        // Validation des données
+        $errors = [];
+        
+        if ($sleepHours < 0 || $sleepHours > 24) {
+            $errors[] = 'Les heures de sommeil doivent être entre 0 et 24';
+        }
+        
+        if ($studyHours < 0 || $studyHours > 24) {
+            $errors[] = 'Les heures d\'étude doivent être entre 0 et 24';
+        }
+        
+        if ($coffeeCups < 0 || $coffeeCups > 50) {
+            $errors[] = 'Le nombre de cafés n\'est pas valide';
+        }
+        
+        if ($age < 1 || $age > 120) {
+            $errors[] = 'L\'âge n\'est pas valide';
         }
 
-        // Store the validated answer
-        $questionnaireData[$validationResult['key']] = $validationResult['value'];
-        $session->set('questionnaire_data', $questionnaireData);
+        if (!empty($errors)) {
+            return new JsonResponse([
+                'reply' => 'Erreur de validation:\n- ' . implode('\n- ', $errors)
+            ], 400);
+        }
 
-        // Move to next step
-        $nextStep = $currentStep + 1;
+        try {
+            // Utiliser le service de prédiction de bien-être
+            $result = $this->wellbeingService->predictWellbeing(
+                $sleepHours,
+                $studyHours,
+                $coffeeCups,
+                $age,
+                $sportHours
+            );
 
-        // Check if questionnaire is complete
-        if ($nextStep > 5) {
-            // Calculate predictions
-            $stressAnalysis = $this->predictionService->calculateStressFromQuestionnaire($questionnaireData);
-            $joyAnalysis = $this->predictionService->calculateJoyFromQuestionnaire($questionnaireData);
+            if (!$result['success']) {
+                return new JsonResponse([
+                    'reply' => 'Erreur lors de la prédiction: ' . ($result['error'] ?? 'Erreur inconnue')
+                ], 500);
+            }
 
-            // Clear questionnaire session
-            $session->remove('questionnaire_active');
-            $session->remove('questionnaire_step');
-            $session->remove('questionnaire_data');
-
-            // Build final response
-            $reply = $this->buildQuestionnaireResults($questionnaireData, $stressAnalysis, $joyAnalysis);
+            // Formater la réponse
+            $reply = $this->formatWellbeingResponse($result);
 
             return new JsonResponse([
                 'reply' => $reply,
-                'stress_analysis' => $stressAnalysis,
-                'happiness_analysis' => $joyAnalysis,
-                'questionnaire_complete' => true,
-                'models_status' => $this->predictionService->getModelsStatus()
+                'predictions' => $result['predictions'] ?? []
             ]);
-        }
 
-        // Ask next question
-        $session->set('questionnaire_step', $nextStep);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'reply' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Formate la réponse de prédiction de bien-être
+     */
+    private function formatWellbeingResponse(array $result): string
+    {
+        $predictions = $result['predictions'] ?? [];
+        $input = $result['input'] ?? [];
         
-        return new JsonResponse([
-            'reply' => "✅ Réponse enregistrée !\n\n" . $this->getQuestionnaireQuestion($nextStep),
-            'questionnaire_active' => true,
-            'questionnaire_step' => $nextStep,
-            'models_status' => $this->predictionService->getModelsStatus()
-        ]);
-    }
-
-    /**
-     * Get questionnaire question by step
-     */
-    private function getQuestionnaireQuestion(int $step): string
-    {
-        $questions = [
-            1 => "📊 **Questionnaire d'évaluation du bien-être**\n\n" .
-                 "Je vais vous poser quelques questions pour évaluer votre niveau de stress et de joie.\n\n" .
-                 "**Question 1/5** 😴\n" .
-                 "Combien d'heures dormez-vous par nuit en moyenne ?\n" .
-                 "_(Exemple: 7 ou 7.5)_",
-            
-            2 => "**Question 2/5** 📚\n" .
-                 "Combien d'heures étudiez-vous par jour en moyenne ?\n" .
-                 "_(Exemple: 4 ou 5.5)_",
-            
-            3 => "**Question 3/5** 🏃‍♂️\n" .
-                 "Combien de minutes de sport pratiquez-vous par jour ?\n" .
-                 "_(Exemple: 30 ou 60)_",
-            
-            4 => "**Question 4/5** ☕\n" .
-                 "Combien de tasses de café buvez-vous par jour ?\n" .
-                 "_(Exemple: 2 ou 3)_",
-            
-            5 => "**Question 5/5** 🎂\n" .
-                 "Quel est votre âge ?\n" .
-                 "_(Exemple: 25)_"
-        ];
-
-        return $questions[$step] ?? "Question inconnue";
-    }
-
-    /**
-     * Validate questionnaire answer
-     */
-    private function validateQuestionnaireAnswer(int $step, string $answer): array
-    {
-        $answer = trim($answer);
+        $reply = "📊 <strong>Résultats de votre analyse bien-être</strong>\n\n";
         
-        // Replace comma with dot for decimal numbers
-        $answer = str_replace(',', '.', $answer);
-
-        switch ($step) {
-            case 1: // Sleep hours
-                if (!is_numeric($answer) || floatval($answer) < 0 || floatval($answer) > 24) {
-                    return [
-                        'valid' => false,
-                        'error' => "❌ Veuillez entrer un nombre valide entre 0 et 24 heures."
-                    ];
-                }
-                return [
-                    'valid' => true,
-                    'key' => 'sleep_hours',
-                    'value' => floatval($answer)
-                ];
-
-            case 2: // Study hours
-                if (!is_numeric($answer) || floatval($answer) < 0 || floatval($answer) > 24) {
-                    return [
-                        'valid' => false,
-                        'error' => "❌ Veuillez entrer un nombre valide entre 0 et 24 heures."
-                    ];
-                }
-                return [
-                    'valid' => true,
-                    'key' => 'study_hours',
-                    'value' => floatval($answer)
-                ];
-
-            case 3: // Sport minutes
-                if (!is_numeric($answer) || floatval($answer) < 0 || floatval($answer) > 1440) {
-                    return [
-                        'valid' => false,
-                        'error' => "❌ Veuillez entrer un nombre valide entre 0 et 1440 minutes."
-                    ];
-                }
-                return [
-                    'valid' => true,
-                    'key' => 'sport_minutes',
-                    'value' => floatval($answer)
-                ];
-
-            case 4: // Coffee cups
-                if (!is_numeric($answer) || intval($answer) < 0 || intval($answer) > 20) {
-                    return [
-                        'valid' => false,
-                        'error' => "❌ Veuillez entrer un nombre entier valide entre 0 et 20."
-                    ];
-                }
-                return [
-                    'valid' => true,
-                    'key' => 'coffee_cups',
-                    'value' => intval($answer)
-                ];
-
-            case 5: // Age
-                if (!is_numeric($answer) || intval($answer) < 1 || intval($answer) > 120) {
-                    return [
-                        'valid' => false,
-                        'error' => "❌ Veuillez entrer un âge valide entre 1 et 120 ans."
-                    ];
-                }
-                return [
-                    'valid' => true,
-                    'key' => 'age',
-                    'value' => intval($answer)
-                ];
-
-            default:
-                return [
-                    'valid' => false,
-                    'error' => "❌ Question invalide."
-                ];
+        // Afficher les deux résultats en même temps
+        $reply .= "<div class='results-container'>";
+        
+        // Prédiction de bonheur
+        $reply .= "<div class='result-card happiness'>";
+        $reply .= "<div class='icon'>😊</div>";
+        $reply .= "<div class='title'>Niveau de Bonheur</div>";
+        
+        if (isset($predictions['happiness'])) {
+            $happiness = $predictions['happiness'];
+            if (isset($happiness['error'])) {
+                $reply .= "<div class='value'>❌</div>";
+                $reply .= "<div class='level'>Erreur</div>";
+            } else {
+                $level = $happiness['level'] ?? 'Inconnu';
+                $normalized = $happiness['normalized'] ?? $happiness['value'];
+                $reply .= "<div class='value'>" . number_format($normalized, 1) . "/10</div>";
+                $reply .= "<div class='level'>$level</div>";
+            }
         }
-    }
-
-    /**
-     * Build questionnaire results message
-     */
-    private function buildQuestionnaireResults(array $data, array $stressAnalysis, array $joyAnalysis): string
-    {
-        $reply = "🎉 **Questionnaire terminé !**\n\n";
-        $reply .= "📋 **Vos réponses :**\n";
-        $reply .= "• Sommeil : {$data['sleep_hours']} heures/nuit\n";
-        $reply .= "• Étude : {$data['study_hours']} heures/jour\n";
-        $reply .= "• Sport : {$data['sport_minutes']} minutes/jour\n";
-        $reply .= "• Café : {$data['coffee_cups']} tasses/jour\n";
-        $reply .= "• Âge : {$data['age']} ans\n\n";
-        $reply .= "---\n\n";
-
-        // Stress analysis
-        if ($stressAnalysis['success']) {
-            $stressEmoji = $this->getStressEmoji($stressAnalysis['score']);
-            $reply .= "🧠 **Niveau de stress** : {$stressEmoji} {$stressAnalysis['level']}\n";
-            $reply .= "📊 **Score** : {$stressAnalysis['score']}%\n";
-            $reply .= "💡 {$stressAnalysis['advice']['message']}\n\n";
+        $reply .= "</div>";
+        
+        // Prédiction de stress
+        $reply .= "<div class='result-card '";
+        if (isset($predictions['stress']) && isset($predictions['stress']['percentage'])) {
+            $reply .= ($predictions['stress']['percentage'] < 40) ? 'low-stress' : 'stress';
         } else {
-            $reply .= "⚠️ Analyse du stress indisponible : {$stressAnalysis['error']}\n\n";
+            $reply .= 'stress';
+        }
+        $reply .= "'>";
+        $reply .= "<div class='icon'>😰</div>";
+        $reply .= "<div class='title'>Niveau de Stress</div>";
+        
+        if (isset($predictions['stress'])) {
+            $stress = $predictions['stress'];
+            if (isset($stress['error'])) {
+                $reply .= "<div class='value'>❌</div>";
+                $reply .= "<div class='level'>Erreur</div>";
+            } else {
+                $level = $stress['level'] ?? 'Inconnu';
+                $percentage = $stress['percentage'] ?? ($stress['value'] * 100);
+                $reply .= "<div class='value'>" . number_format($percentage, 0) . "%</div>";
+                $reply .= "<div class='level'>$level</div>";
+            }
+        }
+        $reply .= "</div>";
+        $reply .= "</div>";
+        
+        // Conseils
+        $reply .= "<div class='tips-section'>";
+        $reply .= "<h4>💡 Conseils personnalisés:</h4>";
+        $reply .= "<ul>";
+        
+        if (isset($predictions['stress']) && isset($predictions['stress']['percentage'])) {
+            if ($predictions['stress']['percentage'] >= 70) {
+                $reply .= "<li>🔥 Votre niveau de stress est élevé. Essayez la méditation ou des exercices de respiration.</li>";
+            } elseif ($predictions['stress']['percentage'] >= 40) {
+                $reply .= "<li>⚠️ Votre stress est modéré. Pensez à prendre des pauses régulières.</li>";
+            } else {
+                $reply .= "<li>✅ Votre niveau de stress est bien géré. Continuez comme ça!</li>";
+            }
+        }
+        
+        if (isset($predictions['happiness']) && isset($predictions['happiness']['normalized'])) {
+            if ($predictions['happiness']['normalized'] < 5) {
+                $reply .= "<li>😢 Votre bonheur semble faible. Accordez-vous du temps pour vous reposer et faire des activités agréables.</li>";
+            } elseif ($predictions['happiness']['normalized'] >= 7) {
+                $reply .= "<li>😊 Votre niveau de bonheur est excellent! Partagez votre bonne humeur!</li>";
+            }
         }
 
-        // Joy analysis
-        if ($joyAnalysis['success']) {
-            $joyEmoji = $this->getHappinessEmoji($joyAnalysis['score']);
-            $reply .= "😊 **Niveau de joie** : {$joyEmoji} {$joyAnalysis['level']}\n";
-            $reply .= "📊 **Score** : {$joyAnalysis['score']}%\n";
-            $reply .= "💡 {$joyAnalysis['advice']['message']}\n\n";
-        } else {
-            $reply .= "⚠️ Analyse de la joie indisponible : {$joyAnalysis['error']}\n\n";
+        if (($input['sleep_hours'] ?? 0) < 7) {
+            $reply .= "<li>😴 Vous dormez moins de 7h. Essayez de dormir plus pour améliorer votre bien-être.</li>";
         }
-
-        $reply .= "---\n\n";
-        $reply .= "💬 Tapez 'questionnaire' pour refaire le test ou posez-moi une autre question !";
+        
+        if (($input['sport_hours'] ?? 0) < 2) {
+            $reply .= "<li>🏃 Essayez de faire au moins 2h de sport par semaine pour réduire le stress.</li>";
+        }
+        
+        $reply .= "</ul>";
+        $reply .= "</div>";
 
         return $reply;
     }
+
+    /**
+     * Gère la prédiction de prix via l'API dédiée
+     */
+    private function handlePricePrediction(
+        HttpClientInterface $client,
+        string $productName,
+        string $description,
+        string $category
+    ): JsonResponse {
+        try {
+            $response = $client->request('POST', self::FLASK_URL . '/api/predict', [
+                'json' => [
+                    'product_name' => $productName,
+                    'description' => $description,
+                    'category' => $category
+                ],
+                'timeout' => 30
+            ]);
+
+            $data = $response->toArray();
+
+            if (isset($data['error'])) {
+                return new JsonResponse([
+                    'reply' => 'Erreur lors de la prédiction: ' . $data['error']
+                ], 500);
+            }
+
+            $reply = sprintf(
+                "💰 **Prix estimé pour %s:** %s €\n\n📂 Catégorie: %s\n📝 Description: %s\n\n📊 Fourchette de prix dans cette catégorie:\n- Min: %s €\n- Max: %s €\n- Moyenne: %s €",
+                $data['product_name'],
+                $data['predicted_price'],
+                $data['category'],
+                $description,
+                $data['price_range']['min'],
+                $data['price_range']['max'],
+                $data['price_range']['mean']
+            );
+
+            return new JsonResponse([
+                'reply' => $reply
+            ]);
+
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'reply' => 'Désolé, le serveur de prédiction est hors ligne. 🔌 Erreur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Route pour obtenir les catégories disponibles pour la prédiction
+     */
+    #[Route('/chat/categories', name: 'chat_categories', methods: ['GET'])]
+    public function getCategories(HttpClientInterface $client): JsonResponse
+    {
+        try {
+            $response = $client->request('GET', self::FLASK_URL . '/api/categories', [
+                'timeout' => 10
+            ]);
+
+            $data = $response->toArray();
+
+            return new JsonResponse([
+                'categories' => $data['categories'] ?? [],
+                'price_stats' => $data['price_stats'] ?? []
+            ]);
+
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'Impossible de charger les catégories: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Vérification de la connexion au serveur Flask
+     */
+    #[Route('/chat/health', name: 'chat_health', methods: ['GET'])]
+    public function healthCheck(HttpClientInterface $client): JsonResponse
+    {
+        try {
+            $response = $client->request('GET', self::FLASK_URL . '/health', [
+                'timeout' => 5
+            ]);
+
+            $data = $response->toArray();
+
+            return new JsonResponse([
+                'status' => $data['status'] ?? 'unknown',
+                'models_loaded' => $data['models_loaded'] ?? false,
+                'connected' => true
+            ]);
+
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'status' => 'error',
+                'connected' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    #[Route('/chat/send', name: 'chat_send_get', methods: ['GET'])]
+public function sendGet(): JsonResponse
+{
+    return new JsonResponse([
+        'reply' => 'Le chat utilise POST. Cette requête GET est ignorée.'
+    ]);
 }
-
-
-
-
-
-
-
-
-
-
-
+}

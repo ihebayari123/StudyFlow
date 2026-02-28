@@ -64,3 +64,10 @@ services:
     App\Service\PricePredictionService:
         arguments:
             $projectDir: '%kernel.project_dir%'
+
+    # Service de prédiction du bien-être (bonheur et stress)
+    App\Service\WellbeingPredictionService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+            $logger: '@logger'
+            $pythonPath: 'python'

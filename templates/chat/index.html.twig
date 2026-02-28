@@ -1,913 +1,593 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Chat Médical - StudyFlow{% endblock %}
+{% block title %}Chat Bien-être - StudyFlow{% endblock %}
 
 {% block body %}
 <style>
-    .chat-container {
-        min-height: 100vh;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 40px 20px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+    * {
+        box-sizing: border-box;
     }
-
+    
     .chat-wrapper {
-        width: 100%;
-        max-width: 800px;
-        background: #ffffff;
-        border-radius: 24px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 120px);
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(180deg, #f0f4ff 0%, #ffffff 100%);
     }
-
+    
     .chat-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 25px 30px;
+        color: white;
+        padding: 20px 30px;
+        border-radius: 20px 20px 0 0;
         display: flex;
         align-items: center;
         gap: 15px;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
     }
-
-    .chat-header-icon {
+    
+    .chat-header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .chat-header .bot-icon {
         width: 50px;
         height: 50px;
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(255,255,255,0.2);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 24px;
     }
-
-    .chat-header-info h2 {
-        color: #ffffff;
-        margin: 0;
-        font-size: 22px;
-        font-weight: 600;
-    }
-
-    .chat-header-info p {
-        color: rgba(255, 255, 255, 0.8);
-        margin: 0;
-        font-size: 13px;
-    }
-
-    .chat-status {
-        margin-left: auto;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(255, 255, 255, 0.15);
-        padding: 8px 16px;
-        border-radius: 20px;
-    }
-
-    .history-button {
-        background: rgba(255, 255, 255, 0.15);
-        border: none;
-        color: #ffffff;
-        padding: 8px 16px;
-        border-radius: 20px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 13px;
-        transition: all 0.3s ease;
-    }
-
-    .history-button:hover {
-        background: rgba(255, 255, 255, 0.25);
-    }
-
-    .history-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .history-modal.active {
-        display: flex;
-    }
-
-    .history-modal-content {
-        background: #ffffff;
-        border-radius: 20px;
-        width: 90%;
-        max-width: 600px;
-        max-height: 80vh;
+    
+    .chat-container {
+        flex: 1;
+        background: white;
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         overflow: hidden;
         display: flex;
         flex-direction: column;
     }
-
-    .history-modal-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 20px 25px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .history-modal-header h3 {
-        color: #ffffff;
-        margin: 0;
-        font-size: 18px;
-    }
-
-    .history-close {
-        background: none;
-        border: none;
-        color: #ffffff;
-        font-size: 24px;
-        cursor: pointer;
-        padding: 0;
-        line-height: 1;
-    }
-
-    .history-modal-body {
+    
+    .chat-messages {
+        flex: 1;
         padding: 20px;
         overflow-y: auto;
-        flex: 1;
+        background: linear-gradient(180deg, #fafbfc 0%, #f0f4ff 100%);
     }
-
-    .history-item {
-        padding: 15px;
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .history-item:last-child {
-        border-bottom: none;
-    }
-
-    .history-item-user {
-        color: #667eea;
-        font-weight: 600;
-        font-size: 13px;
-        margin-bottom: 5px;
-    }
-
-    .history-item-bot {
-        color: #334155;
-        font-size: 14px;
-        margin-top: 5px;
-    }
-
-    .history-item-time {
-        font-size: 11px;
-        color: #94a3b8;
-    }
-
-    .history-empty {
-        text-align: center;
-        color: #94a3b8;
-        padding: 40px 20px;
-    }
-
-    .history-modal-footer {
-        padding: 15px 20px;
-        border-top: 1px solid #e2e8f0;
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-    }
-
-    .history-clear-btn {
-        background: #ef4444;
-        color: #ffffff;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: all 0.3s ease;
-    }
-
-    .history-clear-btn:hover {
-        background: #dc2626;
-    }
-
-    .history-count {
-        font-size: 12px;
-        background: rgba(255, 255, 255, 0.3);
-        padding: 2px 8px;
-        border-radius: 10px;
-    }
-
-    .status-dot {
-        width: 8px;
-        height: 8px;
-        background: #4ade80;
-        border-radius: 50%;
-        animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
-
-    .status-text {
-        color: #ffffff;
-        font-size: 12px;
-        font-weight: 500;
-    }
-
-    .chat-box {
-        height: 450px;
-        overflow-y: auto;
-        padding: 25px 30px;
-        background: #f8fafc;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .chat-box::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .chat-box::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .chat-box::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 3px;
-    }
-
+    
     .message {
-        max-width: 75%;
-        padding: 15px 20px;
-        border-radius: 20px;
-        font-size: 14px;
-        line-height: 1.6;
-        animation: messageSlide 0.3s ease-out;
-    }
-
-    @keyframes messageSlide {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .message-user {
-        align-self: flex-end;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: #ffffff;
-        border-bottom-right-radius: 5px;
-    }
-
-    .message-bot {
-        align-self: flex-start;
-        background: #ffffff;
-        color: #334155;
-        border-bottom-left-radius: 5px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    }
-
-    .message-header {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 6px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .message-user .message-header {
-        color: rgba(255, 255, 255, 0.9);
-    }
-
-    .message-bot .message-header {
-        color: #667eea;
-    }
-
-    .message-time {
-        font-size: 11px;
-        font-weight: 400;
-        opacity: 0.7;
-    }
-
-    .typing-indicator {
-        display: none;
-        align-self: flex-start;
-        background: #ffffff;
-        padding: 20px 25px;
-        border-radius: 20px;
-        border-bottom-left-radius: 5px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    }
-
-    .typing-indicator.active {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .typing-dot {
-        width: 8px;
-        height: 8px;
-        background: #667eea;
-        border-radius: 50%;
-        animation: typingBounce 1.4s infinite ease-in-out both;
-    }
-
-    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-
-    @keyframes typingBounce {
-        0%, 80%, 100% { transform: scale(0); }
-        40% { transform: scale(1); }
-    }
-
-    .welcome-message {
-        text-align: center;
-        padding: 30px 20px;
-        color: #64748b;
-    }
-
-    .welcome-message i {
-        font-size: 48px;
-        color: #667eea;
         margin-bottom: 15px;
-        display: block;
-    }
-
-    .welcome-message h3 {
-        color: #334155;
-        font-size: 18px;
-        margin-bottom: 8px;
-    }
-
-    .welcome-message p {
-        font-size: 14px;
-        margin: 0;
-    }
-
-    .chat-input-container {
-        padding: 20px 30px;
-        background: #ffffff;
-        border-top: 1px solid #e2e8f0;
-        display: flex;
-        gap: 12px;
-        align-items: center;
-    }
-
-    .chat-input-wrapper {
-        flex: 1;
-        position: relative;
-    }
-
-    .chat-input {
-        width: 100%;
+        max-width: 80%;
         padding: 15px 20px;
-        border: 2px solid #e2e8f0;
+        border-radius: 20px;
+        line-height: 1.6;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .message.bot {
+        background: white;
+        border: 2px solid #e8ecf4;
+        margin-right: auto;
+        border-bottom-left-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .message.user {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 5px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .message.system {
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        margin: 10px auto;
+        text-align: center;
+        max-width: 90%;
+    }
+    
+    .chat-input-area {
+        padding: 20px;
+        background: white;
+        border-top: 1px solid #e8ecf4;
+    }
+    
+    .chat-input-wrapper {
+        display: flex;
+        gap: 10px;
+        max-width: 100%;
+    }
+    
+    .chat-input {
+        flex: 1;
+        padding: 15px 20px;
+        border: 2px solid #e8ecf4;
         border-radius: 30px;
         font-size: 14px;
         outline: none;
-        transition: all 0.3s ease;
-        background: #f8fafc;
+        transition: all 0.3s;
     }
-
+    
     .chat-input:focus {
         border-color: #667eea;
-        background: #ffffff;
-        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
-
-    .chat-input::placeholder {
-        color: #94a3b8;
-    }
-
-    .send-button {
-        width: 50px;
-        height: 50px;
-        border: none;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: #ffffff;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-
-    .send-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-    }
-
-    .send-button:active {
-        transform: translateY(0);
-    }
-
-    .send-button i {
-        font-size: 18px;
-    }
-
-    .quick-replies {
-        display: flex;
-        gap: 10px;
+    
+    .send-btn {
         padding: 15px 30px;
-        background: #ffffff;
-        border-top: 1px solid #e2e8f0;
-        flex-wrap: wrap;
-    }
-
-    .quick-reply {
-        padding: 8px 16px;
-        background: #f1f5f9;
-        border: 1px solid #e2e8f0;
-        border-radius: 20px;
-        font-size: 13px;
-        color: #64748b;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .quick-reply:hover {
-        background: #667eea;
-        color: #ffffff;
-        border-color: #667eea;
-    }
-
-    /* Prediction Analysis Styles */
-    .prediction-analysis {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
         border: none;
-        padding: 20px;
+        border-radius: 30px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .send-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .send-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    /* Questionnaire Styles */
+    .questionnaire {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin: 10px 0;
+        border: 3px solid #667eea;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.2);
+    }
+    
+    .questionnaire h3 {
+        margin-top: 0;
+        color: #667eea;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .question-item {
+        margin-bottom: 20px;
+    }
+    
+    .question-item label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+        font-size: 14px;
+    }
+    
+    .question-item label .icon {
+        margin-right: 8px;
+    }
+    
+    .question-item input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e8ecf4;
+        border-radius: 12px;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+    
+    .question-item input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .questionnaire .analyze-btn {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 10px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .questionnaire .analyze-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .questionnaire .analyze-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+    
+    /* Results Cards */
+    .results-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
         margin: 15px 0;
     }
-
-    .prediction-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 15px;
-    }
-
-    .prediction-card {
-        background: white;
-        border-radius: 12px;
+    
+    .result-card {
         padding: 20px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-
-    .prediction-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+    .result-card.happiness {
+        background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+        border: 2px solid #f39c12;
     }
-
-    .prediction-header {
+    
+    .result-card.stress {
+        background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
+        color: white;
+        border: 2px solid #c0392b;
+    }
+    
+    .result-card.low-stress {
+        background: linear-gradient(135deg, #55efc4 0%, #00b894 100%);
+        border: 2px solid #00b894;
+    }
+    
+    .result-card .icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+    
+    .result-card .title {
+        font-weight: 700;
+        font-size: 14px;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+    
+    .result-card .value {
+        font-size: 32px;
+        font-weight: 800;
+        margin: 10px 0;
+    }
+    
+    .result-card .level {
+        font-size: 14px;
+        font-weight: 600;
+        padding: 5px 15px;
+        border-radius: 20px;
+        display: inline-block;
+    }
+    
+    .result-card.happiness .level {
+        background: rgba(255,255,255,0.5);
+    }
+    
+    .result-card.stress .level, 
+    .result-card.low-stress .level {
+        background: rgba(0,0,0,0.2);
+        color: white;
+    }
+    
+    .tips-section {
+        background: #e8f5e9;
+        border: 2px solid #4caf50;
+        border-radius: 15px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    
+    .tips-section h4 {
+        margin: 0 0 10px 0;
+        color: #2e7d32;
+    }
+    
+    .tips-section ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+    
+    .tips-section li {
+        margin-bottom: 5px;
+        color: #333;
+    }
+    
+    /* Quick Actions */
+    .quick-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+    }
+    
+    .quick-btn {
+        padding: 8px 16px;
+        background: #f0f4ff;
+        border: 2px solid #667eea;
+        border-radius: 20px;
+        color: #667eea;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .quick-btn:hover {
+        background: #667eea;
+        color: white;
+    }
+    
+    /* Loading */
+    .loading {
         display: flex;
         align-items: center;
         gap: 10px;
-        margin-bottom: 15px;
+        color: #666;
     }
-
-    .prediction-icon {
-        font-size: 24px;
+    
+    .spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
     }
-
-    .prediction-title {
-        font-weight: 600;
-        color: #1e293b;
-        font-size: 16px;
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
-
-    .prediction-score {
-        font-size: 36px;
-        font-weight: 700;
-        text-align: center;
-        margin: 10px 0;
-    }
-
-    .prediction-level {
-        text-align: center;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 14px;
-        margin: 10px 0;
-    }
-
-    .prediction-bar {
-        width: 100%;
-        height: 8px;
-        background: #e2e8f0;
-        border-radius: 4px;
-        overflow: hidden;
-        margin-top: 15px;
-    }
-
-    .prediction-bar-fill {
-        height: 100%;
-        border-radius: 4px;
-        transition: width 0.5s ease;
-        animation: fillBar 0.8s ease-out;
-    }
-
-    @keyframes fillBar {
-        from {
-            width: 0;
-        }
-    }
-
-    @media (max-width: 640px) {
-        .prediction-container {
+    
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+        .results-container {
             grid-template-columns: 1fr;
         }
-    }
-
-    @media (max-width: 640px) {
-        .chat-container {
-            padding: 0;
-        }
-
+        
         .chat-wrapper {
-            border-radius: 0;
-            min-height: 100vh;
+            padding: 10px;
         }
-
-        .chat-box {
-            height: calc(100vh - 200px);
+        
+        .message {
+            max-width: 90%;
         }
     }
 </style>
 
-<div class="chat-container">
-    <div class="chat-wrapper">
-        <div class="chat-header">
-            <div class="chat-header-icon">
-                🤖
-            </div>
-            <div class="chat-header-info">
-                <h2>Assistant Médical Stress</h2>
-                <p>Spécialiste en gestion du stress et bien-être</p>
-            </div>
-            <div class="chat-status">
-                <span class="status-dot"></span>
-                <span class="status-text">En ligne</span>
-            </div>
-            <button class="history-button" onclick="openHistoryModal()">
-                <span>📜</span>
-                <span>Historique</span>
-                <span id="history-count" class="history-count">0</span>
-            </button>
-        </div>
-
-        <div id="chat-box" class="chat-box">
-            <div class="welcome-message">
-                <span>💬</span>
-                <h3>Bienvenue !</h3>
-                <p>Je suis là pour vous aider à gérer votre stress et répondre à vos questions médicales.</p>
-                <p style="margin-top: 10px; font-size: 13px;">💡 Cliquez sur "📊 Questionnaire" pour évaluer votre niveau de stress et de joie !</p>
-            </div>
-        </div>
-
-        <div id="typing-indicator" class="typing-indicator">
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-        </div>
-
-        <div class="quick-replies">
-            <span class="quick-reply" onclick="sendQuickReply('questionnaire')">📊 Questionnaire</span>
-            <span class="quick-reply" onclick="sendQuickReply('Bonjour')">👋 Bonjour</span>
-            <span class="quick-reply" onclick="sendQuickReply('Je me sens stressé')">😰 Je me sens stressé</span>
-            <span class="quick-reply" onclick="sendQuickReply('Conseils relaxation')">🧘 Conseils relaxation</span>
-        </div>
-
-        <div class="chat-input-container">
-            <div class="chat-input-wrapper">
-                <input type="text" id="msg" class="chat-input" placeholder="Écrivez votre message ici..." onkeypress="handleKeyPress(event)">
-            </div>
-            <button class="send-button" onclick="send()">
-                <span>➤</span>
-            </button>
+<div class="chat-wrapper">
+    <div class="chat-header">
+        <div class="bot-icon">🤖</div>
+        <div>
+            <h1>Dr. MediBot</h1>
+            <small style="opacity: 0.9;">Assistant Bien-être & Santé</small>
         </div>
     </div>
-
-    <!-- History Modal -->
-    <div id="history-modal" class="history-modal" onclick="closeHistoryModal(event)">
-        <div class="history-modal-content" onclick="event.stopPropagation()">
-            <div class="history-modal-header">
-                <h3>📜 Historique des conversations</h3>
-                <button class="history-close" onclick="closeHistoryModal()">&times;</button>
+    
+    <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                👋 <strong>Bienvenue sur MediBot!</strong>
+                <br><br>
+                Je suis votre assistant personnel de bien-être. Je peux vous aider à:
+                <br><br>
+                🎯 <strong>Évaluer votre niveau de:</strong>
+                <ul>
+                    <li>😌 <strong>Bonheur</strong> - basé sur vos habitudes de sommeil et d'étude</li>
+                    <li>😰 <strong>Stress</strong> - basé sur 5 facteurs de votre quotidien</li>
+                </ul>
+                💡 <strong>Vous donner des conseils personnalisés</strong> pour améliorer votre bien-être.
+                <br><br>
+                <em>Cliquez sur le bouton ci-dessous pour commencer l'évaluation!</em>
             </div>
-            <div id="history-list" class="history-modal-body">
-                <div class="history-empty">
-                    <p>Aucun historique disponible</p>
-                </div>
+            
+            <div style="text-align: center; margin: 20px 0;">
+                <button class="send-btn" onclick="showQuestionnaire()" style="font-size: 18px; padding: 15px 40px;">
+                    📊 Faire le test
+                </button>
             </div>
-            <div class="history-modal-footer">
-                <button class="history-clear-btn" onclick="clearHistory()">🗑️ Effacer l'historique</button>
+        </div>
+        
+        <div class="chat-input-area">
+            <div class="chat-input-wrapper">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Tapez votre message..." autocomplete="off">
+                <button id="sendBtn" class="send-btn" onclick="sendMessage()">Envoyer</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const CHAT_STORAGE_KEY = 'studyflow_chat_history';
-
-    function getCurrentTime() {
-        const now = new Date();
-        return now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    }
-
-    function getCurrentDate() {
-        const now = new Date();
-        return now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    }
-
-    // Load chat history from localStorage
-    function loadChatHistory() {
-        const history = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || '[]');
-        return history;
-    }
-
-    // Save message to localStorage
-    function saveMessageToHistory(userMessage, botMessage) {
-        const history = loadChatHistory();
-        const timestamp = new Date().toISOString();
-        
-        history.push({
-            user: userMessage,
-            bot: botMessage,
-            time: timestamp,
-            date: getCurrentDate(),
-            displayTime: getCurrentTime()
-        });
-
-        // Keep only last 100 messages
-        if (history.length > 100) {
-            history.shift();
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    
+    // Allow Enter key to send
+    chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
         }
-
-        localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(history));
-        updateHistoryCount();
-    }
-
-    // Update history count badge
-    function updateHistoryCount() {
-        const history = loadChatHistory();
-        const countElement = document.getElementById('history-count');
-        if (countElement) {
-            countElement.textContent = history.length;
-        }
-    }
-
-    // Open history modal
-    function openHistoryModal() {
-        const modal = document.getElementById('history-modal');
-        const historyList = document.getElementById('history-list');
-        const history = loadChatHistory();
-
-        if (history.length === 0) {
-            historyList.innerHTML = '<div class="history-empty"><p>Aucun historique disponible</p></div>';
-        } else {
-            // Show most recent first
-            const reversedHistory = [...history].reverse();
-            historyList.innerHTML = reversedHistory.map(item => `
-                <div class="history-item">
-                    <div class="history-item-user">👤 Vous: ${escapeHtml(item.user)}</div>
-                    <div class="history-item-bot">🤖 Bot: ${escapeHtml(item.bot)}</div>
-                    <div class="history-item-time">${item.date} à ${item.displayTime}</div>
+    });
+    
+    function showQuestionnaire() {
+        const questionnaireHTML = `
+            <div class="questionnaire" id="questionnaire">
+                <h3>📋 Questionnaire Bien-être</h3>
+                <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                    Répondez à ces 5 questions pour obtenir votre analyse
+                </p>
+                
+                <div class="question-item">
+                    <label><span class="icon">😴</span>1. Combien d'heures dormez-vous par nuit ?</label>
+                    <input type="number" id="sleepHours" min="0" max="24" step="0.5" placeholder="Ex: 7" required>
                 </div>
-            `).join('');
-        }
-
-        modal.classList.add('active');
-    }
-
-    // Close history modal
-    function closeHistoryModal(event) {
-        if (event && event.target !== event.currentTarget) return;
-        const modal = document.getElementById('history-modal');
-        modal.classList.remove('active');
-    }
-
-    // Clear history
-    function clearHistory() {
-        if (confirm('Êtes-vous sûr de vouloir effacer tout l\'historique du chat?')) {
-            localStorage.removeItem(CHAT_STORAGE_KEY);
-            updateHistoryCount();
-            openHistoryModal(); // Refresh the modal
-        }
-    }
-
-    // Escape HTML to prevent XSS
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    function handleKeyPress(event) {
-        if (event.key === 'Enter') {
-            send();
-        }
-    }
-
-    function sendQuickReply(message) {
-        document.getElementById('msg').value = message;
-        send();
-    }
-
-    function showTypingIndicator() {
-        const indicator = document.getElementById('typing-indicator');
-        indicator.classList.add('active');
-        const chatBox = document.getElementById('chat-box');
-        chatBox.appendChild(indicator);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    function hideTypingIndicator() {
-        const indicator = document.getElementById('typing-indicator');
-        indicator.classList.remove('active');
-    }
-
-    function addMessage(content, isUser) {
-        const chatBox = document.getElementById('chat-box');
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${isUser ? 'message-user' : 'message-bot'}`;
-
-        const header = document.createElement('div');
-        header.className = 'message-header';
-        header.innerHTML = `
-            <span>${isUser ? '👤 Vous' : '🤖 Bot'}</span>
-            <span class="message-time">${getCurrentTime()}</span>
+                
+                <div class="question-item">
+                    <label><span class="icon">📚</span>2. Combien d'heures étudiez-vous par jour ?</label>
+                    <input type="number" id="studyHours" min="0" max="24" step="0.5" placeholder="Ex: 4" required>
+                </div>
+                
+                <div class="question-item">
+                    <label><span class="icon">☕</span>3. Combien de tasses de café buvez-vous par jour ?</label>
+                    <input type="number" id="coffeeCups" min="0" max="50" placeholder="Ex: 2" required>
+                </div>
+                
+                <div class="question-item">
+                    <label><span class="icon">🎂</span>4. Quel est votre âge ?</label>
+                    <input type="number" id="age" min="1" max="120" placeholder="Ex: 20" required>
+                </div>
+                
+                <div class="question-item">
+                    <label><span class="icon">🏃</span>5. Combien d'heures faites-vous du sport par semaine ?</label>
+                    <input type="number" id="sportHours" min="0" max="50" step="0.5" placeholder="Ex: 3" required>
+                </div>
+                
+                <button class="analyze-btn" onclick="analyzeWellbeing()" id="analyzeBtn">
+                    🔍 Analyser mon bien-être
+                </button>
+            </div>
         `;
-
-        const text = document.createElement('div');
-        text.textContent = content;
-
-        messageDiv.appendChild(header);
-        messageDiv.appendChild(text);
-        chatBox.appendChild(messageDiv);
-
-        // Remove welcome message if it exists
-        const welcomeMessage = chatBox.querySelector('.welcome-message');
-        if (welcomeMessage) {
-            welcomeMessage.remove();
-        }
-
-        chatBox.scrollTop = chatBox.scrollHeight;
+        
+        addMessage(questionnaireHTML, 'bot');
     }
-
-    function send() {
-        const msgInput = document.getElementById('msg');
-        const msg = msgInput.value.trim();
-
-        if (msg === '') return;
-
-        addMessage(msg, true);
-        msgInput.value = '';
-
-        showTypingIndicator();
-
-        fetch("{{ path('chat_send') }}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: "message=" + encodeURIComponent(msg)
+    
+    function analyzeWellbeing() {
+        const sleepHours = parseFloat(document.getElementById('sleepHours').value);
+        const studyHours = parseFloat(document.getElementById('studyHours').value);
+        const coffeeCups = parseInt(document.getElementById('coffeeCups').value);
+        const age = parseInt(document.getElementById('age').value);
+        const sportHours = parseFloat(document.getElementById('sportHours').value) || 0;
+        
+        // Validation
+        if (isNaN(sleepHours) || isNaN(studyHours) || isNaN(coffeeCups) || isNaN(age)) {
+            addMessage('❌ Veuillez remplir tous les champs correctement.', 'bot');
+            return;
+        }
+        
+        if (sleepHours < 0 || sleepHours > 24 || studyHours < 0 || studyHours > 24) {
+            addMessage('❌ Les heures de sommeil et d\'étude doivent être entre 0 et 24.', 'bot');
+            return;
+        }
+        
+        if (coffeeCups < 0 || coffeeCups > 50 || age < 1 || age > 120) {
+            addMessage('❌ Veuillez vérifier vos réponses.', 'bot');
+            return;
+        }
+        
+        // Disable button and show loading
+        const btn = document.getElementById('analyzeBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Analyse en cours...';
+        
+        // Add loading message
+        addMessage('<div class="loading"><div class="spinner"></div> Analyse en cours avec les modèles ML...</div>', 'bot');
+        
+        const formData = new FormData();
+        formData.append('wellbeing_mode', 'true');
+        formData.append('sleep_hours', sleepHours);
+        formData.append('study_hours', studyHours);
+        formData.append('coffee_cups', coffeeCups);
+        formData.append('age', age);
+        formData.append('sport_hours', sportHours);
+        
+        fetch('{{ path('chat_send') }}', {
+            method: 'POST',
+            body: formData
         })
-        .then(res => res.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erreur HTTP: ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
-            hideTypingIndicator();
-            setTimeout(() => {
-                // Display the reply with predictions
-                addMessage(data.reply, false);
-                
-                // Display prediction analysis if available
-                if (data.stress_analysis || data.happiness_analysis) {
-                    displayPredictionAnalysis(data.stress_analysis, data.happiness_analysis);
-                }
-                
-                // Save conversation to history
-                saveMessageToHistory(msg, data.reply);
-            }, 300);
+            // Remove loading message
+            const messages = chatMessages.querySelectorAll('.message');
+            if (messages.length > 0) {
+                messages[messages.length - 1].remove();
+            }
+            
+            // Show results
+            addMessage(data.reply || 'Analyse terminée', 'bot');
+            
+            // Re-enable button
+            btn.disabled = false;
+            btn.innerHTML = '🔍 Analyser mon bien-être';
+            
+            // Add quick action to retest
+            addMessage('<div class="quick-actions"><button class="quick-btn" onclick="showQuestionnaire()">📊 Refaire le test</button></div>', 'bot');
         })
         .catch(error => {
-            hideTypingIndicator();
-            addMessage("Désolé, une erreur s'est produite. Veuillez réessayer.", false);
-            console.error('Chat error:', error);
+            // Remove loading message
+            const messages = chatMessages.querySelectorAll('.message');
+            if (messages.length > 0) {
+                messages[messages.length - 1].remove();
+            }
+            
+            addMessage('❌ Désolé, une erreur est survenue lors de l\'analyse.<br><br>Détails: ' + error.message, 'bot');
+            
+            // Re-enable button
+            btn.disabled = false;
+            btn.innerHTML = '🔍 Analyser mon bien-être';
         });
     }
-
-    // Function to display prediction analysis with visual indicators
-    function displayPredictionAnalysis(stressAnalysis, happinessAnalysis) {
-        const chatBox = document.getElementById('chat-box');
-        const analysisDiv = document.createElement('div');
-        analysisDiv.className = 'message bot-message prediction-analysis';
+    
+    function sendMessage() {
+        const message = chatInput.value.trim();
+        if (!message) return;
         
-        let analysisHTML = '<div class="prediction-container">';
+        addMessage(message, 'user');
+        chatInput.value = '';
         
-        // Stress Analysis
-        if (stressAnalysis && stressAnalysis.success) {
-            const stressColor = getStressColor(stressAnalysis.score);
-            const stressEmoji = getStressEmoji(stressAnalysis.score);
-            
-            analysisHTML += `
-                <div class="prediction-card stress-card">
-                    <div class="prediction-header">
-                        <span class="prediction-icon">${stressEmoji}</span>
-                        <span class="prediction-title">Niveau de Stress</span>
-                    </div>
-                    <div class="prediction-score" style="color: ${stressColor}">
-                        ${stressAnalysis.score}%
-                    </div>
-                    <div class="prediction-level" style="background: ${stressColor}20; color: ${stressColor}">
-                        ${stressAnalysis.level}
-                    </div>
-                    <div class="prediction-bar">
-                        <div class="prediction-bar-fill" style="width: ${stressAnalysis.score}%; background: ${stressColor}"></div>
-                    </div>
-                </div>
-            `;
-        }
+        const formData = new FormData();
+        formData.append('message', message);
         
-        // Happiness Analysis
-        if (happinessAnalysis && happinessAnalysis.success) {
-            const happinessColor = getHappinessColor(happinessAnalysis.score);
-            const happinessEmoji = getHappinessEmoji(happinessAnalysis.score);
-            
-            analysisHTML += `
-                <div class="prediction-card happiness-card">
-                    <div class="prediction-header">
-                        <span class="prediction-icon">${happinessEmoji}</span>
-                        <span class="prediction-title">Niveau de Bonheur</span>
-                    </div>
-                    <div class="prediction-score" style="color: ${happinessColor}">
-                        ${happinessAnalysis.score}%
-                    </div>
-                    <div class="prediction-level" style="background: ${happinessColor}20; color: ${happinessColor}">
-                        ${happinessAnalysis.level}
-                    </div>
-                    <div class="prediction-bar">
-                        <div class="prediction-bar-fill" style="width: ${happinessAnalysis.score}%; background: ${happinessColor}"></div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        analysisHTML += '</div>';
-        analysisDiv.innerHTML = analysisHTML;
-        chatBox.appendChild(analysisDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        fetch('{{ path('chat_send') }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erreur HTTP: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            addMessage(data.reply || 'Réponse reçue', 'bot');
+        })
+        .catch(error => {
+            addMessage('Désolé, une erreur est survenue: ' + error.message, 'bot');
+        });
     }
-
-    // Helper functions for colors and emojis
-    function getStressColor(score) {
-        if (score >= 80) return '#ef4444';
-        if (score >= 60) return '#f97316';
-        if (score >= 40) return '#eab308';
-        return '#22c55e';
+    
+    function addMessage(text, sender) {
+        const div = document.createElement('div');
+        div.className = 'message ' + sender;
+        div.innerHTML = text;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-
-    function getHappinessColor(score) {
-        if (score >= 80) return '#22c55e';
-        if (score >= 60) return '#3b82f6';
-        if (score >= 40) return '#eab308';
-        return '#ef4444';
-    }
-
-    function getStressEmoji(score) {
-        if (score >= 80) return '🔴';
-        if (score >= 60) return '🟠';
-        if (score >= 40) return '🟡';
-        return '🟢';
-    }
-
-    function getHappinessEmoji(score) {
-        if (score >= 80) return '😄';
-        if (score >= 60) return '🙂';
-        if (score >= 40) return '😐';
-        return '😔';
-    }
-
-    // Initialize history count on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        updateHistoryCount();
-    });
 </script>
-
 {% endblock %}

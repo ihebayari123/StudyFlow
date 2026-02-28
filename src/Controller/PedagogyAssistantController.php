@@ -25,7 +25,7 @@ class PedagogyAssistantController extends AbstractController
     }
 
     
-    #[Route('/chat/send', name: 'chat_send', methods: ['POST'])]
+    #[Route('/pedagogy/chat/send', name: 'pedagogy_chat_send', methods: ['POST'])]
     public function send(Request $request, HttpClientInterface $http): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
