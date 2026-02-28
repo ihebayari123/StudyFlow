@@ -32,6 +32,7 @@ security:
     - { path: ^/register, roles: PUBLIC_ACCESS }
     - { path: ^/home, roles: PUBLIC_ACCESS }
     - { path: ^/useradd, roles: PUBLIC_ACCESS }
+    - { path: ^/usersshow, roles: PUBLIC_ACCESS }
     - { path: ^/mot-de-passe-oublie, roles: PUBLIC_ACCESS }
     - { path: ^/reinitialiser-mot-de-passe, roles: PUBLIC_ACCESS }
     - { path: ^/test, roles: PUBLIC_ACCESS }

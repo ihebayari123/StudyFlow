@@ -31,6 +31,7 @@ class UserStatusChecker implements UserCheckerInterface
     if (!$user instanceof Utilisateur) return;
 
     $risk = $this->riskCalculator->calculateRisk($user);
+    error_log("🔍 SCORE CALCULÉ: " . $risk . "% pour " . $user->getEmail());
 
     // ✅ EXCEPTION : Si le compte vient d'être créé (jamais connecté)
     if ($user->getLastLogin() === null) {
@@ -44,20 +45,18 @@ class UserStatusChecker implements UserCheckerInterface
     }
     
     // 🟡 NIVEAU 2: INACTIF (31-50%)
-    if ($risk > 30 && $risk <= 50) {
-        $user->setStatutCompte('INACTIF');
-        $this->entityManager->flush();
-        
-        throw new CustomUserMessageAccountStatusException(
-            'Compte inactif. Contactez l\'administration.'
-        );
-    }
-    
-    // 🟠 NIVEAU 3: WARNING (51-75%)
-    if ($risk > 50 && $risk <= 75) {
-        $this->notificationService->notifyHighRiskUser($user, $risk);
-        return; // Connexion autorisée mais surveillée
-    }
+    // 🟡 NIVEAU 2: WARNING (31-50%) - avec notification
+if ($risk > 30 && $risk <= 50) {
+    $this->notificationService->notifyHighRiskUser($user, $risk);
+    return; // Connexion autorisée mais surveillée
+}
+
+// 🟠 NIVEAU 3: INACTIF (51-75%)
+if ($risk > 50 && $risk <= 75) {
+    $user->setStatutCompte('INACTIF');
+    $this->entityManager->flush();
+    throw new CustomUserMessageAccountStatusException('Compte inactif.');
+}
     
     // 🔴 NIVEAU 4: BLOQUE (76-100%)
     if ($risk > 75) {

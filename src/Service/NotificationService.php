@@ -47,6 +47,8 @@
 
         public function notifyHighRiskUser(Utilisateur $user, int $riskScore): void
 {
+    error_log("📝 DÉBUT notifyHighRiskUser pour " . $user->getEmail() . " (score: $riskScore)");
+    
     $details = [];
     
     if ($user->getFailedLoginAttempts() > 3) {
@@ -78,8 +80,9 @@
 
     $this->em->persist($notification);
     $this->em->flush();
+    
+    error_log("✅ FIN notifyHighRiskUser - Notification persistée en base");
 }
-
         public function markAllAsRead(): void
 {
     $this->em->createQueryBuilder()
