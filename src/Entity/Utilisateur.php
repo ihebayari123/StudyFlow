@@ -75,6 +75,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $statutCompte = null;   
 
+    #[ORM\Column(type: 'integer')]
+    private ?int $loginFrequency = 0;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $lastLogin = null;
+
+    #[ORM\Column(type: 'integer')]
+    private ?int $failedLoginAttempts = 0;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $createdAt = null;
+
     /**
      * @var Collection<int, Cours>
      */
@@ -105,6 +117,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: StressSurvey::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $stressSurveys;
 
+    /**
+     * @var Collection<int, Notification>
+     */
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'user')]
+    private Collection $notifications;
+
+    /**
+     * @var Collection<int, PasswordResetToken>
+     */
+    #[ORM\OneToMany(targetEntity: PasswordResetToken::class, mappedBy: 'user')]
+    private Collection $passwordResetTokens;
+
     public function __construct()
     {
         $this->cours = new ArrayCollection();
@@ -112,6 +136,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->events = new ArrayCollection();
         $this->produits = new ArrayCollection();
         $this->stressSurveys = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
+        $this->createdAt = new \DateTime();
+        $this->passwordResetTokens = new ArrayCollection(); 
     }
 
     public function getId(): ?int { return $this->id; }
@@ -237,4 +264,109 @@ public function getPassword(): string
     return $this->motDePasse;
 }
 
+public function getLoginFrequency(): ?int
+{
+    return $this->loginFrequency;
 }
+
+public function setLoginFrequency(int $loginFrequency): static
+{
+    $this->loginFrequency = $loginFrequency;
+    return $this;
+}
+
+public function getLastLogin(): ?\DateTimeInterface
+{
+    return $this->lastLogin;
+}
+
+public function setLastLogin(?\DateTimeInterface $lastLogin): static
+{
+    $this->lastLogin = $lastLogin;
+    return $this;
+}
+
+public function getFailedLoginAttempts(): ?int
+{
+    return $this->failedLoginAttempts;
+}
+
+public function setFailedLoginAttempts(int $failedLoginAttempts): static
+{
+    $this->failedLoginAttempts = $failedLoginAttempts;
+    return $this;
+}
+
+/**
+ * @return Collection<int, Notification>
+ */
+public function getNotifications(): Collection
+{
+    return $this->notifications;
+}
+
+public function addNotification(Notification $notification): static
+{
+    if (!$this->notifications->contains($notification)) {
+        $this->notifications->add($notification);
+        $notification->setUser($this);
+    }
+
+    return $this;
+}
+
+public function removeNotification(Notification $notification): static
+{
+    if ($this->notifications->removeElement($notification)) {
+        // set the owning side to null (unless already changed)
+        if ($notification->getUser() === $this) {
+            $notification->setUser(null);
+        }
+    }
+
+    return $this;
+}
+
+public function getCreatedAt(): ?\DateTimeInterface
+{
+    return $this->createdAt;
+}
+
+public function setCreatedAt(?\DateTimeInterface $createdAt): static
+{
+    $this->createdAt = $createdAt;
+    return $this;
+}
+
+/**
+ * @return Collection<int, PasswordResetToken>
+ */
+public function getPasswordResetTokens(): Collection
+{
+    return $this->passwordResetTokens;
+}
+
+public function addPasswordResetToken(PasswordResetToken $passwordResetToken): static
+{
+    if (!$this->passwordResetTokens->contains($passwordResetToken)) {
+        $this->passwordResetTokens->add($passwordResetToken);
+        $passwordResetToken->setUser($this);
+    }
+
+    return $this;
+}
+
+public function removePasswordResetToken(PasswordResetToken $passwordResetToken): static
+{
+    if ($this->passwordResetTokens->removeElement($passwordResetToken)) {
+        // set the owning side to null (unless already changed)
+        if ($passwordResetToken->getUser() === $this) {
+            $passwordResetToken->setUser(null);
+        }
+    }
+
+    return $this;
+}
+
+}
+

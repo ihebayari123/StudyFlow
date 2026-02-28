@@ -1,0 +1,35 @@
+nom,description,categorie,prix
+iPhone 15 Pro Max,"Smartphone haut de gamme avec écran OLED 6.7 pouces, processeur A17 Pro, caméra triple 48MP, batterie 4000mAh",Électronique,1299
+Samsung Galaxy S24,"Téléphone Android flagship avec écran Dynamic AMOLED 120Hz, Galaxy AI intégré, caméra révolutionnaire",Électronique,999
+iPad Air,"Tablette polyvalente avec écran Liquid Retina 11 pouces, processeur M1, parfait pour études et travail",Électronique,649
+Google Pixel 8,"Pixel 8 avec IA Google Tensor, caméra computationnelle exceptionnelle, écran OLED vibrant",Électronique,799
+OnePlus 12,"Smartphone chinois performant avec Snapdragon 8 Gen 3 L, charge ultra-rapide 100W",Électronique,749
+Laptop Dell XPS 13,"Ultrabook professionnel léger avec processeur Intel Core i7, 16GB RAM, SSD 512GB",Informatique,1599
+MacBook Air M2,"Laptop premium Apple avec processeur M2 8-core, 16GB mémoire unifié, batterie 18h",Informatique,1799
+Chaise de Bureau Gamer,"Chaise ergonomique pour gaming avec support lombaire ajustable, revêtement cuir synthétique",Mobilier,399
+Bureau Blanc Moderne,"Bureau blanc style scandinave dimensions 120x60cm, plateau MDF massif, pieds métal stable",Mobilier,249
+Lampe LED RGB,"Lampe de bureau LED RGB avec USB, 3 modes de couleur, 10 niveaux luminosité",Accessoires,89
+Clavier Mécanique,"Clavier mécanique RGB switch Blue, 104 touches, anti-ghosting, câble tressé",Accessoires,159
+Souris Gaming,"Souris gaming sans fil avec DPI ajustable, 8 boutons programmables, batterie 20h",Accessoires,79
+Écran 27 pouces 4K,"Moniteur LED 27 pouces 4K UHD 60Hz, IPS panel, USB-C intégré, cadre ultra-fin",Informatique,549
+Casque Audio Sony,"Casque audio Bluetooth Sony WH-1000XM5 réduction bruit active, son premium, 30h batterie",Électronique,399
+Power Bank 20000mAh,"Power bank 20000mAh avec charge rapide 65W, 2 ports USB-C, affichage LED numérique",Électronique,59
+Câble USB-C,"Câble USB-C vers USB-C certifié 100W, 2 mètres, charge et données rapides",Accessoires,29
+Housse de Téléphone,"Housse silicone premium Samsung Galaxy S24, protection 4 coins renforcée, design ergonomique",Accessoires,19
+Verre Trempé Protecteur,"Verre trempé protecteur iPhone 15 Pro, dureté 9H, pose facile avec cadre alignement",Accessoires,9
+Station de Charge,"Station de charge sans fil Qi 15W, compatible tous téléphones, design minimaliste",Accessoires,39
+Adaptateur HDMI,"Adaptateur HDMI 2.1 8K, longueur 1m, doré haute qualité pour écrans professionnels",Accessoires,19
+T-Shirt Coton Premium,"T-shirt 100% coton premium pour homme, couleur blanc cassé, taille M à XXL disponible",Vêtements,49
+Pantalon Jeans Bleu,"Pantalon jeans bleu classique coupe slim, denim durable, fermeture éclair qualité",Vêtements,39
+Chemise Professionnelle,"Chemise de bureau propres rayures blanches bleu, coton respirant, repassage facile",Vêtements,79
+Robe de Soirée,"Robe de soirée noire élégante avec dentelle, découpe sensuelle, parfait mariage",Vêtements,199
+Veste Cuir,"Veste cuir noir véritable pour femme, doublure viscose, col classique rebrasé",Vêtements,449
+Chaussures Compétition,"Chaussures de compétition running Nike carbone, semelle réactive, poids léger 180g",Chaussures,149
+Baskets Sport,"Baskets sport blanc cassé polyvalentes, confort quotidien, soutien arch optimisé",Chaussures,89
+Sandales Confort,"Sandales confort orthopédiques, semelle mémoire mousse, parfait climat chaud",Chaussures,49
+Python Programming,"Guide complet Python 3 programmation, 800 pages, exercices pratiques inclus",Livres,49
+Data Science Handbook,"Handbook data science avec ML, statistiques, notebooks Jupyter, 900 pages",Livres,59
+Web Development Guide,"Guide web development HTML CSS JavaScript, responsive design, avec CMS modernes",Livres,59
+Machine Learning Bible,"Bible machine learning approfondie, neural networks, deep learning, recommandations",Livres,45
+The Pragmatic Programmer,"Classic programmation agile pragmatique, refactoring, patterns, conseil professionnel",Livres,69
+Clean Code,"Code épuré principes clean, nommage, fonctions, gestion erreurs, architecture",Livres,89

@@ -8,10 +8,10 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\UrlType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Validator\Constraints\File;
 
 class CoursesType extends AbstractType
 {
@@ -33,19 +33,29 @@ class CoursesType extends AbstractType
                     'rows' => 4
                 ]
             ])
-            ->add('image', UrlType::class, [
-                'label' => 'Image URL',
+            ->add('imageFile', FileType::class, [
+                'label' => 'Course Image',
+                'mapped' => false,
+                'required' => false,
                 'attr' => [
-                    'class' => 'form-control',
-                    'placeholder' => 'https://example.com/image.jpg'
-                ]
+                    'accept' => 'image/*'
+                ],
+                'constraints' => [
+                    new File([
+                        'maxSize' => '2M',
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                            'image/gif',
+                        ],
+                        'mimeTypesMessage' => 'Please upload a valid image (JPG, PNG, GIF)',
+                    ])
+                ],
             ])
             ->add('user', EntityType::class, [
                 'class' => Utilisateur::class,
                 'choice_label' => 'id',
-            ])
-            ->add('save',SubmitType::class)
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

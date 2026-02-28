@@ -21,18 +21,32 @@ security:
         logout:
             path: app_logout
             target: app_login
-        
+        user_checker: App\Security\UserStatusChecker
 
   access_control:
-  # Pages publiques (sans connexion)
-  - { path: ^/login$, roles: PUBLIC_ACCESS }
-  - { path: ^/register, roles: PUBLIC_ACCESS }
-  - { path: ^/logout$, roles: PUBLIC_ACCESS }
+    # ===== ROUTES 100% PUBLIQUES ===== (sans aucun login)
+    - { path: ^/$, roles: PUBLIC_ACCESS }
+    - { path: ^/captcha, roles: PUBLIC_ACCESS }
+    - { path: ^/login, roles: PUBLIC_ACCESS }
+    - { path: ^/logout, roles: PUBLIC_ACCESS }
+    - { path: ^/register, roles: PUBLIC_ACCESS }
+    - { path: ^/home, roles: PUBLIC_ACCESS }
+    - { path: ^/useradd, roles: PUBLIC_ACCESS }
+    - { path: ^/mot-de-passe-oublie, roles: PUBLIC_ACCESS }
+    - { path: ^/reinitialiser-mot-de-passe, roles: PUBLIC_ACCESS }
+    - { path: ^/test, roles: PUBLIC_ACCESS }
+    - { path: ^/chat, roles: PUBLIC_ACCESS }
+    - { path: ^/chat/send, roles: PUBLIC_ACCESS }
+    
+    # ===== BACKOFFICE ===== (enseignants + admins)
+    - { path: ^/admin, roles: [ROLE_ADMIN, ROLE_ENSEIGNANT] }
+    
+    # ===== PAGE DE CHOIX ENSEIGNANT =====
+    - { path: ^/login/success, roles: ROLE_ENSEIGNANT }
+    
+    # ===== TOUT LE RESTE ===== (nécessite juste d'être connecté)
+    - { path: ^/, roles: ROLE_USER }
 
-  # Tout le reste → utilisateur connecté suffit
-  - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
-
-  
 when@test:
   security:
     password_hashers:

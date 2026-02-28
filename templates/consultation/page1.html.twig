@@ -75,7 +75,7 @@
                     </div>
                 </div>
 
-                <!-- Service: Coatch Stresse -->
+                <!-- Service: Coach Stresse -->
                 <div class="service-card">
                     <div class="service-image">
                         <div class="service-logo">
@@ -83,7 +83,7 @@
                                 <i class="fas fa-spa"></i>
                             </div>
                         </div>
-                        <span class="service-category">COATCH_STRESSE</span>
+                        <span class="service-category">COACH_STRESSE</span>
                         <div class="service-actions">
                             <a href="{{ path('app_stresse_coach') }}" class="action-btn" style="background: linear-gradient(135deg, #FF6B6B 0%, #C92A2A 100%);" title="Consulter coach">
                                 <i class="fas fa-user-tie"></i>
@@ -91,7 +91,7 @@
                         </div>
                     </div>
                     <div class="service-content">
-                        <h3 class="service-title">Coatch Stresse</h3>
+                        <h3 class="service-title">Coach Stresse</h3>
                         <p class="service-description">
                             Accompagnement personnalisé pour la gestion du stress et l'équilibre émotionnel.
                         </p>
@@ -242,6 +242,12 @@
             </button>
         </div>
         <div class="robot-chat-input">
+            <button id="testVoiceBtn" class="voice-ai-btn" title="Tester la voix" style="background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <button id="voiceAIBtn" class="voice-ai-btn" title="Activer la reconnaissance vocale">
+                <i class="fas fa-microphone"></i>
+            </button>
             <input type="text" id="userQuestion" placeholder="Posez votre question..." class="chat-input-field">
             <button id="sendQuestionBtn" class="send-btn">
                 <i class="fas fa-paper-plane"></i>
@@ -264,6 +270,11 @@
             </button>
         </div>
         <div class="notification-progress"></div>
+    </div>
+
+    <!-- Voice Status Indicator -->
+    <div class="voice-status" id="voiceStatus">
+        <i class="fas fa-microphone"></i> <span id="voiceStatusText">En attente...</span>
     </div>
 
     <!-- Conteneur pour les notifications de motivation -->
@@ -859,6 +870,81 @@
                 box-shadow: 0 4px 10px rgba(0, 188, 212, 0.3);
             }
 
+            /* Voice AI Button */
+            .voice-ai-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+                color: white;
+                border: none;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                flex-shrink: 0;
+            }
+
+            .voice-ai-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+            }
+
+            .voice-ai-btn.listening {
+                animation: voicePulse 1.5s infinite;
+                background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            }
+
+            .voice-ai-btn.speaking {
+                animation: voicePulse 0.5s infinite;
+                background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+            }
+
+            @keyframes voicePulse {
+                0% {
+                    box-shadow: 0 0 0 0 rgba(156, 39, 176, 0.7);
+                }
+                70% {
+                    box-shadow: 0 0 0 15px rgba(156, 39, 176, 0);
+                }
+                100% {
+                    box-shadow: 0 0 0 0 rgba(156, 39, 176, 0);
+                }
+            }
+
+            /* Voice Status Indicator */
+            .voice-status {
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+                color: white;
+                padding: 12px 25px;
+                border-radius: 25px;
+                font-weight: 600;
+                display: none;
+                z-index: 10000;
+                box-shadow: 0 4px 20px rgba(156, 39, 176, 0.4);
+            }
+
+            .voice-status.active {
+                display: block;
+                animation: statusSlideDown 0.3s ease;
+            }
+
+            @keyframes statusSlideDown {
+                from {
+                    opacity: 0;
+                    transform: translateX(-50%) translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }
+            }
+
             /* Welcome Notification */
             .welcome-notification {
                 position: fixed;
@@ -1209,6 +1295,245 @@
                 const chatMessages = document.getElementById('chatMessages');
                 const welcomeNotification = document.getElementById('welcomeNotification');
                 const motivationContainer = document.getElementById('motivationNotification');
+                const voiceAIBtn = document.getElementById('voiceAIBtn');
+                const voiceStatus = document.getElementById('voiceStatus');
+                const voiceStatusText = document.getElementById('voiceStatusText');
+
+                // Voice AI - Speech Recognition and Synthesis
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                let recognition = null;
+                let isListening = false;
+
+                // Page content for explaining
+                const pageContent = 'Cette page propose plusieurs services de santé et bien-être : Consulte_Medecin pour les consultations médicales en ligne, Voir_score pour voir vos scores de santé personnalisés, Coach Stresse pour la gestion du stress, Nutrition pour les plans nutritionnels, et Fitness pour les programmes d\'entraînement. Vous pouvez également générer un emploi du temps personnalisé.';
+
+                // Check if browser supports speech recognition
+                if (SpeechRecognition) {
+                    recognition = new SpeechRecognition();
+                    recognition.continuous = false;
+                    recognition.lang = 'fr-FR';
+                    recognition.interimResults = false;
+                    recognition.maxAlternatives = 1;
+
+                    recognition.onstart = function() {
+                        isListening = true;
+                        voiceAIBtn.classList.add('listening');
+                        voiceAIBtn.classList.remove('speaking');
+                        voiceStatus.classList.add('active');
+                        voiceStatusText.textContent = 'Je vous écoute...';
+                    };
+
+                    recognition.onend = function() {
+                        isListening = false;
+                        voiceAIBtn.classList.remove('listening');
+                        setTimeout(() => {
+                            if (!voiceAIBtn.classList.contains('speaking')) {
+                                voiceStatus.classList.remove('active');
+                            }
+                        }, 1000);
+                    };
+
+                    recognition.onerror = function(event) {
+                        console.error('Speech recognition error:', event.error);
+                        isListening = false;
+                        voiceAIBtn.classList.remove('listening');
+                        voiceStatus.classList.remove('active');
+                        
+                        if (event.error === 'not-allowed') {
+                            speakText('Je n\'ai pas accès au microphone. Veuillez autoriser l\'accès au microphone dans les paramètres de votre navigateur.');
+                        } else if (event.error !== 'no-speech') {
+                            speakText('Désolé, je n\'ai pas bien compris. Veuillez réessayer.');
+                        }
+                    };
+
+                    recognition.onresult = function(event) {
+                        console.log('Voice result received:', event);
+                        const transcript = event.results[0][0].transcript.toLowerCase();
+                        console.log('Voice command:', transcript);
+                        
+                        if (transcript && transcript.trim().length > 0) {
+                            // Process the voice command
+                            processVoiceCommand(transcript);
+                        } else {
+                            speakText('Je n\'ai pas bien entendu. Veuillez réessayer.');
+                        }
+                    };
+                } else {
+                    // Hide voice button if not supported
+                    voiceAIBtn.style.display = 'none';
+                    console.log('Speech recognition not supported in this browser');
+                }
+
+                // Function to process voice command
+                function processVoiceCommand(command) {
+                    let response = '';
+                    
+                    // Check for specific commands - Robot X activation
+                    if (command.includes('robot') || command.includes('robots') || command.includes('robot x') || command.includes('robox') || command.includes('robotech') || command.includes('assistant') || command.includes('bob') || command.includes('robin')) {
+                        response = 'Bonjour ! Je suis Robot X, votre assistant vocal. Comment puis-je vous aider ? Je peux vous expliquer le contenu de cette page, ou répondre à vos questions sur les services.';
+                        console.log('Robot X activated');
+                        openChat();
+                    } else if (command.includes('bonjour') || command.includes('salut') || command.includes('coucou') || command.includes('bonsoir')) {
+                        response = 'Bonjour ! Comment puis-je vous aider ?';
+                    } else if (command.includes('comment ça va') || command.includes('comment vas tu') || command.includes('ca va')) {
+                        response = 'Je vais très bien, merci ! Et vous ?';
+                    } else if (command.includes('bien') || command.includes('super') || command.includes('parfait')) {
+                        response = 'Je suis ravi de l\'entendre !';
+                    } else if (command.includes('explique') || command.includes('contenu') || command.includes('page') || command.includes('résumé') || command.includes('qu\'est ce qu\'il y a') || command.includes('qui es tu') || command.includes('qui t\'es')) {
+                        response = pageContent;
+                    } else if (command.includes('merci')) {
+                        response = 'De rien ! Je suis là pour vous aider.';
+                    } else if (command.includes('au revoir') || command.includes('bye')) {
+                        response = 'Au revoir ! Bonne journée !';
+                    } else if (command.includes('service') || command.includes('quoi faire')) {
+                        response = 'Cette page propose : Consulte_Medecin pour les consultations, Voir_score pour vos scores de santé, Coach Stresse, Nutrition et Fitness.';
+                    } else if (command.includes('médecin') || command.includes('medecin') || command.includes('consultation')) {
+                        response = 'Le service Consulte_Medecin vous permet de prendre rendez-vous avec des médecins en ligne et consulter à distance.';
+                    } else if (command.includes('score') || command.includes('santé')) {
+                        response = 'Vous pouvez voir vos scores de santé incluant la santé globale à 92%, le bien-être à 85%, la nutrition à 78% et l\'activité à 90%.';
+                    } else if (command.includes('stress') || command.includes('coach')) {
+                        response = 'Le Coach Stresse vous offre un accompagnement personnalisé pour la gestion du stress avec des techniques de relaxation.';
+                    } else if (command.includes('nutrition') || command.includes('alimentation') || command.includes('repas')) {
+                        response = 'Le service Nutrition propose des plans nutritionnels personnalisés adaptés à vos objectifs.';
+                    } else if (command.includes('fitness') || command.includes('sport') || command.includes('exercice')) {
+                        response = 'Le service Fitness vous donne accès à des programmes d\'entraînement personnalisés.';
+                    } else if (command.includes('statistique') || command.includes('stat')) {
+                        response = 'Vos statistiques : Santé Globale 92%, Bien-être 85%, Nutrition 78%, Activité 90%.';
+                    } else if (command.includes('emploi du temps') || command.includes('planning') || command.includes('horaire')) {
+                        response = 'Vous pouvez générer un emploi du temps personnalisé en cliquant sur le bouton orange en bas à droite.';
+                    } else if (command.includes('aide') || command.includes('help')) {
+                        response = 'Je peux vous aider à : connaître les services disponibles, expliquer le contenu de la page, répondre à vos questions sur la santé et le bien-être. Dites simplement ce dont vous avez besoin !';
+                    } else {
+                        // Default response for unknown commands
+                        response = 'Je n\'ai pas bien compris. Dites "aide" pour voir ce que je peux faire, ou "explique le contenu de cette page" pour en savoir plus.';
+                    }
+
+                    // Speak the response
+                    speakText(response);
+                    
+                    // Open chat if not already open
+                    openChat();
+                    
+                    // Also show in chat
+                    addMessage('user', command);
+                    setTimeout(() => {
+                        addMessage('robot', response);
+                    }, 500);
+                }
+
+                // Function to speak text
+                function speakText(text) {
+                    if ('speechSynthesis' in window) {
+                        // Cancel any ongoing speech
+                        window.speechSynthesis.cancel();
+                        
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'fr-FR';
+                        utterance.rate = 0.85; // Slower for clarity
+                        utterance.pitch = 1.0;
+                        utterance.volume = 1.0;
+                        
+                        // Get voices - wait if not loaded
+                        const trySpeak = () => {
+                            const voices = window.speechSynthesis.getVoices();
+                            console.log('Voices loaded:', voices.length);
+                            
+                            // Try French voice first
+                            let frenchVoice = voices.find(voice => voice.lang.includes('fr'));
+                            if (!frenchVoice) {
+                                // Use any available French voice
+                                frenchVoice = voices.find(voice => voice.lang.startsWith('fr'));
+                            }
+                            if (!frenchVoice && voices.length > 0) {
+                                // Fallback to first voice
+                                frenchVoice = voices[0];
+                                utterance.lang = 'fr';
+                            }
+                            if (frenchVoice) {
+                                utterance.voice = frenchVoice;
+                                console.log('Using voice:', frenchVoice.name);
+                            }
+                            
+                            utterance.onstart = function() {
+                                console.log('Speech started');
+                                if (voiceAIBtn) {
+                                    voiceAIBtn.classList.add('speaking');
+                                    voiceAIBtn.classList.remove('listening');
+                                }
+                                if (voiceStatus) {
+                                    voiceStatus.classList.add('active');
+                                    voiceStatusText.textContent = 'Je parle...';
+                                }
+                            };
+                            
+                            utterance.onend = function() {
+                                console.log('Speech ended');
+                                if (voiceAIBtn) voiceAIBtn.classList.remove('speaking');
+                                setTimeout(() => {
+                                    if (voiceStatus) voiceStatus.classList.remove('active');
+                                }, 500);
+                            };
+                            
+                            utterance.onerror = function(event) {
+                                console.error('Speech error:', event);
+                                if (voiceAIBtn) voiceAIBtn.classList.remove('speaking');
+                                if (voiceStatus) voiceStatus.classList.remove('active');
+                            };
+                            
+                            window.speechSynthesis.speak(utterance);
+                        };
+                        
+                        // Check if voices are loaded
+                        if (window.speechSynthesis.getVoices().length > 0) {
+                            trySpeak();
+                        } else {
+                            // Wait for voices to load
+                            window.speechSynthesis.onvoiceschanged = trySpeak;
+                            // Timeout fallback
+                            setTimeout(trySpeak, 100);
+                        }
+                    } else {
+                        console.log('Speech synthesis not supported');
+                        alert('La synthèse vocale n\'est pas supportée par votre navigateur.');
+                    }
+                }
+
+                // Make speakText available globally
+                window.speakText = speakText;
+
+                // Voice AI button click handler
+                const testVoiceBtn = document.getElementById('testVoiceBtn');
+                
+                // Test voice button
+                if (testVoiceBtn) {
+                    testVoiceBtn.addEventListener('click', function() {
+                        console.log('Test voice button clicked');
+                        speakText('Bonjour ! Je suis Robot X. La voix fonctionne correctement. Comment puis-je vous aider ?');
+                        openChat();
+                    });
+                }
+                
+                voiceAIBtn.addEventListener('click', function() {
+                    console.log('Voice button clicked, isListening:', isListening);
+                    
+                    if (!SpeechRecognition) {
+                        alert('La reconnaissance vocale n\'est pas supportée par votre navigateur. Veuillez utiliser Chrome ou Edge.');
+                        return;
+                    }
+
+                    if (isListening) {
+                        console.log('Stopping recognition...');
+                        recognition.stop();
+                    } else {
+                        console.log('Starting recognition...');
+                        try {
+                            recognition.start();
+                        } catch (e) {
+                            console.error('Error starting recognition:', e);
+                            alert('Erreur au démarrage de la reconnaissance vocale: ' + e.message);
+                        }
+                    }
+                });
 
                 // Base de connaissances détaillée de Robot X
                 const knowledgeBase = {
@@ -1230,9 +1555,9 @@
                     'score': '📊 **Service Voir_score**\n\nCe service vous permet de visualiser :\n• Votre score de santé global\n• Votre niveau de bien-être mental\n• Votre niveau de stress\n• Vos indicateurs de santé personnalisés\n\n👉 Cliquez sur le bouton avec l\'icône de médecin sur la carte "Voir_score" pour accéder à vos scores.',
                     
                     // Coach stress
-                    'coach stress': '🧘 **Service Coatch Stresse**\n\nCe service vous offre :\n• Un accompagnement personnalisé pour la gestion du stress\n• Des techniques de relaxation\n• Des exercices de respiration\n• Un suivi émotionnel\n\n👉 Cliquez sur le bouton avec l\'icône 👔 sur la carte "Coatch Stresse" pour commencer.',
+                    'coach stress': '🧘 **Service Coach Stresse**\n\nCe service vous offre :\n• Un accompagnement personnalisé pour la gestion du stress\n• Des techniques de relaxation\n• Des exercices de respiration\n• Un suivi émotionnel\n\n👉 Cliquez sur le bouton avec l\'icône 👔 sur la carte "Coatch Stresse" pour commencer.',
                     
-                    'stress': '🧘 **Service Coatch Stresse**\n\nCe service vous offre :\n• Un accompagnement personnalisé pour la gestion du stress\n• Des techniques de relaxation\n• Des exercices de respiration\n• Un suivi émotionnel\n\n👉 Cliquez sur le bouton avec l\'icône 👔 sur la carte "Coatch Stresse" pour commencer.',
+                    'stress': '🧘 **Service Coach Stresse**\n\nCe service vous offre :\n• Un accompagnement personnalisé pour la gestion du stress\n• Des techniques de relaxation\n• Des exercices de respiration\n• Un suivi émotionnel\n\n👉 Cliquez sur le bouton avec l\'icône 👔 sur la carte "Coatch Stresse" pour commencer.',
                     
                     // Nutrition
                     'nutrition': '🥗 **Service Nutrition**\n\nCe service vous propose :\n• Des plans nutritionnels personnalisés\n• Des conseils alimentaires adaptés à vos objectifs\n• Un suivi de votre alimentation\n• Des recettes santé\n\n👉 Cliquez sur le titre "Nutrition" ou le bouton 🎮 pour accéder au service.',
@@ -1354,6 +1679,18 @@
                         }, 5000);
                     }
                 }, 1000);
+
+                // Auto-greeting vocal when page loads
+                setTimeout(() => {
+                    // Open chat first
+                    openChat();
+                    
+                    const greetingText = 'Bonjour ! Je suis Robot X, votre assistant vocal. Cliquez sur le bouton mikrophone pour me parler. Je peux vous dire bonjour, répondre comment ça va, ou expliquer le contenu de cette page.';
+                    speakText(greetingText);
+                    
+                    // Also add message to chat
+                    addMessage('robot', '🎤 **Bonjour !** Je suis votre assistant vocal.\n\nCliquez sur le bouton mikrophone violet pour me parler !\n\nJe peux répondre à :\n• "bonjour" - Je dis bonjour\n• "comment ça va" - Je vais bien\n• "explique le contenu de cette page" - Je vous explique tout\n• Questions sur les services');
+                }, 2000);
 
                 // Ajouter un message de bienvenue dans le chat
                 setTimeout(() => {

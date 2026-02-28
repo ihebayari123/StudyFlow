@@ -410,10 +410,25 @@
             <div class="contact-section">
                 <h3><i class="fas fa-calendar-alt"></i> Besoin d'aide pour organiser votre temps ?</h3>
                 <p>Consultez nos ressources de gestion du temps ou contactez un coach</p>
-                <a href="{{ path('app_stresse_coach') }}" class="btn-contact">
-                    <i class="fas fa-user-tie"></i>
-                    Voir le coach stress
-                </a>
+                <div class="contact-buttons">
+                    <a href="{{ path('app_stresse_coach') }}" class="btn-contact">
+                        <i class="fas fa-user-tie"></i>
+                        Voir le coach stress
+                    </a>
+                    <a href="{{ path('app_stresse_agenda', {
+                        'matiere_par_jour': parametres.matiereParJour,
+                        'heure_par_matiere': parametres.heureParMatiere,
+                        'pause': parametres.pause,
+                        'heure_debut': parametres.heureDebut,
+                        'periode': parametres.periode,
+                        'inclure_weekend': parametres.inclureWeekend ? 1 : 0,
+                        'niveau_stress': parametres.niveauStress,
+                        'matieres': matieres|join(',')
+                    }) }}" class="btn-contact btn-agenda">
+                        <i class="fas fa-calendar-check"></i>
+                        Voir l'agenda avec notifications
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -1160,6 +1175,23 @@
                 box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
                 color: #667eea;
                 text-decoration: none;
+            }
+
+            .btn-contact.btn-agenda {
+                background: linear-gradient(135deg, #2ed573 0%, #26af61 100%);
+                color: white;
+            }
+
+            .btn-contact.btn-agenda:hover {
+                box-shadow: 0 8px 25px rgba(46, 213, 115, 0.4);
+                color: white;
+            }
+
+            .contact-buttons {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 15px;
             }
 
             /* Responsive */

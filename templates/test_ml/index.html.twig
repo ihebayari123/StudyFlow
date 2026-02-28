@@ -1,0 +1,13 @@
+<h1>ML Risk Prediction Test</h1>
+
+<p><strong>User:</strong> {{ user.prenom }} {{ user.nom }} ({{ user.email }})</p>
+<p><strong>Role:</strong> {{ user.role }}</p>
+<p><strong>Risk Score (0–100%):</strong> {{ riskScore }}%</p>
+
+{% if riskScore > 50 %}
+    <p style="color:red;font-weight:bold;">⚠️ High Risk — Account may be blocked</p>
+{% elseif riskScore > 30 %}
+    <p style="color:orange;">⚠️ Medium Risk — Admin should review</p>
+{% else %}
+    <p style="color:green;">✅ Low Risk — Safe</p>
+{% endif %}

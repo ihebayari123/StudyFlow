@@ -5,24 +5,18 @@
 {% block admin_content %}
 <div class="admin-main-content">
     <div class="container-fluid mt-5">
-        <!-- Header with breadcrumb -->
+
+        <!-- Header -->
         <div class="page-header mb-4">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item">
-                        <a href="{{ path('app_coursesback') }}">
-                            <i class="fas fa-book"></i> Courses
-                        </a>
-                    </li>
+                    <li class="breadcrumb-item"><a href="{{ path('app_coursesback') }}"><i class="fas fa-book"></i> Courses</a></li>
                     <li class="breadcrumb-item active">{{ cours.titre }}</li>
                 </ol>
             </nav>
-            
             <div class="row align-items-center">
                 <div class="col">
-                    <h2 class="page-title">
-                        <i class="fas fa-list"></i> Chapters - {{ cours.titre }}
-                    </h2>
+                    <h2 class="page-title"><i class="fas fa-list"></i> Chapters - {{ cours.titre }}</h2>
                     <p class="text-muted">Manage chapters for this course</p>
                 </div>
                 <div class="col-auto">
@@ -43,9 +37,47 @@
                     <div class="col">
                         <h4>{{ cours.titre }}</h4>
                         <p class="text-muted mb-2">{{ cours.description }}</p>
-                        <span class="badge bg-info">
-                            Instructor: {{ cours.user.nom }} {{ cours.user.prenom }}
-                        </span>
+                        <span class="badge bg-info">Instructor: {{ cours.user.nom }} {{ cours.user.prenom }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── ESTIMATION CARD ── -->
+        <div class="card mb-4 duration-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="dur-icon-wrap"><i class="fas fa-clock"></i></div>
+                        <div>
+                            <div class="dur-eyebrow">Estimated Course Duration</div>
+                            <div class="dur-big" id="backBannerTotal">
+                                <span style="font-size:1rem;font-weight:500;opacity:.7">
+                                    <i class="fas fa-spinner fa-spin"></i> Calculating…
+                                </span>
+                            </div>
+                            <div class="dur-note" id="backBannerNote" style="display:none">
+                                <i class="fas fa-info-circle"></i> <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dur-stats">
+                        <div class="dur-stat">
+                            <span class="ds-val">{{ chapitres|length }}</span>
+                            <span class="ds-key">Chapters</span>
+                        </div>
+                        <div class="dur-stat" id="statVideoMin">
+                            <span class="ds-val">—</span>
+                            <span class="ds-key">Video</span>
+                        </div>
+                        <div class="dur-stat" id="statPdfMin">
+                            <span class="ds-val">—</span>
+                            <span class="ds-key">PDF</span>
+                        </div>
+                        <div class="dur-stat accent" id="statTotal">
+                            <span class="ds-val">—</span>
+                            <span class="ds-key">Total</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -60,6 +92,7 @@
                             <tr>
                                 <th>Order</th>
                                 <th>Chapter Title</th>
+                                <th>Duration</th>
                                 <th>Content</th>
                                 <th>Actions</th>
                             </tr>
@@ -67,35 +100,28 @@
                         <tbody>
                             {% for chapitre in chapitres %}
                             <tr>
-                                <td>
-                                    <span class="badge bg-secondary">{{ chapitre.ordre }}</span>
-                                </td>
+                                <td><span class="badge bg-secondary">{{ chapitre.ordre }}</span></td>
                                 <td><strong>{{ chapitre.titre }}</strong></td>
+                                <td>
+                                    <span class="dur-badge-back" id="dur-back-{{ chapitre.id }}">
+                                        <i class="fas fa-spinner fa-spin text-muted"></i>
+                                    </span>
+                                </td>
                                 <td>{{ chapitre.contenu|slice(0, 80) }}{% if chapitre.contenu|length > 80 %}...{% endif %}</td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <a href="{{ path('app_editchapitre', {'id': chapitre.id}) }}" 
-                                           class="btn btn-sm btn-warning" 
-                                           title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="{{ path('app_deletechapitre', {'id': chapitre.id}) }}" 
-                                           class="btn btn-sm btn-danger" 
-                                           onclick="return confirm('Are you sure you want to delete this chapter?')" 
-                                           title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
+                                        <a href="{{ path('app_chapitre_versions', {'id': chapitre.id}) }}" class="btn btn-sm btn-info" title="Version History"><i class="fas fa-code-branch"></i></a>
+                                        <a href="{{ path('app_editchapitre', {'id': chapitre.id}) }}" class="btn btn-sm btn-warning" title="Edit"><i class="fas fa-edit"></i></a>
+                                        <a href="{{ path('app_deletechapitre', {'id': chapitre.id}) }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this chapter?')" title="Delete"><i class="fas fa-trash"></i></a>
                                     </div>
                                 </td>
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="4" class="text-center text-muted py-4">
+                                <td colspan="5" class="text-center text-muted py-4">
                                     <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
                                     <p>No chapters found for this course</p>
-                                    <a href="{{ path('app_addchapitre', {'courseId': cours.id}) }}" class="btn btn-primary">
-                                        <i class="fas fa-plus"></i> Add First Chapter
-                                    </a>
+                                    <a href="{{ path('app_addchapitre', {'courseId': cours.id}) }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add First Chapter</a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -109,9 +135,7 @@
         <div class="row mt-4">
             <div class="col-md-4">
                 <div class="stat-card">
-                    <div class="stat-icon bg-primary">
-                        <i class="fas fa-list"></i>
-                    </div>
+                    <div class="stat-icon bg-primary"><i class="fas fa-list"></i></div>
                     <div class="stat-info">
                         <h3>{{ chapitres|length }}</h3>
                         <p>Total Chapters</p>
@@ -122,167 +146,242 @@
     </div>
 </div>
 
+<script>
+const chaptersData = {
+    {% for chapitre in chapitres %}
+    {{ chapitre.id }}: {
+        titre: {{ chapitre.titre|json_encode|raw }},
+        contenu: {{ chapitre.contenu|json_encode|raw }},
+        videoUrl: {{ chapitre.videoUrl|json_encode|raw }},
+        fileName: {{ chapitre.fileName|json_encode|raw }},
+        links: {{ chapitre.links|json_encode|raw }},
+        durationMinutes: {{ chapitre.durationMinutes|json_encode|raw }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+};
+</script>
+
 <style>
-    .admin-main-content {
-        margin-left: 280px;
-        padding-top: 100px;
-        transition: margin-left 0.3s ease;
-    }
+    .admin-main-content { margin-left: 280px; padding-top: 100px; transition: margin-left 0.3s ease; }
+    .breadcrumb { background-color: transparent; padding: 0; margin-bottom: 1rem; }
+    .breadcrumb-item a { color: #667eea; text-decoration: none; transition: all 0.3s ease; }
+    .breadcrumb-item a:hover { color: #764ba2; text-decoration: underline; }
+    .breadcrumb-item.active { color: #6c757d; }
+    .course-image { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; border: 2px solid #e9ecef; }
+    .page-header { border-bottom: 2px solid #e9ecef; padding-bottom: 1rem; margin-bottom: 2rem; }
+    .page-title { font-weight: 700; color: #2c3e50; margin-bottom: 0.5rem; }
+    .page-title i { color: #667eea; margin-right: 10px; }
+    .card { border-radius: 10px; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .card-body { padding: 1.5rem; }
+    .table { margin-bottom: 0; }
+    .table thead th { border-bottom: 2px solid #dee2e6; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; color: #495057; }
+    .table tbody tr { transition: all 0.2s ease; }
+    .table tbody tr:hover { background-color: #f8f9fa; transform: scale(1.01); }
+    .btn-group { display: flex; gap: 5px; }
+    .btn-sm { padding: 6px 12px; font-size: 0.875rem; }
+    .badge { padding: 6px 12px; font-weight: 500; }
 
-    .breadcrumb {
-        background-color: transparent;
-        padding: 0;
-        margin-bottom: 1rem;
-    }
+    /* Duration Card */
+    .duration-card { border-left: 4px solid #6366f1 !important; background: linear-gradient(135deg, #fafafe 0%, #f5f3ff 100%); }
+    .dur-icon-wrap { width: 52px; height: 52px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.4rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(99,102,241,.3); }
+    .dur-eyebrow { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #6366f1; margin-bottom: 4px; }
+    .dur-big { display: flex; align-items: baseline; gap: 4px; font-size: 2rem; font-weight: 800; color: #1f2937; line-height: 1; }
+    .dur-big small { font-size: .9rem; font-weight: 600; color: #6366f1; margin-left: 1px; }
+    .dur-note { font-size: .75rem; color: #6b7280; margin-top: 5px; display: flex; align-items: center; gap: 5px; }
+    .dur-note i { color: #9ca3af; }
+    .dur-stats { display: flex; gap: 10px; flex-wrap: wrap; }
+    .dur-stat { display: flex; flex-direction: column; align-items: center; background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px 18px; min-width: 90px; transition: transform .2s, box-shadow .2s; }
+    .dur-stat:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+    .dur-stat.accent { background: #eef2ff; border-color: #c7d2fe; }
+    .ds-val { font-size: 1.4rem; font-weight: 800; color: #1f2937; line-height: 1.1; }
+    .dur-stat.accent .ds-val { color: #4338ca; }
+    .ds-key { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #9ca3af; margin-top: 3px; }
 
-    .breadcrumb-item a {
-        color: #667eea;
-        text-decoration: none;
-        transition: all 0.3s ease;
-    }
+    /* Per-row badge */
+    .dur-badge-back { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: .82rem; font-weight: 600; }
+    .dur-badge-back.confirmed { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .dur-badge-back.computed  { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .dur-badge-back.estimated { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
 
-    .breadcrumb-item a:hover {
-        color: #764ba2;
-        text-decoration: underline;
-    }
+    .stat-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 15px; }
+    .stat-icon { width: 60px; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; }
+    .stat-icon.bg-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .stat-info h3 { margin: 0; font-size: 2rem; font-weight: 700; color: #2c3e50; }
+    .stat-info p { margin: 0; color: #6c757d; font-size: 0.9rem; }
 
-    .breadcrumb-item.active {
-        color: #6c757d;
-    }
-
-    .course-image {
-        width: 100px;
-        height: 100px;
-        object-fit: cover;
-        border-radius: 10px;
-        border: 2px solid #e9ecef;
-    }
-
-    .page-header {
-        border-bottom: 2px solid #e9ecef;
-        padding-bottom: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .page-title {
-        font-weight: 700;
-        color: #2c3e50;
-        margin-bottom: 0.5rem;
-    }
-
-    .page-title i {
-        color: #667eea;
-        margin-right: 10px;
-    }
-
-    .card {
-        border-radius: 10px;
-        border: none;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .card-body {
-        padding: 1.5rem;
-    }
-
-    .table {
-        margin-bottom: 0;
-    }
-
-    .table thead th {
-        border-bottom: 2px solid #dee2e6;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.85rem;
-        letter-spacing: 0.5px;
-        color: #495057;
-    }
-
-    .table tbody tr {
-        transition: all 0.2s ease;
-    }
-
-    .table tbody tr:hover {
-        background-color: #f8f9fa;
-        transform: scale(1.01);
-    }
-
-    .btn-group {
-        display: flex;
-        gap: 5px;
-    }
-
-    .btn-sm {
-        padding: 6px 12px;
-        font-size: 0.875rem;
-    }
-
-    .badge {
-        padding: 6px 12px;
-        font-weight: 500;
-    }
-
-    /* Statistics Card */
-    .stat-card {
-        background: white;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    .stat-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        color: white;
-    }
-
-    .stat-icon.bg-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    .stat-info h3 {
-        margin: 0;
-        font-size: 2rem;
-        font-weight: 700;
-        color: #2c3e50;
-    }
-
-    .stat-info p {
-        margin: 0;
-        color: #6c757d;
-        font-size: 0.9rem;
-    }
-
-    /* Responsive */
     @media (max-width: 768px) {
-        .admin-main-content {
-            margin-left: 0;
-            padding-top: 80px;
-        }
-
-        .page-header .row {
-            flex-direction: column;
-        }
-
-        .page-header .col-auto {
-            margin-top: 1rem;
-        }
-        
-        .course-image {
-            width: 80px;
-            height: 80px;
-        }
+        .admin-main-content { margin-left: 0; padding-top: 80px; }
+        .page-header .row { flex-direction: column; }
+        .page-header .col-auto { margin-top: 1rem; }
+        .course-image { width: 80px; height: 80px; }
+        .dur-stats { justify-content: flex-start; }
     }
 </style>
 
-<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// ⚙️  CONFIG — paste your YouTube Data API v3 key here
+// Get one free at: https://console.cloud.google.com/
+// Enable "YouTube Data API v3" → Create credentials → API key
+// ─────────────────────────────────────────────────────────────
+const YOUTUBE_API_KEY = 'AIzaSyDUdd0buLiGZ4F_djbApyzLJPW_WCDQtn8';
+const PDF_MINUTES     = 45;
+
+function extractYouTubeId(url) {
+    if (!url) return null;
+    const patterns = [
+        /(?:youtube\.com\/watch\?.*v=)([^"&?\/\s]{11})/,
+        /(?:youtu\.be\/)([^"&?\/\s]{11})/,
+        /(?:youtube\.com\/embed\/)([^"&?\/\s]{11})/,
+        /(?:youtube\.com\/shorts\/)([^"&?\/\s]{11})/,
+        /(?:youtube\.com\/v\/)([^"&?\/\s]{11})/
+    ];
+    for (const pattern of patterns) {
+        const m = url.match(pattern);
+        if (m) return m[1];
+    }
+    return null;
+}
+
+function parseISO8601(iso) {
+    if (!iso) return 0;
+    const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if (!m) return 0;
+    return Math.ceil(parseInt(m[1]||0)*60 + parseInt(m[2]||0) + parseInt(m[3]||0)/60);
+}
+
+async function fetchYouTubeDurations(videoIds) {
+    if (!videoIds.length) return {};
+    if (YOUTUBE_API_KEY === 'YOUR_YOUTUBE_API_KEY_HERE') {
+        console.warn('YouTube API key not set.');
+        return {};
+    }
+    const results = {};
+    const chunks = [];
+    for (let i = 0; i < videoIds.length; i += 50) chunks.push(videoIds.slice(i, i + 50));
+
+    for (const chunk of chunks) {
+        try {
+            const res = await fetch(
+                `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${chunk.join(',')}&key=${YOUTUBE_API_KEY}`,
+                { signal: AbortSignal.timeout(8000) }
+            );
+            if (!res.ok) throw new Error(`YouTube API ${res.status}`);
+            const data = await res.json();
+            for (const item of (data.items || [])) {
+                results[item.id] = parseISO8601(item.contentDetails?.duration);
+            }
+        } catch (e) {
+            console.error('YouTube API failed:', e.message);
+        }
+    }
+    return results;
+}
+
+function formatMinutes(min) {
+    if (!min || min <= 0) return '—';
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    if (h > 0 && m > 0) return `${h}h ${m}m`;
+    if (h > 0) return `${h}h`;
+    return `${m}m`;
+}
+
+async function initDurations() {
+    const ids = Object.keys(chaptersData);
+
+    // Collect unique YouTube IDs
+    const ytIdMap = {};
+    for (const id of ids) {
+        const ytId = extractYouTubeId(chaptersData[id].videoUrl);
+        if (ytId) ytIdMap[id] = ytId;
+    }
+
+    // Single batched API call
+    const uniqueIds   = [...new Set(Object.values(ytIdMap))];
+    const ytDurations = await fetchYouTubeDurations(uniqueIds);
+
+    let grandTotal    = 0;
+    let totalVideoMin = 0;
+    let totalPdfMin   = 0;
+    let anyEstimated  = false;
+    let apiWorked     = false;
+
+    for (const id of ids) {
+        const ch = chaptersData[id];
+        let chMin = 0;
+        let source = 'estimated';
+
+        if (ch.durationMinutes) {
+            // Manual override
+            chMin  = ch.durationMinutes;
+            source = 'confirmed';
+        } else {
+            // Video
+            if (ch.videoUrl) {
+                const ytId = ytIdMap[id];
+                if (ytId && ytDurations[ytId] !== undefined) {
+                    chMin        += ytDurations[ytId];
+                    totalVideoMin += ytDurations[ytId];
+                    apiWorked     = true;
+                    source        = 'computed';
+                } else {
+                    anyEstimated = true;
+                }
+            }
+            // PDF
+            if (ch.fileName) {
+                chMin       += PDF_MINUTES;
+                totalPdfMin += PDF_MINUTES;
+                if (source !== 'computed') source = 'computed';
+            }
+            if (chMin === 0) anyEstimated = true;
+        }
+
+        grandTotal += chMin;
+
+        // Per-row badge
+        const badge = document.getElementById(`dur-back-${id}`);
+        if (badge) {
+            badge.className = `dur-badge-back ${source}`;
+            const icon   = source === 'confirmed' ? 'fa-check-circle' : source === 'computed' ? 'fa-clock' : 'fa-question-circle';
+            const prefix = source === 'estimated' ? '~' : '';
+            const suffix = source === 'confirmed' ? ' <small style="opacity:.6">(manual)</small>' : '';
+            badge.innerHTML = `<i class="fas ${icon}"></i> ${prefix}${formatMinutes(chMin)}${suffix}`;
+        }
+    }
+
+    // Big number
+    const bannerEl = document.getElementById('backBannerTotal');
+    if (bannerEl) {
+        const h = Math.floor(grandTotal / 60);
+        const m = grandTotal % 60;
+        let html = '';
+        if (grandTotal === 0) {
+            html = '<span style="font-size:1rem;opacity:.6">No data yet</span>';
+        } else {
+            if (anyEstimated) html += '<span style="font-size:1.2rem;opacity:.6;margin-right:2px">~</span>';
+            if (h > 0) html += `<span>${h}<small>h</small></span>`;
+            if (m > 0 || h === 0) html += `<span>${m}<small>m</small></span>`;
+        }
+        bannerEl.innerHTML = html;
+    }
+
+    // Stat pills
+    document.querySelector('#statVideoMin .ds-val').textContent = totalVideoMin > 0 ? formatMinutes(totalVideoMin) : '—';
+    document.querySelector('#statPdfMin .ds-val').textContent   = totalPdfMin  > 0 ? `${totalPdfMin}m` : '—';
+    document.querySelector('#statTotal .ds-val').textContent    = grandTotal   > 0 ? (anyEstimated ? '~' : '') + formatMinutes(grandTotal) : '—';
+
+    // Note
+    if (anyEstimated) {
+        const note = document.getElementById('backBannerNote');
+        note.style.display = 'flex';
+        note.querySelector('span').textContent = 'Some video durations could not be fetched from YouTube API';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initDurations);
+</script>
 {% endblock %}

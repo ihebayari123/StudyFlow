@@ -429,8 +429,60 @@ final class StresseController extends AbstractController
 
    
     #[Route('/stresse/coach', name: 'app_stresse_coach')]
-    public function coachStressManagement(): Response
+    public function coachStressManagement(Request $request): Response
     {
+        // Paramètres par défaut (identiques à generateEmploiTempsAvance)
+        $defaultMatiereParJour = 4;
+        $defaultHeureParMatiere = 1.5;
+        $defaultPause = 0.5;
+        $defaultHeureDebut = 8;
+        $defaultPeriode = 'semaine';
+        
+        // Récupération et validation des paramètres
+        $matiereParJour = $this->validateInt($request->query->get('matiere_par_jour', $defaultMatiereParJour), 1, 8);
+        $heureParMatiere = $this->validateFloat($request->query->get('heure_par_matiere', $defaultHeureParMatiere), 0.5, 4);
+        $pause = $this->validateFloat($request->query->get('pause', $defaultPause), 0.25, 2);
+        $heureDebut = $this->validateInt($request->query->get('heure_debut', $defaultHeureDebut), 6, 22);
+        $periode = $request->query->get('periode', $defaultPeriode);
+        $inclureWeekend = $request->query->getBoolean('inclure_weekend', false);
+        $niveauStress = $request->query->getInt('niveau_stress', 5);
+        
+        // Récupérer les matières
+        $matieresSelectionnees = $this->getMatieresFromRequest($request);
+        
+        // Générer l'emploi du temps
+        $emploiTemps = $this->genererEmploiTempsAvance(
+            $matieresSelectionnees,
+            $matiereParJour,
+            $heureParMatiere,
+            $pause,
+            $heureDebut,
+            $periode,
+            $inclureWeekend,
+            $niveauStress
+        );
+        
+        // Générer les notifications pour chaque cours
+        $notifications = $this->genererNotificationsCours($emploiTemps);
+        
+        // Calculer les cours à venir
+        $coursAVoir = $this->getCoursAVoir($emploiTemps);
+        
+        // Message motivant basé sur le niveau de stress
+        $motivationalMessages = [
+            1 => "🌟 Excellent ! Votre niveau de stress est très bas. Continuez comme ça !",
+            2 => "💪 Très bien ! Vous gérez parfaitement votre stress.",
+            3 => "👍 Bon travail ! Vous êtes sur la bonne voie.",
+            4 => "💫 Bien joué ! Continuez à appliquer vos techniques de relaxation.",
+            5 => "✨ Correct ! N'oubliez pas de prendre soin de vous.",
+            6 => "💪 Vous pouvez le faire ! Respirez profondément et restez positif.",
+            7 => "🌈 Ne vous inquiétez pas ! Chaque pas compte vers le calme.",
+            8 => "🌻 C'est normal de se sentir stressed. Prenez du temps pour vous.",
+            9 => "💙 Soyez gentil avec vous-même. Demandez de l'aide si nécessaire.",
+            10 => "🌺 Votre bien-être est important. Consultez un professionnel si besoin."
+        ];
+        $messageMotivant = $motivationalMessages[$niveauStress] ?? $motivationalMessages[5];
+
         // Techniques de respiration pour gérer le stress
         $breathingTechniques = [
             [
@@ -646,6 +698,20 @@ final class StresseController extends AbstractController
             'timeOrganization' => $timeOrganization,
             'workshops' => $workshops,
             'dailyTips' => $dailyTips,
+            'coursAVoir' => $coursAVoir,
+            'notifications' => $notifications,
+            'parametres' => [
+                'matiereParJour' => $matiereParJour,
+                'heureParMatiere' => $heureParMatiere,
+                'pause' => $pause,
+                'heureDebut' => $heureDebut,
+                'periode' => $periode,
+                'inclureWeekend' => $inclureWeekend,
+                'niveauStress' => $niveauStress
+            ],
+            'emploiTemps' => $emploiTemps,
+            'matieres' => $matieresSelectionnees,
+            'messageMotivant' => $messageMotivant
         ]);
     }
    
@@ -1660,6 +1726,327 @@ public function generateEmploiTempsAvance(Request $request, ManagerRegistry $doc
     ]);
 }
 
+    /**
+     * Agenda des cours avec notifications
+     * Fonction liée à l'emploi du temps (generateEmploiTempsAvance)
+     * Utilise les mêmes paramètres que la route /stresse/emploie/avance
+     */
+    #[Route('/stresse/agenda', name: 'app_stresse_agenda')]
+    public function agenda(Request $request, ManagerRegistry $doctrine): Response
+    {
+        // Paramètres par défaut (identiques à generateEmploiTempsAvance)
+        $defaultMatiereParJour = 4;
+        $defaultHeureParMatiere = 1.5;
+        $defaultPause = 0.5;
+        $defaultHeureDebut = 8;
+        $defaultPeriode = 'semaine';
+        
+        // Récupération et validation des paramètres (même logique que generateEmploiTempsAvance)
+        $matiereParJour = $this->validateInt($request->query->get('matiere_par_jour', $defaultMatiereParJour), 1, 8);
+        $heureParMatiere = $this->validateFloat($request->query->get('heure_par_matiere', $defaultHeureParMatiere), 0.5, 4);
+        $pause = $this->validateFloat($request->query->get('pause', $defaultPause), 0.25, 2);
+        $heureDebut = $this->validateInt($request->query->get('heure_debut', $defaultHeureDebut), 6, 22);
+        $periode = $request->query->get('periode', $defaultPeriode);
+        $inclureWeekend = $request->query->getBoolean('inclure_weekend', false);
+        $niveauStress = $request->query->getInt('niveau_stress', 5);
+        
+        // Récupérer les matières (même logique que generateEmploiTempsAvance)
+        $matieresSelectionnees = $this->getMatieresFromRequest($request);
+        
+        // Générer l'emploi du temps en utilisant la même fonction que generateEmploiTempsAvance
+        $emploiTemps = $this->genererEmploiTempsAvance(
+            $matieresSelectionnees,
+            $matiereParJour,
+            $heureParMatiere,
+            $pause,
+            $heureDebut,
+            $periode,
+            $inclureWeekend,
+            $niveauStress
+        );
+        
+        // Générer les notifications pour chaque cours
+        $notifications = $this->genererNotificationsCours($emploiTemps);
+        
+        // Calculer les cours à venir
+        $coursAVoir = $this->getCoursAVoir($emploiTemps);
+        
+        return $this->render('stresse/agenda.html.twig', [
+            'emploiTemps' => $emploiTemps,
+            'notifications' => $notifications,
+            'coursAVoir' => $coursAVoir,
+            'matieres' => $matieresSelectionnees,
+            'jours' => $this->getJoursSemaine($inclureWeekend, $periode),
+            'parametres' => [
+                'matiereParJour' => $matiereParJour,
+                'heureParMatiere' => $heureParMatiere,
+                'pause' => $pause,
+                'heureDebut' => $heureDebut,
+                'periode' => $periode,
+                'inclureWeekend' => $inclureWeekend,
+                'niveauStress' => $niveauStress
+            ]
+        ]);
+    }
+
+    /**
+     * Génère les notifications pour chaque cours
+     */
+    private function genererNotificationsCours(array $emploiTemps): array
+    {
+        $notifications = [];
+        $aujourdhui = new \DateTime();
+        $jourActuel = strftime('%A', $aujourdhui->getTimestamp());
+        
+        // Mapper les jours en français
+        $joursMap = [
+            'Monday' => 'Lundi', 'Tuesday' => 'Mardi', 'Wednesday' => 'Mercredi',
+            'Thursday' => 'Jeudi', 'Friday' => 'Vendredi', 'Saturday' => 'Samedi', 'Sunday' => 'Dimanche'
+        ];
+        $jourActuel = $joursMap[$jourActuel] ?? $jourActuel;
+        
+        $numeroJour = (int)$aujourdhui->format('N'); // 1 (Lundi) à 7 (Dimanche)
+        
+        foreach ($emploiTemps as $jour => $cours) {
+            foreach ($cours as $index => $coursDetail) {
+                $notification = [
+                    'id' => uniqid('notif_'),
+                    'matiere' => $coursDetail['matiere'],
+                    'jour' => $jour,
+                    'heureDebut' => $coursDetail['heureDebut'],
+                    'heureFin' => $coursDetail['heureFin'],
+                    'plage' => $coursDetail['plage'] ?? 'matin',
+                    'efficacite' => $coursDetail['efficacite'] ?? 'Normale',
+                    'type' => 'info',
+                    'message' => '',
+                    'priorite' => 'normale'
+                ];
+                
+                // Déterminer si c'est aujourd'hui
+                $estAujourdhui = ($jour === $jourActuel);
+                
+                // Calculer l'urgence de la notification
+                $heureCours = explode(':', $coursDetail['heureDebut']);
+                $heureActuelle = (int)date('H');
+                $minuteActuelle = (int)date('i');
+                $heureDebutCours = (int)$heureCours[0];
+                $minuteDebutCours = isset($heureCours[1]) ? (int)$heureCours[1] : 0;
+                
+                $minutesAvantCours = ($heureDebutCours * 60 + $minuteDebutCours) - ($heureActuelle * 60 + $minuteActuelle);
+                
+                // Définir le type de notification
+                if ($estAujourdhui) {
+                    if ($minutesAvantCours <= 0 && $minutesAvantCours >= -60) {
+                        // Cours en cours
+                        $notification['type'] = 'en_cours';
+                        $notification['message'] = 'Cours de ' . $coursDetail['matiere'] . ' en cours maintenant!';
+                        $notification['priorite'] = 'haute';
+                    } elseif ($minutesAvantCours > 0 && $minutesAvantCours <= 15) {
+                        // Cours commence dans moins de 15 minutes
+                        $notification['type'] = 'imminent';
+                        $notification['message'] = 'Cours de ' . $coursDetail['matiere'] . ' commence dans ' . $minutesAvantCours . ' minutes!';
+                        $notification['priorite'] = 'haute';
+                    } elseif ($minutesAvantCours > 15 && $minutesAvantCours <= 60) {
+                        // Cours commence dans moins d'une heure
+                        $notification['type'] = 'proche';
+                        $notification['message'] = 'Cours de ' . $coursDetail['matiere'] . ' dans environ ' . $minutesAvantCours . ' minutes';
+                        $notification['priorite'] = 'moyenne';
+                    } else {
+                        // Cours à venir aujourd'hui
+                        $notification['type'] = 'avenir';
+                        $notification['message'] = 'Cours de ' . $coursDetail['matiere'] . ' prévu à ' . $coursDetail['heureDebut'];
+                        $notification['priorite'] = 'basse';
+                    }
+                } else {
+                    // Cours d'un autre jour
+                    $notification['type'] = 'avenir';
+                    $notification['message'] = 'Cours de ' . $coursDetail['matiere'] . ' prévu ' . $jour . ' à ' . $coursDetail['heureDebut'];
+                    $notification['priorite'] = 'basse';
+                }
+                
+                // Ajouter des conseils selon la matière et le niveau d'efficacité
+                $notification['conseils'] = $this->getConseilsMatiere($coursDetail['matiere'], $coursDetail['efficacite'] ?? 'Normale');
+                
+                $notifications[] = $notification;
+            }
+        }
+        
+        // Trier les notifications par priorité
+        usort($notifications, function($a, $b) {
+            $priorites = ['haute' => 0, 'moyenne' => 1, 'basse' => 2];
+            return $priorites[$a['priorite']] - $priorites[$b['priorite']];
+        });
+        
+        return $notifications;
+    }
+
+    /**
+     * Récupère les matières depuis la requête
+     */
+    private function getMatieresFromRequest(Request $request): array
+    {
+        $matieresSelectionnees = [];
+        $allParams = $request->query->all();
+        
+        if (isset($allParams['matieres'])) {
+            $matieresParam = $allParams['matieres'];
+            
+            if (is_array($matieresParam)) {
+                $matieresSelectionnees = $matieresParam;
+            } elseif (is_string($matieresParam) && !empty($matieresParam)) {
+                if (strpos($matieresParam, '[') === 0 || strpos($matieresParam, '{') === 0) {
+                    $decoded = json_decode($matieresParam, true);
+                    if (is_array($decoded)) {
+                        $matieresSelectionnees = $decoded;
+                    }
+                } else {
+                    $matieresSelectionnees = array_map('trim', explode(',', $matieresParam));
+                }
+            }
+        }
+        
+        if (empty($matieresSelectionnees)) {
+            $matieresFromGet = $request->query->get('matieres');
+            if (is_array($matieresFromGet)) {
+                $matieresSelectionnees = $matieresFromGet;
+            } elseif (is_string($matieresFromGet) && !empty($matieresFromGet)) {
+                $matieresSelectionnees = [$matieresFromGet];
+            }
+        }
+        
+        if (empty($matieresSelectionnees)) {
+            $matieresSelectionnees = [
+                'Mathématiques', 'Physique', 'Chimie', 'SVT', 'Français', 
+                'Anglais', 'Histoire', 'Géographie', 'Philosophie', 'Informatique'
+            ];
+        }
+        
+        return array_values(array_filter(array_map('trim', $matieresSelectionnees), function($value) {
+            return !empty($value);
+        }));
+    }
+
+    /**
+     * Retourne les cours à venir (les 10 prochains)
+     */
+    private function getCoursAVoir(array $emploiTemps): array
+    {
+        $coursAVoir = [];
+        $aujourdhui = new \DateTime();
+        $jourActuel = strftime('%A', $aujourdhui->getTimestamp());
+        
+        $joursMap = [
+            'Monday' => 'Lundi', 'Tuesday' => 'Mardi', 'Wednesday' => 'Mercredi',
+            'Thursday' => 'Jeudi', 'Friday' => 'Vendredi', 'Saturday' => 'Samedi', 'Sunday' => 'Dimanche'
+        ];
+        $jourActuel = $joursMap[$jourActuel] ?? $jourActuel;
+        
+        // Ordre des jours pour le tri
+        $ordreJours = ['Lundi' => 1, 'Mardi' => 2, 'Mercredi' => 3, 'Jeudi' => 4, 'Vendredi' => 5, 'Samedi' => 6, 'Dimanche' => 7];
+        
+        $aujourdhuiNumero = (int)$aujourdhui->format('N');
+        
+        foreach ($emploiTemps as $jour => $cours) {
+            foreach ($cours as $coursDetail) {
+                $jourNumero = $ordreJours[$jour] ?? 8;
+                $estAujourdhui = ($jour === $jourActuel);
+                
+                $coursAVoir[] = [
+                    'jour' => $jour,
+                    'jourNumero' => $jourNumero,
+                    'estAujourdhui' => $estAujourdhui,
+                    'matiere' => $coursDetail['matiere'],
+                    'heureDebut' => $coursDetail['heureDebut'],
+                    'heureFin' => $coursDetail['heureFin'],
+                    'plage' => $coursDetail['plage'] ?? 'matin',
+                    'efficacite' => $coursDetail['efficacite'] ?? 'Normale'
+                ];
+            }
+        }
+        
+        // Trier par jour et heure
+        usort($coursAVoir, function($a, $b) use ($aujourdhuiNumero) {
+            // Si un cours est aujourd'hui, il passe en premier
+            if ($a['estAujourdhui'] && !$b['estAujourdhui']) return -1;
+            if (!$a['estAujourdhui'] && $b['estAujourdhui']) return 1;
+            
+            // Trier par jour
+            if ($a['jourNumero'] !== $b['jourNumero']) {
+                return $a['jourNumero'] - $b['jourNumero'];
+            }
+            
+            // Trier par heure
+            return strcmp($a['heureDebut'], $b['heureDebut']);
+        });
+        
+        return array_slice($coursAVoir, 0, 10); // Retourner les 10 premiers
+    }
+
+    /**
+     * Retourne des conseils pour une matière
+     */
+    private function getConseilsMatiere(string $matiere, string $efficacite): array
+    {
+        $conseilsParMatiere = [
+            'Mathématiques' => [
+                'Pratiquez régulièrement avec des exercices variés',
+                'Ne négligez pas les bases avant d\'attaquer les problèmes complexes',
+                'Faites des fiches de formules et théorèmes'
+            ],
+            'Physique' => [
+                'Comprenez les concepts avant de mémoriser les formules',
+                'Faites des schémas pour visualer les problèmes',
+                'Reliez la théorie aux applications pratiques'
+            ],
+            'Chimie' => [
+                'Apprenez le tableau périodique par cœur',
+                'Pratiquez les équations chimiques régulièrement',
+                'Faites des fiches de réactifs et produits'
+            ],
+            'SVT' => [
+                'Utilisez des schémas pour comprendre les processus',
+                'Reliez les concepts à des exemples concrets',
+                'Faites des fiches de définitions'
+            ],
+            'Français' => [
+                'Lisez régulièrement pour enrichir votre vocabulaire',
+                'Pratiquez l\'écriture avec des exercices variés',
+                'Analysez des textes de différents genres'
+            ],
+            'Anglais' => [
+                'Écoutez des podcasts ou regarde des vidéos en anglais',
+                'Pratiquez régulièrement la conversation',
+                'Apprenez le vocabulaire en contexte'
+            ],
+            'Histoire' => [
+                'Créez une frise chronologique pour situer les événements',
+                'Comprenez les causes et conséquences des événements',
+                'Faites des résumés de chaque période'
+            ],
+            'Géographie' => [
+                'Utilisez des cartes pour visualiser les espaces',
+                'Apprenez avec des exemples concrets',
+                'Faites des fiches de vocabulaires géographiques'
+            ],
+            'Philosophie' => [
+                'Lisez les textes des philosophes avec attention',
+                'Entraînez-vous à la dissertation régulièrement',
+                'Construisez des arguments logiques'
+            ],
+            'Informatique' => [
+                'Pratiquez le code régulièrement',
+                'Comprenez les concepts avant de coder',
+                'Faites des projets pratiques'
+            ]
+        ];
+        
+        return $conseilsParMatiere[$matiere] ?? [
+            'Révision régulière est clé',
+            'Faites des résumé de cours',
+            'Pratiquez avec des exercices'
+        ];
+    }
+
 /**
  * Génère un emploi du temps avancé avec optimisation anti-stress
  */
@@ -2038,5 +2425,226 @@ private function validateFloat($value, float $min, float $max): float
 {
     $float = floatval($value);
     return max($min, min($max, $float));
+}
+
+/**
+ * Base de données des psychiatres en Tunisie (coordonnées réelles des grandes villes)
+ */
+private function getPsychiatristsData(): array
+{
+    return [
+        // Tunis (Capitale)
+        ['id' => 1, 'name' => 'Dr. Mohamed Ben Ali', 'specialty' => 'Psychiatrie Générale', 'city' => 'Tunis', 'address' => 'Avenue Habib Bourguiba', 'lat' => 36.8065, 'lng' => 10.1815, 'phone' => '+216 71 123 456'],
+        ['id' => 2, 'name' => 'Dr. Leila Trabelsi', 'specialty' => 'Psychiatrie Infantile', 'city' => 'Tunis', 'address' => 'Rue de la Médina', 'lat' => 36.8024, 'lng' => 10.1700, 'phone' => '+216 71 234 567'],
+        ['id' => 3, 'name' => 'Dr. Ahmed Khelif', 'specialty' => 'Psychiatrie Addictologie', 'city' => 'Tunis', 'address' => 'Bloc Medical Les Orangers', 'lat' => 36.8100, 'lng' => 10.1900, 'phone' => '+216 71 345 678'],
+        ['id' => 4, 'name' => 'Dr. Salma Ben Mbarek', 'specialty' => 'Psychiatrie Générale', 'city' => 'Tunis', 'address' => 'Centre Médical La Marsa', 'lat' => 36.8760, 'lng' => 10.1620, 'phone' => '+216 71 456 789'],
+        ['id' => 5, 'name' => 'Dr. Karim Jouini', 'specialty' => 'Psychiatrie Clinique', 'city' => 'Tunis', 'address' => 'Clinique El Amen', 'lat' => 36.8200, 'lng' => 10.1750, 'phone' => '+216 71 567 890'],
+        
+        // Sfax
+        ['id' => 6, 'name' => 'Dr. Hichem Sassi', 'specialty' => 'Psychiatrie Générale', 'city' => 'Sfax', 'address' => 'Avenue 14 Janvier', 'lat' => 34.7400, 'lng' => 10.7600, 'phone' => '+216 74 123 456'],
+        ['id' => 7, 'name' => 'Dr. Najla Beltaief', 'specialty' => 'Psychiatrie Infantile', 'city' => 'Sfax', 'address' => 'Rue ibn Khaldoun', 'lat' => 34.7450, 'lng' => 10.7550, 'phone' => '+216 74 234 567'],
+        ['id' => 8, 'name' => 'Dr. Montassar Hajri', 'specialty' => 'Psychiatrie Addictologie', 'city' => 'Sfax', 'address' => 'Centre Hospitalier', 'lat' => 34.7350, 'lng' => 10.7650, 'phone' => '+216 74 345 678'],
+        
+        // Sousse
+        ['id' => 9, 'name' => 'Dr. Youssef Boubakri', 'specialty' => 'Psychiatrie Générale', 'city' => 'Sousse', 'address' => 'Avenue Mohamed Karoui', 'lat' => 35.8250, 'lng' => 10.6410, 'phone' => '+216 73 123 456'],
+        ['id' => 10, 'name' => 'Dr. Ines Ben Hamida', 'specialty' => 'Psychiatrie Clinique', 'city' => 'Sousse', 'address' => 'Rue Ibn Jazzar', 'lat' => 35.8300, 'lng' => 10.6380, 'phone' => '+216 73 234 567'],
+        ['id' => 11, 'name' => 'Dr. Sami Mseddi', 'specialty' => 'Psychiatrie Générale', 'city' => 'Sousse', 'address' => 'Clinique Erriadh', 'lat' => 35.8200, 'lng' => 10.6450, 'phone' => '+216 73 345 678'],
+        
+        // Kairouan
+        ['id' => 12, 'name' => 'Dr. Abderrazak Guizani', 'specialty' => 'Psychiatrie Générale', 'city' => 'Kairouan', 'address' => 'Avenue Okba Ibn Nafa', 'lat' => 35.6780, 'lng' => 10.0990, 'phone' => '+216 77 123 456'],
+        ['id' => 13, 'name' => 'Dr. Fatima Zahra Chaabane', 'specialty' => 'Psychiatrie Infantile', 'city' => 'Kairouan', 'address' => 'Rue de la Grande Mosquée', 'lat' => 35.6820, 'lng' => 10.0950, 'phone' => '+216 77 234 567'],
+        
+        // Gabès
+        ['id' => 14, 'name' => 'Dr. Ridha Ben Hassen', 'specialty' => 'Psychiatrie Générale', 'city' => 'Gabès', 'address' => 'Avenue 2 Mars', 'lat' => 33.8830, 'lng' => 9.9500, 'phone' => '+216 75 123 456'],
+        ['id' => 15, 'name' => 'Dr. Hanène Ben Ali', 'specialty' => 'Psychiatrie Clinique', 'city' => 'Gabès', 'address' => 'Rue ibn Batouta', 'lat' => 33.8850, 'lng' => 9.9520, 'phone' => '+216 75 234 567'],
+        
+        // Bizerte
+        ['id' => 16, 'name' => 'Dr. Anis Mghirbi', 'specialty' => 'Psychiatrie Générale', 'city' => 'Bizerte', 'address' => 'Avenue 7 Novembre', 'lat' => 37.2770, 'lng' => 9.8730, 'phone' => '+216 72 123 456'],
+        ['id' => 17, 'name' => 'Dr. Amira Ben Amor', 'specialty' => 'Psychiatrie Addictologie', 'city' => 'Bizerte', 'address' => 'Rue de la République', 'lat' => 37.2800, 'lng' => 9.8700, 'phone' => '+216 72 234 567'],
+        
+        // Monastir
+        ['id' => 18, 'name' => 'Dr. Imed Ben Rejeb', 'specialty' => 'Psychiatrie Générale', 'city' => 'Monastir', 'address' => 'Avenue 14 Juillet', 'lat' => 35.7780, 'lng' => 10.8260, 'phone' => '+216 73 456 789'],
+        ['id' => 19, 'name' => 'Dr. Dalila Ben Hassine', 'specialty' => 'Psychiatrie Infantile', 'city' => 'Monastir', 'address' => 'Clinique Ahlem', 'lat' => 35.7800, 'lng' => 10.8300, 'phone' => '+216 73 567 890'],
+        
+        // Médenine
+        ['id' => 20, 'name' => 'Dr. Lotfi Ben Yahia', 'specialty' => 'Psychiatrie Générale', 'city' => 'Médenine', 'address' => 'Avenue Habib Thameur', 'lat' => 33.3540, 'lng' => 10.5020, 'phone' => '+216 75 345 678'],
+        ['id' => 21, 'name' => 'Dr. Samia Ben Mohamed', 'specialty' => 'Psychiatrie Clinique', 'city' => 'Médenine', 'address' => 'Rue ibn Rochd', 'lat' => 33.3560, 'lng' => 10.5050, 'phone' => '+216 75 456 789'],
+        
+        // Nabeul
+        ['id' => 22, 'name' => 'Dr. Mourad Ben Abdallah', 'specialty' => 'Psychiatrie Générale', 'city' => 'Nabeul', 'address' => 'Avenue Habib Thameur', 'lat' => 36.4520, 'lng' => 10.7370, 'phone' => '+216 72 345 678'],
+        ['id' => 23, 'name' => 'Dr. Yosr Ben Ali', 'specialty' => 'Psychiatrie Générale', 'city' => 'Nabeul', 'address' => 'Rue ibn Ammar', 'lat' => 36.4550, 'lng' => 10.7400, 'phone' => '+216 72 456 789'],
+        
+        // Kasserine
+        ['id' => 24, 'name' => 'Dr. Adel Ben Mansour', 'specialty' => 'Psychiatrie Générale', 'city' => 'Kasserine', 'address' => 'Avenue 7 Janvier', 'lat' => 35.1680, 'lng' => 8.8360, 'phone' => '+216 77 345 678'],
+        ['id' => 25, 'name' => 'Dr. Mouna Ben Slama', 'specialty' => 'Psychiatrie Infantile', 'city' => 'Kasserine', 'address' => 'Rue ibn Khaldoun', 'lat' => 35.1700, 'lng' => 8.8400, 'phone' => '+216 77 456 789'],
+        
+        // Gafsa
+        ['id' => 26, 'name' => 'Dr. Hamadi Ben Amor', 'specialty' => 'Psychiatrie Générale', 'city' => 'Gafsa', 'address' => 'Avenue de la République', 'lat' => 34.4250, 'lng' => 9.2300, 'phone' => '+216 76 123 456'],
+        ['id' => 27, 'name' => 'Dr. Asma Ben Mahmoud', 'specialty' => 'Psychiatrie Clinique', 'city' => 'Gafsa', 'address' => 'Rue ibn Sina', 'lat' => 34.4280, 'lng' => 9.2350, 'phone' => '+216 76 234 567'],
+        
+        // Sidi Bouzid
+        ['id' => 28, 'name' => 'Dr. Moez Ben Jemaa', 'specialty' => 'Psychiatrie Générale', 'city' => 'Sidi Bouzid', 'address' => 'Avenue 14 Janvier', 'lat' => 35.0380, 'lng' => 9.5150, 'phone' => '+216 78 123 456'],
+        ['id' => 29, 'name' => 'Dr. Olfa Ben Slimane', 'specialty' => 'Psychiatrie Addictologie', 'city' => 'Sidi Bouzid', 'address' => 'Rue ibn Jazzar', 'lat' => 35.0400, 'lng' => 9.5180, 'phone' => '+216 78 234 567'],
+        
+        // Tataouine
+        ['id' => 30, 'name' => 'Dr. Firas Ben Khelif', 'specialty' => 'Psychiatrie Générale', 'city' => 'Tataouine', 'address' => 'Avenue de l\'Indépendance', 'lat' => 32.9340, 'lng' => 10.4510, 'phone' => '+216 76 345 678'],
+        
+        // Tozeur
+        ['id' => 31, 'name' => 'Dr. Bilel Ben Nasr', 'specialty' => 'Psychiatrie Générale', 'city' => 'Tozeur', 'address' => 'Avenue Charles de Gaulle', 'lat' => 33.9180, 'lng' => 8.1340, 'phone' => '+216 76 456 789'],
+        ['id' => 32, 'name' => 'Dr. Amel Ben Chaabane', 'specialty' => 'Psychiatrie Clinique', 'city' => 'Tozeur', 'address' => 'Rue ibn Ammar', 'lat' => 33.9200, 'lng' => 8.1380, 'phone' => '+216 76 567 890'],
+    ];
+}
+
+/**
+ * Calcule la distance entre deux points (formule de Haversine)
+ */
+private function calculateDistance(float $lat1, float $lng1, float $lat2, float $lng2): float
+{
+    $earthRadius = 6371; // Rayon de la Terre en kilomètres
+    
+    $lat1Rad = deg2rad($lat1);
+    $lat2Rad = deg2rad($lat2);
+    $deltaLat = deg2rad($lat2 - $lat1);
+    $deltaLng = deg2rad($lng2 - $lng1);
+    
+    $a = sin($deltaLat / 2) * sin($deltaLat / 2) +
+         cos($lat1Rad) * cos($lat2Rad) *
+         sin($deltaLng / 2) * sin($deltaLng / 2);
+    
+    $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+    
+    return $earthRadius * $c;
+}
+
+/**
+ * Estime le temps de trajet en voiture (en minutes)
+ * Vitesse moyenne en ville: 30 km/h, hors ville: 80 km/h
+ */
+private function estimateTravelTime(float $distanceKm): array
+{
+    // Estimation basée sur la distance
+    if ($distanceKm < 10) {
+        // En ville
+        $speedKmh = 30;
+        $timeHours = $distanceKm / $speedKmh;
+    } elseif ($distanceKm < 50) {
+        // Banlieue
+        $speedKmh = 50;
+        $timeHours = $distanceKm / $speedKmh;
+    } else {
+        // Hors ville/autoroute
+        $speedKmh = 80;
+        $timeHours = $distanceKm / $speedKmh;
+    }
+    
+    $timeMinutes = round($timeHours * 60);
+    
+    return [
+        'minutes' => $timeMinutes,
+        'hours' => round($timeHours, 1),
+        'formatted' => $this->formatTravelTime($timeMinutes)
+    ];
+}
+
+/**
+ * Formate le temps de trajet en format lisible
+ */
+private function formatTravelTime(int $minutes): string
+{
+    if ($minutes < 60) {
+        return $minutes . ' min';
+    }
+    
+    $hours = floor($minutes / 60);
+    $mins = $minutes % 60;
+    
+    if ($mins === 0) {
+        return $hours . 'h';
+    }
+    
+    return $hours . 'h ' . $mins . 'min';
+}
+
+/**
+ * Route pour la carte 3D de la Tunisie avec les psychiatres
+ */
+#[Route('/stresse/carte-3d', name: 'app_stresse_carte_3d')]
+public function carte3d(): Response
+{
+    $psychiatrists = $this->getPsychiatristsData();
+    
+    return $this->render('stresse/caret3d.html.twig', [
+        'psychiatrists' => $psychiatrists,
+        'defaultLat' => 33.8869,
+        'defaultLng' => 9.5615,
+        'defaultZoom' => 7,
+    ]);
+}
+
+/**
+ * API pour obtenir les 5 psychiatres les plus proches
+ * Paramètres: lat (latitude), lng (longitude)
+ */
+#[Route('/api/psychiatres-proches', name: 'app_api_psychiatres_proches')]
+public function getNearbyPsychiatrists(Request $request): Response
+{
+    // Récupérer la position de l'utilisateur
+    $userLat = floatval($request->query->get('lat', 36.8065));
+    $userLng = floatval($request->query->get('lng', 10.1815));
+    
+    // Validation des coordonnées
+    if ($userLat < 30 || $userLat > 38 || $userLng < 7 || $userLng > 12) {
+        return $this->json([
+            'error' => 'Coordonnées invalides pour la Tunisie',
+            'userLat' => $userLat,
+            'userLng' => $userLng
+        ], 400);
+    }
+    
+    $psychiatrists = $this->getPsychiatristsData();
+    $nearestPsychiatrists = [];
+    
+    // Calculer la distance pour chaque psychiatre
+    foreach ($psychiatrists as $psychiatrist) {
+        $distance = $this->calculateDistance(
+            $userLat, 
+            $userLng, 
+            $psychiatrist['lat'], 
+            $psychiatrist['lng']
+        );
+        
+        $travelTime = $this->estimateTravelTime($distance);
+        
+        $nearestPsychiatrists[] = [
+            'id' => $psychiatrist['id'],
+            'name' => $psychiatrist['name'],
+            'specialty' => $psychiatrist['specialty'],
+            'city' => $psychiatrist['city'],
+            'address' => $psychiatrist['address'],
+            'phone' => $psychiatrist['phone'],
+            'latitude' => $psychiatrist['lat'],
+            'longitude' => $psychiatrist['lng'],
+            'distance' => round($distance, 1),
+            'distanceKm' => round($distance, 1),
+            'travelTime' => $travelTime['formatted'],
+            'travelTimeMinutes' => $travelTime['minutes'],
+        ];
+    }
+    
+    // Trier par distance et prendre les 5 plus proches
+    usort($nearestPsychiatrists, function($a, $b) {
+        return $a['distance'] <=> $b['distance'];
+    });
+    
+    $nearestPsychiatrists = array_slice($nearestPsychiatrists, 0, 5);
+    
+    return $this->json([
+        'userLocation' => [
+            'latitude' => $userLat,
+            'longitude' => $userLng
+        ],
+        'nearestPsychiatrists' => $nearestPsychiatrists,
+        'totalAvailable' => count($psychiatrists)
+    ]);
 }
 }
