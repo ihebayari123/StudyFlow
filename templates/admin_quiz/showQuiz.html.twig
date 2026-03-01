@@ -515,66 +515,26 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-// Sélection/Désélection de toutes les cases
 document.getElementById('selectAll')?.addEventListener('change', function(e) {
     document.querySelectorAll('.quiz-checkbox').forEach(checkbox => {
         checkbox.checked = e.target.checked;
     });
 });
 
-// Fonction de suppression avec confirmation
 function deleteQuiz(quizId) {
     const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
     const confirmBtn = document.getElementById('confirmDeleteBtn');
-    confirmBtn.href = '{{ path('app_deletequiz', {id: 0}) }}'.replace('0', quizId);
+    confirmBtn.href = '{{ path('app_deletequiz', {id: '__ID__'}) }}'.replace('__ID__', quizId);
     modal.show();
 }
 
-
-    
-    // Simulation de chargement (à remplacer par un vrai appel AJAX)
-    setTimeout(() => {
-        fetch(`/admin/quiz/${quizId}/preview`)
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById('previewContent').innerHTML = html;
-            })
-            .catch(() => {
-                document.getElementById('previewContent').innerHTML = '<p class="text-danger">Erreur de chargement</p>';
-            });
-    }, 500);
-}
-
-
-
-// Fonction de changement de vue
 function toggleView(view) {
     const table = document.getElementById('quizTable');
     const buttons = document.querySelectorAll('.btn-group .btn');
-    
     buttons.forEach(btn => btn.classList.remove('active'));
     event.target.closest('.btn').classList.add('active');
-    
-    if (view === 'grid') {
-        // Implémentez la vue grille si nécessaire
-        console.log('Grid view');
-    } else {
-        table.style.display = 'table';
-    }
 }
 
-// Animation des lignes au survol
-document.querySelectorAll('.quiz-row').forEach(row => {
-    row.addEventListener('mouseenter', () => {
-        row.style.backgroundColor = '#f8f9ff';
-    });
-    
-    row.addEventListener('mouseleave', () => {
-        row.style.backgroundColor = '';
-    });
-});
-
-// Auto-submit du formulaire de filtre
 document.querySelectorAll('#filterForm select').forEach(select => {
     select.addEventListener('change', () => {
         document.getElementById('filterForm').submit();
