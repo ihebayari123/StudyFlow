@@ -14,6 +14,19 @@
               <h1 class="auth-title" style="font-size: 1.8rem;">Create Account</h1>
               <p class="auth-subtitle">Join our learning community</p>
           </div>
+          {# 🔴 ADD THIS SECTION FOR FLASH MESSAGES #}
+          {% for message in app.flashes('success') %}
+              <div class="alert alert-success" style="background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 50px; padding: 12px 18px; margin-bottom: 20px; text-align: center;">
+                  {{ message }}
+              </div>
+          {% endfor %}
+          
+          {% for message in app.flashes('error') %}
+              <div class="alert alert-danger" style="background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 50px; padding: 12px 18px; margin-bottom: 20px; text-align: center;">
+                  {{ message|raw }}
+              </div>
+          {% endfor %}
+          {# 🔴 END OF FLASH MESSAGES SECTION #}
             {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate', 'class': 'auth-form'}}) }}
 
             {% if registrationForm.vars.errors|length > 0 %}
@@ -287,27 +300,47 @@
         text-decoration: underline;
     }
 
-    .alert {
-        padding: 12px 18px;
-        border-radius: 50px;
-        font-size: 0.95rem;
-    }
+    /* ✅ Add these new alert styles */
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
 
-    .alert-danger {
-        background: #fee2e2;
-        color: #b91c1c;
-        border: 1px solid #fecaca;
-    }
+.alert-warning {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
 
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+.alert {
+    padding: 12px 18px;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
     }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert a {
+    color: inherit;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.alert a:hover {
+    text-decoration: none;
+}
 </style>
 {% endblock %}

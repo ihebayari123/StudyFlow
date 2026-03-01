@@ -7,6 +7,9 @@ parameters:
   images_directory: '%kernel.project_dir%/public/uploads'  # dossier pour stocker les images uploadées
   chapters_directory: '%kernel.project_dir%/public/uploads/chapters'
   python_path: '%env(PYTHON_PATH)%'
+  app.email_from: 'agrebi.98.oussema@gmail.com'  # Change this to whatever email you want
+  app.year: '2026'
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -64,3 +67,7 @@ services:
     App\Service\PricePredictionService:
         arguments:
             $projectDir: '%kernel.project_dir%'
+
+    App\Service\NaturalLanguageInterpreter:
+        arguments:
+            $ollamaService: '@App\Service\OllamaService'

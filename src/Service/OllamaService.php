@@ -18,6 +18,30 @@ class OllamaService
         $this->model     = $model;
     }
 
+    public function generateResponse(string $prompt): string
+    {
+        try {
+            $response = $this->httpClient->request('POST', $this->ollamaUrl . '/api/generate', [
+                'json' => [
+                    'model'   => $this->model,
+                    'prompt'  => $prompt,
+                    'stream'  => false,
+                    'temperature' => 0.1,
+                    'num_predict' => 500,
+                ],
+                'timeout' => 30,
+            ]);
+
+            $data = $response->toArray();
+            return $data['response'] ?? '';
+
+        } catch (\Exception $e) {
+            throw new \RuntimeException(
+                'Cannot reach Ollama. Make sure it is running: `ollama serve`. Error: ' . $e->getMessage()
+            );
+        }
+    }
+
     public function generateCourse(string $courseName, int $chapterCount = 5): array
     {
         $prompt = $this->buildPrompt($courseName, $chapterCount);

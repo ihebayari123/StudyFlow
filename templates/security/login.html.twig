@@ -14,6 +14,25 @@
                 <h1 class="auth-title">Welcome Back</h1>
                 <p class="auth-subtitle">Sign in to continue learning</p>
             </div>
+             {# 🔴 ADD THIS SECTION FOR FLASH MESSAGES #}
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success" style="background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 50px; padding: 12px 18px; margin-bottom: 20px; text-align: center;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger" style="background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 50px; padding: 12px 18px; margin-bottom: 20px; text-align: center;">
+                    {{ message|raw }}
+                </div>
+            {% endfor %}
+            
+            {% for message in app.flashes('warning') %}
+                <div class="alert alert-warning" style="background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 50px; padding: 12px 18px; margin-bottom: 20px; text-align: center;">
+                    {{ message|raw }}
+                </div>
+            {% endfor %}
+            {# 🔴 END OF FLASH MESSAGES SECTION #}
 
             {# Formulaire Symfony #}
             {{ form_start(form, {'attr': {'class': 'auth-form'}}) }}
@@ -262,6 +281,18 @@
 
     .auth-footer a:hover {
         text-decoration: underline;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-warning {
+        background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
     }
 
     .alert {

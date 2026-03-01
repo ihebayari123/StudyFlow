@@ -14,5 +14,11 @@ final class HomeController extends AbstractController
         return $this->render('home/index.html.twig');
     }
 
+    #[Route('/admin/test-search', name: 'admin_test_search')]
+    public function testSearch(): Response
+    {  
+        return $this->render('admin/user_search_test.html.twig');
+    }
+
     
 }

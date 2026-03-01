@@ -87,6 +87,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $createdAt = null;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $emailVerified = false;
+
+    #[ORM\Column(type: 'string', length: 64, nullable: true, unique: true)]
+    private ?string $emailVerificationToken = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $emailVerificationTokenExpiresAt = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $emailVerifiedAt = null;
+
     /**
      * @var Collection<int, Cours>
      */
@@ -367,6 +379,41 @@ public function removePasswordResetToken(PasswordResetToken $passwordResetToken)
 
     return $this;
 }
+
+// Getters and setters
+public function isEmailVerified(): bool { return $this->emailVerified; }
+public function setEmailVerified(bool $emailVerified): self 
+{ $this->emailVerified = $emailVerified; return $this; }
+
+public function getEmailVerificationToken(): ?string { return $this->emailVerificationToken; }
+public function setEmailVerificationToken(?string $token): self 
+{ $this->emailVerificationToken = $token; return $this; }
+
+public function getEmailVerificationTokenExpiresAt(): ?\DateTimeInterface 
+{ return $this->emailVerificationTokenExpiresAt; }
+public function setEmailVerificationTokenExpiresAt(?\DateTimeInterface $expiresAt): self 
+{ $this->emailVerificationTokenExpiresAt = $expiresAt; return $this; }
+
+public function getEmailVerifiedAt(): ?\DateTimeInterface { return $this->emailVerifiedAt; }
+public function setEmailVerifiedAt(?\DateTimeInterface $verifiedAt): self 
+{ $this->emailVerifiedAt = $verifiedAt; return $this; }
+
+// Helper method to check if token is valid
+public function isVerificationTokenValid(string $token): bool
+{
+    return $this->emailVerificationToken === $token 
+        && $this->emailVerificationTokenExpiresAt > new \DateTime();
+}
+
+    public function markEmailAsVerified(): self
+    {
+        $this->emailVerified = true;
+        $this->emailVerifiedAt = new \DateTime();
+        $this->emailVerificationToken = null;
+        $this->emailVerificationTokenExpiresAt = null;
+        
+        return $this;
+    }
 
 }
 
