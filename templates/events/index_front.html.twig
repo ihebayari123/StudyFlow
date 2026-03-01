@@ -7,6 +7,21 @@
 {% include 'home/navbar.html.twig' %}
 {% endblock %}
 
+<!-- ✅ MODAL GÉNÉRATEUR D'AFFICHE -->
+<div id="posterModal" class="poster-modal-overlay" onclick="closePosterModal(event)">
+    <div class="poster-modal-box">
+        <button class="poster-modal-close" onclick="closePosterModal()">✕</button>
+        <h2 class="poster-modal-title">🎨 Générateur d'Affiche</h2>
+        <p class="poster-modal-sub">Aperçu de votre affiche téléchargeable</p>
+        <canvas id="posterCanvas" width="800" height="500"></canvas>
+        <div class="poster-modal-actions">
+            <button class="poster-dl-btn" onclick="downloadPoster()">
+                ⬇️ Télécharger en PNG
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="events-section">
     <div class="container">
         
@@ -16,9 +31,9 @@
             <i class="fas fa-search search-icon"></i>
         </div>
 
-        <!-- Calendar + Favoris Buttons -->
-        <div class="calendar-button-container" style="text-align:center; margin:30px 0; display:flex; justify-content:center; gap:15px; flex-wrap:wrap;">
-            <a href="https://127.0.0.1:8000/events/front/calendrier" 
+        <!-- Calendar + Favoris + Traduction Buttons -->
+        <div class="calendar-button-container" style="text-align:center; margin:30px 0; display:flex; justify-content:center; gap:15px; flex-wrap:wrap; align-items:center;">
+            <a href="http://127.0.0.1:8000/events/front/calendrier" 
                class="calendar-btn" 
                style="position:relative; display:inline-block; padding:12px 25px; color:white; font-weight:600; text-decoration:none; overflow:hidden; border-radius:8px; background:linear-gradient(135deg,#667eea,#764ba2); transition:0.4s;">
                 <i class="bi bi-calendar3" style="margin-right:6px;"></i> Voir Calendrier
@@ -33,6 +48,20 @@
                 <span class="fav-btn-label">Favoris</span>
                 <span class="fav-badge" id="favCount">0</span>
             </button>
+
+            <!-- SÉLECTEUR DE LANGUE -->
+            <div class="lang-selector">
+                <span class="lang-icon">🌐</span>
+                <select id="langSelect" onchange="translateAll()">
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="en">🇬🇧 English</option>
+                    <option value="ar">🇹🇳 العربية</option>
+                    <option value="es">🇪🇸 Español</option>
+                </select>
+                <div id="translateSpinner" class="translate-spinner" style="display:none;">
+                    <div class="spinner-dot"></div>
+                </div>
+            </div>
         </div>
 
         <script>
@@ -41,6 +70,26 @@
             btn.addEventListener('mouseleave', () => btn.querySelector('.hover-slide').style.left = '-100%');
         });
         </script>
+
+        <!-- WIDGET MÉTÉO -->
+        <div class="weather-container">
+            <div class="weather-search-bar">
+                <i class="fas fa-map-marker-alt" style="color:rgba(255,255,255,0.6); font-size:1rem;"></i>
+                <input type="text" id="weatherCityInput" placeholder="Entrez une ville pour voir la météo..." />
+                <button onclick="fetchWeather()">🌤 Voir la météo</button>
+            </div>
+            <div id="weatherResult" style="display:none;">
+                <span id="w-icon"></span>
+                <span id="w-temp"></span>°C
+                <span id="w-desc"></span>
+                <span>💨 <span id="w-wind"></span> km/h</span>
+                <span>💧 <span id="w-humidity"></span>%</span>
+                <span id="w-city"></span>
+            </div>
+            <div id="weatherError" style="display:none;">
+                ⚠️ Ville introuvable ou erreur météo.
+            </div>
+        </div>
 
         <!-- OVERLAY -->
         <div id="favOverlay" onclick="toggleFavPanel()"></div>
@@ -79,7 +128,8 @@
                     <div class="event-card" data-event-type="{{ event.type|lower }}">
                         <div class="event-image">
                             {% if event.image %}
-                                <img src="{{ asset('uploads/' ~ event.image) }}" alt="{{ event.titre }}">
+                                <img src="{{ asset('uploads/' ~ event.image) }}" alt="{{ event.titre }}"
+                                     data-img-url="{{ asset('uploads/' ~ event.image) }}">
                             {% else %}
                                 <div class="placeholder-image">
                                     <i class="fas fa-calendar-alt"></i>
@@ -99,8 +149,10 @@
                                 <i class="bi bi-calendar-event"></i> 
                                 {{ event.dateCreation ? event.dateCreation|date('d M Y') : '' }}
                             </p>
-                            <h3 class="event-title">{{ event.titre }}</h3>
-                            <p class="event-description">
+                            <h3 class="event-title translatable-title"
+                                data-original="{{ event.titre|e('html_attr') }}">{{ event.titre }}</h3>
+                            <p class="event-description translatable-desc"
+                               data-original="{{ event.description|e('html_attr') }}">
                                 {{ event.description|length > 150 ? event.description|slice(0,150) ~ '...' : event.description }}
                             </p>
                             
@@ -119,7 +171,7 @@
                             <!-- Countdown -->
                             <p class="countdown" data-date="{{ event.dateCreation ? event.dateCreation|date('Y-m-d H:i:s') : '' }}"></p>
 
-                            <!-- BOUTONS LIKE / DISLIKE / FAVORI -->
+                            <!-- BOUTONS LIKE / DISLIKE / FAVORI / AFFICHE -->
                             <div class="event-actions-bar">
                                 <button class="action-btn like-btn" id="like-btn-{{ event.id }}" onclick="handleLike({{ event.id }})">
                                     👍 <span id="like-count-{{ event.id }}">0</span>
@@ -130,6 +182,17 @@
                                 <button class="action-btn fav-btn" id="fav-btn-{{ event.id }}" 
                                         onclick="handleFavorite({{ event.id }}, `{{ event.titre|e('js') }}`, `{{ event.type|upper|e('js') }}`, `{{ event.dateCreation ? event.dateCreation|date('d M Y')|e('js') : '' }}`)">
                                     ☆ Favori
+                                </button>
+                                {# ✅ On passe le nom du fichier image uniquement (ex: photo.jpg) #}
+                                <button class="action-btn poster-btn"
+                                        onclick="openPosterModal(
+                                            `{{ event.titre|e('js') }}`,
+                                            `{{ event.type|upper|e('js') }}`,
+                                            `{{ event.dateCreation ? event.dateCreation|date('d M Y')|e('js') : 'Date inconnue' }}`,
+                                            `{{ event.description|slice(0,100)|e('js') }}`,
+                                            `{{ event.image|e('js') }}`
+                                        )">
+                                    🎨 Affiche
                                 </button>
                             </div>
 
@@ -153,9 +216,7 @@
     .header-area {
         background: rgba(0, 0, 0, 0.3) !important;
         backdrop-filter: blur(10px);
-        position: sticky;
-        top: 0;
-        z-index: 999;
+        position: sticky; top: 0; z-index: 999;
         transition: background-color 0.3s, color 0.3s;
         padding: 15px 0;
     }
@@ -175,7 +236,6 @@
 
     .container { max-width: 1400px; margin: 0 auto; }
 
-    /* Search Bar */
     .search-container { position: relative; max-width: 600px; margin: 0 auto 40px auto; }
 
     .search-bar {
@@ -199,24 +259,106 @@
         color: rgba(255,255,255,0.7); font-size: 1.2rem; pointer-events: none;
     }
 
-    .search-bar:focus + .search-icon { color: #667eea; }
+    /* LANGUE */
+    .lang-selector {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: rgba(255,255,255,0.15); backdrop-filter: blur(12px);
+        border: 1.5px solid rgba(255,255,255,0.35); border-radius: 50px;
+        padding: 8px 16px; transition: all 0.3s;
+    }
 
-    /* Filter Buttons */
-    .filter-buttons { display: flex; justify-content: center; gap: 15px; margin-bottom: 60px; flex-wrap: wrap; }
+    .lang-selector:hover {
+        border-color: rgba(255,255,255,0.6);
+        background: rgba(255,255,255,0.22);
+        box-shadow: 0 4px 15px rgba(255,255,255,0.15);
+    }
 
-    .filter-btn {
-        padding: 12px 30px; border: none; background-color: rgba(255,255,255,0.2);
-        color: white; border-radius: 30px; font-size: 1rem; cursor: pointer;
-        transition: all 0.3s ease; font-weight: 500; backdrop-filter: blur(10px);
+    .lang-icon { font-size: 1.1rem; }
+
+    .lang-selector select {
+        background: transparent; border: none; color: white;
+        font-size: 0.9rem; font-weight: 600; cursor: pointer;
+        outline: none; appearance: none; padding-right: 4px;
+    }
+
+    .lang-selector select option { background: #4a3f8f; color: white; }
+
+    .translate-spinner { width: 16px; height: 16px; }
+
+    .spinner-dot {
+        width: 16px; height: 16px;
         border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white; border-radius: 50%;
+        animation: spin 0.7s linear infinite;
     }
 
-    .filter-btn:hover, .filter-btn.active {
-        background-color: white; color: #667eea;
-        transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .translating { opacity: 0.35; transition: opacity 0.25s; }
+    .translated  { opacity: 1;    transition: opacity 0.35s; }
+
+    /* MÉTÉO */
+    .weather-container { text-align: center; margin: 0 auto 35px auto; max-width: 620px; }
+
+    .weather-search-bar {
+        display: flex; align-items: center; gap: 10px;
+        justify-content: center; margin-bottom: 14px;
+        background: rgba(255,255,255,0.12); backdrop-filter: blur(15px);
+        border: 1.5px solid rgba(255,255,255,0.25); border-radius: 50px;
+        padding: 8px 8px 8px 20px; transition: border-color 0.3s;
     }
 
-    /* Events Grid */
+    .weather-search-bar:focus-within {
+        border-color: rgba(255,255,255,0.5);
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
+    }
+
+    .weather-search-bar input {
+        flex: 1; border: none; background: transparent;
+        color: white; font-size: 0.95rem; outline: none; min-width: 0;
+    }
+
+    .weather-search-bar input::placeholder { color: rgba(255,255,255,0.55); }
+
+    .weather-search-bar button {
+        padding: 10px 22px; border: none; border-radius: 40px;
+        background: white; color: #667eea; font-weight: 700;
+        cursor: pointer; transition: all 0.3s; white-space: nowrap;
+        font-size: 0.9rem; flex-shrink: 0;
+    }
+
+    .weather-search-bar button:hover:not(:disabled) {
+        background: #667eea; color: white;
+        transform: scale(1.04); box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+    }
+
+    .weather-search-bar button:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    #weatherResult {
+        display: flex; align-items: center; justify-content: center;
+        gap: 16px; flex-wrap: wrap;
+        background: rgba(255,255,255,0.15); backdrop-filter: blur(15px);
+        border-radius: 20px; padding: 16px 24px; color: white;
+        font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.25);
+        animation: fadeInWeather 0.4s ease;
+    }
+
+    @keyframes fadeInWeather {
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #w-icon { font-size: 2.2rem; }
+    #w-temp { font-size: 1.6rem; font-weight: 800; }
+    #w-desc { opacity: 0.85; }
+    #w-city { font-weight: 700; color: #fbbf24; }
+
+    #weatherError {
+        background: rgba(255,255,255,0.1); border-radius: 12px;
+        padding: 10px 20px; color: rgba(255,255,255,0.75); font-size: 0.9rem;
+    }
+
+    /* EVENTS GRID */
     .events-grid {
         display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
         gap: 30px; margin-top: 40px;
@@ -259,7 +401,6 @@
     }
 
     .heart-icon:hover i { transform: scale(1.1); }
-
     .heart-icon.liked i { color: #ff4757; animation: heartBeat 0.3s ease; }
 
     @keyframes heartBeat {
@@ -279,7 +420,6 @@
     .event-description { color: #666; font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px; }
 
     .event-sponsors { margin-bottom: 15px; font-size: 0.9rem; }
-
     .event-sponsors strong { color: #333; margin-right: 5px; }
 
     .sponsor-badge {
@@ -297,7 +437,6 @@
         border-radius: 10px; text-align: center;
     }
 
-    /* BOUTONS LIKE / DISLIKE / FAVORI */
     .event-actions-bar {
         display: flex; align-items: center; gap: 8px;
         margin-top: 15px; flex-wrap: wrap;
@@ -315,32 +454,98 @@
     .dislike-btn.active { background: #f8d7da; border-color: #dc3545; color: #dc3545; }
     .fav-btn.active     { background: #fff3cd; border-color: #ffc107; color: #d48800; }
 
-    /* BOUTON FAVORIS TRIGGER */
-    .fav-trigger-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 11px 22px;
-        background: rgba(255,255,255,0.15);
-        backdrop-filter: blur(12px);
-        border: 1.5px solid rgba(255,255,255,0.35);
-        border-radius: 50px;
-        color: white;
-        font-weight: 600;
-        font-size: 0.9rem;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* BOUTON AFFICHE */
+    .poster-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2) !important;
+        color: white !important;
+        border-color: transparent !important;
+        box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+    }
+
+    .poster-btn:hover {
+        transform: translateY(-3px) scale(1.04) !important;
+        box-shadow: 0 8px 25px rgba(102,126,234,0.5) !important;
+    }
+
+    /* MODAL AFFICHE */
+    .poster-modal-overlay {
+        display: none;
+        position: fixed; inset: 0; z-index: 999999;
+        background: rgba(10, 8, 30, 0.85);
+        backdrop-filter: blur(10px);
+        align-items: center; justify-content: center;
+        animation: fadeInOverlay 0.3s ease;
+    }
+
+    .poster-modal-overlay.open { display: flex; }
+
+    @keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
+
+    .poster-modal-box {
+        background: #1a1330;
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 24px; padding: 32px;
+        max-width: 860px; width: 95%;
         position: relative;
-        overflow: hidden;
+        animation: slideUpModal 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+    }
+
+    @keyframes slideUpModal {
+        from { opacity: 0; transform: translateY(40px) scale(0.96); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .poster-modal-close {
+        position: absolute; top: 16px; right: 20px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: rgba(255,255,255,0.6); border-radius: 50%;
+        width: 36px; height: 36px; font-size: 1rem;
+        cursor: pointer; transition: all 0.25s;
+        display: flex; align-items: center; justify-content: center;
+    }
+
+    .poster-modal-close:hover {
+        background: rgba(245,87,108,0.2);
+        border-color: rgba(245,87,108,0.5);
+        color: #f5576c; transform: rotate(90deg);
+    }
+
+    .poster-modal-title { color: white; font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; text-align: center; }
+    .poster-modal-sub   { color: rgba(255,255,255,0.4); font-size: 0.85rem; text-align: center; margin-bottom: 20px; }
+
+    #posterCanvas {
+        width: 100%; border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5); display: block;
+    }
+
+    .poster-modal-actions { display: flex; justify-content: center; margin-top: 20px; }
+
+    .poster-dl-btn {
+        padding: 14px 36px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white; border: none; border-radius: 50px;
+        font-size: 1rem; font-weight: 700; cursor: pointer;
+        transition: all 0.3s; box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+    }
+
+    .poster-dl-btn:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 12px 35px rgba(102,126,234,0.6); }
+
+    /* FAVORIS */
+    .fav-trigger-btn {
+        display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px;
+        background: rgba(255,255,255,0.15); backdrop-filter: blur(12px);
+        border: 1.5px solid rgba(255,255,255,0.35); border-radius: 50px;
+        color: white; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative; overflow: hidden;
     }
 
     .fav-trigger-btn::before {
-        content: '';
-        position: absolute;
-        inset: 0;
+        content: ''; position: absolute; inset: 0;
         background: linear-gradient(135deg, rgba(251,191,36,0.3), rgba(245,87,108,0.3));
-        opacity: 0;
-        transition: opacity 0.3s;
+        opacity: 0; transition: opacity 0.3s;
     }
 
     .fav-trigger-btn:hover {
@@ -352,144 +557,86 @@
     .fav-trigger-btn:hover::before { opacity: 1; }
     .fav-trigger-btn:active { transform: scale(0.97); }
 
-    .fav-btn-icon {
-        display: flex;
-        align-items: center;
-        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
+    .fav-btn-icon { display: flex; align-items: center; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
     .fav-trigger-btn:hover .fav-btn-icon { transform: rotate(72deg) scale(1.2); }
 
     .fav-badge {
         background: linear-gradient(135deg, #fbbf24, #f5576c);
-        color: white;
-        border-radius: 20px;
-        padding: 2px 9px;
-        font-size: 0.78rem;
-        font-weight: 700;
-        min-width: 22px;
-        text-align: center;
+        color: white; border-radius: 20px; padding: 2px 9px;
+        font-size: 0.78rem; font-weight: 700; min-width: 22px; text-align: center;
         transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .fav-trigger-btn:hover .fav-badge { transform: scale(1.15); }
 
-    /* OVERLAY */
     #favOverlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(15,10,30,0.5);
-        backdrop-filter: blur(4px);
-        z-index: 99998;
-        opacity: 0;
-        transition: opacity 0.35s ease;
+        display: none; position: fixed; inset: 0;
+        background: rgba(15,10,30,0.5); backdrop-filter: blur(4px);
+        z-index: 99998; opacity: 0; transition: opacity 0.35s ease;
     }
 
     #favOverlay.visible { opacity: 1; }
 
-    /* PANNEAU GLISSANT */
     #favoritesPanel {
-        position: fixed;
-        top: 0;
-        right: 0;
-        width: 380px;
-        height: 100vh;
-        background: #0f0a1e;
-        z-index: 99999;
-        display: flex;
-        flex-direction: column;
+        position: fixed; top: 0; right: 0; width: 380px; height: 100vh;
+        background: #0f0a1e; z-index: 99999; display: flex; flex-direction: column;
         transform: translateX(100%);
         transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
         box-shadow: -20px 0 60px rgba(0,0,0,0.5);
     }
 
     #favoritesPanel::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 3px;
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
         background: linear-gradient(90deg, #667eea, #fbbf24, #f5576c);
     }
 
     #favoritesPanel.open { transform: translateX(0); }
 
     .fav-panel-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        display: flex; align-items: center; justify-content: space-between;
         padding: 28px 24px 20px;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
-        flex-shrink: 0;
+        border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
     }
 
     .fav-panel-title {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: #fff;
-        letter-spacing: 0.3px;
+        display: flex; align-items: center; gap: 10px;
+        font-size: 1.05rem; font-weight: 700; color: #fff; letter-spacing: 0.3px;
     }
 
     .fav-panel-count {
         background: linear-gradient(135deg, #fbbf24, #f5576c);
-        color: white;
-        border-radius: 20px;
-        padding: 2px 10px;
-        font-size: 0.78rem;
-        font-weight: 700;
+        color: white; border-radius: 20px; padding: 2px 10px;
+        font-size: 0.78rem; font-weight: 700;
     }
 
     .fav-close-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 34px; height: 34px;
-        background: rgba(255,255,255,0.07);
-        border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 50%;
-        color: rgba(255,255,255,0.6);
-        cursor: pointer;
-        transition: all 0.25s;
+        display: flex; align-items: center; justify-content: center;
+        width: 34px; height: 34px; background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.12); border-radius: 50%;
+        color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.25s;
     }
 
     .fav-close-btn:hover {
-        background: rgba(245,87,108,0.2);
-        border-color: rgba(245,87,108,0.5);
-        color: #f5576c;
-        transform: rotate(90deg);
+        background: rgba(245,87,108,0.2); border-color: rgba(245,87,108,0.5);
+        color: #f5576c; transform: rotate(90deg);
     }
 
     .fav-panel-body {
-        flex: 1;
-        overflow-y: auto;
-        padding: 16px 24px 24px;
-        scrollbar-width: thin;
-        scrollbar-color: rgba(255,255,255,0.1) transparent;
+        flex: 1; overflow-y: auto; padding: 16px 24px 24px;
+        scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent;
     }
 
     .fav-panel-body::-webkit-scrollbar { width: 4px; }
     .fav-panel-body::-webkit-scrollbar-track { background: transparent; }
     .fav-panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
-    /* État vide */
     .fav-empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 60px 20px;
-        text-align: center;
+        display: flex; flex-direction: column; align-items: center;
+        justify-content: center; padding: 60px 20px; text-align: center;
         color: rgba(255,255,255,0.3);
     }
 
-    .fav-empty-icon {
-        font-size: 3rem;
-        margin-bottom: 16px;
-        animation: pulse-star 2.5s ease-in-out infinite;
-    }
+    .fav-empty-icon { font-size: 3rem; margin-bottom: 16px; animation: pulse-star 2.5s ease-in-out infinite; }
 
     @keyframes pulse-star {
         0%, 100% { transform: scale(1); opacity: 0.3; }
@@ -499,153 +646,100 @@
     .fav-empty-state p     { font-size: 0.95rem; font-weight: 500; margin-bottom: 6px; color: rgba(255,255,255,0.4); }
     .fav-empty-state small { font-size: 0.8rem; color: rgba(255,255,255,0.2); }
 
-    /* Items favoris */
     .fav-item {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 14px;
-        padding: 16px;
-        margin-bottom: 10px;
+        background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px; padding: 16px; margin-bottom: 10px;
         animation: slideInFavItem 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
         transition: background 0.2s, border-color 0.2s;
     }
 
-    .fav-item:hover {
-        background: rgba(255,255,255,0.07);
-        border-color: rgba(102,126,234,0.3);
-    }
+    .fav-item:hover { background: rgba(255,255,255,0.07); border-color: rgba(102,126,234,0.3); }
 
     @keyframes slideInFavItem {
         from { opacity: 0; transform: translateX(20px); }
         to   { opacity: 1; transform: translateX(0); }
     }
 
-    .fav-item-type {
-        font-size: 0.68rem;
-        font-weight: 700;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
-        color: #fbbf24;
-        margin-bottom: 5px;
-    }
-
-    .fav-item-title {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #fff;
-        margin-bottom: 4px;
-        line-height: 1.3;
-    }
-
-    .fav-item-date {
-        font-size: 0.78rem;
-        color: rgba(255,255,255,0.35);
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
+    .fav-item-type  { font-size: 0.68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #fbbf24; margin-bottom: 5px; }
+    .fav-item-title { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 4px; line-height: 1.3; }
+    .fav-item-date  { font-size: 0.78rem; color: rgba(255,255,255,0.35); margin-bottom: 12px; display: flex; align-items: center; gap: 4px; }
 
     .fav-remove-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 0.75rem;
-        color: rgba(245,87,108,0.7);
-        background: rgba(245,87,108,0.08);
-        border: 1px solid rgba(245,87,108,0.2);
-        border-radius: 20px;
-        padding: 4px 12px;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-weight: 600;
+        display: inline-flex; align-items: center; gap: 5px; font-size: 0.75rem;
+        color: rgba(245,87,108,0.7); background: rgba(245,87,108,0.08);
+        border: 1px solid rgba(245,87,108,0.2); border-radius: 20px;
+        padding: 4px 12px; cursor: pointer; transition: all 0.2s; font-weight: 600;
     }
 
     .fav-remove-btn:hover {
-        background: rgba(245,87,108,0.2);
-        border-color: rgba(245,87,108,0.5);
-        color: #f5576c;
-        transform: scale(1.03);
+        background: rgba(245,87,108,0.2); border-color: rgba(245,87,108,0.5);
+        color: #f5576c; transform: scale(1.03);
     }
 
-    /* Alert */
-    .alert {
-        background: white; color: #666; padding: 30px;
-        border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
+    .alert { background: white; color: #666; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
-    /* Responsive */
     @media (max-width: 768px) {
         .events-section { padding: 100px 15px 40px 15px; }
         .events-grid { grid-template-columns: 1fr; }
-        .filter-buttons { flex-direction: column; align-items: center; }
-        .filter-btn { width: 200px; }
         .event-image { height: 250px; }
         #favoritesPanel { width: 100%; }
+        .weather-search-bar { flex-wrap: wrap; border-radius: 16px; padding: 12px; }
+        .weather-search-bar button { width: 100%; }
+        .poster-modal-box { padding: 20px; }
     }
 </style>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
-    // Navbar scroll
     const header = document.querySelector('.header-area');
     if (header) {
-        window.addEventListener('scroll', function() {
-            header.classList.toggle('scrolled', window.scrollY > 50);
-        });
+        window.addEventListener('scroll', () => header.classList.toggle('scrolled', window.scrollY > 50));
     }
 
-    // Filter
     document.querySelectorAll('.filter-btn').forEach(button => {
         button.addEventListener('click', function() {
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
             const filterType = this.dataset.type;
             document.querySelectorAll('.event-card').forEach(card => {
-                if (filterType === 'all') { card.style.display = 'block'; }
-                else { card.style.display = card.dataset.eventType === filterType ? 'block' : 'none'; }
+                card.style.display = filterType === 'all' || card.dataset.eventType === filterType ? 'block' : 'none';
             });
         });
     });
 
-    // Search
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('keyup', function() {
-            const searchValue = this.value.toLowerCase();
+            const v = this.value.toLowerCase();
             document.querySelectorAll('.event-card').forEach(card => {
-                const title = card.querySelector('.event-title').textContent.toLowerCase();
-                const desc  = card.querySelector('.event-description').textContent.toLowerCase();
-                const type  = card.querySelector('.event-category').textContent.toLowerCase();
-                card.style.display = (title.includes(searchValue) || desc.includes(searchValue) || type.includes(searchValue)) ? 'block' : 'none';
+                const t = card.querySelector('.event-title').textContent.toLowerCase();
+                const d = card.querySelector('.event-description').textContent.toLowerCase();
+                const c = card.querySelector('.event-category').textContent.toLowerCase();
+                card.style.display = (t.includes(v) || d.includes(v) || c.includes(v)) ? 'block' : 'none';
             });
         });
     }
 
-    // Hearts
     document.querySelectorAll('.heart-icon').forEach(heart => {
         const id = heart.dataset.eventId;
         if (localStorage.getItem('heart_' + id) === 'liked') heart.classList.add('liked');
         heart.addEventListener('click', function(e) {
             e.stopPropagation();
             heart.classList.toggle('liked');
-            if (heart.classList.contains('liked')) localStorage.setItem('heart_' + id, 'liked');
-            else localStorage.removeItem('heart_' + id);
+            localStorage[heart.classList.contains('liked') ? 'setItem' : 'removeItem']('heart_' + id, 'liked');
         });
     });
 
-    // Countdown
     const countdowns = document.querySelectorAll('.countdown');
     function updateCountdown() {
         const now = new Date().getTime();
         countdowns.forEach(cd => {
-            const dateStr = cd.dataset.date;
-            if (!dateStr) return;
-            const diff = new Date(dateStr).getTime() - now;
+            if (!cd.dataset.date) return;
+            const diff = new Date(cd.dataset.date).getTime() - now;
             if (diff > 0) {
                 const d = Math.floor(diff / 86400000);
                 const h = Math.floor((diff % 86400000) / 3600000);
@@ -662,10 +756,12 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(updateCountdown, 1000);
     updateCountdown();
 
-    // Init like/dislike/fav au chargement
     const state = loadState();
     Object.keys(state).forEach(id => updateActionUI(id, state[id]));
     refreshFavCount();
+
+    const wInput = document.getElementById('weatherCityInput');
+    if (wInput) wInput.addEventListener('keypress', e => { if (e.key === 'Enter') fetchWeather(); });
 });
 
 /* ══════════════════════════════════════
@@ -676,14 +772,8 @@ const FAV_KEY   = 'sf_favs_v2';
 
 function loadState() { try { return JSON.parse(localStorage.getItem(STATE_KEY)) || {}; } catch { return {}; } }
 function saveState(s) { localStorage.setItem(STATE_KEY, JSON.stringify(s)); }
-
-function getEventData(id) {
-    const s = loadState();
-    if (!s[id]) s[id] = { likes: 0, dislikes: 0, vote: null, fav: false };
-    return s[id];
-}
+function getEventData(id) { const s = loadState(); if (!s[id]) s[id] = { likes: 0, dislikes: 0, vote: null, fav: false }; return s[id]; }
 function setEventData(id, d) { const s = loadState(); s[id] = d; saveState(s); }
-
 function getFavMeta() { try { return JSON.parse(localStorage.getItem(FAV_KEY)) || {}; } catch { return {}; } }
 function setFavMeta(m) { localStorage.setItem(FAV_KEY, JSON.stringify(m)); }
 
@@ -714,73 +804,307 @@ function handleDislike(id) {
 }
 
 function handleFavorite(id, titre, type, date) {
-    const d = getEventData(id);
-    const m = getFavMeta();
+    const d = getEventData(id); const m = getFavMeta();
     d.fav = !d.fav;
-    if (d.fav) m[id] = { titre, type, date };
-    else delete m[id];
+    if (d.fav) m[id] = { titre, type, date }; else delete m[id];
     setEventData(id, d); setFavMeta(m);
     updateActionUI(id, d); refreshFavCount(); renderFavList();
 }
 
 function refreshFavCount() {
-    const count = Object.keys(getFavMeta()).length;
     const el = document.getElementById('favCount');
-    if (el) el.textContent = count;
+    if (el) el.textContent = Object.keys(getFavMeta()).length;
 }
 
 function renderFavList() {
-    const m   = getFavMeta();
-    const ids = Object.keys(m);
-    const el  = document.getElementById('favList');
-    const panelCount = document.getElementById('favPanelCount');
-    if (panelCount) panelCount.textContent = ids.length;
-
+    const m = getFavMeta(); const ids = Object.keys(m);
+    const el = document.getElementById('favList');
+    const pc = document.getElementById('favPanelCount');
+    if (pc) pc.textContent = ids.length;
     if (!ids.length) {
-        el.innerHTML = `
-            <div class="fav-empty-state">
-                <div class="fav-empty-icon">✦</div>
-                <p>Aucun favori pour l'instant</p>
-                <small>Cliquez sur ☆ Favori pour ajouter des événements</small>
-            </div>`;
+        el.innerHTML = `<div class="fav-empty-state"><div class="fav-empty-icon">✦</div><p>Aucun favori pour l'instant</p><small>Cliquez sur ☆ Favori pour ajouter des événements</small></div>`;
         return;
     }
-
     el.innerHTML = ids.map((id, i) => `
         <div class="fav-item" style="animation-delay:${i * 0.06}s">
             <div class="fav-item-type">${m[id].type}</div>
             <div class="fav-item-title">${m[id].titre}</div>
-            <div class="fav-item-date">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                ${m[id].date}
-            </div>
+            <div class="fav-item-date"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${m[id].date}</div>
             <button class="fav-remove-btn" onclick="handleFavorite(${id}, '${m[id].titre.replace(/'/g,"\\'")}', '${m[id].type}', '${m[id].date}')">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                Retirer
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Retirer
             </button>
-        </div>
-    `).join('');
+        </div>`).join('');
 }
 
 function toggleFavPanel() {
-    const panel   = document.getElementById('favoritesPanel');
+    const panel = document.getElementById('favoritesPanel');
     const overlay = document.getElementById('favOverlay');
-    const isOpen  = panel.classList.contains('open');
-
+    const isOpen = panel.classList.contains('open');
     if (isOpen) {
-        panel.classList.remove('open');
-        overlay.classList.remove('visible');
+        panel.classList.remove('open'); overlay.classList.remove('visible');
         setTimeout(() => { overlay.style.display = 'none'; }, 350);
         document.body.style.overflow = '';
     } else {
         overlay.style.display = 'block';
-        requestAnimationFrame(() => {
-            overlay.classList.add('visible');
-            panel.classList.add('open');
-        });
-        document.body.style.overflow = 'hidden';
-        renderFavList();
+        requestAnimationFrame(() => { overlay.classList.add('visible'); panel.classList.add('open'); });
+        document.body.style.overflow = 'hidden'; renderFavList();
     }
+}
+
+/* ══════════════════════════════════════
+   TRADUCTION
+══════════════════════════════════════ */
+async function translateText(text, targetLang) {
+    if (!text || !text.trim()) return null;
+    try {
+        const res  = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|${targetLang}`);
+        const data = await res.json();
+        return data.responseStatus === 200 ? data.responseData.translatedText : null;
+    } catch { return null; }
+}
+
+async function translateAll() {
+    const lang = document.getElementById('langSelect').value;
+    const spinner = document.getElementById('translateSpinner');
+    const titles = document.querySelectorAll('.translatable-title');
+    const descs  = document.querySelectorAll('.translatable-desc');
+    const isRTL  = lang === 'ar';
+
+    if (lang === 'fr') {
+        titles.forEach(el => { el.textContent = el.dataset.original; el.style.direction = 'ltr'; el.style.textAlign = 'left'; });
+        descs.forEach(el  => { const o = el.dataset.original; el.textContent = o.length > 150 ? o.slice(0,150)+'...' : o; el.style.direction = 'ltr'; el.style.textAlign = 'left'; });
+        return;
+    }
+
+    spinner.style.display = 'block';
+    titles.forEach(el => el.classList.add('translating'));
+    descs.forEach(el  => el.classList.add('translating'));
+
+    const titleP = Array.from(titles).map(el =>
+        translateText(el.dataset.original, lang).then(t => {
+            if (t) { el.textContent = t; el.style.direction = isRTL ? 'rtl' : 'ltr'; el.style.textAlign = isRTL ? 'right' : 'left'; }
+            el.classList.remove('translating'); el.classList.add('translated');
+        })
+    );
+
+    const descP = Array.from(descs).map(el => {
+        const o = el.dataset.original;
+        return translateText(o.length > 150 ? o.slice(0,150) : o, lang).then(t => {
+            if (t) { el.textContent = t.length > 150 ? t.slice(0,150)+'...' : t; el.style.direction = isRTL ? 'rtl' : 'ltr'; el.style.textAlign = isRTL ? 'right' : 'left'; }
+            el.classList.remove('translating'); el.classList.add('translated');
+        });
+    });
+
+    await Promise.all([...titleP, ...descP]);
+    spinner.style.display = 'none';
+}
+
+/* ══════════════════════════════════════
+   MÉTÉO
+══════════════════════════════════════ */
+function fetchWeather() {
+    const city = document.getElementById('weatherCityInput').value.trim();
+    if (!city) return;
+    const result = document.getElementById('weatherResult');
+    const error  = document.getElementById('weatherError');
+    const btn    = document.querySelector('.weather-search-bar button');
+    result.style.display = 'none'; error.style.display = 'none';
+    btn.textContent = '⏳ Chargement...'; btn.disabled = true;
+    fetch(`/events/weather?lieu=${encodeURIComponent(city)}`)
+        .then(r => r.json())
+        .then(data => {
+            btn.textContent = '🌤 Voir la météo'; btn.disabled = false;
+            if (data.error) { error.style.display = 'block'; return; }
+            document.getElementById('w-icon').textContent     = data.icon;
+            document.getElementById('w-temp').textContent     = data.temperature;
+            document.getElementById('w-desc').textContent     = data.description;
+            document.getElementById('w-wind').textContent     = data.windspeed;
+            document.getElementById('w-humidity').textContent = data.humidity;
+            document.getElementById('w-city').textContent     = '📍 ' + data.city;
+            result.style.display = 'flex';
+        })
+        .catch(() => { btn.textContent = '🌤 Voir la météo'; btn.disabled = false; error.style.display = 'block'; });
+}
+
+/* ══════════════════════════════════════
+   ✅ GÉNÉRATEUR D'AFFICHE (HTML Canvas)
+   CORRECTION CORS : l'image est chargée via
+   la route Symfony /events/image-base64?filename=xxx
+   qui lit public/uploads/xxx et retourne du base64
+══════════════════════════════════════ */
+let currentPosterData = {};
+
+function openPosterModal(titre, type, date, description, imageFilename) {
+    currentPosterData = { titre, type, date, description, imageFilename };
+    document.getElementById('posterModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    drawPoster(titre, type, date, description, imageFilename);
+}
+
+function closePosterModal(e) {
+    if (e && e.target !== document.getElementById('posterModal') && !e.target.classList.contains('poster-modal-close')) return;
+    document.getElementById('posterModal').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+function drawPoster(titre, type, date, description, imageFilename) {
+    const canvas = document.getElementById('posterCanvas');
+    const ctx    = canvas.getContext('2d');
+    const W = 800, H = 500;
+    canvas.width = W; canvas.height = H;
+
+    const typeColors = {
+        'EDUCATION' : ['#667eea', '#764ba2'],
+        'CULTURE'   : ['#f093fb', '#f5576c'],
+        'SPORT'     : ['#4facfe', '#00f2fe'],
+        'BIEN-ETRE' : ['#43e97b', '#38f9d7'],
+        'TECH'      : ['#fa709a', '#fee140'],
+        'HACKATHON' : ['#f7971e', '#ffd200'],
+        'FORMATION' : ['#11998e', '#38ef7d'],
+        'WORKSHOP'  : ['#ee0979', '#ff6a00'],
+    };
+    const colors = typeColors[type] || ['#667eea', '#764ba2'];
+
+    const drawContent = (img) => {
+        // Fond dégradé
+        const grad = ctx.createLinearGradient(0, 0, W, H);
+        grad.addColorStop(0, colors[0]);
+        grad.addColorStop(1, colors[1]);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
+
+        // ✅ Image en fond couvrant toute la canvas (object-fit: cover)
+        if (img) {
+            const scale = Math.max(W / img.width, H / img.height);
+            const iw = img.width  * scale;
+            const ih = img.height * scale;
+            const ix = (W - iw) / 2;
+            const iy = (H - ih) / 2;
+            ctx.save();
+            ctx.globalAlpha = 0.38;
+            ctx.drawImage(img, ix, iy, iw, ih);
+            ctx.restore();
+        }
+
+        // Overlay sombre pour lisibilité
+        ctx.fillStyle = 'rgba(0,0,0,0.50)';
+        ctx.fillRect(0, 0, W, H);
+
+        // Bande décorative gauche
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        ctx.fillRect(0, 0, 8, H);
+
+        // Badge TYPE
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        roundRect(ctx, 40, 40, 140, 36, 18);
+        ctx.fill();
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 14px Segoe UI';
+        ctx.textAlign = 'left';
+        ctx.fillText('📌 ' + type, 58, 63);
+
+        // Date
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.font = '15px Segoe UI';
+        ctx.textAlign = 'right';
+        ctx.fillText('📅 ' + date, W - 40, 63);
+
+        // Titre principal
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 42px Segoe UI';
+        ctx.textAlign = 'left';
+        wrapText(ctx, titre, 40, 170, W - 80, 52);
+
+        // Ligne séparatrice
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(40, 270);
+        ctx.lineTo(W - 40, 270);
+        ctx.stroke();
+
+        // Description
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.font = '16px Segoe UI';
+        wrapText(ctx, description || '', 40, 310, W - 80, 24, 3);
+
+        // Footer branding
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.fillRect(0, H - 60, W, 60);
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.font = 'bold 16px Segoe UI';
+        ctx.textAlign = 'center';
+        ctx.fillText('✦ StudyFlow Events', W / 2, H - 28);
+
+        // Cercles décoratifs
+        ctx.beginPath();
+        ctx.arc(W - 80, H - 180, 100, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.04)';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(W - 60, H - 160, 60, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.06)';
+        ctx.fill();
+    };
+
+    // ✅ Charger l'image via la route Symfony /events/image-base64?filename=xxx
+    // → Symfony lit public/uploads/xxx et retourne du base64 → zéro CORS
+    if (imageFilename && imageFilename.trim() !== '') {
+        fetch(`/events/image-base64?filename=${encodeURIComponent(imageFilename)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.base64) {
+                    const img = new Image();
+                    img.onload  = () => drawContent(img);
+                    img.onerror = () => drawContent(null);
+                    img.src = data.base64; // base64 → pas de CORS
+                } else {
+                    drawContent(null);
+                }
+            })
+            .catch(() => drawContent(null));
+    } else {
+        drawContent(null);
+    }
+}
+
+function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 4) {
+    if (!text) return;
+    const words = text.split(' ');
+    let line = '', count = 0;
+    for (let i = 0; i < words.length; i++) {
+        const test = line + words[i] + ' ';
+        if (ctx.measureText(test).width > maxWidth && i > 0) {
+            ctx.fillText(line.trim(), x, y);
+            line = words[i] + ' ';
+            y += lineHeight; count++;
+            if (count >= maxLines) { ctx.fillText('...', x, y); return; }
+        } else { line = test; }
+    }
+    ctx.fillText(line.trim(), x, y);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+}
+
+function downloadPoster() {
+    const canvas = document.getElementById('posterCanvas');
+    const link   = document.createElement('a');
+    const titre  = currentPosterData.titre || 'event';
+    link.download = `affiche-${titre.toLowerCase().replace(/\s+/g, '-')}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
 }
 </script>
 
