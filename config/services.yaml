@@ -71,3 +71,9 @@ services:
     App\Service\NaturalLanguageInterpreter:
         arguments:
             $ollamaService: '@App\Service\OllamaService'
+    # Service de prédiction du bien-être (bonheur et stress)
+    App\Service\WellbeingPredictionService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+            $logger: '@logger'
+            $pythonPath: 'python'

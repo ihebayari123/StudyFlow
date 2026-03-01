@@ -18,7 +18,7 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
-
+use Symfony\Component\HttpFoundation\JsonResponse;
 final class EventsController extends AbstractController
 {
     // ================= ADMIN LIST =================
@@ -50,6 +50,30 @@ final class EventsController extends AbstractController
             'sort' => $sort,
         ]);
     }
+
+
+
+
+#[Route('/events/image-base64', name: 'event_image_base64', methods: ['GET'])]
+public function imageBase64(Request $request): JsonResponse
+{
+    $filename = $request->query->get('filename', '');
+    if (empty($filename) || str_contains($filename, '..') || str_contains($filename, '/')) {
+        return new JsonResponse(['error' => 'Invalid'], 400);
+    }
+    $filePath = $this->getParameter('images_directory') . '/' . $filename;
+    if (!file_exists($filePath)) {
+        return new JsonResponse(['error' => 'Not found'], 404);
+    }
+    $base64 = 'data:' . mime_content_type($filePath) . ';base64,' . base64_encode(file_get_contents($filePath));
+    return new JsonResponse(['base64' => $base64]);
+}
+
+
+
+
+
+
 
     // ================= CREATE =================
     // ⚠️ DOIT être AVANT /{id}/edit et /{id}/delete
@@ -142,7 +166,7 @@ PROMPT;
 
         try {
             $payload = json_encode([
-                'model'  => 'gemma:2b',
+                'model'  => 'phi3:mini',
                 'prompt' => $prompt,
                 'stream' => false,
                 'options' => [
@@ -193,21 +217,20 @@ PROMPT;
 
     // ================= FRONT OFFICE =================
     // ⚠️ DOIT être AVANT /{id}/edit et /{id}/delete
+#[Route('/events/front', name: 'events_front')]
+public function frontIndex(EntityManagerInterface $em): Response
+{
+    $events = $em->createQuery(
+        'SELECT e, s
+         FROM App\Entity\Event e
+         LEFT JOIN e.sponsors s
+         ORDER BY e.dateCreation DESC'
+    )->getResult();
 
-    #[Route('/events/front', name: 'events_front')]
-    public function frontIndex(EntityManagerInterface $em): Response
-    {
-        $events = $em->createQuery(
-            'SELECT e, s
-             FROM App\Entity\Event e
-             LEFT JOIN e.sponsors s
-             ORDER BY e.dateCreation DESC'
-        )->getResult();
-
-        return $this->render('events/index_front.html.twig', [
-            'events' => $events,
-        ]);
-    }
+    return $this->render('events/index_front.html.twig', [
+        'events' => $events,
+    ]);
+}
 
     // ================= CALENDRIER =================
     // ⚠️ DOIT être AVANT /{id}/edit et /{id}/delete
@@ -333,4 +356,76 @@ PROMPT;
 
         return implode(' ', $sentences);
     }
+    // ================= MÉTÉO (Open-Meteo) =================
+
+#[Route('/events/weather', name: 'event_weather', methods: ['GET'])]
+public function getWeather(Request $request): Response
+{
+    $lieu = trim($request->query->get('lieu', ''));
+
+    if (empty($lieu)) {
+        return $this->json(['error' => 'Lieu manquant'], 400);
+    }
+
+    try {
+        // 1. Géocodage : convertir le nom de ville en coordonnées GPS
+        $geoUrl = 'https://geocoding-api.open-meteo.com/v1/search?name='
+            . urlencode($lieu)
+            . '&count=1&language=fr&format=json';
+
+        $geoResponse = file_get_contents($geoUrl);
+        $geoData     = json_decode($geoResponse, true);
+
+        if (empty($geoData['results'])) {
+            return $this->json(['error' => 'Ville introuvable : ' . $lieu], 404);
+        }
+
+        $lat  = $geoData['results'][0]['latitude'];
+        $lon  = $geoData['results'][0]['longitude'];
+        $name = $geoData['results'][0]['name'];
+
+        // 2. Appel météo avec les coordonnées
+        $meteoUrl = "https://api.open-meteo.com/v1/forecast"
+            . "?latitude=$lat&longitude=$lon"
+            . "&current=temperature_2m,weathercode,windspeed_10m,relative_humidity_2m"
+            . "&timezone=auto";
+
+        $meteoResponse = file_get_contents($meteoUrl);
+        $meteoData     = json_decode($meteoResponse, true);
+
+        $current = $meteoData['current'];
+
+        // 3. Convertir le code météo en description + icône emoji
+        $weatherInfo = $this->decodeWeatherCode($current['weathercode']);
+
+        return $this->json([
+            'city'        => $name,
+            'temperature' => $current['temperature_2m'],
+            'windspeed'   => $current['windspeed_10m'],
+            'humidity'    => $current['relative_humidity_2m'],
+            'description' => $weatherInfo['description'],
+            'icon'        => $weatherInfo['icon'],
+        ]);
+
+    } catch (\Exception $e) {
+        return $this->json(['error' => 'Erreur météo : ' . $e->getMessage()], 500);
+    }
+}
+
+// Convertit le code WMO en description lisible
+private function decodeWeatherCode(int $code): array
+{
+    return match(true) {
+        $code === 0                         => ['description' => 'Ciel dégagé',       'icon' => '☀️'],
+        in_array($code, [1, 2])             => ['description' => 'Partiellement nuageux', 'icon' => '⛅'],
+        $code === 3                         => ['description' => 'Couvert',           'icon' => '☁️'],
+        in_array($code, [45, 48])           => ['description' => 'Brouillard',        'icon' => '🌫️'],
+        in_array($code, [51, 53, 55])       => ['description' => 'Bruine',            'icon' => '🌦️'],
+        in_array($code, [61, 63, 65])       => ['description' => 'Pluie',             'icon' => '🌧️'],
+        in_array($code, [71, 73, 75])       => ['description' => 'Neige',             'icon' => '❄️'],
+        in_array($code, [80, 81, 82])       => ['description' => 'Averses',           'icon' => '🌦️'],
+        in_array($code, [95, 96, 99])       => ['description' => 'Orage',             'icon' => '⛈️'],
+        default                             => ['description' => 'Météo inconnue',    'icon' => '🌡️'],
+    };
+}
 }

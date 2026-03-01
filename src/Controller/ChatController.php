@@ -8,11 +8,22 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\ProcessBuilder;
+use Psr\Log\LoggerInterface;
+use App\Service\WellbeingPredictionService;
 
 class ChatController extends AbstractController
 {
     // URL du serveur Flask
     private const FLASK_URL = 'http://127.0.0.1:5000';
+    
+    private WellbeingPredictionService $wellbeingService;
+
+    public function __construct(WellbeingPredictionService $wellbeingService)
+    {
+        $this->wellbeingService = $wellbeingService;
+    }
 
     #[Route('/chat', name: 'chat_page')]
     public function index()
@@ -25,8 +36,16 @@ class ChatController extends AbstractController
         Request $request,
         HttpClientInterface $client
     ): JsonResponse {
+        // Vérifier si c'est une demande de prédiction de bien-être EN PREMIER
+        $isWellbeingRequest = $request->request->has('wellbeing_mode') && 
+                              $request->request->get('wellbeing_mode') === 'true';
+        
+        if ($isWellbeingRequest) {
+            return $this->handleWellbeingPrediction($request);
+        }
+        
         $message = $request->request->get('message');
-
+        
         // Récupérer les informations de prédiction de prix si présentes
         $productName = $request->request->get('product_name');
         $description = $request->request->get('description');
@@ -39,6 +58,11 @@ class ChatController extends AbstractController
         $userId = $session->get('chat_user_id');
 
         try {
+            // Vérifier si c'est une demande de prédiction de bien-être
+            if ($isWellbeingRequest) {
+                return $this->handleWellbeingPrediction($request);
+            }
+
             // Vérifier si c'est une demande de prédiction de prix
             $priceKeywords = ['prix', 'prédire', 'prediction', 'combien', 'cout', 'coût'];
             $isPriceRequest = false;
@@ -57,29 +81,199 @@ class ChatController extends AbstractController
                 return $this->handlePricePrediction($client, $productName, $description, $category);
             }
 
-            // Sinon, utiliser l'endpoint de chat standard
-            $response = $client->request('POST', self::FLASK_URL . '/api/chat', [
-                'json' => [
-                    'message' => $message,
-                    'user_id' => $userId,
-                    'product_name' => $productName,
-                    'description' => $description,
-                    'category' => $category
-                ],
-                'timeout' => 30
-            ]);
+            // Sinon, utiliser l'endpoint de chat standard (si Flask est disponible)
+            try {
+                $response = $client->request('POST', self::FLASK_URL . '/api/chat', [
+                    'json' => [
+                        'message' => $message,
+                        'user_id' => $userId,
+                        'product_name' => $productName,
+                        'description' => $description,
+                        'category' => $category
+                    ],
+                    'timeout' => 30
+                ]);
 
-            $data = $response->toArray();
-            
-            return new JsonResponse([
-                'reply' => $data['reply'] ?? 'Réponse reçue'
-            ]);
+                $data = $response->toArray();
+                
+                return new JsonResponse([
+                    'reply' => $data['reply'] ?? 'Réponse reçue'
+                ]);
+            } catch (\Exception $e) {
+                // Si Flask n'est pas disponible, retourner un message par défaut
+                return new JsonResponse([
+                    'reply' => "Bonjour ! Je suis MediBot.\n\nJe peux vous aider à:\n- Évaluer votre bien-être (stress et bonheur)\n- Vous donner des conseils santé\n\nCliquez sur 'Faire le test' pour commencer l'évaluation de bien-être!"
+                ]);
+            }
             
         } catch (\Exception $e) {
             return new JsonResponse([
-                'reply' => 'Désolé, le serveur de diagnostic est hors ligne. 🔌 Erreur: ' . $e->getMessage()
+                'reply' => 'Désolé, une erreur est survenue. Erreur: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Gère la prédiction de bien-être (stress et bonheur) via les modèles ML
+     */
+    private function handleWellbeingPrediction(Request $request): JsonResponse
+    {
+        // Récupérer les 5 paramètres
+        $sleepHours = (float) $request->request->get('sleep_hours', 0);
+        $studyHours = (float) $request->request->get('study_hours', 0);
+        $coffeeCups = (int) $request->request->get('coffee_cups', 0);
+        $age = (int) $request->request->get('age', 0);
+        $sportHours = (float) $request->request->get('sport_hours', 0);
+
+        // Validation des données
+        $errors = [];
+        
+        if ($sleepHours < 0 || $sleepHours > 24) {
+            $errors[] = 'Les heures de sommeil doivent être entre 0 et 24';
+        }
+        
+        if ($studyHours < 0 || $studyHours > 24) {
+            $errors[] = 'Les heures d\'étude doivent être entre 0 et 24';
+        }
+        
+        if ($coffeeCups < 0 || $coffeeCups > 50) {
+            $errors[] = 'Le nombre de cafés n\'est pas valide';
+        }
+        
+        if ($age < 1 || $age > 120) {
+            $errors[] = 'L\'âge n\'est pas valide';
+        }
+
+        if (!empty($errors)) {
+            return new JsonResponse([
+                'reply' => 'Erreur de validation:\n- ' . implode('\n- ', $errors)
+            ], 400);
+        }
+
+        try {
+            // Utiliser le service de prédiction de bien-être
+            $result = $this->wellbeingService->predictWellbeing(
+                $sleepHours,
+                $studyHours,
+                $coffeeCups,
+                $age,
+                $sportHours
+            );
+
+            if (!$result['success']) {
+                return new JsonResponse([
+                    'reply' => 'Erreur lors de la prédiction: ' . ($result['error'] ?? 'Erreur inconnue')
+                ], 500);
+            }
+
+            // Formater la réponse
+            $reply = $this->formatWellbeingResponse($result);
+
+            return new JsonResponse([
+                'reply' => $reply,
+                'predictions' => $result['predictions'] ?? []
+            ]);
+
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'reply' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Formate la réponse de prédiction de bien-être
+     */
+    private function formatWellbeingResponse(array $result): string
+    {
+        $predictions = $result['predictions'] ?? [];
+        $input = $result['input'] ?? [];
+        
+        $reply = "📊 <strong>Résultats de votre analyse bien-être</strong>\n\n";
+        
+        // Afficher les deux résultats en même temps
+        $reply .= "<div class='results-container'>";
+        
+        // Prédiction de bonheur
+        $reply .= "<div class='result-card happiness'>";
+        $reply .= "<div class='icon'>😊</div>";
+        $reply .= "<div class='title'>Niveau de Bonheur</div>";
+        
+        if (isset($predictions['happiness'])) {
+            $happiness = $predictions['happiness'];
+            if (isset($happiness['error'])) {
+                $reply .= "<div class='value'>❌</div>";
+                $reply .= "<div class='level'>Erreur</div>";
+            } else {
+                $level = $happiness['level'] ?? 'Inconnu';
+                $normalized = $happiness['normalized'] ?? $happiness['value'];
+                $reply .= "<div class='value'>" . number_format($normalized, 1) . "/10</div>";
+                $reply .= "<div class='level'>$level</div>";
+            }
+        }
+        $reply .= "</div>";
+        
+        // Prédiction de stress
+        $reply .= "<div class='result-card '";
+        if (isset($predictions['stress']) && isset($predictions['stress']['percentage'])) {
+            $reply .= ($predictions['stress']['percentage'] < 40) ? 'low-stress' : 'stress';
+        } else {
+            $reply .= 'stress';
+        }
+        $reply .= "'>";
+        $reply .= "<div class='icon'>😰</div>";
+        $reply .= "<div class='title'>Niveau de Stress</div>";
+        
+        if (isset($predictions['stress'])) {
+            $stress = $predictions['stress'];
+            if (isset($stress['error'])) {
+                $reply .= "<div class='value'>❌</div>";
+                $reply .= "<div class='level'>Erreur</div>";
+            } else {
+                $level = $stress['level'] ?? 'Inconnu';
+                $percentage = $stress['percentage'] ?? ($stress['value'] * 100);
+                $reply .= "<div class='value'>" . number_format($percentage, 0) . "%</div>";
+                $reply .= "<div class='level'>$level</div>";
+            }
+        }
+        $reply .= "</div>";
+        $reply .= "</div>";
+        
+        // Conseils
+        $reply .= "<div class='tips-section'>";
+        $reply .= "<h4>💡 Conseils personnalisés:</h4>";
+        $reply .= "<ul>";
+        
+        if (isset($predictions['stress']) && isset($predictions['stress']['percentage'])) {
+            if ($predictions['stress']['percentage'] >= 70) {
+                $reply .= "<li>🔥 Votre niveau de stress est élevé. Essayez la méditation ou des exercices de respiration.</li>";
+            } elseif ($predictions['stress']['percentage'] >= 40) {
+                $reply .= "<li>⚠️ Votre stress est modéré. Pensez à prendre des pauses régulières.</li>";
+            } else {
+                $reply .= "<li>✅ Votre niveau de stress est bien géré. Continuez comme ça!</li>";
+            }
+        }
+        
+        if (isset($predictions['happiness']) && isset($predictions['happiness']['normalized'])) {
+            if ($predictions['happiness']['normalized'] < 5) {
+                $reply .= "<li>😢 Votre bonheur semble faible. Accordez-vous du temps pour vous reposer et faire des activités agréables.</li>";
+            } elseif ($predictions['happiness']['normalized'] >= 7) {
+                $reply .= "<li>😊 Votre niveau de bonheur est excellent! Partagez votre bonne humeur!</li>";
+            }
+        }
+
+        if (($input['sleep_hours'] ?? 0) < 7) {
+            $reply .= "<li>😴 Vous dormez moins de 7h. Essayez de dormir plus pour améliorer votre bien-être.</li>";
+        }
+        
+        if (($input['sport_hours'] ?? 0) < 2) {
+            $reply .= "<li>🏃 Essayez de faire au moins 2h de sport par semaine pour réduire le stress.</li>";
+        }
+        
+        $reply .= "</ul>";
+        $reply .= "</div>";
+
+        return $reply;
     }
 
     /**

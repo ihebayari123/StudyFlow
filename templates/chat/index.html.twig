@@ -1,39 +1,56 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Chat - StudyFlow{% endblock %}
+{% block title %}Chat Bien-être - StudyFlow{% endblock %}
 
 {% block body %}
 <style>
+    * {
+        box-sizing: border-box;
+    }
+    
     .chat-wrapper {
         display: flex;
         flex-direction: column;
         height: calc(100vh - 120px);
-        max-width: 1200px;
+        max-width: 900px;
         margin: 0 auto;
         padding: 20px;
+        background: linear-gradient(180deg, #f0f4ff 0%, #ffffff 100%);
     }
     
     .chat-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 20px;
-        border-radius: 12px 12px 0 0;
+        padding: 20px 30px;
+        border-radius: 20px 20px 0 0;
         display: flex;
         align-items: center;
         gap: 15px;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
     }
     
     .chat-header h1 {
         margin: 0;
         font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .chat-header .bot-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
     }
     
     .chat-container {
         flex: 1;
         background: white;
-        border: 1px solid #e0e0e0;
-        border-top: none;
-        border-radius: 0 0 12px 12px;
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -43,120 +60,359 @@
         flex: 1;
         padding: 20px;
         overflow-y: auto;
-        background: #f5f7fa;
+        background: linear-gradient(180deg, #fafbfc 0%, #f0f4ff 100%);
     }
     
     .message {
         margin-bottom: 15px;
-        max-width: 70%;
-        padding: 12px 16px;
-        border-radius: 12px;
-        line-height: 1.5;
+        max-width: 80%;
+        padding: 15px 20px;
+        border-radius: 20px;
+        line-height: 1.6;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     
     .message.bot {
         background: white;
-        border: 1px solid #e0e0e0;
+        border: 2px solid #e8ecf4;
         margin-right: auto;
-        border-bottom-left-radius: 2px;
+        border-bottom-left-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
     
     .message.user {
-        background: #667eea;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         margin-left: auto;
-        border-bottom-right-radius: 2px;
+        border-bottom-right-radius: 5px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .message.system {
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        margin: 10px auto;
+        text-align: center;
+        max-width: 90%;
     }
     
     .chat-input-area {
-        padding: 15px;
+        padding: 20px;
         background: white;
-        border-top: 1px solid #e0e0e0;
+        border-top: 1px solid #e8ecf4;
+    }
+    
+    .chat-input-wrapper {
         display: flex;
         gap: 10px;
+        max-width: 100%;
     }
     
     .chat-input {
         flex: 1;
-        padding: 12px 16px;
-        border: 1px solid #ddd;
-        border-radius: 24px;
+        padding: 15px 20px;
+        border: 2px solid #e8ecf4;
+        border-radius: 30px;
         font-size: 14px;
         outline: none;
-        transition: border-color 0.2s;
+        transition: all 0.3s;
     }
     
     .chat-input:focus {
         border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
     
     .send-btn {
-        padding: 12px 24px;
-        background: #667eea;
+        padding: 15px 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border: none;
-        border-radius: 24px;
+        border-radius: 30px;
         cursor: pointer;
-        font-weight: 500;
-        transition: background 0.2s;
+        font-weight: 600;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
     
     .send-btn:hover {
-        background: #5568d3;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
     }
     
     .send-btn:disabled {
         background: #ccc;
         cursor: not-allowed;
+        transform: none;
     }
     
-    .loading-indicator {
+    /* Questionnaire Styles */
+    .questionnaire {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin: 10px 0;
+        border: 3px solid #667eea;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.2);
+    }
+    
+    .questionnaire h3 {
+        margin-top: 0;
+        color: #667eea;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .question-item {
+        margin-bottom: 20px;
+    }
+    
+    .question-item label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+        font-size: 14px;
+    }
+    
+    .question-item label .icon {
+        margin-right: 8px;
+    }
+    
+    .question-item input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e8ecf4;
+        border-radius: 12px;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+    
+    .question-item input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .questionnaire .analyze-btn {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 10px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .questionnaire .analyze-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .questionnaire .analyze-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+    
+    /* Results Cards */
+    .results-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin: 15px 0;
+    }
+    
+    .result-card {
+        padding: 20px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .result-card.happiness {
+        background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+        border: 2px solid #f39c12;
+    }
+    
+    .result-card.stress {
+        background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
+        color: white;
+        border: 2px solid #c0392b;
+    }
+    
+    .result-card.low-stress {
+        background: linear-gradient(135deg, #55efc4 0%, #00b894 100%);
+        border: 2px solid #00b894;
+    }
+    
+    .result-card .icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+    
+    .result-card .title {
+        font-weight: 700;
+        font-size: 14px;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+    
+    .result-card .value {
+        font-size: 32px;
+        font-weight: 800;
+        margin: 10px 0;
+    }
+    
+    .result-card .level {
+        font-size: 14px;
+        font-weight: 600;
+        padding: 5px 15px;
+        border-radius: 20px;
         display: inline-block;
-        margin-left: 10px;
     }
     
-    .typing {
+    .result-card.happiness .level {
+        background: rgba(255,255,255,0.5);
+    }
+    
+    .result-card.stress .level, 
+    .result-card.low-stress .level {
+        background: rgba(0,0,0,0.2);
+        color: white;
+    }
+    
+    .tips-section {
+        background: #e8f5e9;
+        border: 2px solid #4caf50;
+        border-radius: 15px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    
+    .tips-section h4 {
+        margin: 0 0 10px 0;
+        color: #2e7d32;
+    }
+    
+    .tips-section ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+    
+    .tips-section li {
+        margin-bottom: 5px;
+        color: #333;
+    }
+    
+    /* Quick Actions */
+    .quick-actions {
         display: flex;
-        gap: 4px;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 10px;
     }
     
-    .typing span {
-        width: 8px;
-        height: 8px;
+    .quick-btn {
+        padding: 8px 16px;
+        background: #f0f4ff;
+        border: 2px solid #667eea;
+        border-radius: 20px;
+        color: #667eea;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .quick-btn:hover {
         background: #667eea;
-        border-radius: 50%;
-        animation: typing 1.4s infinite;
+        color: white;
     }
     
-    .typing span:nth-child(2) { animation-delay: 0.2s; }
-    .typing span:nth-child(3) { animation-delay: 0.4s; }
+    /* Loading */
+    .loading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #666;
+    }
     
-    @keyframes typing {
-        0%, 60%, 100% { transform: translateY(0); }
-        30% { transform: translateY(-8px); }
+    .spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+        .results-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .chat-wrapper {
+            padding: 10px;
+        }
+        
+        .message {
+            max-width: 90%;
+        }
     }
 </style>
 
 <div class="chat-wrapper">
     <div class="chat-header">
-        <span style="font-size: 24px;">🤖</span>
-        <h1>Dr. MediBot - Assistant Santé</h1>
+        <div class="bot-icon">🤖</div>
+        <div>
+            <h1>Dr. MediBot</h1>
+            <small style="opacity: 0.9;">Assistant Bien-être & Santé</small>
+        </div>
     </div>
     
     <div class="chat-container">
         <div class="chat-messages" id="chatMessages">
             <div class="message bot">
-                👋 Bonjour ! Je suis votre assistant médical virtuel. 
+                👋 <strong>Bienvenue sur MediBot!</strong>
                 <br><br>
-                Je peux vous aider avec :
+                Je suis votre assistant personnel de bien-être. Je peux vous aider à:
+                <br><br>
+                🎯 <strong>Évaluer votre niveau de:</strong>
                 <ul>
-                    <li>Des conseils pour gérer le stress</li>
-                    <li>Des informations sur l'anxiété</li>
-                    <li>Des tips pour améliorer votre sommeil</li>
-                    <li>Des recommandations bien-être</li>
+                    <li>😌 <strong>Bonheur</strong> - basé sur vos habitudes de sommeil et d'étude</li>
+                    <li>😰 <strong>Stress</strong> - basé sur 5 facteurs de votre quotidien</li>
                 </ul>
-                <br>
-                <strong>Comment puis-je vous aider aujourd'hui ?</strong>
+                💡 <strong>Vous donner des conseils personnalisés</strong> pour améliorer votre bien-être.
+                <br><br>
+                <em>Cliquez sur le bouton ci-dessous pour commencer l'évaluation!</em>
+            </div>
+            
+            <div style="text-align: center; margin: 20px 0;">
+                <button class="send-btn" onclick="showQuestionnaire()" style="font-size: 18px; padding: 15px 40px;">
+                    📊 Faire le test
+                </button>
+            </div>
+        </div>
+        
+        <div class="chat-input-area">
+            <div class="chat-input-wrapper">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Tapez votre message..." autocomplete="off">
+                <button id="sendBtn" class="send-btn" onclick="sendMessage()">Envoyer</button>
             </div>
         </div>
         
@@ -172,6 +428,7 @@
     const chatInput = document.getElementById('chatInput');
     const sendBtn = document.getElementById('sendBtn');
     
+    // Allow Enter key to send
     chatInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -179,13 +436,135 @@
         }
     });
     
+    function showQuestionnaire() {
+        const questionnaireHTML = `
+            <div class="questionnaire" id="questionnaire">
+                <h3>📋 Questionnaire Bien-être</h3>
+                <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                    Répondez à ces 5 questions pour obtenir votre analyse
+                </p>
+                
+                <div class="question-item">
+                    <label><span class="icon">😴</span>1. Combien d'heures dormez-vous par nuit ?</label>
+                    <input type="number" id="sleepHours" min="0" max="24" step="0.5" placeholder="Ex: 7" required>
+                </div>
+                
+                <div class="question-item">
+                    <label><span class="icon">📚</span>2. Combien d'heures étudiez-vous par jour ?</label>
+                    <input type="number" id="studyHours" min="0" max="24" step="0.5" placeholder="Ex: 4" required>
+                </div>
+                
+                <div class="question-item">
+                    <label><span class="icon">☕</span>3. Combien de tasses de café buvez-vous par jour ?</label>
+                    <input type="number" id="coffeeCups" min="0" max="50" placeholder="Ex: 2" required>
+                </div>
+                
+                <div class="question-item">
+                    <label><span class="icon">🎂</span>4. Quel est votre âge ?</label>
+                    <input type="number" id="age" min="1" max="120" placeholder="Ex: 20" required>
+                </div>
+                
+                <div class="question-item">
+                    <label><span class="icon">🏃</span>5. Combien d'heures faites-vous du sport par semaine ?</label>
+                    <input type="number" id="sportHours" min="0" max="50" step="0.5" placeholder="Ex: 3" required>
+                </div>
+                
+                <button class="analyze-btn" onclick="analyzeWellbeing()" id="analyzeBtn">
+                    🔍 Analyser mon bien-être
+                </button>
+            </div>
+        `;
+        
+        addMessage(questionnaireHTML, 'bot');
+    }
+    
+    function analyzeWellbeing() {
+        const sleepHours = parseFloat(document.getElementById('sleepHours').value);
+        const studyHours = parseFloat(document.getElementById('studyHours').value);
+        const coffeeCups = parseInt(document.getElementById('coffeeCups').value);
+        const age = parseInt(document.getElementById('age').value);
+        const sportHours = parseFloat(document.getElementById('sportHours').value) || 0;
+        
+        // Validation
+        if (isNaN(sleepHours) || isNaN(studyHours) || isNaN(coffeeCups) || isNaN(age)) {
+            addMessage('❌ Veuillez remplir tous les champs correctement.', 'bot');
+            return;
+        }
+        
+        if (sleepHours < 0 || sleepHours > 24 || studyHours < 0 || studyHours > 24) {
+            addMessage('❌ Les heures de sommeil et d\'étude doivent être entre 0 et 24.', 'bot');
+            return;
+        }
+        
+        if (coffeeCups < 0 || coffeeCups > 50 || age < 1 || age > 120) {
+            addMessage('❌ Veuillez vérifier vos réponses.', 'bot');
+            return;
+        }
+        
+        // Disable button and show loading
+        const btn = document.getElementById('analyzeBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Analyse en cours...';
+        
+        // Add loading message
+        addMessage('<div class="loading"><div class="spinner"></div> Analyse en cours avec les modèles ML...</div>', 'bot');
+        
+        const formData = new FormData();
+        formData.append('wellbeing_mode', 'true');
+        formData.append('sleep_hours', sleepHours);
+        formData.append('study_hours', studyHours);
+        formData.append('coffee_cups', coffeeCups);
+        formData.append('age', age);
+        formData.append('sport_hours', sportHours);
+        
+        fetch('{{ path('chat_send') }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erreur HTTP: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Remove loading message
+            const messages = chatMessages.querySelectorAll('.message');
+            if (messages.length > 0) {
+                messages[messages.length - 1].remove();
+            }
+            
+            // Show results
+            addMessage(data.reply || 'Analyse terminée', 'bot');
+            
+            // Re-enable button
+            btn.disabled = false;
+            btn.innerHTML = '🔍 Analyser mon bien-être';
+            
+            // Add quick action to retest
+            addMessage('<div class="quick-actions"><button class="quick-btn" onclick="showQuestionnaire()">📊 Refaire le test</button></div>', 'bot');
+        })
+        .catch(error => {
+            // Remove loading message
+            const messages = chatMessages.querySelectorAll('.message');
+            if (messages.length > 0) {
+                messages[messages.length - 1].remove();
+            }
+            
+            addMessage('❌ Désolé, une erreur est survenue lors de l\'analyse.<br><br>Détails: ' + error.message, 'bot');
+            
+            // Re-enable button
+            btn.disabled = false;
+            btn.innerHTML = '🔍 Analyser mon bien-être';
+        });
+    }
+    
     function sendMessage() {
         const message = chatInput.value.trim();
         if (!message) return;
         
         addMessage(message, 'user');
         chatInput.value = '';
-        showTyping();
         
         const formData = new FormData();
         formData.append('message', message);
@@ -201,13 +580,10 @@
             return response.json();
         })
         .then(data => {
-            hideTyping();
             addMessage(data.reply || 'Réponse reçue', 'bot');
         })
         .catch(error => {
-            hideTyping();
-            addMessage('Désolé, une erreur est survenue. Veuillez réessayer.', 'bot');
-            console.error('Error:', error);
+            addMessage('Désolé, une erreur est survenue: ' + error.message, 'bot');
         });
     }
     
@@ -218,43 +594,5 @@
         chatMessages.appendChild(div);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-    
-    let typingIndicator = null;
-    
-    function showTyping() {
-        sendBtn.disabled = true;
-        typingIndicator = document.createElement('div');
-        typingIndicator.className = 'message bot';
-        typingIndicator.id = 'typingIndicator';
-        typingIndicator.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
-        chatMessages.appendChild(typingIndicator);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-    
-    function hideTyping() {
-        sendBtn.disabled = false;
-        if (typingIndicator) {
-            typingIndicator.remove();
-            typingIndicator = null;
-        }
-    }
-    
-    // Health check - maintenant vers la bonne route
-    fetch('/chat/health')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Health check failed');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (!data.connected) {
-                addMessage('⚠️ Le serveur de diagnostic semble hors ligne. Veuillez vérifier que le serveur Flask est en cours d\'exécution.', 'bot');
-            }
-        })
-        .catch(() => {
-            // Silencieux - ne pas afficher d'erreur si le health check échoue
-            console.log('Health check unavailable');
-        });
 </script>
 {% endblock %}
