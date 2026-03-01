@@ -29,7 +29,7 @@ class NotificationController extends AbstractController
         $count = count($notificationService->getUnreadForAdmin());
         
         // ⚠️ Il faut retourner un objet Response, pas un nombre
-        return new Response($count);
+        return new Response((string)$count);
     }
 
     #[Route('/notifications/mark-all-read', name: 'app_notifications_mark_all_read')]  // ← supprime methods

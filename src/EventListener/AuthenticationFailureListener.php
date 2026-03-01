@@ -2,7 +2,7 @@
 // src/EventListener/AuthenticationFailureListener.php
 namespace App\EventListener;
 
-use Symfony\Component\Security\Core\Event\AuthenticationFailureEvent;
+use Symfony\Component\Security\Http\Event\LoginFailureEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Utilisateur;
 
@@ -15,7 +15,7 @@ class AuthenticationFailureListener
         $this->entityManager = $entityManager;
     }
 
-    public function onAuthenticationFailure(AuthenticationFailureEvent $event)
+    public function onAuthenticationFailure(LoginFailureEvent $event)
     {
         $email = $event->getAuthenticationToken()->getUser();
 

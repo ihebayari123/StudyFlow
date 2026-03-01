@@ -28,6 +28,14 @@ class TypeCategorieRepository extends ServiceEntityRepository
         
         return $query->getResult();
     }
+    public function findByNomCategorie(string $nom): ?TypeCategorie
+{
+    return $this->createQueryBuilder('tc')
+        ->andWhere('tc.nomCategorie = :nom')
+        ->setParameter('nom', $nom)
+        ->getQuery()
+        ->getOneOrNullResult();
+}
 
 
 

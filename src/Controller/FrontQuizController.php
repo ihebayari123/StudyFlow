@@ -104,7 +104,8 @@ public function quizSubmit(
     if (!$quiz) throw $this->createNotFoundException('Quiz introuvable');
 
     $questions = $questionRepository->findBy(['quiz' => $quiz]);
-    $answers = $request->request->all('answers') ?? [];
+    $answers = $request->request->all('answers');
+
 
     $scoreQuestions = 0;
     $scorePoints = 0;
@@ -178,7 +179,10 @@ public function quizSubmit(
 
     
     if ($this->getUser()) {
-        $attempt->setUser($this->getUser());
+        $user = $this->getUser();
+    if ($user instanceof \App\Entity\Utilisateur) {
+        $attempt->setUser($user);
+    }
     }
 
     $em->persist($attempt);

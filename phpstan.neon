@@ -1,0 +1,12 @@
+parameters:
+    level: 5
+    paths:
+        - src
+    ignoreErrors:
+        - '#is never assigned int so it can be removed from the property type#'
+        - '#is never assigned null so it can be removed from the property type#'
+        - '#Comparison operation ">" between .* and .* is always true#'
+        - '#Comparison operation ">" between .* and .* is always false#'
+        - '#Expression on left side of \?\? is not nullable#'
+        - '#Call to function is_array\(\) with .* will always evaluate to false#'
+        - '#If condition is always false#'

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Chapitre;
 use App\Entity\Cours;
+use App\Entity\Utilisateur;
 use App\Service\OllamaService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -64,7 +65,9 @@ class AiCourseController extends AbstractController
             $cours->setDescription(mb_substr($data['description'], 0, 255));
             $imageKeyword = urlencode(strtolower(trim($data['titre'])));
             $cours->setImage('https://source.unsplash.com/800x450/?' . $imageKeyword);
-            $cours->setUser($user);
+            if ($user instanceof Utilisateur) {
+    $cours->setUser($user);
+}
             $this->em->persist($cours);
 
             foreach ($data['chapitres'] as $index => $chData) {

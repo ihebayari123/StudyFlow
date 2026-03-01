@@ -166,7 +166,7 @@ PROMPT;
 
         try {
             $payload = json_encode([
-                'model'  => 'phi3:mini',
+                'model'  => 'phi3:latest',
                 'prompt' => $prompt,
                 'stream' => false,
                 'options' => [
