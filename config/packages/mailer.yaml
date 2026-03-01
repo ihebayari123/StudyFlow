@@ -1,0 +1,7 @@
+framework:
+    mailer:
+        dsn: '%env(MAILER_DSN)%'
+        envelope:
+            sender: 'rokitube8@gmail.com'
+        headers:
+            From: 'StudyFlow <rokitube8@gmail.com>'

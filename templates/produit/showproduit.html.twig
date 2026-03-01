@@ -1,0 +1,259 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Gestion des Produits{% endblock %}
+
+{% block body %}
+
+<div class="admin-layout">
+
+    {% include 'admin/Partials/sidebar.html.twig' %}
+    {% include 'admin/partials/navbar.html.twig' %}
+
+    <main class="main-content">
+
+        <h2 class="page-title">🛍️ Gestion des Produits</h2>
+
+        <!-- Formulaire de recherche -->
+        <form method="get" class="search-form">
+            <input
+                type="text"
+                name="q"
+                placeholder="Recherche par nom de produit..."
+                value="{{ app.request.get('q') }}"
+            >
+            <button type="submit">🔍</button>
+        </form>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table class="quiz-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Produit</th>
+                        <th>Description</th>
+                        <th>Prix</th>
+                        <th>Image</th>
+                        <th>Catégorie</th>
+                        <th>User</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for produit in listproduit %}
+                    <tr>
+                        <td><strong>#{{ produit.id }}</strong></td>
+                        <td><strong>{{ produit.nom }}</strong></td>
+                        <td>{{ produit.description|length > 50 ? produit.description|slice(0, 50) ~ '...' : produit.description }}</td>
+                        <td class="price">{{ produit.prix }} DT</td>
+                        <td>
+                            {% if produit.image %}
+                                <img src="{{ asset('uploads/' ~ produit.image) }}" alt="{{ produit.nom }}" class="product-img">
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td><span class="badge">{{ produit.typeCategorie.nomCategorie }}</span></td>
+                        <td>{{ produit.user.role }}</td>
+                        <td class="actions">
+                            <a href="{{ path('app_updateproduit', {id: produit.id}) }}" title="Modifier">✏️</a>
+                            <a href="{{ path('app_deleteproduit', {id: produit.id}) }}" 
+                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')" 
+                               title="Supprimer">🗑️</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="no-result">📭 Aucun produit trouvé</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Add button -->
+        <div class="add-btn">
+            <a href="{{ path('app_addproduit') }}">➕ Ajouter un Produit</a>
+        </div>
+
+    </main>
+</div>
+
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets2/images/favicon.ico') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/vendors/css/vendors.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/theme.min.css') }}" />
+
+    <style>
+    .admin-layout {
+        display: flex;
+    }
+
+    .main-content {
+        margin-left: 260px; 
+        padding: 30px;
+        width: calc(100% - 260px);
+        background-color: #f4f6f8;
+        min-height: 100vh;
+    }
+
+    .page-title {
+        margin-bottom: 20px;
+        font-size: 24px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    /* Formulaire de recherche */
+    .search-form {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .search-form input {
+        flex: 1;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+    }
+
+    .search-form button {
+        padding: 10px 15px;
+        background-color: #4f46e5;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .search-form button:hover {
+        background-color: #4338ca;
+    }
+
+    /* Table */
+    .table-container {
+        background: white;
+        border-radius: 8px;
+        overflow-x: auto;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .quiz-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .quiz-table th,
+    .quiz-table td {
+        padding: 14px;
+        text-align: left;
+    }
+
+    .quiz-table thead {
+        background-color: #4f46e5;
+        color: white;
+    }
+
+    .quiz-table tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .quiz-table tbody tr:hover {
+        background-color: #eef2ff;
+    }
+
+    .quiz-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    /* Prix */
+    .price {
+        color: #10b981;
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    /* Badge catégorie */
+    .badge {
+        padding: 5px 12px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    /* Image produit */
+    .product-img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 2px solid #e5e7eb;
+    }
+
+    /* Actions */
+    .actions {
+        white-space: nowrap;
+    }
+
+    .actions a {
+        margin-right: 12px;
+        text-decoration: none;
+        font-size: 18px;
+        transition: transform 0.2s;
+        display: inline-block;
+    }
+
+    .actions a:hover {
+        transform: scale(1.2);
+    }
+
+    /* Aucun résultat */
+    .no-result {
+        text-align: center;
+        padding: 40px;
+        color: #6b7280;
+        font-style: italic;
+    }
+
+    /* Bouton ajouter */
+    .add-btn {
+        margin-top: 20px;
+        text-align: right;
+    }
+
+    .add-btn a {
+        padding: 10px 16px;
+        background-color: #10b981;
+        color: white;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background-color 0.3s;
+        display: inline-block;
+    }
+
+    .add-btn a:hover {
+        background-color: #059669;
+    }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets2/vendors/js/vendors.min.js') }}"></script>
+    <script src="{{ asset('assets2/js/common-init.min.js') }}"></script>
+    <script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
+{% endblock %}

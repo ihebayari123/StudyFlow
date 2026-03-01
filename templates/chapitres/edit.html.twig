@@ -1,0 +1,683 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Edit Chapter{% endblock %}
+
+{% block admin_content %}
+<div class="admin-main-content">
+    <div class="container-fluid px-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ path('app_coursesback') }}" class="text-decoration-none">
+                        <i class="fas fa-book me-1"></i> Courses
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ path('app_chapitres', {'courseId': chapitre.course.id}) }}" class="text-decoration-none">
+                        {{ chapitre.course.titre }}
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Edit Chapter</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-2">
+                    <i class="fas fa-edit text-primary me-2"></i>Edit Chapter
+                </h1>
+                <p class="text-muted">Update chapter information for <span class="fw-semibold text-primary">{{ chapitre.course.titre }}</span></p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ path('app_chapitre_versions', {'id': chapitre.id}) }}" class="btn btn-outline-primary rounded-3">
+                    <i class="fas fa-code-branch me-2"></i>Version History
+                </a>
+                <span class="badge bg-warning bg-gradient px-3 py-2">
+                    <i class="fas fa-pen me-1"></i> Editing Mode
+                </span>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Form -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <form method="post" action="{{ path('app_editchapitre', {'id': chapitre.id}) }}" enctype="multipart/form-data">
+                            <!-- Chapter Title & Order Row -->
+                            <div class="row g-4 mb-4">
+                                <div class="col-md-8">
+                                    <label class="form-label fw-semibold">
+                                        <i class="fas fa-heading text-primary me-2"></i>Chapter Title
+                                    </label>
+                                    <div class="form-floating">
+                                        <input type="text" 
+                                               id="titre" 
+                                               name="titre" 
+                                               class="form-control rounded-3" 
+                                               placeholder="Enter chapter title"
+                                               value="{{ chapitre.titre }}"
+                                               required>
+                                        <label for="titre">Chapter title</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        <i class="fas fa-sort-numeric-up text-primary me-2"></i>Order
+                                    </label>
+                                    <div class="form-floating">
+                                        <input type="number" 
+                                               id="ordre" 
+                                               name="ordre" 
+                                               class="form-control rounded-3" 
+                                               placeholder="Order"
+                                               value="{{ chapitre.ordre }}"
+                                               min="1"
+                                               required>
+                                        <label for="ordre">Chapter number</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Duration -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-clock text-primary me-2"></i>Estimated Duration
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0 rounded-start-3">
+                                        <i class="fas fa-hourglass-half text-primary"></i>
+                                    </span>
+                                    <input type="number" 
+                                           id="durationMinutes" 
+                                           name="durationMinutes" 
+                                           class="form-control rounded-0" 
+                                           placeholder="30"
+                                           value="{{ chapitre.durationMinutes }}"
+                                           min="1">
+                                    <span class="input-group-text bg-light border-0 rounded-end-3">minutes</span>
+                                </div>
+                                <small class="text-muted">How long will this chapter take to complete?</small>
+                            </div>
+
+                            <!-- Content Type Selection -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-layer-group text-primary me-2"></i>Content Type
+                                </label>
+                                <select id="contentType" name="contentType" class="form-select rounded-3" required>
+                                    <option value="" disabled>Select content type...</option>
+                                    <option value="text" {% if chapitre.contentType == 'text' %}selected{% endif %}>📝 Text Only</option>
+                                    <option value="video" {% if chapitre.contentType == 'video' %}selected{% endif %}>🎥 Video</option>
+                                    <option value="file" {% if chapitre.contentType == 'file' %}selected{% endif %}>📁 File/Document</option>
+                                    <option value="mixed" {% if chapitre.contentType == 'mixed' %}selected{% endif %}>🔄 Mixed Content</option>
+                                </select>
+                            </div>
+
+                            <!-- Content Description -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-file-alt text-primary me-2"></i>Content Description
+                                </label>
+                                <textarea id="contenu" 
+                                          name="contenu" 
+                                          class="form-control rounded-3" 
+                                          placeholder="Write the chapter content and description..."
+                                          rows="6"
+                                          required>{{ chapitre.contenu }}</textarea>
+                                <small class="text-muted">Provide detailed information about this chapter</small>
+                            </div>
+
+                            <!-- Dynamic Content Sections -->
+                            <div id="videoSection" class="content-section mb-4" style="display: {% if chapitre.contentType in ['video', 'mixed'] %}block{% else %}none{% endif %};">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="section-icon bg-primary bg-opacity-10 p-2 rounded-3 me-3">
+                                        <i class="fab fa-youtube text-primary"></i>
+                                    </div>
+                                    <h6 class="mb-0 fw-semibold">Video Content</h6>
+                                </div>
+                                <label class="form-label">Video URL</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0">
+                                        <i class="fas fa-link text-primary"></i>
+                                    </span>
+                                    <input type="url" 
+                                           id="videoUrl" 
+                                           name="videoUrl" 
+                                           class="form-control" 
+                                           value="{{ chapitre.videoUrl }}"
+                                           placeholder="https://www.youtube.com/watch?v=...">
+                                </div>
+                                <small class="text-muted">Supports YouTube, Vimeo, or direct video links</small>
+                            </div>
+
+                            <div id="fileUploadSection" class="content-section mb-4" style="display: {% if chapitre.contentType in ['file', 'mixed'] %}block{% else %}none{% endif %};">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="section-icon bg-success bg-opacity-10 p-2 rounded-3 me-3">
+                                        <i class="fas fa-upload text-success"></i>
+                                    </div>
+                                    <h6 class="mb-0 fw-semibold">File Upload</h6>
+                                </div>
+                                
+                                {% if chapitre.fileName %}
+                                    <div class="current-file mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-file-alt fa-2x text-primary me-3"></i>
+                                            <div>
+                                                <strong>{{ chapitre.fileName }}</strong>
+                                                <p class="text-muted small mb-0">Current file</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                
+                                <label class="form-label">Upload New File/Document</label>
+                                <input type="file" 
+                                       id="fileUpload" 
+                                       name="fileUpload" 
+                                       class="form-control" 
+                                       accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.zip">
+                                <small class="text-muted">Accepted formats: PDF, DOC, DOCX, PPT, PPTX, TXT, ZIP (Max: 10MB)</small>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="removeFile" name="removeFile">
+                                    <label class="form-check-label text-danger" for="removeFile">
+                                        Remove current file
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Thumbnail -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-image text-primary me-2"></i>Chapter Thumbnail
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0">
+                                        <i class="fas fa-link text-primary"></i>
+                                    </span>
+                                    <input type="url" 
+                                           id="imageUrl" 
+                                           name="imageUrl" 
+                                           class="form-control" 
+                                           value="{{ chapitre.imageUrl }}"
+                                           placeholder="https://example.com/image.jpg">
+                                </div>
+                                <small class="text-muted">Optional: Add a thumbnail image URL for this chapter</small>
+                            </div>
+
+                            <!-- Additional Resources -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-link text-primary me-2"></i>Additional Resources
+                                </label>
+                                <div class="resources-container bg-light p-3 rounded-3" id="linksContainer">
+                                    {% if chapitre.links and chapitre.links|length > 0 %}
+                                        {% for link in chapitre.links %}
+                                            <div class="link-item mb-3">
+                                                <input type="text" 
+                                                       name="linkTitle[]" 
+                                                       class="form-control mb-2" 
+                                                       value="{{ link.title }}"
+                                                       placeholder="Resource title">
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-white">
+                                                        <i class="fas fa-globe text-primary"></i>
+                                                    </span>
+                                                    <input type="url" 
+                                                           name="linkUrl[]" 
+                                                           class="form-control" 
+                                                           value="{{ link.url }}"
+                                                           placeholder="https://example.com">
+                                                    <button type="button" class="btn btn-outline-danger remove-link-btn">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="link-item mb-3">
+                                            <input type="text" 
+                                                   name="linkTitle[]" 
+                                                   class="form-control mb-2" 
+                                                   placeholder="Resource title">
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white">
+                                                    <i class="fas fa-globe text-primary"></i>
+                                                </span>
+                                                <input type="url" 
+                                                       name="linkUrl[]" 
+                                                       class="form-control" 
+                                                       placeholder="https://example.com">
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="addLinkBtn">
+                                    <i class="fas fa-plus me-2"></i>Add Another Resource
+                                </button>
+                                <small class="text-muted d-block mt-2">Add helpful links and resources for students</small>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="d-flex gap-3 justify-content-end pt-4 border-top">
+                                <a href="{{ path('app_chapitres', {'courseId': chapitre.course.id}) }}" class="btn btn-outline-secondary px-4 rounded-3">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary px-5 rounded-3 shadow-sm">
+                                    <i class="fas fa-save me-2"></i>Update Chapter
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Panel -->
+            <div class="col-lg-4">
+                <!-- Chapter Info Card -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="chapter-icon bg-primary bg-opacity-10 p-3 rounded-3 me-3">
+                                <i class="fas fa-layer-group text-primary fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Current Chapter</h6>
+                                <h5 class="mb-0 fw-semibold">Chapter {{ chapitre.ordre }}</h5>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Course</span>
+                            <span class="fw-semibold">{{ chapitre.course.titre }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Content Type</span>
+                            <span class="badge bg-light text-dark">{{ chapitre.contentType|capitalize }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Chapter Number</span>
+                            <span class="fw-semibold">{{ chapitre.ordre }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Card -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-transparent border-0 pt-4">
+                        <h5 class="mb-0">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Editing Tips
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-3">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <strong>Title:</strong> Keep it consistent with course flow
+                            </li>
+                            <li class="mb-3">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <strong>Content:</strong> Update descriptions as needed
+                            </li>
+                            <li class="mb-3">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <strong>Resources:</strong> Refresh outdated links
+                            </li>
+                            <li class="mb-3">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <strong>Files:</strong> Replace with updated versions
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Version Info Card -->
+                <div class="card border-0 shadow-sm rounded-4 bg-gradient-info text-white">
+                    <div class="card-body p-4">
+                        <h5 class="text-white mb-3">
+                            <i class="fas fa-code-branch me-2"></i>Version Control
+                        </h5>
+                        <p class="small opacity-75 mb-3">Track all changes made to this chapter</p>
+                        <div class="d-grid">
+                            <a href="{{ path('app_chapitre_versions', {'id': chapitre.id}) }}" class="btn btn-light">
+                                <i class="fas fa-history me-2"></i>View Version History
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Styles -->
+<style>
+    /* Main container */
+    .admin-main-content {
+        margin-left: 280px;
+        padding: 30px 40px 40px 40px;
+        min-height: 100vh;
+        background-color: #f8f9fa;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+        background-color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .breadcrumb-item a {
+        color: #667eea;
+    }
+
+    .breadcrumb-item.active {
+        color: #6c757d;
+    }
+
+    /* Card styles */
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.1) !important;
+    }
+
+    /* Form controls */
+    .form-control, .form-select {
+        border: 1px solid #e0e0e0;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        padding: 12px 15px;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.1);
+    }
+
+    .form-floating > label {
+        color: #6c757d;
+        font-weight: 400;
+    }
+
+    .form-floating > .form-control:focus ~ label,
+    .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        color: #4f46e5;
+        font-weight: 500;
+        transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+    }
+
+    /* Input group */
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #e0e0e0;
+    }
+
+    /* Content sections */
+    .content-section {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        border-left: 4px solid #4f46e5;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .section-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Resources container */
+    .resources-container {
+        background-color: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .link-item {
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Badge styling */
+    .badge.bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .badge.bg-gradient-warning {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    }
+
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+    }
+
+    /* Button styles */
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1.5rem rgba(102, 126, 234, 0.3) !important;
+    }
+
+    .btn-outline-primary {
+        border: 1px solid #667eea;
+        color: #667eea;
+    }
+
+    .btn-outline-primary:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: transparent;
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1.5rem rgba(102, 126, 234, 0.2);
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        border-color: #6c757d;
+    }
+
+    /* List styling */
+    .list-unstyled li {
+        padding: 8px 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: background 0.2s;
+    }
+
+    .list-unstyled li:hover {
+        background: #e9ecef;
+    }
+
+    /* Chapter icon */
+    .chapter-icon {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Current file styling */
+    .current-file {
+        background-color: #e7f3ff;
+        padding: 15px;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+    }
+
+    /* File input styling */
+    input[type="file"].form-control {
+        padding: 10px;
+    }
+
+    input[type="file"].form-control::file-selector-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        margin-right: 15px;
+        transition: all 0.3s ease;
+    }
+
+    input[type="file"].form-control::file-selector-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    /* Checkbox styling */
+    .form-check-input:checked {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    /* Responsive */
+    @media (max-width: 991.98px) {
+        .admin-main-content {
+            margin-left: 0;
+            padding: 20px;
+        }
+    }
+
+    /* Animation for button click */
+    .btn:active {
+        transform: scale(0.95);
+    }
+
+    /* Hover effect for remove button */
+    .btn-outline-danger {
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+
+    .btn-outline-danger:hover {
+        background: #dc3545;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.2);
+    }
+
+    /* Version history button */
+    .btn-light {
+        background: white;
+        color: #333;
+        border: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-light:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+    }
+</style>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Content Type Toggle
+        const contentTypeSelect = document.getElementById('contentType');
+        const videoSection = document.getElementById('videoSection');
+        const fileUploadSection = document.getElementById('fileUploadSection');
+        
+        if (contentTypeSelect) {
+            contentTypeSelect.addEventListener('change', function() {
+                // Hide all sections
+                if (videoSection) videoSection.style.display = 'none';
+                if (fileUploadSection) fileUploadSection.style.display = 'none';
+                
+                // Show relevant sections
+                switch(this.value) {
+                    case 'video':
+                        if (videoSection) videoSection.style.display = 'block';
+                        break;
+                    case 'file':
+                        if (fileUploadSection) fileUploadSection.style.display = 'block';
+                        break;
+                    case 'mixed':
+                        if (videoSection) videoSection.style.display = 'block';
+                        if (fileUploadSection) fileUploadSection.style.display = 'block';
+                        break;
+                }
+            });
+        }
+
+        // Add Link Functionality
+        const addLinkBtn = document.getElementById('addLinkBtn');
+        const linksContainer = document.getElementById('linksContainer');
+        
+        if (addLinkBtn) {
+            addLinkBtn.addEventListener('click', function() {
+                const newLinkItem = document.createElement('div');
+                newLinkItem.className = 'link-item mb-3';
+                newLinkItem.innerHTML = `
+                    <input type="text" 
+                           name="linkTitle[]" 
+                           class="form-control mb-2" 
+                           placeholder="Resource title">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="fas fa-globe text-primary"></i>
+                        </span>
+                        <input type="url" 
+                               name="linkUrl[]" 
+                               class="form-control" 
+                               placeholder="https://example.com">
+                        <button type="button" class="btn btn-outline-danger remove-link-btn">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                linksContainer.appendChild(newLinkItem);
+            });
+        }
+
+        // Remove link functionality (event delegation)
+        if (linksContainer) {
+            linksContainer.addEventListener('click', function(e) {
+                const removeBtn = e.target.closest('.remove-link-btn');
+                if (removeBtn) {
+                    const linkItem = removeBtn.closest('.link-item');
+                    if (document.querySelectorAll('.link-item').length > 1) {
+                        linkItem.remove();
+                    } else {
+                        alert('You need at least one resource link');
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

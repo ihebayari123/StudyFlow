@@ -1,0 +1,1863 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Santé & Bien-être{% endblock %}
+
+{% block body %}
+    <!-- Header -->
+    {% block header %}
+        {% include 'home/navbar.html.twig' %}
+    {% endblock %}
+
+    <!-- Main Content -->
+    <div class="courses-section">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="header-with-button">
+                <h1 class="section-title">Santé & Bien-être</h1>
+                <div class="header-actions">
+                    {# Statistiques - désactivé #}
+                </div>
+            </div>
+
+            <!-- Page Description -->
+            <div class="description-section">
+                <p class="description-text">
+                    Choisissez votre service de santé préféré et accédez à vos consultations médicales 
+                    ou visualisez vos scores de santé personnalisés.
+                </p>
+            </div>
+
+            <!-- Services Grid -->
+            <div class="services-grid">
+                <!-- Service: Consultation Médicale -->
+                <div class="service-card">
+                    <div class="service-image">
+                        <div class="service-logo">
+                            <div class="logo-container logo-primary">
+                                <i class="fas fa-heartbeat"></i>
+                            </div>
+                        </div>
+                        <span class="service-category">Consulte_Medecin</span>
+                        <div class="service-actions">
+                            <a href="{{ path('app_add_consultation') }}" class="action-btn doctor-btn" title="Consulter">
+                                <i class="fas fa-user-md"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <h3 class="service-title">Consulte_Medecin</h3>
+                        <p class="service-description">
+                            Service complet de santé avec suivi médical personnalisé.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Service: Score de Santé -->
+                <div class="service-card">
+                    <div class="service-image">
+                        <div class="service-logo">
+                            <div class="logo-container logo-secondary">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                        </div>
+                        <span class="service-category">Voir_score</span>
+                        <div class="service-actions">
+                            <a href="{{ path('app_add_stresse') }}" class="action-btn doctor-btn" title="Consulter">
+                                <i class="fas fa-user-md"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <h3 class="service-title">Voir_score</h3>
+                        <p class="service-description">
+                            Support psychologique et gestion du stress.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Service: Coach Stresse -->
+                <div class="service-card">
+                    <div class="service-image">
+                        <div class="service-logo">
+                            <div class="logo-container" style="background: linear-gradient(135deg, #FF6B6B 0%, #C92A2A 100%);">
+                                <i class="fas fa-spa"></i>
+                            </div>
+                        </div>
+                        <span class="service-category">COACH_STRESSE</span>
+                        <div class="service-actions">
+                            <a href="{{ path('app_stresse_coach') }}" class="action-btn" style="background: linear-gradient(135deg, #FF6B6B 0%, #C92A2A 100%);" title="Consulter coach">
+                                <i class="fas fa-user-tie"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <h3 class="service-title">Coach Stresse</h3>
+                        <p class="service-description">
+                            Accompagnement personnalisé pour la gestion du stress et l'équilibre émotionnel.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Service: Nutrition -->
+                <div class="service-card">
+                    <div class="service-image">
+                        <div class="service-logo">
+                            <div class="logo-container logo-tertiary">
+                                <i class="fas fa-apple-alt"></i>
+                            </div>
+                        </div>
+                        <span class="service-category">NUTRITION</span>
+                        <div class="service-actions">
+                            <a href="/stresse/jeux" class="action-btn score-btn" title="Consulter jeu">
+                                <i class="fas fa-gamepad"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <a href="{{ path('app_studyflow_nutrition') }}" class="service-link">
+                            <h3 class="service-title">Nutrition</h3>
+                            <p class="service-description">
+                                Plans nutritionnels personnalisés.
+                            </p>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Service: Fitness -->
+                <div class="service-card">
+                    <div class="service-image">
+                        <div class="service-logo">
+                            <div class="logo-container logo-quaternary">
+                                <i class="fas fa-dumbbell"></i>
+                            </div>
+                        </div>
+                        <span class="service-category">FITNESS</span>
+                        <div class="service-actions">
+                            <a href="{{ path('app_studyflow_fitness') }}" class="action-btn doctor-btn" title="Consulter">
+                                <i class="fas fa-user-md"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <h3 class="service-title">Fitness</h3>
+                        <p class="service-description">
+                            Programmes d'entraînement personnalisés.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Section -->
+            <div class="stats-section">
+                <h2 class="section-subtitle">Vos Statistiques</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-value">92%</h3>
+                            <p>Santé Globale</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-smile"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-value">85%</h3>
+                            <p>Bien-être</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-value">78%</h3>
+                            <p>Nutrition</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-running"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-value">90%</h3>
+                            <p>Activité</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bouton flottant pour générer emploi du temps -->
+    <a href="{{ path('app_stresse_emploie_avance') }}" class="schedule-floating-btn" title="Générer emploi du temps">
+        <i class="fas fa-calendar-alt"></i>
+        <span class="btn-text">Générer emploi du temps</span>
+    </a>
+
+    <!-- Robot X Floating Button -->
+    <button class="robot-floating-btn" id="robotToggleBtn" title="Discuter avec Robot X">
+        <i class="fas fa-robot"></i>
+        <span class="btn-text">Robot X</span>
+    </button>
+
+    <!-- Robot X Chat Interface -->
+    <div class="robot-chat-container" id="robotChatContainer">
+        <div class="robot-chat-header">
+            <div class="robot-info">
+                <i class="fas fa-robot"></i>
+                <h3>Robot X - Assistant</h3>
+            </div>
+            <button class="close-chat-btn" id="closeChatBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="robot-chat-messages" id="chatMessages">
+            <!-- Messages will be added here dynamically -->
+        </div>
+        <div class="quick-actions">
+            <button class="quick-action-btn" onclick="askAboutServices()">
+                <i class="fas fa-list"></i> Services
+            </button>
+            <button class="quick-action-btn" onclick="askAboutConsultation()">
+                <i class="fas fa-user-md"></i> Consultation
+            </button>
+            <button class="quick-action-btn" onclick="askAboutStress()">
+                <i class="fas fa-brain"></i> Stress
+            </button>
+            <button class="quick-action-btn" onclick="askAboutNutrition()">
+                <i class="fas fa-apple-alt"></i> Nutrition
+            </button>
+            <button class="quick-action-btn" onclick="askAboutFitness()">
+                <i class="fas fa-dumbbell"></i> Fitness
+            </button>
+            <button class="quick-action-btn" onclick="askAboutStats()">
+                <i class="fas fa-chart-line"></i> Statistiques
+            </button>
+        </div>
+        <div class="robot-chat-input">
+            <button id="testVoiceBtn" class="voice-ai-btn" title="Tester la voix" style="background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <button id="voiceAIBtn" class="voice-ai-btn" title="Activer la reconnaissance vocale">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <input type="text" id="userQuestion" placeholder="Posez votre question..." class="chat-input-field">
+            <button id="sendQuestionBtn" class="send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Notification de bienvenue -->
+    <div class="welcome-notification" id="welcomeNotification">
+        <div class="notification-content">
+            <div class="notification-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="notification-text">
+                <h4>Bonjour ! 👋</h4>
+                <p>Je suis Robot X, votre assistant personnel. Besoin d'aide ?</p>
+            </div>
+            <button class="notification-close" onclick="closeNotification()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="notification-progress"></div>
+    </div>
+
+    <!-- Voice Status Indicator -->
+    <div class="voice-status" id="voiceStatus">
+        <i class="fas fa-microphone"></i> <span id="voiceStatusText">En attente...</span>
+    </div>
+
+    <!-- Conteneur pour les notifications de motivation -->
+    <div class="motivation-notification-container" id="motivationNotification"></div>
+
+    <!-- Styles -->
+    {% block stylesheets %}
+        {{ parent() }}
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+            /* Reset & Base */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+            }
+
+            /* Header */
+            .header-area {
+                background: rgba(0, 0, 0, 0.3) !important;
+                backdrop-filter: blur(10px);
+            }
+
+            .header-area .logo h1,
+            .header-area .nav a,
+            .header-area .menu-trigger span,
+            nav, .navbar, nav *, .navbar *, .nav-link {
+                color: white !important;
+            }
+
+            /* Layout */
+            .courses-section {
+                padding: 120px 20px 60px 20px;
+                background-color: transparent;
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+
+            /* Typography */
+            .section-title {
+                font-size: 3rem;
+                font-weight: 700;
+                color: #ffffff;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+                margin: 0;
+            }
+
+            .section-subtitle {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #ffffff;
+                text-align: center;
+                margin-bottom: 40px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            .description-text {
+                font-size: 1.2rem;
+                color: rgba(255, 255, 255, 0.9);
+                max-width: 800px;
+                margin: 0 auto;
+                line-height: 1.6;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            }
+
+            /* Header with Button */
+            .header-with-button {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 50px;
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+
+            /* Description Section */
+            .description-section {
+                margin-bottom: 60px;
+                text-align: center;
+            }
+
+            /* Services Grid */
+            .services-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                gap: 30px;
+                margin-bottom: 60px;
+            }
+
+            .service-card {
+                background: white;
+                border-radius: 20px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            }
+
+            .service-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            }
+
+            .service-image {
+                position: relative;
+                height: 250px;
+                overflow: hidden;
+                background: linear-gradient(135deg, #f0f4ff 0%, #e6e9ff 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .service-logo {
+                text-align: center;
+            }
+
+            .logo-container {
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 20px;
+                font-size: 2.5rem;
+                color: white;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
+
+            .logo-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+            .logo-secondary { background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%); }
+            .logo-tertiary { background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%); }
+            .logo-quaternary { background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%); }
+
+            .service-category {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                background: white;
+                color: #7b68ee;
+                padding: 10px 25px;
+                border-radius: 25px;
+                font-weight: 600;
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            /* Action Buttons */
+            .service-actions {
+                position: absolute;
+                bottom: 20px;
+                right: 20px;
+                display: flex;
+                gap: 10px;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .service-card:hover .service-actions {
+                opacity: 1;
+            }
+
+            .action-btn {
+                width: 45px;
+                height: 45px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                font-size: 1.1rem;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            }
+
+            .doctor-btn {
+                background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+                color: white;
+            }
+
+            .doctor-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
+            }
+
+            .score-btn {
+                background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+                color: white;
+            }
+
+            .score-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0 6px 15px rgba(33, 150, 243, 0.4);
+            }
+
+            /* Service Content */
+            .service-content {
+                padding: 25px 30px 30px;
+                background: white;
+            }
+
+            .service-link {
+                text-decoration: none;
+                color: inherit;
+                display: block;
+            }
+
+            .service-title {
+                color: #1a1a1a;
+                font-size: 1.8rem;
+                font-weight: 700;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+
+            .service-description {
+                color: #666;
+                font-size: 1rem;
+                line-height: 1.6;
+                text-align: center;
+            }
+
+            /* Stats Section */
+            .stats-section {
+                margin-top: 60px;
+                padding: 40px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 20px;
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 30px;
+            }
+
+            .stat-item {
+                background: rgba(255, 255, 255, 0.15);
+                border-radius: 15px;
+                padding: 25px;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                transition: all 0.3s ease;
+                border: 2px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .stat-item:hover {
+                background: rgba(255, 255, 255, 0.25);
+                transform: translateY(-5px);
+            }
+
+            .stat-icon {
+                width: 60px;
+                height: 60px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.8rem;
+                color: white;
+            }
+
+            .stat-content h3 {
+                font-size: 2.5rem;
+                font-weight: 700;
+                color: white;
+                margin-bottom: 5px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            .stat-content p {
+                color: rgba(255, 255, 255, 0.9);
+                font-size: 1rem;
+                font-weight: 500;
+            }
+
+            /* Style du bouton flottant pour emploi du temps */
+            .schedule-floating-btn {
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+                color: white;
+                width: 60px;
+                height: 60px;
+                border-radius: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+                box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+                transition: all 0.3s ease;
+                z-index: 1000;
+                overflow: hidden;
+                border: 2px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .schedule-floating-btn i {
+                font-size: 1.8rem;
+                transition: all 0.3s ease;
+            }
+
+            .schedule-floating-btn .btn-text {
+                position: absolute;
+                white-space: nowrap;
+                opacity: 0;
+                transform: translateX(20px);
+                transition: all 0.3s ease;
+                font-weight: 600;
+                font-size: 1rem;
+            }
+
+            .schedule-floating-btn:hover {
+                width: 220px;
+                background: linear-gradient(135deg, #F57C00 0%, #EF6C00 100%);
+                box-shadow: 0 8px 25px rgba(255, 152, 0, 0.4);
+            }
+
+            .schedule-floating-btn:hover i {
+                transform: translateX(-40px);
+            }
+
+            .schedule-floating-btn:hover .btn-text {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            /* Robot X Floating Button */
+            .robot-floating-btn {
+                position: fixed;
+                bottom: 30px;
+                right: 100px;
+                background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
+                color: white;
+                width: 60px;
+                height: 60px;
+                border-radius: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+                box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+                transition: all 0.3s ease;
+                z-index: 1000;
+                overflow: hidden;
+                border: none;
+                cursor: pointer;
+                border: 2px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .robot-floating-btn i {
+                font-size: 1.8rem;
+                transition: all 0.3s ease;
+            }
+
+            .robot-floating-btn .btn-text {
+                position: absolute;
+                white-space: nowrap;
+                opacity: 0;
+                transform: translateX(20px);
+                transition: all 0.3s ease;
+                font-weight: 600;
+                font-size: 1rem;
+            }
+
+            .robot-floating-btn:hover {
+                width: 150px;
+                background: linear-gradient(135deg, #0097A7 0%, #006064 100%);
+                box-shadow: 0 8px 25px rgba(0, 188, 212, 0.4);
+            }
+
+            .robot-floating-btn:hover i {
+                transform: translateX(-40px);
+            }
+
+            .robot-floating-btn:hover .btn-text {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            /* Robot X Chat Container */
+            .robot-chat-container {
+                position: fixed;
+                bottom: 100px;
+                right: 100px;
+                width: 380px;
+                height: 550px;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+                display: none;
+                flex-direction: column;
+                overflow: hidden;
+                z-index: 1001;
+                animation: slideIn 0.3s ease;
+            }
+
+            .robot-chat-container.active {
+                display: flex;
+            }
+
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .robot-chat-header {
+                background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
+                color: white;
+                padding: 15px 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .robot-info {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .robot-info i {
+                font-size: 1.5rem;
+            }
+
+            .robot-info h3 {
+                font-size: 1.1rem;
+                font-weight: 600;
+                margin: 0;
+            }
+
+            .close-chat-btn {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 1.2rem;
+                cursor: pointer;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background 0.3s ease;
+            }
+
+            .close-chat-btn:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+            .robot-chat-messages {
+                flex: 1;
+                padding: 20px;
+                overflow-y: auto;
+                background: #f5f5f5;
+            }
+
+            .message {
+                margin-bottom: 15px;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .message.user {
+                align-items: flex-end;
+            }
+
+            .message.robot {
+                align-items: flex-start;
+            }
+
+            .message-content {
+                max-width: 80%;
+                padding: 10px 15px;
+                border-radius: 18px;
+                font-size: 0.95rem;
+                line-height: 1.4;
+            }
+
+            .message.user .message-content {
+                background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
+                color: white;
+                border-bottom-right-radius: 5px;
+            }
+
+            .message.robot .message-content {
+                background: white;
+                color: #333;
+                border-bottom-left-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            .message-time {
+                font-size: 0.7rem;
+                color: #999;
+                margin-top: 5px;
+                margin-left: 5px;
+                margin-right: 5px;
+            }
+
+            /* Quick Actions */
+            .quick-actions {
+                padding: 10px;
+                background: white;
+                border-bottom: 1px solid #eee;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: center;
+            }
+
+            .quick-action-btn {
+                background: #f0f0f0;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                color: #333;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            .quick-action-btn:hover {
+                background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
+                color: white;
+                transform: translateY(-2px);
+            }
+
+            .robot-chat-input {
+                padding: 15px;
+                background: white;
+                border-top: 1px solid #eee;
+                display: flex;
+                gap: 10px;
+            }
+
+            .chat-input-field {
+                flex: 1;
+                padding: 10px 15px;
+                border: 1px solid #ddd;
+                border-radius: 25px;
+                font-size: 0.95rem;
+                transition: all 0.3s ease;
+            }
+
+            .chat-input-field:focus {
+                outline: none;
+                border-color: #00BCD4;
+                box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.1);
+            }
+
+            .send-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
+                color: white;
+                border: none;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+            }
+
+            .send-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0 4px 10px rgba(0, 188, 212, 0.3);
+            }
+
+            /* Voice AI Button */
+            .voice-ai-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+                color: white;
+                border: none;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                flex-shrink: 0;
+            }
+
+            .voice-ai-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+            }
+
+            .voice-ai-btn.listening {
+                animation: voicePulse 1.5s infinite;
+                background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            }
+
+            .voice-ai-btn.speaking {
+                animation: voicePulse 0.5s infinite;
+                background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+            }
+
+            @keyframes voicePulse {
+                0% {
+                    box-shadow: 0 0 0 0 rgba(156, 39, 176, 0.7);
+                }
+                70% {
+                    box-shadow: 0 0 0 15px rgba(156, 39, 176, 0);
+                }
+                100% {
+                    box-shadow: 0 0 0 0 rgba(156, 39, 176, 0);
+                }
+            }
+
+            /* Voice Status Indicator */
+            .voice-status {
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+                color: white;
+                padding: 12px 25px;
+                border-radius: 25px;
+                font-weight: 600;
+                display: none;
+                z-index: 10000;
+                box-shadow: 0 4px 20px rgba(156, 39, 176, 0.4);
+            }
+
+            .voice-status.active {
+                display: block;
+                animation: statusSlideDown 0.3s ease;
+            }
+
+            @keyframes statusSlideDown {
+                from {
+                    opacity: 0;
+                    transform: translateX(-50%) translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }
+            }
+
+            /* Welcome Notification */
+            .welcome-notification {
+                position: fixed;
+                top: 100px;
+                right: 30px;
+                width: 350px;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+                overflow: hidden;
+                z-index: 1002;
+                animation: slideDown 0.5s ease;
+                cursor: pointer;
+            }
+
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .notification-content {
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
+                color: white;
+            }
+
+            .notification-icon {
+                width: 40px;
+                height: 40px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+            }
+
+            .notification-text {
+                flex: 1;
+            }
+
+            .notification-text h4 {
+                font-size: 1rem;
+                font-weight: 600;
+                margin-bottom: 5px;
+            }
+
+            .notification-text p {
+                font-size: 0.9rem;
+                opacity: 0.9;
+            }
+
+            .notification-close {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 1rem;
+                cursor: pointer;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background 0.3s ease;
+            }
+
+            .notification-close:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+            .notification-progress {
+                height: 3px;
+                background: rgba(255, 255, 255, 0.5);
+                width: 100%;
+                animation: progress 5s linear forwards;
+            }
+
+            @keyframes progress {
+                from {
+                    width: 100%;
+                }
+                to {
+                    width: 0%;
+                }
+            }
+
+            /* Motivation Notification */
+            .motivation-notification-container {
+                position: fixed;
+                top: 100px;
+                right: 30px;
+                z-index: 1003;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                pointer-events: none;
+            }
+
+            .motivation-notification {
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0, 188, 212, 0.3);
+                overflow: hidden;
+                animation: slideInRight 0.5s ease, fadeOut 0.5s ease 4.5s forwards;
+                width: 320px;
+                pointer-events: auto;
+                border-left: 5px solid #00BCD4;
+            }
+
+            @keyframes slideInRight {
+                from {
+                    opacity: 0;
+                    transform: translateX(100px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            @keyframes fadeOut {
+                from {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateX(100px);
+                }
+            }
+
+            .motivation-content {
+                padding: 15px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            }
+
+            .motivation-icon {
+                width: 40px;
+                height: 40px;
+                background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.2rem;
+                animation: bounce 2s infinite;
+            }
+
+            @keyframes bounce {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+            }
+
+            .motivation-text {
+                flex: 1;
+            }
+
+            .motivation-text p {
+                color: #333;
+                font-size: 0.95rem;
+                line-height: 1.4;
+                margin: 0;
+                font-weight: 500;
+            }
+
+            .motivation-time {
+                font-size: 0.7rem;
+                color: #999;
+                margin-top: 5px;
+            }
+
+            /* Suggestion buttons */
+            .suggestion-buttons {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-top: 10px;
+            }
+
+            .suggestion-btn {
+                background: #f0f0f0;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 15px;
+                font-size: 0.85rem;
+                color: #333;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .suggestion-btn:hover {
+                background: #e0e0e0;
+                transform: translateY(-2px);
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .header-with-button {
+                    flex-direction: column;
+                    text-align: center;
+                }
+
+                .section-title {
+                    font-size: 2rem;
+                }
+
+                .description-text {
+                    font-size: 1rem;
+                    padding: 0 15px;
+                }
+
+                .services-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .service-actions {
+                    opacity: 1;
+                }
+
+                .stats-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .stat-item {
+                    flex-direction: column;
+                    text-align: center;
+                }
+
+                .schedule-floating-btn,
+                .robot-floating-btn {
+                    bottom: 20px;
+                    width: 50px;
+                    height: 50px;
+                }
+
+                .schedule-floating-btn {
+                    right: 20px;
+                }
+
+                .robot-floating-btn {
+                    right: 80px;
+                }
+
+                .schedule-floating-btn i,
+                .robot-floating-btn i {
+                    font-size: 1.5rem;
+                }
+
+                .schedule-floating-btn:hover,
+                .robot-floating-btn:hover {
+                    width: 180px;
+                }
+
+                .robot-chat-container {
+                    width: 300px;
+                    height: 500px;
+                    right: 20px;
+                    bottom: 80px;
+                }
+
+                .welcome-notification,
+                .motivation-notification {
+                    width: 280px;
+                    right: 20px;
+                    top: 80px;
+                }
+
+                .motivation-notification-container {
+                    right: 20px;
+                }
+
+                .quick-actions {
+                    padding: 8px;
+                }
+
+                .quick-action-btn {
+                    padding: 6px 10px;
+                    font-size: 0.75rem;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .courses-section {
+                    padding: 100px 15px 40px 15px;
+                }
+
+                .service-image {
+                    height: 200px;
+                }
+
+                .logo-container {
+                    width: 80px;
+                    height: 80px;
+                    font-size: 2rem;
+                }
+
+                .service-category {
+                    font-size: 0.75rem;
+                    padding: 8px 15px;
+                }
+
+                .stat-value {
+                    font-size: 2rem;
+                }
+
+                .schedule-floating-btn:hover,
+                .robot-floating-btn:hover {
+                    width: 160px;
+                }
+
+                .robot-chat-container {
+                    width: 280px;
+                    height: 450px;
+                }
+
+                .welcome-notification,
+                .motivation-notification {
+                    width: 260px;
+                }
+            }
+        </style>
+    {% endblock %}
+
+    <!-- JavaScript -->
+    {% block javascripts %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Éléments du DOM
+                const robotToggleBtn = document.getElementById('robotToggleBtn');
+                const robotChatContainer = document.getElementById('robotChatContainer');
+                const closeChatBtn = document.getElementById('closeChatBtn');
+                const sendQuestionBtn = document.getElementById('sendQuestionBtn');
+                const userQuestion = document.getElementById('userQuestion');
+                const chatMessages = document.getElementById('chatMessages');
+                const welcomeNotification = document.getElementById('welcomeNotification');
+                const motivationContainer = document.getElementById('motivationNotification');
+                const voiceAIBtn = document.getElementById('voiceAIBtn');
+                const voiceStatus = document.getElementById('voiceStatus');
+                const voiceStatusText = document.getElementById('voiceStatusText');
+
+                // Voice AI - Speech Recognition and Synthesis
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                let recognition = null;
+                let isListening = false;
+
+                // Page content for explaining
+                const pageContent = 'Cette page propose plusieurs services de santé et bien-être : Consulte_Medecin pour les consultations médicales en ligne, Voir_score pour voir vos scores de santé personnalisés, Coach Stresse pour la gestion du stress, Nutrition pour les plans nutritionnels, et Fitness pour les programmes d\'entraînement. Vous pouvez également générer un emploi du temps personnalisé.';
+
+                // Check if browser supports speech recognition
+                if (SpeechRecognition) {
+                    recognition = new SpeechRecognition();
+                    recognition.continuous = false;
+                    recognition.lang = 'fr-FR';
+                    recognition.interimResults = false;
+                    recognition.maxAlternatives = 1;
+
+                    recognition.onstart = function() {
+                        isListening = true;
+                        voiceAIBtn.classList.add('listening');
+                        voiceAIBtn.classList.remove('speaking');
+                        voiceStatus.classList.add('active');
+                        voiceStatusText.textContent = 'Je vous écoute...';
+                    };
+
+                    recognition.onend = function() {
+                        isListening = false;
+                        voiceAIBtn.classList.remove('listening');
+                        setTimeout(() => {
+                            if (!voiceAIBtn.classList.contains('speaking')) {
+                                voiceStatus.classList.remove('active');
+                            }
+                        }, 1000);
+                    };
+
+                    recognition.onerror = function(event) {
+                        console.error('Speech recognition error:', event.error);
+                        isListening = false;
+                        voiceAIBtn.classList.remove('listening');
+                        voiceStatus.classList.remove('active');
+                        
+                        if (event.error === 'not-allowed') {
+                            speakText('Je n\'ai pas accès au microphone. Veuillez autoriser l\'accès au microphone dans les paramètres de votre navigateur.');
+                        } else if (event.error !== 'no-speech') {
+                            speakText('Désolé, je n\'ai pas bien compris. Veuillez réessayer.');
+                        }
+                    };
+
+                    recognition.onresult = function(event) {
+                        console.log('Voice result received:', event);
+                        const transcript = event.results[0][0].transcript.toLowerCase();
+                        console.log('Voice command:', transcript);
+                        
+                        if (transcript && transcript.trim().length > 0) {
+                            // Process the voice command
+                            processVoiceCommand(transcript);
+                        } else {
+                            speakText('Je n\'ai pas bien entendu. Veuillez réessayer.');
+                        }
+                    };
+                } else {
+                    // Hide voice button if not supported
+                    voiceAIBtn.style.display = 'none';
+                    console.log('Speech recognition not supported in this browser');
+                }
+
+                // Function to process voice command
+                function processVoiceCommand(command) {
+                    let response = '';
+                    
+                    // Check for specific commands - Robot X activation
+                    if (command.includes('robot') || command.includes('robots') || command.includes('robot x') || command.includes('robox') || command.includes('robotech') || command.includes('assistant') || command.includes('bob') || command.includes('robin')) {
+                        response = 'Bonjour ! Je suis Robot X, votre assistant vocal. Comment puis-je vous aider ? Je peux vous expliquer le contenu de cette page, ou répondre à vos questions sur les services.';
+                        console.log('Robot X activated');
+                        openChat();
+                    } else if (command.includes('bonjour') || command.includes('salut') || command.includes('coucou') || command.includes('bonsoir')) {
+                        response = 'Bonjour ! Comment puis-je vous aider ?';
+                    } else if (command.includes('comment ça va') || command.includes('comment vas tu') || command.includes('ca va')) {
+                        response = 'Je vais très bien, merci ! Et vous ?';
+                    } else if (command.includes('bien') || command.includes('super') || command.includes('parfait')) {
+                        response = 'Je suis ravi de l\'entendre !';
+                    } else if (command.includes('explique') || command.includes('contenu') || command.includes('page') || command.includes('résumé') || command.includes('qu\'est ce qu\'il y a') || command.includes('qui es tu') || command.includes('qui t\'es')) {
+                        response = pageContent;
+                    } else if (command.includes('merci')) {
+                        response = 'De rien ! Je suis là pour vous aider.';
+                    } else if (command.includes('au revoir') || command.includes('bye')) {
+                        response = 'Au revoir ! Bonne journée !';
+                    } else if (command.includes('service') || command.includes('quoi faire')) {
+                        response = 'Cette page propose : Consulte_Medecin pour les consultations, Voir_score pour vos scores de santé, Coach Stresse, Nutrition et Fitness.';
+                    } else if (command.includes('médecin') || command.includes('medecin') || command.includes('consultation')) {
+                        response = 'Le service Consulte_Medecin vous permet de prendre rendez-vous avec des médecins en ligne et consulter à distance.';
+                    } else if (command.includes('score') || command.includes('santé')) {
+                        response = 'Vous pouvez voir vos scores de santé incluant la santé globale à 92%, le bien-être à 85%, la nutrition à 78% et l\'activité à 90%.';
+                    } else if (command.includes('stress') || command.includes('coach')) {
+                        response = 'Le Coach Stresse vous offre un accompagnement personnalisé pour la gestion du stress avec des techniques de relaxation.';
+                    } else if (command.includes('nutrition') || command.includes('alimentation') || command.includes('repas')) {
+                        response = 'Le service Nutrition propose des plans nutritionnels personnalisés adaptés à vos objectifs.';
+                    } else if (command.includes('fitness') || command.includes('sport') || command.includes('exercice')) {
+                        response = 'Le service Fitness vous donne accès à des programmes d\'entraînement personnalisés.';
+                    } else if (command.includes('statistique') || command.includes('stat')) {
+                        response = 'Vos statistiques : Santé Globale 92%, Bien-être 85%, Nutrition 78%, Activité 90%.';
+                    } else if (command.includes('emploi du temps') || command.includes('planning') || command.includes('horaire')) {
+                        response = 'Vous pouvez générer un emploi du temps personnalisé en cliquant sur le bouton orange en bas à droite.';
+                    } else if (command.includes('aide') || command.includes('help')) {
+                        response = 'Je peux vous aider à : connaître les services disponibles, expliquer le contenu de la page, répondre à vos questions sur la santé et le bien-être. Dites simplement ce dont vous avez besoin !';
+                    } else {
+                        // Default response for unknown commands
+                        response = 'Je n\'ai pas bien compris. Dites "aide" pour voir ce que je peux faire, ou "explique le contenu de cette page" pour en savoir plus.';
+                    }
+
+                    // Speak the response
+                    speakText(response);
+                    
+                    // Open chat if not already open
+                    openChat();
+                    
+                    // Also show in chat
+                    addMessage('user', command);
+                    setTimeout(() => {
+                        addMessage('robot', response);
+                    }, 500);
+                }
+
+                // Function to speak text
+                function speakText(text) {
+                    if ('speechSynthesis' in window) {
+                        // Cancel any ongoing speech
+                        window.speechSynthesis.cancel();
+                        
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'fr-FR';
+                        utterance.rate = 0.85; // Slower for clarity
+                        utterance.pitch = 1.0;
+                        utterance.volume = 1.0;
+                        
+                        // Get voices - wait if not loaded
+                        const trySpeak = () => {
+                            const voices = window.speechSynthesis.getVoices();
+                            console.log('Voices loaded:', voices.length);
+                            
+                            // Try French voice first
+                            let frenchVoice = voices.find(voice => voice.lang.includes('fr'));
+                            if (!frenchVoice) {
+                                // Use any available French voice
+                                frenchVoice = voices.find(voice => voice.lang.startsWith('fr'));
+                            }
+                            if (!frenchVoice && voices.length > 0) {
+                                // Fallback to first voice
+                                frenchVoice = voices[0];
+                                utterance.lang = 'fr';
+                            }
+                            if (frenchVoice) {
+                                utterance.voice = frenchVoice;
+                                console.log('Using voice:', frenchVoice.name);
+                            }
+                            
+                            utterance.onstart = function() {
+                                console.log('Speech started');
+                                if (voiceAIBtn) {
+                                    voiceAIBtn.classList.add('speaking');
+                                    voiceAIBtn.classList.remove('listening');
+                                }
+                                if (voiceStatus) {
+                                    voiceStatus.classList.add('active');
+                                    voiceStatusText.textContent = 'Je parle...';
+                                }
+                            };
+                            
+                            utterance.onend = function() {
+                                console.log('Speech ended');
+                                if (voiceAIBtn) voiceAIBtn.classList.remove('speaking');
+                                setTimeout(() => {
+                                    if (voiceStatus) voiceStatus.classList.remove('active');
+                                }, 500);
+                            };
+                            
+                            utterance.onerror = function(event) {
+                                console.error('Speech error:', event);
+                                if (voiceAIBtn) voiceAIBtn.classList.remove('speaking');
+                                if (voiceStatus) voiceStatus.classList.remove('active');
+                            };
+                            
+                            window.speechSynthesis.speak(utterance);
+                        };
+                        
+                        // Check if voices are loaded
+                        if (window.speechSynthesis.getVoices().length > 0) {
+                            trySpeak();
+                        } else {
+                            // Wait for voices to load
+                            window.speechSynthesis.onvoiceschanged = trySpeak;
+                            // Timeout fallback
+                            setTimeout(trySpeak, 100);
+                        }
+                    } else {
+                        console.log('Speech synthesis not supported');
+                        alert('La synthèse vocale n\'est pas supportée par votre navigateur.');
+                    }
+                }
+
+                // Make speakText available globally
+                window.speakText = speakText;
+
+                // Voice AI button click handler
+                const testVoiceBtn = document.getElementById('testVoiceBtn');
+                
+                // Test voice button
+                if (testVoiceBtn) {
+                    testVoiceBtn.addEventListener('click', function() {
+                        console.log('Test voice button clicked');
+                        speakText('Bonjour ! Je suis Robot X. La voix fonctionne correctement. Comment puis-je vous aider ?');
+                        openChat();
+                    });
+                }
+                
+                voiceAIBtn.addEventListener('click', function() {
+                    console.log('Voice button clicked, isListening:', isListening);
+                    
+                    if (!SpeechRecognition) {
+                        alert('La reconnaissance vocale n\'est pas supportée par votre navigateur. Veuillez utiliser Chrome ou Edge.');
+                        return;
+                    }
+
+                    if (isListening) {
+                        console.log('Stopping recognition...');
+                        recognition.stop();
+                    } else {
+                        console.log('Starting recognition...');
+                        try {
+                            recognition.start();
+                        } catch (e) {
+                            console.error('Error starting recognition:', e);
+                            alert('Erreur au démarrage de la reconnaissance vocale: ' + e.message);
+                        }
+                    }
+                });
+
+                // Base de connaissances détaillée de Robot X
+                const knowledgeBase = {
+                    // Services généraux
+                    'services': '📋 Voici tous les services disponibles sur cette page :\n\n1️⃣ **Consulte_Medecin** - Consultations médicales en ligne\n2️⃣ **Voir_score** - Scores de santé personnalisés\n3️⃣ **Coatch Stresse** - Gestion du stress\n4️⃣ **Nutrition** - Plans nutritionnels\n5️⃣ **Fitness** - Programmes d\'entraînement\n\nCliquez sur les boutons d\'action de chaque carte pour accéder aux services !',
+                    
+                    // Consultation médicale
+                    'consultation médicale': '🏥 **Service Consulte_Medecin**\n\nCe service vous permet de :\n• Prendre rendez-vous avec des médecins en ligne\n• Consulter à distance depuis chez vous\n• Obtenir des ordonnances numériques\n• Suivre votre historique médical\n\n👉 Pour y accéder, cliquez sur le bouton avec l\'icône de médecin (🩺) sur la carte correspondante.',
+                    
+                    'consultation': '🏥 **Service Consulte_Medecin**\n\nCe service vous permet de :\n• Prendre rendez-vous avec des médecins en ligne\n• Consulter à distance depuis chez vous\n• Obtenir des ordonnances numériques\n• Suivre votre historique médical\n\n👉 Pour y accéder, cliquez sur le bouton avec l\'icône de médecin (🩺) sur la carte correspondante.',
+                    
+                    'médecin': '🏥 **Service Consulte_Medecin**\n\nCe service vous permet de :\n• Prendre rendez-vous avec des médecins en ligne\n• Consulter à distance depuis chez vous\n• Obtenir des ordonnances numériques\n• Suivre votre historique médical\n\n👉 Pour y accéder, cliquez sur le bouton avec l\'icône de médecin (🩺) sur la carte correspondante.',
+                    
+                    'medecin': '🏥 **Service Consulte_Medecin**\n\nCe service vous permet de :\n• Prendre rendez-vous avec des médecins en ligne\n• Consulter à distance depuis chez vous\n• Obtenir des ordonnances numériques\n• Suivre votre historique médical\n\n👉 Pour y accéder, cliquez sur le bouton avec l\'icône de médecin (🩺) sur la carte correspondante.',
+                    
+                    // Score de santé
+                    'score de santé': '📊 **Service Voir_score**\n\nCe service vous permet de visualiser :\n• Votre score de santé global\n• Votre niveau de bien-être mental\n• Votre niveau de stress\n• Vos indicateurs de santé personnalisés\n\n👉 Cliquez sur le bouton avec l\'icône de médecin sur la carte "Voir_score" pour accéder à vos scores.',
+                    
+                    'score': '📊 **Service Voir_score**\n\nCe service vous permet de visualiser :\n• Votre score de santé global\n• Votre niveau de bien-être mental\n• Votre niveau de stress\n• Vos indicateurs de santé personnalisés\n\n👉 Cliquez sur le bouton avec l\'icône de médecin sur la carte "Voir_score" pour accéder à vos scores.',
+                    
+                    // Coach stress
+                    'coach stress': '🧘 **Service Coach Stresse**\n\nCe service vous offre :\n• Un accompagnement personnalisé pour la gestion du stress\n• Des techniques de relaxation\n• Des exercices de respiration\n• Un suivi émotionnel\n\n👉 Cliquez sur le bouton avec l\'icône 👔 sur la carte "Coatch Stresse" pour commencer.',
+                    
+                    'stress': '🧘 **Service Coach Stresse**\n\nCe service vous offre :\n• Un accompagnement personnalisé pour la gestion du stress\n• Des techniques de relaxation\n• Des exercices de respiration\n• Un suivi émotionnel\n\n👉 Cliquez sur le bouton avec l\'icône 👔 sur la carte "Coatch Stresse" pour commencer.',
+                    
+                    // Nutrition
+                    'nutrition': '🥗 **Service Nutrition**\n\nCe service vous propose :\n• Des plans nutritionnels personnalisés\n• Des conseils alimentaires adaptés à vos objectifs\n• Un suivi de votre alimentation\n• Des recettes santé\n\n👉 Cliquez sur le titre "Nutrition" ou le bouton 🎮 pour accéder au service.',
+                    
+                    'alimentation': '🥗 **Service Nutrition**\n\nCe service vous propose :\n• Des plans nutritionnels personnalisés\n• Des conseils alimentaires adaptés à vos objectifs\n• Un suivi de votre alimentation\n• Des recettes santé\n\n👉 Cliquez sur le titre "Nutrition" ou le bouton 🎮 pour accéder au service.',
+                    
+                    // Fitness
+                    'fitness': '💪 **Service Fitness**\n\nCe service vous donne accès à :\n• Des programmes d\'entraînement personnalisés\n• Des exercices adaptés à votre niveau\n• Un suivi de vos performances\n• Des vidéos d\'entraînement\n\n👉 Cliquez sur le bouton avec l\'icône de médecin sur la carte "Fitness" pour commencer.',
+                    
+                    'sport': '💪 **Service Fitness**\n\nCe service vous donne accès à :\n• Des programmes d\'entraînement personnalisés\n• Des exercices adaptés à votre niveau\n• Un suivi de vos performances\n• Des vidéos d\'entraînement\n\n👉 Cliquez sur le bouton avec l\'icône de médecin sur la carte "Fitness" pour commencer.',
+                    
+                    // Statistiques
+                    'statistiques': '📈 **Vos Statistiques**\n\nVos indicateurs de santé actuels :\n• **Santé Globale** : 92% - Excellent !\n• **Bien-être** : 85% - Très bien\n• **Nutrition** : 78% - Peut être amélioré\n• **Activité** : 90% - Super actif !\n\nCes données sont mises à jour régulièrement en fonction de vos activités.',
+                    
+                    'stats': '📈 **Vos Statistiques**\n\nVos indicateurs de santé actuels :\n• **Santé Globale** : 92% - Excellent !\n• **Bien-être** : 85% - Très bien\n• **Nutrition** : 78% - Peut être amélioré\n• **Activité** : 90% - Super actif !\n\nCes données sont mises à jour régulièrement en fonction de vos activités.',
+                    
+                    // Emploi du temps
+                    'emploi du temps': '📅 **Générer emploi du temps**\n\nLe bouton orange en bas à droite vous permet de :\n• Créer un planning personnalisé\n• Organiser vos activités de bien-être\n• Planifier vos consultations\n• Gérer votre temps efficacement\n\n👉 Cliquez sur le bouton "Générer emploi du temps" pour accéder à cette fonctionnalité.',
+                    
+                    'planning': '📅 **Générer emploi du temps**\n\nLe bouton orange en bas à droite vous permet de :\n• Créer un planning personnalisé\n• Organiser vos activités de bien-être\n• Planifier vos consultations\n• Gérer votre temps efficacement\n\n👉 Cliquez sur le bouton "Générer emploi du temps" pour accéder à cette fonctionnalité.',
+                    
+                    // Robot X
+                    'robot': '🤖 **Robot X - Assistant Personnel**\n\nJe suis votre assistant virtuel dédié ! Je peux :\n• Vous expliquer toutes les fonctionnalités de la page\n• Répondre à vos questions sur les services\n• Vous envoyer des messages de motivation toutes les minutes\n• Vous guider dans votre parcours de bien-être\n\nN\'hésitez pas à me poser des questions sur n\'importe quel service !',
+                    
+                    'assistant': '🤖 **Robot X - Assistant Personnel**\n\nJe suis votre assistant virtuel dédié ! Je peux :\n• Vous expliquer toutes les fonctionnalités de la page\n• Répondre à vos questions sur les services\n• Vous envoyer des messages de motivation toutes les minutes\n• Vous guider dans votre parcours de bien-être\n\nN\'hésitez pas à me poser des questions sur n\'importe quel service !',
+                    
+                    // Messages de base
+                    'bonjour': '👋 Bonjour ! Comment puis-je vous aider aujourd\'hui ? Je peux vous expliquer tous les services disponibles : consultations médicales, scores de santé, coach stress, nutrition, fitness, statistiques, et génération d\'emploi du temps.',
+                    
+                    'bonsoir': '🌙 Bonsoir ! Comment puis-je vous aider ? Je suis là pour répondre à toutes vos questions sur les services de bien-être.',
+                    
+                    'aide': '🆘 **Comment puis-je vous aider ?**\n\nVous pouvez me poser des questions sur :\n• Les services disponibles\n• Comment consulter un médecin\n• Comment voir vos scores de santé\n• Le coach stress et la relaxation\n• La nutrition et les repas équilibrés\n• Le fitness et les exercices\n• Les statistiques de santé\n• La génération d\'emploi du temps\n\nOu utilisez les boutons rapides ci-dessus !',
+                    
+                    'merci': '🌟 Avec plaisir ! N\'hésitez pas si vous avez d\'autres questions. Je suis là pour vous aider à chaque étape de votre parcours bien-être !',
+                    
+                    'fonctionnalités': '📱 **Fonctionnalités de la page**\n\nCette page vous offre :\n• 5 services de santé différents\n• Des statistiques personnalisées\n• Un générateur d\'emploi du temps\n• Un assistant virtuel (moi !)\n• Des messages de motivation toutes les minutes\n\nQue souhaitez-vous explorer ?'
+                };
+
+                // Liste des messages de motivation
+                const motivationMessages = [
+                    "💪 Vous êtes formidable ! Continuez à prendre soin de vous !",
+                    "🌟 Chaque petit pas compte dans votre parcours de bien-être !",
+                    "🌈 Votre santé est votre plus grande richesse, prenez-en soin !",
+                    "✨ Vous méritez d'être en pleine forme aujourd'hui !",
+                    "🌱 Prenez un moment pour respirer et vous détendre.",
+                    "💖 Prenez soin de vous comme vous prenez soin des autres !",
+                    "🚀 Vous êtes sur la bonne voie pour une vie plus saine !",
+                    "🎯 Fixez-vous des objectifs et atteignez-les avec le sourire !",
+                    "🌞 Une nouvelle journée, une nouvelle opportunité de briller !",
+                    "🧘‍♂️ N'oubliez pas de prendre du temps pour vous aujourd'hui.",
+                    "⭐ Vous êtes unique et précieux, ne l'oubliez jamais !",
+                    "💫 Votre bien-être est notre priorité, ensemble nous sommes plus forts !",
+                    "🎉 Célébrez chaque victoire, même les plus petites !",
+                    "🌺 Prenez soin de votre corps, c'est le seul endroit où vous devez vivre.",
+                    "🏃‍♂️ L'activité physique est un cadeau que vous faites à votre corps !",
+                    "🥗 Une alimentation équilibrée est la clé d'une vie épanouie !",
+                    "😊 Votre sourire est la plus belle des médecines !",
+                    "💪 Vous êtes plus fort que vous ne le pensez !",
+                    "🌸 La santé n'est pas une destination, c'est un voyage quotidien.",
+                    "🌿 Chaque jour est une nouvelle chance de prendre soin de soi."
+                ];
+
+                // Index pour parcourir les messages
+                let motivationIndex = 0;
+
+                // Fonction pour afficher un message de motivation
+                function showMotivationMessage() {
+                    const message = motivationMessages[motivationIndex];
+                    
+                    // Créer l'élément de notification
+                    const notification = document.createElement('div');
+                    notification.className = 'motivation-notification';
+                    
+                    notification.innerHTML = `
+                        <div class="motivation-content">
+                            <div class="motivation-icon">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="motivation-text">
+                                <p>${message}</p>
+                                <div class="motivation-time">
+                                    <i class="far fa-clock"></i> ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Ajouter au conteneur
+                    motivationContainer.appendChild(notification);
+                    
+                    // Supprimer après 5 secondes
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 5000);
+                    
+                    // Passer au message suivant
+                    motivationIndex = (motivationIndex + 1) % motivationMessages.length;
+                }
+
+                // Démarrer l'envoi de messages toutes les 1 minute (60000 ms)
+                setInterval(showMotivationMessage, 60000);
+
+                // Réponses par défaut
+                const defaultResponses = [
+                    "Je ne suis pas sûr de comprendre. Pouvez-vous reformuler votre question ?",
+                    "Désolé, je n'ai pas d'information sur ce sujet. Essayez de me poser une question sur les services disponibles.",
+                    "Je n'ai pas encore appris cela. Posez-moi plutôt des questions sur les fonctionnalités de cette page.",
+                    "Je ne connais pas la réponse à cette question. Vous pouvez me demander sur les services : consultations, scores, coach stress, nutrition, fitness, statistiques ou emploi du temps."
+                ];
+
+                // Afficher la notification de bienvenue
+                setTimeout(() => {
+                    if (welcomeNotification) {
+                        welcomeNotification.style.display = 'block';
+                        
+                        // Auto-fermeture après 5 secondes
+                        setTimeout(() => {
+                            closeNotification();
+                        }, 5000);
+                    }
+                }, 1000);
+
+                // Auto-greeting vocal when page loads
+                setTimeout(() => {
+                    // Open chat first
+                    openChat();
+                    
+                    const greetingText = 'Bonjour ! Je suis Robot X, votre assistant vocal. Cliquez sur le bouton mikrophone pour me parler. Je peux vous dire bonjour, répondre comment ça va, ou expliquer le contenu de cette page.';
+                    speakText(greetingText);
+                    
+                    // Also add message to chat
+                    addMessage('robot', '🎤 **Bonjour !** Je suis votre assistant vocal.\n\nCliquez sur le bouton mikrophone violet pour me parler !\n\nJe peux répondre à :\n• "bonjour" - Je dis bonjour\n• "comment ça va" - Je vais bien\n• "explique le contenu de cette page" - Je vous explique tout\n• Questions sur les services');
+                }, 2000);
+
+                // Ajouter un message de bienvenue dans le chat
+                setTimeout(() => {
+                    addMessage('robot', '👋 Bonjour ! Je suis **Robot X**, votre assistant personnel. Je peux vous expliquer en détail toutes les fonctionnalités de cette page.\n\nUtilisez les boutons rapides ci-dessus ou posez-moi directement vos questions sur :\n• Les services disponibles\n• Comment consulter un médecin\n• Vos scores de santé\n• Le coach stress\n• La nutrition\n• Le fitness\n• Les statistiques\n• L\'emploi du temps');
+                }, 1500);
+
+                // Fonction pour fermer la notification
+                window.closeNotification = function() {
+                    if (welcomeNotification) {
+                        welcomeNotification.style.display = 'none';
+                    }
+                };
+
+                // Cliquer sur la notification ouvre le chat
+                welcomeNotification.addEventListener('click', function(e) {
+                    if (!e.target.classList.contains('notification-close') && !e.target.closest('.notification-close')) {
+                        openChat();
+                        closeNotification();
+                    }
+                });
+
+                // Fonction pour ouvrir le chat
+                function openChat() {
+                    robotChatContainer.classList.add('active');
+                }
+
+                // Fonction pour fermer le chat
+                function closeChat() {
+                    robotChatContainer.classList.remove('active');
+                }
+
+                // Toggle du chat
+                robotToggleBtn.addEventListener('click', function() {
+                    if (robotChatContainer.classList.contains('active')) {
+                        closeChat();
+                    } else {
+                        openChat();
+                    }
+                });
+
+                // Fermer le chat
+                closeChatBtn.addEventListener('click', closeChat);
+
+                // Fonction pour ajouter un message
+                function addMessage(sender, text) {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${sender}`;
+                    
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'message-content';
+                    
+                    // Remplacer les retours à la ligne par des <br>
+                    contentDiv.innerHTML = text.replace(/\n/g, '<br>');
+                    
+                    const timeDiv = document.createElement('div');
+                    timeDiv.className = 'message-time';
+                    timeDiv.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    
+                    messageDiv.appendChild(contentDiv);
+                    messageDiv.appendChild(timeDiv);
+                    chatMessages.appendChild(messageDiv);
+                    
+                    // Scroll vers le bas
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+
+                // Fonction pour trouver une réponse
+                function findResponse(question) {
+                    question = question.toLowerCase().trim();
+                    
+                    // Chercher une correspondance exacte ou partielle dans la base de connaissances
+                    for (let key in knowledgeBase) {
+                        if (question.includes(key)) {
+                            return knowledgeBase[key];
+                        }
+                    }
+                    
+                    // Vérifier les mots-clés supplémentaires
+                    if (question.includes('service') || question.includes('fonctionnalité')) {
+                        return knowledgeBase['services'];
+                    }
+                    if (question.includes('comment') && (question.includes('médecin') || question.includes('medecin'))) {
+                        return knowledgeBase['consultation médicale'];
+                    }
+                    if (question.includes('comment') && question.includes('score')) {
+                        return knowledgeBase['score de santé'];
+                    }
+                    if (question.includes('quoi') || question.includes('c\'est') || question.includes('quest-ce')) {
+                        if (question.includes('stress')) return knowledgeBase['coach stress'];
+                        if (question.includes('nutrition')) return knowledgeBase['nutrition'];
+                        if (question.includes('fitness')) return knowledgeBase['fitness'];
+                        if (question.includes('stat')) return knowledgeBase['statistiques'];
+                        if (question.includes('temps') || question.includes('planning')) return knowledgeBase['emploi du temps'];
+                        if (question.includes('robot') || question.includes('assistant')) return knowledgeBase['robot'];
+                    }
+                    
+                    // Réponse par défaut aléatoire
+                    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+                }
+
+                // Fonction pour envoyer une question
+                function sendQuestion() {
+                    const question = userQuestion.value.trim();
+                    
+                    if (question) {
+                        // Ajouter le message de l'utilisateur
+                        addMessage('user', question);
+                        
+                        // Vider l'input
+                        userQuestion.value = '';
+                        
+                        // Simuler une réponse du robot après un court délai
+                        setTimeout(() => {
+                            const response = findResponse(question);
+                            addMessage('robot', response);
+                        }, 500);
+                    }
+                }
+
+                // Envoyer la question avec le bouton
+                sendQuestionBtn.addEventListener('click', sendQuestion);
+
+                // Envoyer la question avec la touche Entrée
+                userQuestion.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendQuestion();
+                    }
+                });
+            });
+
+            // Fonctions globales pour les boutons rapides
+            function askAboutServices() {
+                const chatMessages = document.getElementById('chatMessages');
+                const userQuestion = document.getElementById('userQuestion');
+                userQuestion.value = "Quels sont les services disponibles ?";
+                document.getElementById('sendQuestionBtn').click();
+            }
+
+            function askAboutConsultation() {
+                const userQuestion = document.getElementById('userQuestion');
+                userQuestion.value = "Comment consulter un médecin ?";
+                document.getElementById('sendQuestionBtn').click();
+            }
+
+            function askAboutStress() {
+                const userQuestion = document.getElementById('userQuestion');
+                userQuestion.value = "Qu'est-ce que le coach stress ?";
+                document.getElementById('sendQuestionBtn').click();
+            }
+
+            function askAboutNutrition() {
+                const userQuestion = document.getElementById('userQuestion');
+                userQuestion.value = "Comment fonctionne la nutrition ?";
+                document.getElementById('sendQuestionBtn').click();
+            }
+
+            function askAboutFitness() {
+                const userQuestion = document.getElementById('userQuestion');
+                userQuestion.value = "Comment fonctionne le fitness ?";
+                document.getElementById('sendQuestionBtn').click();
+            }
+
+            function askAboutStats() {
+                const userQuestion = document.getElementById('userQuestion');
+                userQuestion.value = "Voir mes statistiques";
+                document.getElementById('sendQuestionBtn').click();
+            }
+        </script>
+    {% endblock %}
+{% endblock %}

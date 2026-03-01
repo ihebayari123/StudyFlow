@@ -1,0 +1,22 @@
+{
+  "categories": [
+    "\u00c9lectronique",
+    "Informatique",
+    "Mobilier",
+    "Accessoires",
+    "V\u00eatements",
+    "Chaussures",
+    "Livres"
+  ],
+  "prix_stats": {
+    "min": 9.0,
+    "max": 1799.0,
+    "mean": 337.11764705882354,
+    "std": 469.3972772839321
+  },
+  "mae_test": 100.56000000000002,
+  "r2_test": 0.1220530451779458,
+  "n_samples": 34,
+  "tfidf_features": 100,
+  "model_type": "RandomForestRegressor"
+}

@@ -1,0 +1,902 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Carte des Psychiatres - Tunisie{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    /* Keep navbar text white */
+    nav, .navbar, nav *, .navbar *, .nav-link {
+        color: white !important;
+    }
+
+    .add-course-section {
+        padding: 60px 20px;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .form-wrapper {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        animation: slideUp 0.5s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        text-align: center;
+    }
+
+    .form-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .form-header i {
+        margin-right: 10px;
+    }
+
+    .form-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .form-container {
+        padding: 40px;
+    }
+
+    .form-group {
+        margin-bottom: 30px;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 12px;
+        display: block;
+        font-size: 1.1rem;
+    }
+
+    .form-group label i {
+        color: #667eea;
+        margin-right: 8px;
+    }
+
+    .form-control {
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        font-family: inherit;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-control:hover {
+        border-color: #b0b0b0;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    .btn {
+        padding: 14px 30px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: inherit;
+    }
+
+    .btn i {
+        font-size: 1.1rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        flex: 1;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        background: #e0e0e0;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #d0d0d0;
+        transform: translateY(-2px);
+    }
+
+    /* Map wrapper */
+    .map-wrapper {
+        display: flex;
+        gap: 25px;
+        margin-top: 20px;
+    }
+    
+    #map {
+        flex: 1;
+        height: 600px;
+        border-radius: 15px;
+        border: 2px solid #e0e0e0;
+        overflow: hidden;
+        z-index: 1;
+    }
+    
+    .sidebar {
+        width: 400px;
+        background: #f8f9fa;
+        border-radius: 15px;
+        overflow-y: auto;
+        z-index: 1000;
+        padding: 20px;
+    }
+    
+    /* Location Box */
+    .location-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+        color: white;
+        margin-bottom: 20px;
+    }
+    
+    .location-box.success {
+        background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    }
+    
+    .location-box.error {
+        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    }
+    
+    .location-box .status-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+    }
+    
+    .location-box .coordinates {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 1rem;
+        margin-top: 10px;
+        backdrop-filter: blur(5px);
+    }
+    
+    .location-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 30px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .location-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* Search Box */
+    .search-box {
+        margin-bottom: 20px;
+    }
+    
+    .search-box input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .search-box input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    /* Section Headers */
+    .nearest-section h3,
+    .all-psychiatrists h3 {
+        color: #333;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .nearest-section h3 i,
+    .all-psychiatrists h3 i {
+        color: #667eea;
+    }
+    
+    /* Psychiatrist Cards */
+    .psychiatrist-card {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 18px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .psychiatrist-card:hover {
+        transform: translateY(-3px);
+        border-color: #667eea;
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+    }
+    
+    .psychiatrist-card.nearest {
+        border-color: #4caf50;
+        background: linear-gradient(135deg, #f0f9f0 0%, #e8f5e9 100%);
+    }
+    
+    .psychiatrist-card .name {
+        font-weight: 700;
+        color: #333;
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    
+    .badge-nearest {
+        background: #4caf50;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .psychiatrist-card .specialty {
+        color: #667eea;
+        font-size: 0.85rem;
+        margin-bottom: 10px;
+        font-weight: 500;
+    }
+    
+    .psychiatrist-card .city {
+        color: #424242;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .psychiatrist-card .address {
+        color: #64748b;
+        font-size: 0.85rem;
+        margin-bottom: 12px;
+        padding-left: 24px;
+    }
+    
+    .info-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+    
+    .distance, .travel-time {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .distance {
+        background: #e8f0fe;
+        color: #1a237e;
+    }
+    
+    .travel-time {
+        background: #fff3e0;
+        color: #e65100;
+    }
+    
+    .phone {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #2e7d32;
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding-top: 10px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .action-btn {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+        color: white;
+    }
+    
+    .action-btn:hover {
+        transform: scale(1.02);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .directions-btn {
+        background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    }
+    
+    .call-btn {
+        background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    }
+    
+    /* Loading */
+    .loading {
+        text-align: center;
+        padding: 40px;
+    }
+    
+    .loading-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .all-psychiatrists {
+        margin-top: 20px;
+    }
+    
+    #all-psychiatrists-list {
+        max-height: 300px;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+    
+    /* Scrollbar styling */
+    #all-psychiatrists-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    #all-psychiatrists-list::-webkit-scrollbar-track {
+        background: #f0f0f0;
+        border-radius: 10px;
+    }
+    
+    #all-psychiatrists-list::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 10px;
+    }
+    
+    #all-psychiatrists-list::-webkit-scrollbar-thumb:hover {
+        background: #764ba2;
+    }
+    
+    /* Responsive */
+    @media (max-width: 992px) {
+        .map-wrapper {
+            flex-direction: column;
+        }
+        
+        #map {
+            height: 400px;
+        }
+        
+        .sidebar {
+            width: 100%;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .form-header h1 {
+            font-size: 2rem;
+        }
+        
+        .form-container {
+            padding: 30px 20px;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Psychiatrists data from controller
+    const psychiatristsData = {{ psychiatrists|json_encode|raw }};
+    
+    // Default coordinates (center of Tunisia)
+    let userLat = {{ defaultLat }};
+    let userLng = {{ defaultLng }};
+    let hasUserLocation = false;
+    let userMarker = null;
+    let psychiatristMarkers = [];
+    let nearestPsychiatrists = [];
+    let map;
+    
+    // Initialize map
+    function initMap() {
+        // Create map centered on Tunisia
+        map = L.map('map').setView([33.8869, 9.5615], 7);
+        
+        // Add OpenStreetMap tiles (free, no API key needed)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Add psychiatrist markers
+        addPsychiatristMarkers();
+        
+        // Try to get user location automatically
+        getUserLocation();
+    }
+    
+    // Add psychiatrist markers to map
+    function addPsychiatristMarkers() {
+        // Clear existing markers
+        psychiatristMarkers.forEach(marker => map.removeLayer(marker));
+        psychiatristMarkers = [];
+        
+        psychiatristsData.forEach((psychiatrist, index) => {
+            // Create custom icon for psychiatrist
+            const icon = L.divIcon({
+                html: '<div style="background:#667eea;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);font-size:14px;"><i class="fas fa-user-md"></i></div>',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15],
+                popupAnchor: [0, -15]
+            });
+            
+            const marker = L.marker([psychiatrist.lat, psychiatrist.lng], { icon: icon })
+                .addTo(map)
+                .bindPopup(`
+                    <div style="min-width:200px;">
+                        <h3 style="margin:0 0 10px 0;color:#667eea;">${psychiatrist.name}</h3>
+                        <p style="margin:5px 0;color:#5c6bc0;"><strong>Spécialité:</strong> ${psychiatrist.specialty}</p>
+                        <p style="margin:5px 0;color:#424242;"><strong>Ville:</strong> ${psychiatrist.city}</p>
+                        <p style="margin:5px 0;color:#757575;">${psychiatrist.address}</p>
+                        <p style="margin:10px 0 0 0;color:#2e7d32;font-weight:bold;">📞 ${psychiatrist.phone}</p>
+                    </div>
+                `);
+            
+            psychiatristMarkers.push(marker);
+        });
+    }
+    
+    // Get user location
+    function getUserLocation() {
+        const locationBox = document.getElementById('location-box');
+        const locationBtn = document.getElementById('get-location-btn');
+        
+        locationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Recherche...';
+        
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLat = position.coords.latitude;
+                    userLng = position.coords.longitude;
+                    hasUserLocation = true;
+                    
+                    // Update UI
+                    document.getElementById('user-lat').textContent = userLat.toFixed(4);
+                    document.getElementById('user-lng').textContent = userLng.toFixed(4);
+                    
+                    locationBox.className = 'location-box success';
+                    locationBox.innerHTML = `
+                        <div class="status-icon"><i class="fas fa-check-circle"></i></div>
+                        <h4>Position trouvée</h4>
+                        <div class="coordinates">
+                            ${userLat.toFixed(4)}, ${userLng.toFixed(4)}
+                        </div>
+                    `;
+                    
+                    locationBtn.innerHTML = '<i class="fas fa-check"></i> Position mise à jour';
+                    
+                    // Add/update user marker on map
+                    addUserMarker();
+                    
+                    // Fetch nearest psychiatrists
+                    fetchNearestPsychiatrists();
+                },
+                (error) => {
+                    console.error('Geolocation error:', error);
+                    
+                    locationBox.className = 'location-box error';
+                    locationBox.innerHTML = `
+                        <div class="status-icon"><i class="fas fa-exclamation-circle"></i></div>
+                        <h4>Position non disponible</h4>
+                        <div class="coordinates">Utilisation de la position par défaut (Tunis)</div>
+                    `;
+                    
+                    locationBtn.innerHTML = '<i class="fas fa-crosshairs"></i> Réessayer';
+                    
+                    // Use default location (Tunis)
+                    userLat = 36.8065;
+                    userLng = 10.1815;
+                    addUserMarker();
+                    fetchNearestPsychiatrists();
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            locationBox.className = 'location-box error';
+            locationBox.innerHTML = `
+                <div class="status-icon"><i class="fas fa-times-circle"></i></div>
+                <h4>Géolocalisation non supportée</h4>
+                <div class="coordinates">Utilisation de la position par défaut (Tunis)</div>
+            `;
+            
+            userLat = 36.8065;
+            userLng = 10.1815;
+            addUserMarker();
+            fetchNearestPsychiatrists();
+        }
+    }
+    
+    // Add user marker to map
+    function addUserMarker() {
+        // Remove existing user marker
+        if (userMarker) {
+            map.removeLayer(userMarker);
+        }
+        
+        // Create custom icon for user
+        const icon = L.divIcon({
+            html: `<div style="background:${hasUserLocation ? '#00e676' : '#9e9e9e'};color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:4px solid white;box-shadow:0 2px 10px rgba(0,0,0,0.4);font-size:16px;animation:pulse 2s infinite;"><i class="fas fa-user"></i></div>
+                   <style>@keyframes pulse {0% {box-shadow:0 0 0 0 rgba(0,230,118,0.7);}70% {box-shadow:0 0 0 15px rgba(0,230,118,0);}100% {box-shadow:0 0 0 0 rgba(0,230,118,0);}}</style>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+        });
+        
+        userMarker = L.marker([userLat, userLng], { icon: icon, draggable: true })
+            .addTo(map)
+            .bindPopup(`
+                <div style="text-align:center;">
+                    <h4 style="margin:0 0 5px 0;color:#667eea;">Votre position</h4>
+                    <p style="margin:0;color:#666;">${userLat.toFixed(4)}, ${userLng.toFixed(4)}</p>
+                </div>
+            `);
+        
+        // Allow user to drag marker
+        userMarker.on('dragend', function(event) {
+            const pos = event.target.getLatLng();
+            userLat = pos.lat;
+            userLng = pos.lng;
+            document.getElementById('user-lat').textContent = userLat.toFixed(4);
+            document.getElementById('user-lng').textContent = userLng.toFixed(4);
+            fetchNearestPsychiatrists();
+        });
+        
+        // Pan to user location
+        map.setView([userLat, userLng], 12);
+    }
+    
+    // Fetch nearest psychiatrists from API
+    async function fetchNearestPsychiatrists() {
+        const loadingEl = document.getElementById('loading');
+        const listEl = document.getElementById('psychiatrists-list');
+        
+        loadingEl.style.display = 'block';
+        listEl.innerHTML = '';
+        
+        try {
+            const response = await fetch(`/api/psychiatres-proches?lat=${userLat}&lng=${userLng}`);
+            const data = await response.json();
+            
+            loadingEl.style.display = 'none';
+            
+            if (data.nearestPsychiatrists && data.nearestPsychiatrists.length > 0) {
+                nearestPsychiatrists = data.nearestPsychiatrists;
+                
+                data.nearestPsychiatrists.forEach((psychiatrist, index) => {
+                    const card = createPsychiatristCard(psychiatrist, index === 0);
+                    listEl.appendChild(card);
+                });
+            } else {
+                listEl.innerHTML = '<div class="loading">Aucun psychiatre trouvé</div>';
+            }
+        } catch (error) {
+            console.error('Error fetching psychiatrists:', error);
+            loadingEl.style.display = 'none';
+            listEl.innerHTML = '<div class="loading">Erreur lors du chargement</div>';
+        }
+    }
+    
+    // Create psychiatrist card
+    function createPsychiatristCard(psychiatrist, isNearest) {
+        const card = document.createElement('div');
+        card.className = `psychiatrist-card ${isNearest ? 'nearest' : ''}`;
+        card.innerHTML = `
+            <div class="name">
+                ${psychiatrist.name}
+                ${isNearest ? '<span class="badge-nearest"><i class="fas fa-star"></i> Plus proche</span>' : ''}
+            </div>
+            <div class="specialty">${psychiatrist.specialty}</div>
+            <div class="city"><i class="fas fa-map-marker-alt"></i> ${psychiatrist.city}</div>
+            <div class="address">${psychiatrist.address}</div>
+            <div class="info-row">
+                <span class="distance"><i class="fas fa-road"></i> ${psychiatrist.distanceKm} km</span>
+                <span class="travel-time"><i class="fas fa-clock"></i> ${psychiatrist.travelTime}</span>
+            </div>
+            <div class="phone">
+                <i class="fas fa-phone"></i> ${psychiatrist.phone}
+            </div>
+            <div class="actions">
+                <button class="action-btn directions-btn" onclick="getDirections(${psychiatrist.latitude}, ${psychiatrist.longitude}, '${psychiatrist.name.replace(/'/g, "\\'")}')">
+                    <i class="fas fa-directions"></i> Itinéraire
+                </button>
+                <button class="action-btn call-btn" onclick="callPsychiatrist('${psychiatrist.phone}')">
+                    <i class="fas fa-phone"></i> Appeler
+                </button>
+            </div>
+        `;
+        
+        card.addEventListener('click', () => {
+            focusOnPsychiatrist(psychiatrist);
+        });
+        
+        return card;
+    }
+    
+    // Focus on psychiatrist location
+    function focusOnPsychiatrist(psychiatrist) {
+        map.setView([psychiatrist.latitude, psychiatrist.longitude], 15);
+        
+        // Open popup for the psychiatrist
+        const marker = psychiatristMarkers[psychiatrist.id - 1];
+        if (marker) {
+            marker.openPopup();
+        }
+    }
+    
+    // Get directions to psychiatrist
+    function getDirections(lat, lng, name) {
+        const url = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${lat},${lng}`;
+        window.open(url, '_blank');
+    }
+    
+    // Call psychiatrist
+    function callPsychiatrist(phone) {
+        window.location.href = `tel:${phone}`;
+    }
+    
+    // Search psychiatrists
+    function searchPsychiatrists(query) {
+        query = query.toLowerCase();
+        const filtered = psychiatristsData.filter(p => 
+            p.name.toLowerCase().includes(query) ||
+            p.city.toLowerCase().includes(query) ||
+            p.specialty.toLowerCase().includes(query)
+        );
+        
+        // Update markers
+        psychiatristMarkers.forEach(marker => map.removeLayer(marker));
+        psychiatristMarkers = [];
+        
+        filtered.forEach(psychiatrist => {
+            const icon = L.divIcon({
+                html: '<div style="background:#667eea;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);font-size:14px;"><i class="fas fa-user-md"></i></div>',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+            
+            const marker = L.marker([psychiatrist.lat, psychiatrist.lng], { icon: icon })
+                .addTo(map)
+                .bindPopup(`
+                    <div style="min-width:200px;">
+                        <h3 style="margin:0 0 10px 0;color:#667eea;">${psychiatrist.name}</h3>
+                        <p style="margin:5px 0;color:#5c6bc0;"><strong>Spécialité:</strong> ${psychiatrist.specialty}</p>
+                        <p style="margin:5px 0;color:#424242;"><strong>Ville:</strong> ${psychiatrist.city}</p>
+                        <p style="margin:5px 0;color:#757575;">${psychiatrist.address}</p>
+                    </div>
+                `);
+            
+            psychiatristMarkers.push(marker);
+        });
+        
+        // Fit bounds to show all markers
+        if (psychiatristMarkers.length > 0) {
+            const group = L.featureGroup(psychiatristMarkers);
+            map.fitBounds(group.getBounds().pad(0.1));
+        }
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        initMap();
+    });
+</script>
+{% endblock %}
+
+{% block body %}
+<div class="add-course-section">
+    <div class="container">
+        <div class="form-wrapper">
+            <div class="form-header">
+                <h1><i class="fas fa-user-md"></i> Psychiatres en Tunisie</h1>
+                <p>Trouvez le psychiatre le plus proche de vous</p>
+                
+                <!-- Navigation Buttons -->
+                <div class="nav-buttons" style="margin-top: 20px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <a href="javascript:history.back()" class="nav-btn" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 25px; border-radius: 25px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s;">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                    <a href="{{ path('app_home') }}" class="nav-btn" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 25px; border-radius: 25px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s;">
+                        <i class="fas fa-home"></i> Accueil
+                    </a>
+                    <a href="{{ path('app_studyflow_affiche') }}" class="nav-btn" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 25px; border-radius: 25px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s;">
+                        <i class="fas fa-stethoscope"></i> Consultation
+                    </a>
+                </div>
+            </div>
+
+            <div class="form-container">
+                <div class="map-wrapper">
+                    <div id="map"></div>
+                    
+                    <div class="sidebar">
+                        <div class="location-box" id="location-box">
+                            <div class="status-icon"><i class="fas fa-location-arrow"></i></div>
+                            <h4>Votre position</h4>
+                            <div class="coordinates">
+                                Latitude: <span id="user-lat">{{ defaultLat }}</span><br>
+                                Longitude: <span id="user-lng">{{ defaultLng }}</span>
+                            </div>
+                        </div>
+                        
+                        <button class="location-btn" id="get-location-btn" onclick="getUserLocation()">
+                            <i class="fas fa-crosshairs"></i> Obtenir ma position
+                        </button>
+                        
+                        <div class="search-box">
+                            <input type="text" placeholder="Rechercher un psychiatre..." onkeyup="searchPsychiatrists(this.value)">
+                        </div>
+                        
+                        <div class="nearest-section">
+                            <h3><i class="fas fa-star" style="color:#4caf50;"></i> 5 Psychiatres les plus proches</h3>
+                            <div id="psychiatrists-list">
+                                <div id="loading" class="loading">
+                                    <div class="loading-spinner"></div>
+                                    <p>Recherche en cours...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="all-psychiatrists">
+                            <h3><i class="fas fa-list" style="color:#667eea;"></i> Tous les psychiatres (<span id="total-count"></span>)</h3>
+                            <div id="all-psychiatrists-list">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add total count when data loads
+    document.getElementById('total-count').textContent = psychiatristsData.length;
+    
+    // Build all psychiatrists list
+    const allList = document.getElementById('all-psychiatrists-list');
+    psychiatristsData.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'psychiatrist-card';
+        div.innerHTML = `<div class="name">${p.name}</div><div class="city"><i class="fas fa-map-marker-alt"></i> ${p.city}</div>`;
+        div.onclick = () => focusOnPsychiatrist({latitude: p.lat, longitude: p.lng, name: p.name, id: p.id});
+        allList.appendChild(div);
+    });
+</script>
+{% endblock %}

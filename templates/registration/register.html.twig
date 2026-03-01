@@ -1,0 +1,313 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create an Account{% endblock %}
+
+{% block header %}
+    {% include 'home/navbar.html.twig' %}
+{% endblock %}
+
+{% block body %}
+<main class="auth-main" style="padding: 60px 20px;">   {# reduced top padding #}
+  <div class="container">
+      <div class="auth-card" style="padding: 30px;">   {# slightly smaller padding #}
+          <div class="auth-header" style="margin-bottom: 20px;">   {# reduced margin #}
+              <h1 class="auth-title" style="font-size: 1.8rem;">Create Account</h1>
+              <p class="auth-subtitle">Join our learning community</p>
+          </div>
+            {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate', 'class': 'auth-form'}}) }}
+
+            {% if registrationForm.vars.errors|length > 0 %}
+                <div class="alert alert-danger">
+                    {{ form_errors(registrationForm) }}
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                {{ form_label(registrationForm.nom, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(registrationForm.nom, {'attr': {'class': 'form-input', 'placeholder': 'Enter your last name'}}) }}
+                <div class="form-error">{{ form_errors(registrationForm.nom) }}</div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(registrationForm.prenom, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(registrationForm.prenom, {'attr': {'class': 'form-input', 'placeholder': 'Enter your first name'}}) }}
+                <div class="form-error">{{ form_errors(registrationForm.prenom) }}</div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(registrationForm.email, {'attr': {'class': 'form-input', 'placeholder': 'you@example.com'}}) }}
+                <div class="form-error">{{ form_errors(registrationForm.email) }}</div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(registrationForm.plainPassword, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-input', 'placeholder': 'Create a password'}}) }}
+                <div class="form-error">{{ form_errors(registrationForm.plainPassword) }}</div>
+            </div>
+
+            {# ✅ CAPTCHA avec bouton "Recharger" (as_url=false) #}
+            <div class="form-group captcha-group">
+                {{ form_label(registrationForm.captcha, 'Code de sécurité', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="captcha-wrapper">
+                    {{ form_widget(registrationForm.captcha, {'attr': {'class': 'captcha-image'}}) }}
+                    <button type="button" class="btn-reload" onclick="window.location.reload()" title="Recharger le code">
+                        <i class="fas fa-sync-alt"></i> Recharger
+                    </button>
+                </div>
+                {{ form_errors(registrationForm.captcha) }}
+            </div>
+
+            <div class="form-group form-checkbox">
+                {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'checkbox-input'}}) }}
+                {{ form_label(registrationForm.agreeTerms, null, {'label_attr': {'class': 'checkbox-label'}}) }}
+                <div class="form-error">{{ form_errors(registrationForm.agreeTerms) }}</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Register</button>
+
+            {{ form_end(registrationForm) }}
+
+            <div class="auth-footer">
+                Already have an account? <a href="{{ path('app_login') }}">Sign in</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    :root {
+        --primary-color: #4f46e5;
+        --primary-dark: #4338ca;
+        --primary-light: #818cf8;
+        --gray-100: #f1f5f9;
+        --gray-200: #e2e8f0;
+        --gray-300: #cbd5e1;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --gray-800: #1e293b;
+        --gray-900: #0f172a;
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        --border-radius: 16px;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    .auth-main {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 480px;
+        margin: 0 auto;
+    }
+
+    .auth-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-lg);
+        padding: 40px;
+        animation: fadeInUp 0.5s ease;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .auth-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 8px;
+        letter-spacing: -0.02em;
+    }
+
+    .auth-subtitle {
+        font-size: 1rem;
+        color: var(--gray-500);
+    }
+
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid var(--gray-200);
+        border-radius: 50px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+    .form-input::placeholder {
+        color: var(--gray-400);
+    }
+
+    .form-error {
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 4px;
+    }
+
+    .form-checkbox {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .checkbox-input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--primary-color);
+    }
+
+    .checkbox-label {
+        font-size: 0.95rem;
+        color: var(--gray-600);
+    }
+
+    /* ✅ Styles pour le CAPTCHA */
+    .captcha-group {
+        margin-bottom: 10px;
+    }
+
+    .captcha-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .captcha-wrapper img {
+        width: auto;
+        max-width: 100%;
+        height: 100px;
+        object-fit: contain;
+        border: 2px solid var(--gray-200);
+        border-radius: 10px;
+        background: white;
+    }
+
+    .btn-reload {
+        padding: 12px 20px;
+        background: var(--gray-200);
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+    }
+
+    .btn-reload:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn {
+        padding: 14px 24px;
+        border: none;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-block {
+        width: 100%;
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 0.95rem;
+        color: var(--gray-500);
+    }
+
+    .auth-footer a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+
+    .alert {
+        padding: 12px 18px;
+        border-radius: 50px;
+        font-size: 0.95rem;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}

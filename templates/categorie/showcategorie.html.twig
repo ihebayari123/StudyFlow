@@ -1,0 +1,288 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Gestion des Catégories{% endblock %}
+
+{% block body %}
+
+<div class="admin-layout">
+
+    {% include 'admin/Partials/sidebar.html.twig' %}
+    {% include 'admin/partials/navbar.html.twig' %}
+
+    <main class="main-content">
+
+        <h2 class="page-title">📂 Gestion des Catégories</h2>
+
+        <!-- Barre d'actions avec recherche et filtres -->
+        <div class="actions-bar">
+            <form method="get" class="search-form">
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="🔍 Rechercher par nom..."
+                    value="{{ search|default('') }}"
+                >
+                <button type="submit">Rechercher</button>
+            </form>
+
+            <div class="action-buttons">
+                <a href="{{ path('app_showcategorie', {tri: 'nom'}) }}" class="btn btn-sort">📊 Trier A-Z</a>
+                <a href="{{ path('app_showcategorie') }}" class="btn btn-reset">🔄 Réinitialiser</a>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table class="quiz-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom Catégorie</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for categorie in listcategorie %}
+                    <tr>
+                        <td><strong>#{{ categorie.id }}</strong></td>
+                        <td><strong>{{ categorie.nomCategorie }}</strong></td>
+                        <td>{{ categorie.description|length > 80 ? categorie.description|slice(0, 80) ~ '...' : categorie.description }}</td>
+                        <td class="actions">
+                            <a href="{{ path('app_updatecategorie', {id: categorie.id}) }}" title="Modifier">✏️</a>
+                            <a href="{{ path('app_deletecategorie', {id: categorie.id}) }}" 
+                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')" 
+                               title="Supprimer">🗑️</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="no-result">📭 Aucune catégorie trouvée</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Add button -->
+        <div class="add-btn">
+            <a href="{{ path('app_addcategorie') }}">➕ Ajouter une Catégorie</a>
+        </div>
+
+    </main>
+</div>
+
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets2/images/favicon.ico') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/vendors/css/vendors.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets2/css/theme.min.css') }}" />
+
+    <style>
+    .admin-layout {
+        display: flex;
+    }
+
+    .main-content {
+        margin-left: 260px; 
+        padding: 30px;
+        width: calc(100% - 260px);
+        background-color: #f4f6f8;
+        min-height: 100vh;
+    }
+
+    .page-title {
+        margin-bottom: 25px;
+        font-size: 24px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    /* Barre d'actions */
+    .actions-bar {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    /* Formulaire de recherche */
+    .search-form {
+        display: flex;
+        gap: 10px;
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .search-form input {
+        flex: 1;
+        padding: 10px 15px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+    }
+
+    .search-form button {
+        padding: 10px 20px;
+        background-color: #4f46e5;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background-color 0.3s;
+    }
+
+    .search-form button:hover {
+        background-color: #4338ca;
+    }
+
+    /* Boutons d'action */
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 10px 18px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s;
+        color: white;
+    }
+
+    .btn-sort {
+        background-color: #2196F3;
+    }
+
+    .btn-sort:hover {
+        background-color: #0b7dda;
+    }
+
+    .btn-reset {
+        background-color: #ff9800;
+    }
+
+    .btn-reset:hover {
+        background-color: #f57c00;
+    }
+
+    /* Table */
+    .table-container {
+        background: white;
+        border-radius: 8px;
+        overflow-x: auto;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .quiz-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .quiz-table th,
+    .quiz-table td {
+        padding: 14px;
+        text-align: left;
+    }
+
+    .quiz-table thead {
+        background-color: #4f46e5;
+        color: white;
+    }
+
+    .quiz-table tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .quiz-table tbody tr:hover {
+        background-color: #eef2ff;
+    }
+
+    .quiz-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    /* Actions */
+    .actions {
+        white-space: nowrap;
+    }
+
+    .actions a {
+        margin-right: 12px;
+        text-decoration: none;
+        font-size: 18px;
+        transition: transform 0.2s;
+        display: inline-block;
+    }
+
+    .actions a:hover {
+        transform: scale(1.2);
+    }
+
+    /* Aucun résultat */
+    .no-result {
+        text-align: center;
+        padding: 40px;
+        color: #6b7280;
+        font-style: italic;
+    }
+
+    /* Bouton ajouter */
+    .add-btn {
+        margin-top: 20px;
+        text-align: right;
+    }
+
+    .add-btn a {
+        padding: 10px 16px;
+        background-color: #10b981;
+        color: white;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background-color 0.3s;
+        display: inline-block;
+    }
+
+    .add-btn a:hover {
+        background-color: #059669;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .actions-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-form {
+            min-width: 100%;
+        }
+
+        .action-buttons {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('assets2/vendors/js/vendors.min.js') }}"></script>
+    <script src="{{ asset('assets2/js/common-init.min.js') }}"></script>
+    <script src="{{ asset('assets2/js/theme-customizer-init.min.js') }}"></script>
+{% endblock %}

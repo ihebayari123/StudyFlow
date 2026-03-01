@@ -1,0 +1,204 @@
+{# templates/admin/event_create_admin.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Add Event - Admin{% endblock %}
+
+{% block admin_content %}
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h2><i class="fas fa-plus-circle"></i> Add New Event</h2>
+        </div>
+        <div class="card-body">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            {{ form_label(form.titre, 'Event Title', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.titre, {'attr': {'class': 'form-control', 'placeholder': 'Enter event title'}}) }}
+                            {{ form_errors(form.titre) }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            {{ form_label(form.type, 'Event Type', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.type, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.type) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            {{ form_label(form.dateCreation, 'Creation Date', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.dateCreation, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.dateCreation) }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            {{ form_label(form.image, 'Event Image', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.image, {'attr': {'class': 'form-control', 'accept': 'image/*'}}) }}
+                            {{ form_errors(form.image) }}
+                            <small class="form-text text-muted">Upload an image for the event</small>
+                        </div>
+                    </div>
+                </div>
+
+                {# ===== DESCRIPTION + BOUTON IA ===== #}
+                <div class="form-group mb-3">
+                    {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.description, {'attr': {
+                        'class': 'form-control',
+                        'placeholder': 'Enter event description or generate with AI',
+                        'rows': '4'
+                    }}) }}
+                    {{ form_errors(form.description) }}
+
+                    <button type="button" id="btn-generate-ai" class="btn-ai mt-2">
+                        🤖 Générer une description avec l'IA
+                    </button>
+                    <div id="ai-loading" style="display:none; margin-top:8px; color:#667eea; font-weight:600;">
+                        ⏳ Génération en cours... (10-20 secondes)
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Create Event
+                    </button>
+                    <a href="{{ path('app_events') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('btn-generate-ai').addEventListener('click', function () {
+
+    // ✅ Sélection par NAME (fiable) au lieu de ID (généré par Symfony)
+    const titreField       = document.querySelector('input[name*="titre"]');
+    const typeField        = document.querySelector('select[name*="type"]');
+    const descriptionField = document.querySelector('textarea[name*="description"]');
+
+    const titre = titreField?.value || '';
+    const type  = typeField?.value  || '';
+
+    if (!titre || !type) {
+        alert('⚠️ Remplissez le Titre et le Type avant de générer !');
+        return;
+    }
+
+    if (!descriptionField) {
+        alert('❌ Champ description introuvable !');
+        return;
+    }
+
+    document.getElementById('ai-loading').style.display = 'block';
+    this.disabled = true;
+    this.textContent = '⏳ Génération...';
+
+    const formData = new FormData();
+    formData.append('titre', titre);
+    formData.append('type', type);
+
+    fetch('{{ path("event_generate_description") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        descriptionField.value = data.description;
+        document.getElementById('ai-loading').style.display = 'none';
+        const btn = document.getElementById('btn-generate-ai');
+        btn.disabled = false;
+        btn.textContent = '🤖 Générer une description avec l\'IA';
+    })
+    .catch(err => {
+        alert('❌ Erreur : ' + err.message);
+        document.getElementById('ai-loading').style.display = 'none';
+        const btn = document.getElementById('btn-generate-ai');
+        btn.disabled = false;
+        btn.textContent = '🤖 Générer une description avec l\'IA';
+    });
+});
+</script>
+
+<style>
+    .container {
+        margin-left: 280px;
+        max-width: calc(100% - 320px);
+        padding-top: 100px;
+    }
+    .card { border-radius: 10px; border: none; }
+    .card-header { border-radius: 10px 10px 0 0; padding: 1.5rem; }
+    .card-header h2 { margin: 0; font-size: 1.75rem; font-weight: 700; }
+    .card-header i { margin-right: 10px; }
+    .card-body { padding: 2rem; }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-label { font-weight: 600; color: #333; margin-bottom: 0.5rem; display: block; }
+    .form-control {
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        outline: none;
+    }
+    .form-control:hover { border-color: #b0b0b0; }
+    textarea.form-control { resize: vertical; }
+    .form-error-message, .invalid-feedback {
+        color: #dc3545; font-size: 0.875rem;
+        margin-top: 0.25rem; display: block;
+    }
+    .form-text { font-size: 0.875rem; margin-top: 0.25rem; display: block; }
+    .btn { padding: 10px 25px; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; border: none; }
+    .btn i { margin-right: 8px; }
+    .btn-success {
+        background: linear-gradient(135deg, #0cebeb 0%, #20e3b2 100%);
+        color: white;
+    }
+    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(32, 227, 178, 0.3); }
+    .btn-secondary { background: #6c757d; color: white; }
+    .btn-secondary:hover { background: #5a6268; transform: translateY(-2px); }
+    select.form-control {
+        cursor: pointer; appearance: none; background-color: white;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 15px center; padding-right: 40px;
+    }
+    .alert { border-radius: 8px; border: none; }
+    .btn-ai {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white; border: none; padding: 10px 20px;
+        border-radius: 8px; font-weight: 600; cursor: pointer;
+        transition: all 0.3s; font-size: 14px;
+    }
+    .btn-ai:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4); }
+    .btn-ai:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    @media (max-width: 768px) {
+        .container { margin-left: 0; max-width: 100%; padding-top: 80px; }
+        .card-body { padding: 1.5rem; }
+        .btn { width: 100%; margin-bottom: 10px; }
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}

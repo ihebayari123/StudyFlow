@@ -1,0 +1,73 @@
+# config/services.yaml
+
+# ---------------------------------------------------
+# Paramètres globaux de l'application
+# ---------------------------------------------------
+parameters:
+  images_directory: '%kernel.project_dir%/public/uploads'  # dossier pour stocker les images uploadées
+  chapters_directory: '%kernel.project_dir%/public/uploads/chapters'
+  python_path: '%env(PYTHON_PATH)%'
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        
+   # ← paramètre pour le chemin Python
+
+
+
+# --------------------------------------------------
+    # Rendre toutes les classes dans src/ disponibles en tant que services
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+    # AI Course Generator - local Ollama
+    App\Service\OllamaService:
+        arguments:
+            $ollamaUrl: '%env(OLLAMA_URL)%'
+            $model: '%env(OLLAMA_MODEL)%'
+    App\EventListener\AuthenticationFailureListener:
+        arguments:
+            $entityManager: '@doctrine.orm.entity_manager'
+        tags:
+            - { name: kernel.event_listener, event: security.authentication.failure, method: onAuthenticationFailure }
+            
+    App\Security\UserStatusChecker:
+        arguments:
+            $riskCalculator: '@App\Service\UserRiskCalculator'
+            $entityManager: '@doctrine.orm.entity_manager'
+            $notificationService: '@App\Service\NotificationService'
+
+    # ✅ CORRECTION ICI : arguments bien indentés
+    App\Service\PythonMlService:
+        arguments:
+            $python: '%python_path%'
+            $logger: '@logger'
+
+    App\Service\FeatureExtractor:
+        # Pas besoin d'arguments spécifiques
+
+    App\Service\UserRiskCalculator:
+        arguments:
+            $mlService: '@App\Service\PythonMlService'
+            $featureExtractor: '@App\Service\FeatureExtractor'
+    # Ajouter ici d'autres services personnalisés si nécessaire
+    # Remarque : les dernières définitions remplacent toujours les précédentes
+
+    App\Service\PricePredictionService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
+    # Service de prédiction du bien-être (bonheur et stress)
+    App\Service\WellbeingPredictionService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+            $logger: '@logger'
+            $pythonPath: 'python'

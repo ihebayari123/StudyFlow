@@ -1,0 +1,387 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nos Produits{% endblock %}
+
+{% block body %}
+
+<!-- ======= Header ======= -->
+{% block header %}
+{% include 'home/navbar.html.twig' %}
+{% endblock %}
+
+<div class="products-section">
+    <div class="container">
+        <div class="header-with-button">
+            <h1 class="section-title">🛍️ Nos Produits</h1>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="search-container">
+            <form method="get" action="{{ path('app_home_produits') }}" style="width: 100%;">
+                <input type="text" name="search" id="searchInput" class="search-bar" 
+                       placeholder="Rechercher par catégorie..." value="{{ search|default('') }}">
+                <i class="fas fa-search search-icon"></i>
+            </form>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="products-grid">
+            {% for p in listproduit1 %}
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="{{ p.image }}" alt="{{ p.nom }}" 
+                         onerror="this.src='https://via.placeholder.com/400x350?text=Image'">
+                    <span class="product-category">{{ p.typeCategorie.nomCategorie|upper }}</span>
+                    <span class="product-price">{{ p.prix }} DT</span>
+                    <span class="product-id">#{{ p.id }}</span>
+                </div>
+                <div class="product-content">
+                    <p class="product-user">👤 {{ p.user.role }}</p>
+                    <h3 class="product-title">{{ p.nom }}</h3>
+                    <p class="product-desc">{{ p.description|slice(0, 100) }}...</p>
+                    <a href="#" class="btn-cart" data-id="{{ p.id }}" data-name="{{ p.nom|e('html_attr') }}" data-price="{{ p.prix }}" data-image="{{ p.image|e('html_attr') }}">
+                        <i class="fas fa-shopping-cart"></i> Ajouter au Panier
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="no-products">
+                <i class="fas fa-box-open"></i>
+                <p>Aucun produit trouvé</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    /* Keep navbar text white */
+    .header-area {
+        background: rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(10px);
+    }
+
+    .header-area .logo h1,
+    .header-area .nav a,
+    .header-area .menu-trigger span,
+    nav, .navbar, nav *, .navbar *, .nav-link {
+        color: white !important;
+    }
+
+    .products-section {
+        padding: 120px 20px 60px 20px;
+        background-color: transparent;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Header */
+    .header-with-button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 50px;
+    }
+
+    .section-title {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #ffffff;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        margin: 0;
+    }
+
+    /* Search Bar */
+    .search-container {
+        position: relative;
+        max-width: 600px;
+        margin: 0 auto 40px auto;
+    }
+
+    .search-bar {
+        width: 100%;
+        padding: 15px 50px 15px 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 30px;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .search-bar::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .search-bar:focus {
+        outline: none;
+        background: white;
+        color: #333;
+        border-color: white;
+        box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .search-bar:focus::placeholder {
+        color: #999;
+    }
+
+    .search-icon {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1.2rem;
+        pointer-events: none;
+    }
+
+    .search-bar:focus + .search-icon {
+        color: #667eea;
+    }
+
+    /* Products Grid */
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .product-image {
+        position: relative;
+        height: 350px;
+        overflow: hidden;
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-image img {
+        transform: scale(1.05);
+    }
+
+    .product-category {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: white;
+        color: #7b68ee;
+        padding: 10px 25px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .product-price {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #7b68ee 0%, #a78bfa 100%);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 1.5rem;
+    }
+
+    .product-id {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .product-content {
+        padding: 25px 30px 30px;
+        background: white;
+    }
+
+    .product-user {
+        color: #7b68ee;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .product-title {
+        color: #1a1a1a;
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1.4;
+        margin-bottom: 10px;
+    }
+
+    .product-desc {
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .btn-cart {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 25px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-cart:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    .btn-cart i {
+        font-size: 1.1rem;
+    }
+
+    /* No Products */
+    .no-products {
+        grid-column: 1 / -1;
+        text-align: center;
+        color: white;
+        padding: 80px 20px;
+    }
+
+    .no-products i {
+        font-size: 5rem;
+        margin-bottom: 20px;
+        opacity: 0.7;
+    }
+
+    .no-products p {
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .products-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .search-container {
+            margin-bottom: 30px;
+        }
+    }
+</style>
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+    // Live search functionality
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const productCards = document.querySelectorAll('.product-card');
+
+        productCards.forEach(card => {
+            const category = card.querySelector('.product-category').textContent.toLowerCase();
+            const title = card.querySelector('.product-title').textContent.toLowerCase();
+            const desc = card.querySelector('.product-desc').textContent.toLowerCase();
+            
+            if (category.includes(searchValue) || title.includes(searchValue) || desc.includes(searchValue)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+<script>
+// Panier (localStorage) helper
+function getCart(){
+    try{ return JSON.parse(localStorage.getItem('cart')||'[]'); }catch(e){ return []; }
+}
+function saveCart(cart){ localStorage.setItem('cart', JSON.stringify(cart)); }
+function updateCartCount(){
+    const cart = getCart();
+    const count = cart.reduce((s,i)=>s+ (i.quantity||1),0);
+    const el = document.getElementById('cart-count');
+    if(el) el.textContent = count;
+}
+
+function addToCart(item){
+    const cart = getCart();
+    const exist = cart.find(i=>i.id==item.id);
+    if(exist){ exist.quantity = (exist.quantity||1)+1; }
+    else { item.quantity = 1; cart.push(item); }
+    saveCart(cart);
+    updateCartCount();
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+    updateCartCount();
+
+    document.querySelectorAll('.btn-cart').forEach(btn=>{
+        btn.addEventListener('click', function(e){
+            e.preventDefault();
+            const id = this.dataset.id;
+            const name = this.dataset.name || '';
+            const price = parseFloat(this.dataset.price) || 0;
+            const image = this.dataset.image || '';
+            addToCart({ id, name, price, image });
+            // petit feedback
+            this.textContent = 'Ajouté ✓';
+            setTimeout(()=>{ this.innerHTML = '<i class="fas fa-shopping-cart"></i> Ajouter au Panier'; },800);
+        });
+    });
+});
+</script>
+
+{% endblock %}

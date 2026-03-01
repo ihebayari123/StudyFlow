@@ -1,0 +1,790 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Latest Courses{% endblock %}
+
+{% block body %}
+<!-- ======= Header ======= -->
+{% block header %}
+{% include 'home/navbar.html.twig' %}
+{% endblock %}
+
+<main class="courses-main">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">Explore Our Courses</h1>
+            <p class="page-subtitle">Discover your next learning opportunity</p>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="search-filter-section">
+            <!-- Search Bar -->
+            <div class="search-wrapper">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        class="search-input" 
+                        placeholder="Search courses by name or description..."
+                    >
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">All Courses</button>
+                <button class="filter-tab" data-filter="webdesign">Web Design</button>
+                <button class="filter-tab" data-filter="development">Development</button>
+                <button class="filter-tab" data-filter="wordpress">WordPress</button>
+            </div>
+        </div>
+
+        <!-- Courses Grid -->
+        <div class="courses-grid-wrapper">
+            <div class="courses-grid" id="coursesGrid">
+                {% for cours in listcours %}
+                <div class="course-item" data-category="{{ cours.categorie|default('development')|lower }}">
+                    <a href="{{ path('app_cours_chapitres', {'id': cours.id}) }}" class="course-card-link">
+                        <div class="course-card">
+                            <div class="course-media">
+                               {% if cours.image starts with 'http' %}
+    <img src="{{ cours.image }}" alt="{{ cours.titre }}" class="course-image" loading="lazy">
+{% elseif cours.image %}
+    <img src="{{ asset('uploads/courses/' ~ cours.image) }}" alt="{{ cours.titre }}" class="course-image" loading="lazy">
+{% else %}
+    <div class="course-image-placeholder">
+        <i class="fas fa-graduation-cap"></i>
+    </div>
+{% endif %}
+                                <div class="course-category-badge">{{ cours.categorie|default('DEVELOPMENT')|upper }}</div>
+                            </div>
+                            <div class="course-content">
+                                <div class="course-instructor">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span>{{ cours.user.nom }} {{ cours.user.prenom }}</span>
+                                </div>
+                                <h3 class="course-title">{{ cours.titre }}</h3>
+                                <p class="course-description">{{ cours.description|slice(0, 100) }}{% if cours.description|length > 100 %}...{% endif %}</p>
+                                <div class="course-footer">
+                                    <span class="course-link">
+                                        Start Learning 
+                                        <i class="fas fa-arrow-right"></i>
+                                    </span>
+                                    <span class="course-difficulty">
+                                        {% if cours.niveau is defined %}
+                                            {{ cours.niveau }}
+                                        {% else %}
+                                            All Levels
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator">
+            <div class="mouse">
+                <div class="wheel"></div>
+            </div>
+            <div class="scroll-text">Scroll to explore more courses</div>
+            <div class="scroll-arrow">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+
+        <!-- Course Count -->
+        <div class="course-count">
+            <i class="fas fa-book-open"></i>
+            {{ listcours|length }} courses available
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-state-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <h3 class="empty-state-title">No courses found</h3>
+            <p class="empty-state-text">Try adjusting your search or filter to find what you're looking for.</p>
+        </div>
+    </div>
+</main>
+
+<style>
+/* Reset and Base Styles */
+:root {
+    --primary-color: #4f46e5;
+    --primary-dark: #4338ca;
+    --primary-light: #818cf8;
+    --secondary-color: #64748b;
+    --success-color: #22c55e;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --dark-color: #0f172a;
+    --light-color: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    --border-radius: 16px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: var(--gray-800);
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-y: auto; /* Ensure vertical scrolling is enabled */
+    overflow-x: hidden;
+}
+
+/* Main Container */
+.courses-main {
+    padding: 100px 20px 40px;
+    min-height: 100vh;
+    background: transparent;
+    position: relative;
+    overflow-y: visible;
+    height: auto;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+    height: auto;
+    overflow-y: visible;
+}
+
+/* Page Header */
+.page-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Search and Filter Section */
+.search-filter-section {
+    margin-bottom: 30px;
+}
+
+/* Search Box */
+.search-wrapper {
+    margin-bottom: 20px;
+}
+
+.search-box {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    font-size: 1rem;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.search-input {
+    width: 100%;
+    padding: 14px 24px 14px 52px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: white;
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+/* Filter Tabs */
+.filter-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filter-tab {
+    padding: 10px 24px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 40px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.3px;
+}
+
+.filter-tab:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.filter-tab.active {
+    background: white;
+    border-color: white;
+    color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+}
+
+/* Courses Grid Wrapper */
+.courses-grid-wrapper {
+    width: 100%;
+    margin: 20px 0 30px;
+    overflow-y: visible;
+    height: auto;
+}
+
+/* Courses Grid */
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    margin: 0;
+    width: 100%;
+    height: auto;
+    overflow-y: visible;
+}
+
+/* Course Item */
+.course-item {
+    height: 100%;
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    margin-bottom: 0;
+}
+
+/* Course Card Link */
+.course-card-link {
+    text-decoration: none;
+    display: block;
+    height: 100%;
+    cursor: pointer;
+}
+
+.course-card-link:hover {
+    text-decoration: none;
+}
+
+/* Course Card */
+.course-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s ease;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.course-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-xl);
+}
+
+/* Course Media */
+.course-media {
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+    background: linear-gradient(45deg, var(--primary-light), var(--primary-color));
+    flex-shrink: 0;
+}
+
+.course-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+    display: block;
+}
+
+.course-card:hover .course-image {
+    transform: scale(1.05);
+}
+
+.course-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 2.5rem;
+}
+
+.course-category-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    border-radius: 30px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+/* Course Content */
+.course-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    background: white;
+}
+
+.course-instructor {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+    color: var(--gray-600);
+}
+
+.course-instructor i {
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.course-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.course-description {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    margin-bottom: 15px;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.course-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-200);
+    margin-top: auto;
+}
+
+.course-link {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+}
+
+.course-card:hover .course-link {
+    gap: 10px;
+}
+
+.course-link i {
+    font-size: 0.75rem;
+    transition: transform 0.3s ease;
+}
+
+.course-card:hover .course-link i {
+    transform: translateX(4px);
+}
+
+.course-difficulty {
+    padding: 4px 10px;
+    border-radius: 30px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    text-transform: capitalize;
+}
+
+/* Scroll Indicator */
+.scroll-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 30px 0 20px;
+    color: white;
+    animation: bounce 2s infinite;
+}
+
+.mouse {
+    width: 30px;
+    height: 50px;
+    border: 2px solid white;
+    border-radius: 20px;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.wheel {
+    width: 4px;
+    height: 10px;
+    background-color: white;
+    border-radius: 2px;
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: scrollWheel 1.5s infinite;
+}
+
+.scroll-text {
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+.scroll-arrow i {
+    font-size: 1.2rem;
+    color: white;
+}
+
+/* Course Count */
+.course-count {
+    text-align: center;
+    margin: 20px auto;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    display: inline-block;
+    width: auto;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.course-count i {
+    margin-right: 6px;
+    color: var(--primary-light);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 50px 30px;
+    background: white;
+    border-radius: var(--border-radius);
+    margin: 40px auto;
+    max-width: 450px;
+    box-shadow: var(--shadow-lg);
+}
+
+.empty-state-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 20px;
+    background: var(--gray-100);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: var(--gray-500);
+}
+
+.empty-state-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 8px;
+}
+
+.empty-state-text {
+    color: var(--gray-500);
+    font-size: 0.95rem;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes scrollWheel {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+}
+
+.course-item {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .courses-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .courses-main {
+        padding: 90px 15px 30px;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+    }
+
+    .courses-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .filter-tabs {
+        gap: 8px;
+    }
+
+    .filter-tab {
+        padding: 8px 18px;
+        font-size: 0.85rem;
+    }
+
+    .course-media {
+        height: 160px;
+    }
+    
+    .course-content {
+        padding: 18px;
+    }
+    
+    .scroll-indicator {
+        margin: 20px 0 15px;
+    }
+    
+    .mouse {
+        width: 25px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-input {
+        padding: 12px 20px 12px 48px;
+        font-size: 0.9rem;
+    }
+    
+    .course-title {
+        font-size: 1.1rem;
+    }
+    
+    .course-footer {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .course-count {
+        font-size: 0.85rem;
+        padding: 6px 16px;
+    }
+}
+
+/* Ensure scrolling works on all browsers */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+</style>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Force body to allow scrolling
+    document.body.style.overflowY = 'auto';
+    document.body.style.height = 'auto';
+    document.documentElement.style.overflowY = 'auto';
+    document.documentElement.style.height = 'auto';
+    
+    const searchInput = document.getElementById('searchInput');
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    const courseItems = document.querySelectorAll('.course-item');
+    const emptyState = document.getElementById('emptyState');
+    const coursesGrid = document.getElementById('coursesGrid');
+
+    function filterCourses() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const activeFilter = document.querySelector('.filter-tab.active')?.dataset.filter || 'all';
+        
+        let visibleCount = 0;
+
+        courseItems.forEach(item => {
+            const title = item.querySelector('.course-title')?.textContent.toLowerCase() || '';
+            const description = item.querySelector('.course-description')?.textContent.toLowerCase() || '';
+            const instructor = item.querySelector('.course-instructor span')?.textContent.toLowerCase() || '';
+            const category = item.dataset.category || 'development';
+            
+            const matchesSearch = searchTerm === '' || 
+                                 title.includes(searchTerm) || 
+                                 description.includes(searchTerm) ||
+                                 instructor.includes(searchTerm);
+            
+            const matchesFilter = activeFilter === 'all' || category === activeFilter;
+            
+            if (matchesSearch && matchesFilter) {
+                item.style.display = 'block';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        if (visibleCount === 0) {
+            emptyState.style.display = 'block';
+        } else {
+            emptyState.style.display = 'none';
+        }
+    }
+
+    searchInput.addEventListener('input', filterCourses);
+
+    filterTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            filterTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            filterCourses();
+        });
+    });
+
+    // Hide scroll indicator after user scrolls
+    let scrollIndicator = document.querySelector('.scroll-indicator');
+    if (scrollIndicator) {
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 100) {
+                scrollIndicator.style.opacity = '0';
+                scrollIndicator.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => {
+                    scrollIndicator.style.display = 'none';
+                }, 500);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

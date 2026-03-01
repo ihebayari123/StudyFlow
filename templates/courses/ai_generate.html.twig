@@ -1,0 +1,507 @@
+{# templates/courses/ai_generate.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}AI Course Generator{% endblock %}
+
+{% block admin_content %}
+<div class="admin-main-content">
+    <div class="container-fluid mt-5">
+
+        <!-- Header -->
+        <div class="page-header mb-4">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h2 class="page-title">
+                        <i class="fas fa-robot"></i> AI Course Generator
+                    </h2>
+                    <p class="text-muted">Type a course name and let AI build the full course + chapters for you — powered by local Ollama (no API key needed)</p>
+                </div>
+                <div class="col-auto">
+                    <a href="{{ path('app_coursesback') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Courses
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generation Form -->
+        <div class="row">
+            <div class="col-lg-5">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-gradient-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-magic"></i> Generate Course</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="courseName" class="form-label fw-bold">Course Topic <span class="text-danger">*</span></label>
+                            <input type="text"
+                                   id="courseName"
+                                   class="form-control form-control-lg"
+                                   placeholder="e.g. Introduction to Python, Digital Marketing, Machine Learning..."
+                                   autofocus>
+                            <div class="form-text">Be specific for better results (e.g. "Python for beginners" vs "Python")</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="chapterCount" class="form-label fw-bold">Number of Chapters</label>
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="range" id="chapterCount" class="form-range flex-grow-1" min="2" max="10" value="5">
+                                <span id="chapterCountDisplay" class="badge bg-primary fs-6 px-3 py-2">5</span>
+                            </div>
+                        </div>
+
+                        <button id="generateBtn" class="btn btn-primary w-100 btn-lg">
+                            <i class="fas fa-wand-magic-sparkles me-2"></i> Generate Course
+                        </button>
+
+                        <!-- Status messages -->
+                        <div id="statusBox" class="mt-3 d-none">
+                            <div class="d-flex align-items-center gap-2 text-primary">
+                                <div class="spinner-border spinner-border-sm" role="status"></div>
+                                <span id="statusText">Generating your course, please wait...</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div id="errorBox" class="alert alert-danger mt-3 d-none">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span id="errorText"></span>
+                            <div class="mt-2 small">
+                                <strong>Tip:</strong> Make sure Ollama is running:
+                                <code>ollama serve</code> and the model is pulled:
+                                <code>ollama pull mistral</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ollama Setup Guide -->
+                <div class="card border-info">
+                    <div class="card-header bg-info bg-opacity-10 text-info">
+                        <h6 class="mb-0"><i class="fas fa-circle-info"></i> Ollama Setup (one-time)</h6>
+                    </div>
+                    <div class="card-body small">
+                        <ol class="mb-0 ps-3">
+                            <li class="mb-1">Download from <strong>ollama.com</strong></li>
+                            <li class="mb-1">Run <code>ollama pull mistral</code> in your terminal</li>
+                            <li class="mb-1">Start with <code>ollama serve</code></li>
+                            <li>That's it — 100% local, no API key!</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Panel -->
+            <div class="col-lg-7">
+                <div id="previewPanel" class="d-none">
+                    <div class="card shadow-sm">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-eye"></i> Preview & Edit</h5>
+                            <div class="d-flex gap-2">
+                                <button id="regenerateBtn" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-redo"></i> Regenerate
+                                </button>
+                                <button id="saveBtn" class="btn btn-sm btn-success">
+                                    <i class="fas fa-save"></i> Save Course
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Course Info -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-uppercase text-muted small">Course Title</label>
+                                <input type="text" id="previewTitre" class="form-control fw-bold fs-5 border-0 bg-light">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-uppercase text-muted small">Description</label>
+                                <textarea id="previewDescription" class="form-control border-0 bg-light" rows="2"></textarea>
+                            </div>
+
+                            <!-- Chapters -->
+                            <label class="form-label fw-bold text-uppercase text-muted small">
+                                <i class="fas fa-list-ol me-1"></i> Chapters
+                            </label>
+                            <div id="chaptersContainer" class="accordion" id="chaptersAccordion">
+                                <!-- Injected by JS -->
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted small">
+                            <i class="fas fa-pencil me-1"></i> All fields are editable before saving
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty state -->
+                <div id="emptyState" class="text-center py-5 text-muted">
+                    <i class="fas fa-robot fa-5x mb-4 opacity-25"></i>
+                    <h4>Your AI-generated course will appear here</h4>
+                    <p>Enter a course name and click <strong>Generate Course</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-main-content {
+        margin-left: 280px;
+        padding-top: 100px;
+        transition: margin-left 0.3s ease;
+    }
+
+    .page-title i { color: #667eea; margin-right: 10px; }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .card { border-radius: 12px; border: none; }
+
+    .chapter-card {
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow: hidden;
+        transition: box-shadow 0.2s;
+    }
+    .chapter-card:hover { box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15); }
+
+    .chapter-header {
+        background: #f8f9fa;
+        padding: 12px 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        user-select: none;
+    }
+    .chapter-header:hover { background: #eef0ff; }
+
+    .chapter-number {
+        width: 28px; height: 28px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.8rem; font-weight: bold; flex-shrink: 0;
+    }
+
+    .chapter-body { padding: 16px; display: none; }
+    .chapter-body.open { display: block; }
+
+    .chapter-title-input {
+        font-weight: 600;
+        border: none; background: transparent;
+        flex: 1; font-size: 0.95rem;
+    }
+    .chapter-title-input:focus { outline: none; border-bottom: 2px solid #667eea; }
+
+    .duration-badge {
+        font-size: 0.75rem;
+        color: #6c757d;
+        white-space: nowrap;
+    }
+
+    code { background: #f1f3f9; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; }
+
+    @media (max-width: 768px) {
+        .admin-main-content { margin-left: 0; padding-top: 80px; }
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+    let generatedCourse = null;
+
+    const $  = id => document.getElementById(id);
+    const show = id => $(id).classList.remove('d-none');
+    const hide = id => $(id).classList.add('d-none');
+
+    $('chapterCount').addEventListener('input', function () {
+        $('chapterCountDisplay').textContent = this.value;
+    });
+
+    function setLoading(on) {
+        const btn = $('generateBtn');
+        if (on) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Generating...';
+            show('statusBox');
+            hide('errorBox');
+            animateProgress();
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-wand-magic-sparkles me-2"></i> Generate Course';
+            hide('statusBox');
+            $('progressBar').style.width = '100%';
+        }
+    }
+
+    let progressInterval = null;
+    function animateProgress() {
+        let pct = 0;
+        clearInterval(progressInterval);
+        $('progressBar').style.width = '0%';
+        progressInterval = setInterval(() => {
+            if (pct < 90) { pct += Math.random() * 4; $('progressBar').style.width = pct + '%'; }
+        }, 500);
+    }
+
+    function showError(msg) {
+        $('errorText').textContent = msg;
+        show('errorBox');
+    }
+
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    // -----------------------------------------------------------------------
+    // Render preview — includes video, links, content type
+    // -----------------------------------------------------------------------
+   function renderPreview(course) {
+    generatedCourse = course;
+
+    $('previewTitre').value       = course.titre;
+    $('previewDescription').value = course.description;
+
+    const container = $('chaptersContainer');
+    container.innerHTML = '';
+
+    course.chapitres.forEach((ch, i) => {
+        const linksHtml = (ch.links ?? []).map((l, li) => `
+            <div class="link-item d-flex gap-2 mb-2" id="linkRow_${i}_${li}">
+                <input type="text"  class="form-control form-control-sm" id="chLinkTitle_${i}_${li}" placeholder="Title" value="${escHtml(l.title ?? '')}">
+                <input type="url"   class="form-control form-control-sm" id="chLinkUrl_${i}_${li}"   placeholder="https://..." value="${escHtml(l.url ?? '')}">
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeLink(${i},${li})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `).join('');
+
+        const contentTypeBadge = {
+            'text':  '<span class="badge bg-secondary">📝 Text</span>',
+            'video': '<span class="badge bg-danger">🎥 Video</span>',
+            'mixed': '<span class="badge bg-primary">🔄 Mixed</span>',
+        }[ch.contentType] ?? '';
+
+        const div = document.createElement('div');
+        div.className = 'chapter-card';
+        div.id = `chapterCard_${i}`;
+        div.innerHTML = `
+            <div class="chapter-header" onclick="toggleChapter(${i})">
+                <div class="chapter-number">${ch.ordre}</div>
+                <input type="text" class="chapter-title-input" id="chTitre_${i}"
+                       value="${escHtml(ch.titre)}" onclick="event.stopPropagation()">
+                ${contentTypeBadge}
+                <span class="duration-badge">
+                    <i class="fas fa-clock me-1"></i>
+                    <input type="number" id="chDuration_${i}" value="${ch.durationMinutes}"
+                           class="border-0 bg-transparent text-muted" style="width:40px"
+                           min="5" max="300" onclick="event.stopPropagation()"> min
+                </span>
+                <i class="fas fa-chevron-down text-muted ms-2" id="chevron_${i}"></i>
+            </div>
+
+            <div class="chapter-body" id="chBody_${i}">
+
+                <!-- Content Type -->
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-bold">CONTENT TYPE</label>
+                    <select id="chContentType_${i}" class="form-select form-select-sm"
+                            onchange="toggleChapterSections(${i})">
+                        <option value="text"  ${ch.contentType === 'text'  ? 'selected' : ''}>📝 Text Only</option>
+                        <option value="video" ${ch.contentType === 'video' ? 'selected' : ''}>🎥 Video</option>
+                        <option value="mixed" ${ch.contentType === 'mixed' ? 'selected' : ''}>🔄 Mixed</option>
+                    </select>
+                </div>
+
+                <!-- Text Content -->
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-bold">CONTENT</label>
+                    <textarea id="chContenu_${i}" class="form-control border-0 bg-light" rows="5">${escHtml(ch.contenu)}</textarea>
+                </div>
+
+                <!-- Video URL (shown for video/mixed) -->
+                <div class="mb-3 chapter-video-section" id="chVideoSection_${i}"
+                     style="display:${ch.contentType !== 'text' ? 'block' : 'none'}">
+                    <label class="form-label text-muted small fw-bold">
+                        <i class="fab fa-youtube text-danger me-1"></i> VIDEO URL
+                    </label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="fas fa-link"></i></span>
+                        <input type="url" id="chVideoUrl_${i}" class="form-control"
+                               placeholder="https://youtube.com/watch?v=..."
+                               value="${escHtml(ch.videoUrl ?? '')}">
+                    </div>
+                    <small class="text-muted">YouTube, Vimeo, or direct video link</small>
+                </div>
+
+                <!-- Additional Resources / Links -->
+                <div class="mb-2">
+                    <label class="form-label text-muted small fw-bold">
+                        <i class="fas fa-link me-1"></i> ADDITIONAL RESOURCES
+                    </label>
+                    <div id="chLinks_${i}" class="mb-2">
+                        ${linksHtml || '<p class="text-muted small">No resources yet.</p>'}
+                    </div>
+                    <button type="button" class="btn btn-outline-primary btn-sm"
+                            onclick="addLink(${i})">
+                        <i class="fas fa-plus me-1"></i> Add Resource
+                    </button>
+                </div>
+
+            </div>
+        `;
+        container.appendChild(div);
+    });
+
+    hide('emptyState');
+    show('previewPanel');
+}
+
+    function toggleChapterSections(i) {
+    const type    = $(`chContentType_${i}`).value;
+    const videoEl = $(`chVideoSection_${i}`);
+    if (videoEl) videoEl.style.display = (type !== 'text') ? 'block' : 'none';
+}
+
+    function toggleVideoSection(i) {
+        const type = $(`chContentType_${i}`).value;
+        const sec  = $(`chVideoSection_${i}`);
+        if (sec) sec.style.display = type !== 'text' ? 'block' : 'none';
+    }
+
+    function addLink(i) {
+    const container = $(`chLinks_${i}`);
+    // Clear "no resources" message if present
+    if (container.querySelector('p')) container.innerHTML = '';
+    const li = document.createElement('div');
+    li.className = 'link-item d-flex gap-2 mb-2';
+    const newIndex = container.querySelectorAll('.link-item').length;
+    li.id = `linkRow_${i}_${newIndex}`;
+    li.innerHTML = `
+        <input type="text" class="form-control form-control-sm" placeholder="Title">
+        <input type="url"  class="form-control form-control-sm" placeholder="https://...">
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.link-item').remove()">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    container.appendChild(li);
+}
+function removeLink(i, li) {
+    const row = $(`linkRow_${i}_${li}`);
+    if (row) row.remove();
+}
+
+    // -----------------------------------------------------------------------
+    // Collect ALL fields including video and links before saving
+    // -----------------------------------------------------------------------
+    function collectEdited() {
+    const chapitres = generatedCourse.chapitres.map((ch, i) => {
+        // Collect links
+        const linkRows  = document.querySelectorAll(`#chLinks_${i} .link-item`);
+        const links     = [];
+        linkRows.forEach(row => {
+            const inputs = row.querySelectorAll('input');
+            const title  = inputs[0]?.value?.trim();
+            const url    = inputs[1]?.value?.trim();
+            if (url) links.push({ title: title || url, url });
+        });
+
+        return {
+            ordre:           ch.ordre,
+            titre:           $(`chTitre_${i}`)?.value ?? ch.titre,
+            contenu:         $(`chContenu_${i}`)?.value ?? ch.contenu,
+            durationMinutes: parseInt($(`chDuration_${i}`)?.value ?? ch.durationMinutes),
+            contentType:     $(`chContentType_${i}`)?.value ?? 'text',
+            videoUrl:        $(`chVideoUrl_${i}`)?.value ?? null,
+            links,
+        };
+    });
+
+    return {
+        titre:       $('previewTitre').value,
+        description: $('previewDescription').value,
+        chapitres,
+    };
+}
+
+    // -----------------------------------------------------------------------
+    // API calls
+    // -----------------------------------------------------------------------
+    async function generate() {
+        const courseName   = $('courseName').value.trim();
+        const chapterCount = parseInt($('chapterCount').value);
+
+        if (!courseName) {
+            $('courseName').classList.add('is-invalid');
+            $('courseName').focus();
+            return;
+        }
+        $('courseName').classList.remove('is-invalid');
+        setLoading(true);
+
+        try {
+            const res  = await fetch('{{ path("app_ai_course_generate") }}', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ courseName, chapterCount }),
+            });
+            const json = await res.json();
+            clearInterval(progressInterval);
+            setLoading(false);
+
+            if (!res.ok || json.error) { showError(json.error ?? 'Unknown error.'); return; }
+            renderPreview(json.course);
+
+        } catch (err) {
+            clearInterval(progressInterval);
+            setLoading(false);
+            showError('Network error: ' + err.message);
+        }
+    }
+
+    async function saveCourse() {
+        const btn = $('saveBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+
+        try {
+            const res  = await fetch('{{ path("app_ai_course_save") }}', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify(collectEdited()),
+            });
+            const json = await res.json();
+
+            if (!res.ok || json.error) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> Save Course';
+                showError(json.error ?? 'Failed to save.');
+                return;
+            }
+            window.location.href = json.redirect;
+
+        } catch (err) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Save Course';
+            showError('Save failed: ' + err.message);
+        }
+    }
+
+    $('generateBtn').addEventListener('click', generate);
+    $('courseName').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+    document.addEventListener('click', e => {
+        if (e.target.id === 'saveBtn')       saveCourse();
+        if (e.target.id === 'regenerateBtn') generate();
+    });
+</script>
+{% endblock %}

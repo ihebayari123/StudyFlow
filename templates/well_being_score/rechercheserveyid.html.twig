@@ -1,0 +1,769 @@
+{# templates/well_being_score/showscore.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+{% block title %}Manage showscore - Admin{% endblock %}
+
+{% block admin_content %}
+<div style="padding: 60px; margin-left: 210px; overflow-x: auto;">
+<div class="container-fluid px-4 py-5">
+    <!-- En-tête principal -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-5">
+        <div class="d-flex align-items-center gap-3 mb-4 mb-md-0">
+            <div class="bg-gradient-success bg-opacity-10 p-3 rounded-3">
+                <i class="fas fa-search-chart text-success fs-2"></i>
+            </div>
+            <div>
+                <h1 class="fw-bold text-dark mb-1">Recherche de Scores</h1>
+                <p class="text-muted mb-0">Trouvez les scores par ID de sondage</p>
+            </div>
+        </div>
+        
+        <!-- Navigation - BOUTON AJOUTÉ ICI -->
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ path('app_showstresse_sort_date') }}" 
+               class="btn btn-outline-primary d-flex align-items-center gap-2 px-4 rounded-3">
+                <i class="fas fa-calendar-alt me-1"></i>
+                <span>Surveys par date</span>
+            </a>
+            <!-- BOUTON VERS APP_SHOWSCORE AJOUTÉ ICI -->
+            <a href="{{ path('app_showscore') }}" 
+               class="btn btn-outline-success d-flex align-items-center gap-2 px-4 rounded-3">
+                <i class="fas fa-list-ol me-1"></i>
+                <span>Tous les scores</span>
+            </a>
+            <a href="{{ path('app_showscore') }}" 
+               class="btn btn-outline-secondary d-flex align-items-center gap-2 px-4 rounded-3">
+                <i class="fas fa-arrow-left"></i>
+                <span>Retour à la liste</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Carte principale -->
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+        <!-- En-tête de recherche -->
+        <div class="card-header bg-white border-0 py-4 px-5">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h3 class="fw-bold text-dark mb-2">Rechercher un score</h3>
+                    <p class="text-muted mb-0">Entrez l'ID d'un sondage pour voir les scores associés</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
+                        <i class="fas fa-database me-1"></i>
+                        {{ results|length }} résultat{% if results|length > 1 %}s{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire de recherche -->
+        <div class="card-body p-5">
+            <form method="get" action="{{ path('app_showscore_recherche') }}" class="mb-5">
+                <div class="row g-4 align-items-end">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label class="form-label fw-medium text-dark mb-2 d-flex align-items-center gap-2">
+                                <div class="bg-success bg-opacity-10 p-2 rounded-2">
+                                    <i class="fas fa-hashtag text-success"></i>
+                                </div>
+                                <span>ID du sondage</span>
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-poll text-success"></i>
+                                </span>
+                                <input type="number" 
+                                       id="survey_id" 
+                                       name="survey_id" 
+                                       class="form-control border-start-0" 
+                                       value="{{ survey_id }}"
+                                       placeholder="Ex: 12345"
+                                       required
+                                       min="1">
+                                <button type="submit" class="btn btn-success d-flex align-items-center gap-2 px-4">
+                                    <i class="fas fa-search"></i>
+                                    <span class="d-none d-md-inline">Rechercher</span>
+                                </button>
+                            </div>
+                            <div class="form-text text-muted mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Entrez l'identifiant numérique du sondage
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex flex-column gap-2">
+                            <button type="button" onclick="resetSearch()" class="btn btn-outline-secondary">
+                                <i class="fas fa-redo me-2"></i>Réinitialiser
+                            </button>
+                            <!-- BOUTON VERS APP_SHOWSCORE AJOUTÉ ICI -->
+                            <a href="{{ path('app_showscore') }}" 
+                               class="btn btn-outline-warning d-flex align-items-center justify-content-center gap-2">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Voir tous les scores</span>
+                            </a>
+                            <!-- BOUTON AJOUTÉ DANS LA SECTION DES ACTIONS -->
+                            <a href="{{ path('app_showstresse_sort_date') }}" 
+                               class="btn btn-outline-info d-flex align-items-center justify-content-center gap-2">
+                                <i class="fas fa-calendar-day"></i>
+                                <span>Voir les surveys</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Résultats de recherche -->
+            {% if survey_id %}
+            <div class="mt-5">
+                <!-- En-tête des résultats -->
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+                    <div class="d-flex align-items-center gap-3 mb-3 mb-md-0">
+                        <div class="bg-success bg-opacity-10 p-2 rounded-3">
+                            <i class="fas fa-chart-line text-success"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold text-dark mb-0">Résultats pour l'ID : {{ survey_id }}</h4>
+                            <p class="text-muted mb-0">Scores associés au sondage</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-success text-white rounded-pill px-3 py-2">
+                            {{ results|length }} score{% if results|length > 1 %}s{% endif %}
+                        </span>
+                        <!-- BOUTON VERS APP_SHOWSCORE AJOUTÉ ICI -->
+                        <a href="{{ path('app_showscore') }}" 
+                           class="btn btn-outline-success btn-sm d-flex align-items-center gap-2 px-3 rounded-3">
+                            <i class="fas fa-list me-1"></i>
+                            <span>Tous les scores</span>
+                        </a>
+                        <!-- BOUTON AJOUTÉ DANS LA SECTION DES RÉSULTATS -->
+                        <a href="{{ path('app_showstresse_sort_date') }}" 
+                           class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2 px-3 rounded-3">
+                            <i class="fas fa-external-link-alt"></i>
+                            <span>Aller aux surveys</span>
+                        </a>
+                    </div>
+                </div>
+
+                {% if results|length > 0 %}
+                <!-- Tableau des résultats -->
+                <div class="table-responsive rounded-3 overflow-hidden border">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4 py-3 text-uppercase small fw-semibold text-muted">
+                                    <i class="fas fa-id-card me-2"></i>ID Score
+                                </th>
+                                <th class="py-3 text-uppercase small fw-semibold text-muted">
+                                    <i class="fas fa-comment-medical me-2 text-info"></i>Recommandation
+                                </th>
+                                <th class="py-3 text-uppercase small fw-semibold text-muted">
+                                    <i class="fas fa-clipboard-check me-2 text-primary"></i>Plan d'action
+                                </th>
+                                <th class="py-3 text-uppercase small fw-semibold text-muted">
+                                    <i class="fas fa-comment-dots me-2 text-secondary"></i>Commentaire
+                                </th>
+                                <th class="py-3 text-uppercase small fw-semibold text-muted text-center">
+                                    <i class="fas fa-chart-bar me-2 text-warning"></i>Score
+                                </th>
+                                <th class="pe-4 py-3 text-uppercase small fw-semibold text-muted text-center">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in results %}
+                            <tr class="border-bottom border-light-subtle">
+                                <!-- ID -->
+                                <td class="ps-4 py-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="bg-dark bg-opacity-10 p-2 rounded-2">
+                                            <i class="fas fa-hashtag text-dark"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">#{{ item.id }}</div>
+                                            <small class="text-muted">Score</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                
+                                <!-- Recommandation -->
+                                <td class="py-3">
+                                    {% if item.recommendation %}
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fas fa-lightbulb text-warning"></i>
+                                        <span class="text-truncate-custom" style="max-width: 180px;">
+                                            {{ item.recommendation }}
+                                        </span>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted fst-italic">Non spécifié</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- Plan d'action -->
+                                <td class="py-3">
+                                    {% if item.actionPlan %}
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fas fa-tasks text-primary"></i>
+                                        <span class="text-truncate-custom" style="max-width: 180px;">
+                                            {{ item.actionPlan }}
+                                        </span>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted fst-italic">Non défini</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- Commentaire -->
+                                <td class="py-3">
+                                    {% if item.comment %}
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fas fa-sticky-note text-secondary"></i>
+                                        <span class="text-truncate-custom" style="max-width: 180px;">
+                                            {{ item.comment }}
+                                        </span>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted fst-italic">Aucun</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- Score -->
+                                <td class="py-3 text-center">
+                                    {% set scoreColor = 'bg-success' %}
+                                    {% set scoreLabel = 'Excellent' %}
+                                    
+                                    {% if item.score >= 80 %}
+                                        {% set scoreColor = 'bg-success' %}
+                                        {% set scoreLabel = 'Excellent' %}
+                                    {% elseif item.score >= 60 %}
+                                        {% set scoreColor = 'bg-info' %}
+                                        {% set scoreLabel = 'Bon' %}
+                                    {% elseif item.score >= 40 %}
+                                        {% set scoreColor = 'bg-warning' %}
+                                        {% set scoreLabel = 'Moyen' %}
+                                    {% else %}
+                                        {% set scoreColor = 'bg-danger' %}
+                                        {% set scoreLabel = 'Faible' %}
+                                    {% endif %}
+                                    
+                                    <div class="d-flex flex-column align-items-center gap-1">
+                                        <div class="{{ scoreColor }} text-white rounded-pill px-3 py-2 fw-bold d-inline-block">
+                                            {{ item.score }}
+                                        </div>
+                                        <small class="text-muted">{{ scoreLabel }}</small>
+                                    </div>
+                                </td>
+                                
+                                <!-- Actions -->
+                                <td class="pe-4 py-3 text-center">
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <a href="{{ path('app_delete_score', {'id': item.id }) }}" 
+                                           class="btn btn-sm btn-outline-danger d-flex align-items-center gap-2 px-3 rounded-3"
+                                           onclick="return confirmDelete('{{ item.id }}');"
+                                           data-bs-toggle="tooltip" title="Supprimer ce score">
+                                            <i class="fas fa-trash"></i>
+                                            <span class="d-none d-md-inline">Supprimer</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <!-- État : Aucun résultat -->
+                <div class="card border-0 bg-light-subtle">
+                    <div class="card-body text-center py-5">
+                        <div class="mb-4">
+                            <i class="fas fa-search-xmark text-muted fa-4x opacity-25"></i>
+                        </div>
+                        <h4 class="fw-semibold text-dark mb-3">Aucun résultat trouvé</h4>
+                        <p class="text-muted mb-4">
+                            Aucun score n'est associé au sondage avec l'ID <span class="fw-bold">"{{ survey_id }}"</span>.
+                        </p>
+                        <div class="d-flex flex-wrap justify-content-center gap-3">
+                            <button type="button" onclick="resetSearch()" class="btn btn-outline-success px-4 rounded-3">
+                                <i class="fas fa-redo me-2"></i>Nouvelle recherche
+                            </button>
+                            <!-- BOUTON VERS APP_SHOWSCORE AJOUTÉ ICI -->
+                            <a href="{{ path('app_showscore') }}" 
+                               class="btn btn-outline-warning px-4 rounded-3 d-flex align-items-center gap-2">
+                                <i class="fas fa-chart-line me-2"></i>
+                                <span>Voir tous les scores</span>
+                            </a>
+                            <!-- BOUTON AJOUTÉ DANS LA SECTION AUCUN RÉSULTAT -->
+                            <a href="{{ path('app_showstresse_sort_date') }}" 
+                               class="btn btn-outline-primary px-4 rounded-3 d-flex align-items-center gap-2">
+                                <i class="fas fa-calendar-check"></i>
+                                <span>Consulter les surveys</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <!-- État initial : Instructions -->
+            <div class="card border-0 bg-light-subtle">
+                <div class="card-body text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-search-plus text-success fa-4x opacity-25"></i>
+                    </div>
+                    <h4 class="fw-semibold text-dark mb-3">Rechercher des scores</h4>
+                    <p class="text-muted mb-4">
+                        Entrez l'ID d'un sondage dans le champ ci-dessus pour afficher<br>
+                        tous les scores de bien-être qui y sont associés.
+                    </p>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <div class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
+                            <i class="fas fa-lightbulb me-1"></i>Recommandations
+                        </div>
+                        <div class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2">
+                            <i class="fas fa-chart-line me-1"></i>Analyse de score
+                        </div>
+                        <div class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-2">
+                            <i class="fas fa-clipboard-list me-1"></i>Plans d'action
+                        </div>
+                    </div>
+                    <!-- BOUTON VERS APP_SHOWSCORE AJOUTÉ ICI -->
+                    <div class="mt-4 d-flex flex-wrap justify-content-center gap-3">
+                        <a href="{{ path('app_showscore') }}" 
+                           class="btn btn-outline-success px-4 rounded-3 d-flex align-items-center gap-2">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            <span>Accéder à tous les scores</span>
+                        </a>
+                        <a href="{{ path('app_showstresse_sort_date') }}" 
+                           class="btn btn-outline-primary px-4 rounded-3 d-flex align-items-center gap-2">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            <span>Accéder aux surveys triés par date</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Pied de page -->
+        <div class="card-footer bg-light-subtle border-0 py-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-success bg-opacity-10 p-2 rounded-3">
+                            <i class="fas fa-info-circle text-success"></i>
+                        </div>
+                        <div>
+                            <small class="fw-medium d-block">Informations de recherche</small>
+                            <small class="text-muted">Les résultats sont basés sur l'ID exact du sondage</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <small class="text-muted">
+                        <i class="far fa-clock me-1"></i>
+                        {{ "now"|date('d/m/Y H:i') }}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Styles modernes -->
+<style>
+:root {
+    --primary-color: #4361ee;
+    --success-color: #06d6a0;
+    --warning-color: #ffd166;
+    --danger-color: #ef476f;
+    --info-color: #118ab2;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Layout */
+body {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+/* Carte principale */
+.card {
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+/* Gradient backgrounds */
+.bg-gradient-success {
+    background: linear-gradient(135deg, #06d6a0 0%, #04a777 100%);
+}
+
+.bg-gradient-success.bg-opacity-10 {
+    background: linear-gradient(135deg, rgba(6, 214, 160, 0.1) 0%, rgba(4, 167, 119, 0.1) 100%);
+}
+
+/* Formulaires */
+.form-control, .input-group-text {
+    border-color: rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--success-color);
+    box-shadow: 0 0 0 3px rgba(6, 214, 160, 0.1);
+    transform: translateY(-1px);
+}
+
+.input-group-lg .form-control {
+    font-size: 1.1rem;
+    padding: 1rem 1.25rem;
+}
+
+/* Boutons */
+.btn {
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #06d6a0 0%, #04a777 100%);
+    border: none;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-outline-info {
+    border: 2px solid var(--info-color);
+    color: var(--info-color);
+}
+
+.btn-outline-info:hover {
+    background: var(--info-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-outline-warning {
+    border: 2px solid var(--warning-color);
+    color: var(--warning-color);
+}
+
+.btn-outline-warning:hover {
+    background: var(--warning-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 209, 102, 0.3);
+}
+
+.btn-outline-success {
+    border: 2px solid var(--success-color);
+    color: var(--success-color);
+}
+
+.btn-outline-success:hover {
+    background: var(--success-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);
+}
+
+/* Table */
+.table {
+    --bs-table-hover-bg: rgba(6, 214, 160, 0.02);
+}
+
+.table-hover tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--bs-table-hover-bg);
+    transform: translateX(4px);
+}
+
+/* Badges et indicateurs */
+.badge {
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.text-truncate-custom {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Cards internes */
+.card.bg-light-subtle {
+    background: rgba(248, 249, 250, 0.8) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Score badges */
+.bg-success, .bg-info, .bg-warning, .bg-danger {
+    color: white !important;
+}
+
+/* Animation d'entrée */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card, .form-group, .table-hover tbody tr {
+    animation: fadeInUp 0.5s ease forwards;
+    opacity: 0;
+}
+
+.card { animation-delay: 0.1s; }
+.form-group { animation-delay: 0.2s; }
+.table-hover tbody tr:nth-child(1) { animation-delay: 0.3s; }
+.table-hover tbody tr:nth-child(2) { animation-delay: 0.4s; }
+
+/* Bordures arrondies */
+.rounded-3 {
+    border-radius: 12px !important;
+}
+
+.rounded-4 {
+    border-radius: 16px !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 1rem !important;
+    }
+    
+    .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .btn span:not(.fa) {
+        display: none;
+    }
+    
+    .text-truncate-custom {
+        -webkit-line-clamp: 1;
+        max-width: 120px !important;
+    }
+    
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    .d-flex.flex-wrap.gap-2 {
+        width: 100%;
+        justify-content: flex-start;
+        margin-top: 1rem;
+    }
+    
+    .btn {
+        flex: 1;
+        min-width: 120px;
+    }
+}
+
+/* Tooltips */
+[data-bs-toggle="tooltip"] {
+    cursor: pointer;
+}
+
+/* Hover effects */
+.bg-opacity-10 {
+    opacity: 0.1;
+}
+
+.bg-opacity-25 {
+    opacity: 0.25;
+}
+
+/* Input number styling */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    opacity: 1;
+    height: 2em;
+    cursor: pointer;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser les tooltips
+    var tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltips.map(function(element) {
+        return new bootstrap.Tooltip(element);
+    });
+
+    // Fonction de réinitialisation de recherche
+    window.resetSearch = function() {
+        const input = document.getElementById('survey_id');
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
+        window.location.href = "{{ path('app_showscore_recherche') }}";
+    };
+
+    // Fonction de confirmation de suppression
+    window.confirmDelete = function(id) {
+        return new Promise((resolve) => {
+            const modalHtml = `
+                <div class="modal fade" id="deleteModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content rounded-3">
+                            <div class="modal-header border-0">
+                                <h5 class="modal-title fw-semibold text-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Supprimer le score ?
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body py-4">
+                                <div class="text-center mb-4">
+                                    <div class="mb-3">
+                                        <i class="fas fa-trash-alt fa-3x text-danger opacity-75"></i>
+                                    </div>
+                                    <h6 class="fw-semibold mb-2">Score #${id}</h6>
+                                    <p class="text-muted">Cette action est irréversible. Êtes-vous sûr de vouloir supprimer ce score ?</p>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>
+                                    Annuler
+                                </button>
+                                <button type="button" class="btn btn-danger rounded-3" id="confirmDeleteBtn">
+                                    <i class="fas fa-trash me-2"></i>
+                                    Supprimer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+            
+            document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+                modal.hide();
+                resolve(true);
+            });
+            
+            document.getElementById('deleteModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+                resolve(false);
+            });
+        });
+    };
+
+    // Remplacer les confirmations standard
+    document.querySelectorAll('a[onclick*="confirm"]').forEach(link => {
+        const originalOnclick = link.getAttribute('onclick');
+        if (originalOnclick && originalOnclick.includes('confirm')) {
+            link.removeAttribute('onclick');
+            
+            link.addEventListener('click', async function(e) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+                const id = href.split('/').pop();
+                
+                const confirmed = await confirmDelete(id);
+                if (confirmed) {
+                    window.location.href = href;
+                }
+            });
+        }
+    });
+
+    // Animation au focus sur l'input
+    const searchInput = document.getElementById('survey_id');
+    if (searchInput) {
+        searchInput.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        searchInput.addEventListener('blur', function() {
+            this.parentElement.classList.remove('focused');
+        });
+        
+        // Auto-focus si pas de résultats
+        {% if not survey_id %}
+        setTimeout(() => {
+            searchInput.focus();
+        }, 300);
+        {% endif %}
+    }
+
+    // Gestion du texte tronqué
+    const truncatedElements = document.querySelectorAll('.text-truncate-custom');
+    truncatedElements.forEach(element => {
+        if (element.scrollWidth > element.clientWidth) {
+            element.setAttribute('data-bs-toggle', 'tooltip');
+            element.setAttribute('title', element.textContent);
+            new bootstrap.Tooltip(element);
+        }
+    });
+    
+    // Animation pour les boutons
+    const buttons = document.querySelectorAll('a[href*="app_showscore"], a[href*="app_showstresse_sort_date"]');
+    buttons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.style.transform = 'translateX(3px)';
+                icon.style.transition = 'transform 0.3s ease';
+            }
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.style.transform = 'translateX(0)';
+            }
+        });
+    });
+});
+</script>
+ {% endblock %}

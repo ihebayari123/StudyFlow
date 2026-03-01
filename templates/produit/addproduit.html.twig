@@ -1,0 +1,298 @@
+{% extends 'base.html.twig' %}
+
+
+{% block title %}Ajouter un Produit{% endblock %}
+
+{% block body %}
+<style>
+    .form-container { 
+        max-width: 600px; 
+        margin: 30px auto; 
+        padding: 25px; 
+        background: white; 
+        border-radius: 8px; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+    }
+    .form-title { 
+        text-align: center; 
+        color: #333; 
+        margin-bottom: 20px; 
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    label { 
+        display: block; 
+        margin: 15px 0 5px; 
+        font-weight: 600; 
+        color: #333;
+    }
+    input, textarea, select { 
+        width: 100%; 
+        padding: 10px; 
+        border: 2px solid #ddd; 
+        border-radius: 5px; 
+        font-size: 14px;
+    }
+    input:focus, textarea:focus, select:focus { 
+        outline: none; 
+        border-color: #5b4caf; 
+    }
+    .error {
+        color: red;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    button { 
+        width: 100%; 
+        padding: 12px; 
+        margin-top: 20px; 
+        background: #4c4faf; 
+        color: white; 
+        border: none; 
+        border-radius: 5px; 
+        font-size: 16px; 
+        cursor: pointer; 
+    }
+    button:hover { 
+        background: #3d3f8f; 
+    }
+    .predict-section {
+        margin-top: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 5px;
+    }
+    #predict-btn {
+        background: #17a2b8;
+        width: 100%;
+        padding: 12px;
+        margin-top: 10px;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    #predict-btn:hover:not(:disabled) {
+        background: #138496;
+    }
+    #predict-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+    #predict-result {
+        margin-top: 15px;
+        padding: 15px;
+        border-radius: 5px;
+        display: none;
+    }
+    #predict-result.show {
+        display: block;
+    }
+    #predict-result.success {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+    #predict-result.error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+    .predict-price-value {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+    .loading-spinner {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border: 2px solid rgba(0,0,0,0.1);
+        border-radius: 50%;
+        border-top-color: #17a2b8;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<div class="form-container">
+    <h1 class="form-title">➕ Créer un Nouveau Produit</h1>
+    
+    {# Désactivation du contrôle HTML5 #}
+    {{ form_start(ff, {'attr': {'novalidate': 'novalidate'}}) }}
+    
+    <div class="form-group">
+        {{ form_label(ff.nom, "Nom du Produit") }}
+        {{ form_widget(ff.nom) }}
+        {{ form_errors(ff.nom) }}
+    </div>
+    
+    <div class="form-group">
+        {{ form_label(ff.description, "Description") }}
+        {{ form_widget(ff.description) }}
+        {{ form_errors(ff.description) }}
+    </div>
+    
+    <div class="form-group">
+        {{ form_label(ff.prix, "Prix (DT)") }}
+        {{ form_widget(ff.prix) }}
+        {{ form_errors(ff.prix) }}
+    </div>
+    
+    <div class="form-group">
+        {{ form_label(ff.image, "URL de l'image") }}
+        {{ form_widget(ff.image) }}
+        {{ form_errors(ff.image) }}
+    </div>
+    
+    <div class="form-group">
+        {{ form_label(ff.typeCategorie, "Catégorie") }}
+        {{ form_widget(ff.typeCategorie, {'attr': {'id': 'categorie-select'}}) }}
+        {{ form_errors(ff.typeCategorie) }}
+    </div>
+
+    <!-- Section Prédiction de Prix -->
+    <div class="predict-section">
+        <button type="button" id="predict-btn">🔮 Prédire le Prix</button>
+        <div id="predict-result"></div>
+    </div>
+    
+    <div class="form-group">
+        {{ form_label(ff.user, "Utilisateur") }}
+        {{ form_widget(ff.user) }}
+        {{ form_errors(ff.user) }}
+    </div>
+    
+    {{ form_rest(ff) }}
+    
+    {{ form_end(ff) }}
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+    <div style="text-align: center;">
+        <a href="{{ path('app_showproduit') }}" class="back-link">
+            ⬅ retourner à la liste des produits
+        </a>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const predictBtn = document.getElementById('predict-btn');
+    const predictResult = document.getElementById('predict-result');
+
+    // Récupérer les IDs des champs
+    let nomInput, descriptionInput, categorieSelect, prixInput;
+    
+    // Trouver les inputs dynamiquement
+    const allInputs = document.querySelectorAll('input[type="text"]');
+    const allTextareas = document.querySelectorAll('textarea');
+    const allSelects = document.querySelectorAll('select');
+    
+    // Identifier les champs par leur position ou attributs
+    for (let i = 0; i < allInputs.length; i++) {
+        const label = allInputs[i].previousElementSibling;
+        if (label && label.textContent.toLowerCase().includes('nom')) {
+            nomInput = allInputs[i];
+        } else if (label && label.textContent.toLowerCase().includes('prix')) {
+            prixInput = allInputs[i];
+        }
+    }
+    
+    for (let textarea of allTextareas) {
+        const label = textarea.previousElementSibling;
+        if (label && label.textContent.toLowerCase().includes('description')) {
+            descriptionInput = textarea;
+        }
+    }
+    
+    for (let select of allSelects) {
+        const label = select.previousElementSibling;
+        if (label && label.textContent.toLowerCase().includes('catégorie')) {
+            categorieSelect = select;
+        }
+    }
+    
+    // Fallback: chercher par ID ou name contenant les mots-clés
+    if (!nomInput) nomInput = document.querySelector('[name*="nom"], [id*="nom"]');
+    if (!descriptionInput) descriptionInput = document.querySelector('[name*="description"], [id*="description"]');
+    if (!categorieSelect) categorieSelect = document.querySelector('[name*="categorie"], [id*="categorie"], #categorie-select, [name*="typeCategorie"]');
+    if (!prixInput) prixInput = document.querySelector('[name*="prix"], [id*="prix"]');
+
+    // Ajouter l'event listener au bouton
+    predictBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        // Récupérer les valeurs
+        const nom = nomInput ? nomInput.value.trim() : '';
+        const description = descriptionInput ? descriptionInput.value.trim() : '';
+        const categorieValue = categorieSelect ? categorieSelect.options[categorieSelect.selectedIndex].text : '';
+        
+        // Validation
+        if (!nom || !description || !categorieValue || categorieValue === '-- Sélectionner une catégorie --') {
+            showResult('error', '⚠️ Veuillez remplir au moins le nom, la description et sélectionner une catégorie');
+            return;
+        }
+
+        // Afficher le chargement
+        showResult('loading', '<span class="loading-spinner"></span> Prédiction en cours...');
+        predictBtn.disabled = true;
+
+        try {
+            const response = await fetch('{{ path("app_predict_price") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    nom: nom,
+                    description: description,
+                    categorie: categorieValue
+                })
+            });
+
+            const data = await response.json();
+            predictBtn.disabled = false;
+
+            if (data.success) {
+                let confidenceEmoji = '✅';
+                if (data.confidence === 'medium') {
+                    confidenceEmoji = '⚠️';
+                } else if (data.confidence === 'low') {
+                    confidenceEmoji = '❌';
+                }
+                
+                const prixHTML = `
+                    ${confidenceEmoji} Prix Prédit: <span class="predict-price-value">${data.prix_predit.toFixed(2)} DT</span>
+                    <small>(Confiance: ${data.confidence})</small>
+                `;
+                showResult('success', prixHTML);
+                
+                // Remplir le champ prix si trouvé
+                if (prixInput) {
+                    prixInput.value = Math.round(data.prix_predit);
+                }
+            } else {
+                showResult('error', '❌ ' + (data.error || 'Erreur lors de la prédiction'));
+            }
+        } catch (error) {
+            predictBtn.disabled = false;
+            console.error('Erreur:', error);
+            showResult('error', '❌ Erreur de connexion au serveur');
+        }
+    });
+
+    function showResult(type, message) {
+        predictResult.innerHTML = message;
+        predictResult.className = 'show ' + (type === 'error' ? 'error' : type === 'success' ? 'success' : '');
+    }
+});
+</script>
+
+{% endblock %}

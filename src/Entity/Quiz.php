@@ -1,0 +1,174 @@
+<?php
+
+namespace App\Entity;
+
+use App\Repository\QuizRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+#[ORM\Entity(repositoryClass: QuizRepository::class)]
+class Quiz
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le titre du quiz est obligatoire.")]
+    #[Assert\Length(
+        min: 3,
+        minMessage: "Le titre doit contenir au moins {{ limit }} caractères."
+    )]
+    private ?string $titre = null;
+
+    #[ORM\Column]
+    private ?int $duree = null;
+
+    #[ORM\Column]
+    private ?\DateTime $dateCreation = null;
+
+   
+
+    #[ORM\ManyToOne(inversedBy: 'quizzes')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Cours $course = null;
+
+    /**
+     * @var Collection<int, Question>
+     */
+    #[ORM\OneToMany(
+        targetEntity: Question::class,
+        mappedBy: 'quiz',
+        orphanRemoval: true
+    )]
+    private Collection $questions;
+
+    /**
+     * @var Collection<int, QuizAttempt>
+     */
+    #[ORM\OneToMany(targetEntity: QuizAttempt::class, mappedBy: 'quiz' , orphanRemoval: true)]
+    private Collection $quizAttempts;
+
+    public function __construct()
+    {
+        $this->questions = new ArrayCollection();
+        $this->dateCreation = new \DateTime();
+        $this->quizAttempts = new ArrayCollection();
+    }
+
+    // ================= GETTERS & SETTERS =================
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getTitre(): ?string
+    {
+        return $this->titre;
+    }
+
+    public function setTitre(string $titre): static
+    {
+        $this->titre = $titre;
+        return $this;
+    }
+
+    public function getDuree(): ?int
+    {
+        return $this->duree;
+    }
+
+    public function setDuree(int $duree): static
+    {
+        $this->duree = $duree;
+        return $this;
+    }
+
+    public function getDateCreation(): ?\DateTime
+    {
+        return $this->dateCreation;
+    }
+
+    public function setDateCreation(\DateTime $dateCreation): static
+    {
+        $this->dateCreation = $dateCreation;
+        return $this;
+    }
+
+   
+
+    public function getCourse(): ?Cours
+    {
+        return $this->course;
+    }
+
+    public function setCourse(?Cours $course): static
+    {
+        $this->course = $course;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Question>
+     */
+    public function getQuestions(): Collection
+    {
+        return $this->questions;
+    }
+
+    public function addQuestion(Question $question): static
+    {
+        if (!$this->questions->contains($question)) {
+            $this->questions->add($question);
+            $question->setQuiz($this);
+        }
+
+        return $this;
+    }
+
+    public function removeQuestion(Question $question): static
+    {
+        if ($this->questions->removeElement($question)) {
+            if ($question->getQuiz() === $this) {
+                $question->setQuiz(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, QuizAttempt>
+     */
+    public function getQuizAttempts(): Collection
+    {
+        return $this->quizAttempts;
+    }
+
+    public function addQuizAttempt(QuizAttempt $quizAttempt): static
+    {
+        if (!$this->quizAttempts->contains($quizAttempt)) {
+            $this->quizAttempts->add($quizAttempt);
+            $quizAttempt->setQuiz($this);
+        }
+
+        return $this;
+    }
+
+    public function removeQuizAttempt(QuizAttempt $quizAttempt): static
+    {
+        if ($this->quizAttempts->removeElement($quizAttempt)) {
+            // set the owning side to null (unless already changed)
+            if ($quizAttempt->getQuiz() === $this) {
+                $quizAttempt->setQuiz(null);
+            }
+        }
+
+        return $this;
+    }
+}
