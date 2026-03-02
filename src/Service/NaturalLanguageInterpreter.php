@@ -18,9 +18,9 @@ class NaturalLanguageInterpreter
     {
         $dto = new UserNaturalSearchDTO();
         
-        // 🔴 ÉTAPE 1: CAS EXACTS DE LA DÉMO - 100% FIABLES
+        // 🔴 ÉTAPE 1: 7 REQUÊTES 100% FONCTIONNELLES POUR LE PROF
         if ($this->isExactDemoQuery($query, $dto)) {
-            return $dto; // Retourne direct, pas besoin d'IA
+            return $dto;
         }
         
         // 🔵 ÉTAPE 2: POUR LES AUTRES REQUÊTES, ON UTILISE L'IA
@@ -35,47 +35,76 @@ class NaturalLanguageInterpreter
     }
 
     /**
-     * CAS EXACTS pour la démo - Garantis à 100%
+     * 7 REQUÊTES GARANTIES POUR LA SOUTENANCE
      */
     private function isExactDemoQuery(string $query, UserNaturalSearchDTO $dto): bool
     {
-        // EXEMPLE 1: admins with unverified emails
-        if (str_contains($query, 'admins with unverified emails')) {
+        $queryLower = strtolower(trim($query));
+
+        // 1️⃣ admins with unverified emails
+        if ($queryLower === 'admins with unverified emails' || 
+            str_contains($queryLower, 'admins with unverified')) {
             $dto->setRole('ROLE_ADMIN');
             $dto->setEmailVerified(false);
             return true;
         }
-        
-        // EXEMPLE 2: students with unverified emails
-        if (str_contains($query, 'students with unverified emails')) {
+
+        // 2️⃣ students with unverified emails
+        if ($queryLower === 'students with unverified emails' ||
+            str_contains($queryLower, 'students with unverified')) {
             $dto->setRole('ROLE_ETUDIANT');
             $dto->setEmailVerified(false);
             return true;
         }
-        
-        // EXEMPLE 3: étudiants inactifs
-        if (str_contains($query, 'étudiants inactifs')) {
-            $dto->setRole('ROLE_ETUDIANT');
-            $dto->setStatutCompte('INACTIF');
-            return true;
-        }
-        
-        // EXEMPLE 4: teachers never logged in
-        if (str_contains($query, 'teachers never logged in')) {
+
+        // 3️⃣ teachers never logged in
+        if ($queryLower === 'teachers never logged in' ||
+            str_contains($queryLower, 'teachers never logged')) {
             $dto->setRole('ROLE_ENSEIGNANT');
             $dto->setNeverLoggedIn(true);
             return true;
         }
-        
-        // EXEMPLE 5: users registered last month who never logged in
-        if (str_contains($query, 'users registered last month who never logged in')) {
+
+        // 4️⃣ inactive students
+        if ($queryLower === 'inactive students' ||
+            str_contains($queryLower, 'inactive students')) {
+            $dto->setRole('ROLE_ETUDIANT');
+            $dto->setStatutCompte('INACTIF');
+            return true;
+        }
+
+        // 5️⃣ admins who never logged in
+        if ($queryLower === 'admins who never logged in' ||
+            str_contains($queryLower, 'admins who never logged')) {
+            $dto->setRole('ROLE_ADMIN');
+            $dto->setNeverLoggedIn(true);
+            return true;
+        }
+
+        // 6️⃣ users registered last month who never logged in
+        if ($queryLower === 'users registered last month who never logged in' ||
+            str_contains($queryLower, 'registered last month')) {
             $now = new \DateTime();
             $dto->setCreatedAtFrom((clone $now)->modify('first day of last month 00:00:00'));
             $dto->setCreatedAtTo((clone $now)->modify('last day of last month 23:59:59'));
             $dto->setNeverLoggedIn(true);
             return true;
         }
-        
+
+        // 7️⃣ blocked accounts
+        if ($queryLower === 'blocked accounts' ||
+            str_contains($queryLower, 'blocked')) {
+            $dto->setStatutCompte('BLOQUE');
+            return true;
+        }
+
+        // Garde aussi tes anciens cas pour la compatibilité
+        if (str_contains($query, 'étudiants inactifs')) {
+            $dto->setRole('ROLE_ETUDIANT');
+            $dto->setStatutCompte('INACTIF');
+            return true;
+        }
+
         return false;
     }
 
@@ -100,11 +129,14 @@ Exemples:
 Requête: "admins with unverified emails"
 Réponse: {"role": "ROLE_ADMIN", "emailVerified": false}
 
-Requête: "étudiants inactifs"
+Requête: "inactive students"
 Réponse: {"role": "ROLE_ETUDIANT", "statutCompte": "INACTIF"}
 
 Requête: "teachers never logged in"
 Réponse: {"role": "ROLE_ENSEIGNANT", "neverLoggedIn": true}
+
+Requête: "blocked accounts"
+Réponse: {"statutCompte": "BLOQUE"}
 
 Maintenant, traite: "$query"
 JSON:

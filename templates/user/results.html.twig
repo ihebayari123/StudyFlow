@@ -1,0 +1,85 @@
+{# templates/user/results.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Résultats de recherche{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="fas fa-search"></i> Résultats pour : "{{ query }}"</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Carte d'interprétation -->
+                    <div class="alert alert-info">
+                        <strong>🔍 L'IA a compris :</strong>
+                        <ul class="mb-0 mt-2">
+                            {% if interpretation.role %}
+                                <li>Rôle : {{ interpretation.role }}</li>
+                            {% endif %}
+                            {% if interpretation.email_verified is not null %}
+                                <li>Email vérifié : {{ interpretation.email_verified ? '✅' : '❌' }}</li>
+                            {% endif %}
+                            {% if interpretation.statut_compte %}
+                                <li>Statut : {{ interpretation.statut_compte }}</li>
+                            {% endif %}
+                            {% if interpretation.never_logged_in %}
+                                <li>Jamais connecté</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    
+                    <!-- Résultats -->
+                    <h5>{{ count }} utilisateur(s) trouvé(s)</h5>
+                    
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th>Statut</th>
+                                <th>Email vérifié</th>
+                                <th>Dernière connexion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.prenom }} {{ user.nom }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    <span class="badge {% if 'ADMIN' in user.role %}bg-danger{% elseif 'ENSEIGNANT' in user.role %}bg-warning{% else %}bg-info{% endif %}">
+                                        {{ user.role }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {# ✅ CORRIGÉ ICI : statutCompte au lieu de statut_compte #}
+                                    <span class="badge {% if user.statutCompte == 'ACTIF' %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {{ user.statutCompte }}
+                                    </span>
+                                </td>
+                                <td>{{ user.emailVerified ? '✅' : '❌' }}</td>
+                                <td>{{ user.lastLogin ? user.lastLogin|date('d/m/Y H:i') : 'Jamais' }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center">Aucun résultat</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                    <a href="{{ path('admin_natural_search') }}" class="btn btn-secondary">
+                        ← Nouvelle recherche
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

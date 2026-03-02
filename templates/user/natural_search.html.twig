@@ -1,0 +1,428 @@
+{# templates/user/natural_search.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Recherche intelligente{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+        --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+        --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+        --border-radius: 12px;
+    }
+
+    .search-hero {
+        background: var(--primary-gradient);
+        padding: 40px 0;
+        margin-bottom: 30px;
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        color: white;
+    }
+
+    .search-hero h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .search-hero p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    .search-card {
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+    }
+
+    .search-card .card-header {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 20px 25px;
+    }
+
+    .search-card .card-header h4 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .search-card .card-header i {
+        font-size: 1.8rem;
+    }
+
+    .search-card .card-body {
+        padding: 30px;
+    }
+
+    .search-input-wrapper {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .search-textarea {
+        width: 100%;
+        padding: 15px 20px;
+        border: 2px solid #e1e5e9;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        resize: vertical;
+        transition: all 0.3s ease;
+    }
+
+    .search-textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .search-btn {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: var(--shadow-md);
+    }
+
+    .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .search-btn i {
+        font-size: 1.2rem;
+    }
+
+    .examples-section {
+        margin-top: 40px;
+    }
+
+    .examples-section h5 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .example-card {
+        background: #f8f9fa;
+        border-radius: var(--border-radius);
+        padding: 15px;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        height: 100%;
+    }
+
+    .example-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
+        border-color: #667eea;
+    }
+
+    .example-btn {
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+    }
+
+    .example-content {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .example-icon {
+        width: 50px;
+        height: 50px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .example-text {
+        flex: 1;
+    }
+
+    .example-text strong {
+        display: block;
+        font-size: 1rem;
+        color: #2d3748;
+        margin-bottom: 5px;
+    }
+
+    .example-text small {
+        color: #718096;
+        font-size: 0.85rem;
+    }
+
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255,255,255,0.9);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .loading-spinner {
+        text-align: center;
+    }
+
+    .spinner {
+        width: 60px;
+        height: 60px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .loading-spinner p {
+        color: #2d3748;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .loading-spinner small {
+        color: #718096;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>🤖 L'IA réfléchit...</p>
+        <small>Analyse de votre requête en cours</small>
+    </div>
+</div>
+
+<!-- Hero Section -->
+<div class="search-hero">
+    <div class="container">
+        <div class="text-center">
+            <h1><i class="fas fa-robot me-3"></i>Recherche Intelligente</h1>
+            <p>Posez votre question en langage naturel, l'IA comprend et cherche pour vous</p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Main Search Card -->
+            <div class="search-card">
+                <div class="card-header">
+                    <h4>
+                        <i class="fas fa-search"></i>
+                        Exprimez votre recherche
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form action="{{ path('admin_users_natural_search') }}" method="POST" id="searchForm">
+                        <div class="search-input-wrapper">
+                            <textarea name="query" class="search-textarea" rows="3" 
+                                      placeholder="Exemple : admins with unverified emails"></textarea>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="search-btn">
+                                <i class="fas fa-search"></i>
+                                Lancer la recherche intelligente
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Examples Section -->
+            <div class="examples-section">
+                <h5>
+                    <i class="fas fa-lightbulb text-warning"></i>
+                    Exemples de requêtes
+                </h5>
+                
+                <div class="row g-4">
+                    <!-- Exemple 1 -->
+                    <div class="col-md-4">
+                        <div class="example-card">
+                            <form action="{{ path('admin_users_natural_search') }}" method="POST" class="example-form">
+                                <input type="hidden" name="query" value="admins with unverified emails">
+                                <button type="submit" class="example-btn">
+                                    <div class="example-content">
+                                        <div class="example-icon">
+                                            👑
+                                        </div>
+                                        <div class="example-text">
+                                            <strong>Admins non vérifiés</strong>
+                                            <small>admins with unverified emails</small>
+                                        </div>
+                                    </div>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Exemple 2 -->
+                    <div class="col-md-4">
+                        <div class="example-card">
+                            <form action="{{ path('admin_users_natural_search') }}" method="POST" class="example-form">
+                                <input type="hidden" name="query" value="étudiants inactifs">
+                                <button type="submit" class="example-btn">
+                                    <div class="example-content">
+                                        <div class="example-icon">
+                                            🎓
+                                        </div>
+                                        <div class="example-text">
+                                            <strong>Étudiants inactifs</strong>
+                                            <small>étudiants inactifs</small>
+                                        </div>
+                                    </div>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Exemple 3 -->
+                    <div class="col-md-4">
+                        <div class="example-card">
+                            <form action="{{ path('admin_users_natural_search') }}" method="POST" class="example-form">
+                                <input type="hidden" name="query" value="enseignants jamais connectés">
+                                <button type="submit" class="example-btn">
+                                    <div class="example-content">
+                                        <div class="example-icon">
+                                            📚
+                                        </div>
+                                        <div class="example-text">
+                                            <strong>Enseignants jamais connectés</strong>
+                                            <small>enseignants jamais connectés</small>
+                                        </div>
+                                    </div>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Exemple 4 -->
+                    <div class="col-md-4">
+                        <div class="example-card">
+                            <form action="{{ path('admin_users_natural_search') }}" method="POST" class="example-form">
+                                <input type="hidden" name="query" value="users registered last month who never logged in">
+                                <button type="submit" class="example-btn">
+                                    <div class="example-content">
+                                        <div class="example-icon">
+                                            📅
+                                        </div>
+                                        <div class="example-text">
+                                            <strong>Inscrits mois dernier</strong>
+                                            <small>users registered last month...</small>
+                                        </div>
+                                    </div>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Exemple 5 -->
+                    <div class="col-md-4">
+                        <div class="example-card">
+                            <form action="{{ path('admin_users_natural_search') }}" method="POST" class="example-form">
+                                <input type="hidden" name="query" value="admins with verified email">
+                                <button type="submit" class="example-btn">
+                                    <div class="example-content">
+                                        <div class="example-icon">
+                                            ✅
+                                        </div>
+                                        <div class="example-text">
+                                            <strong>Admins vérifiés</strong>
+                                            <small>admins with verified email</small>
+                                        </div>
+                                    </div>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Exemple 6 -->
+                    <div class="col-md-4">
+                        <div class="example-card">
+                            <form action="{{ path('admin_users_natural_search') }}" method="POST" class="example-form">
+                                <input type="hidden" name="query" value="comptes bloqués">
+                                <button type="submit" class="example-btn">
+                                    <div class="example-content">
+                                        <div class="example-icon">
+                                            🔒
+                                        </div>
+                                        <div class="example-text">
+                                            <strong>Comptes bloqués</strong>
+                                            <small>comptes bloqués</small>
+                                        </div>
+                                    </div>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Comment ça marche ?</strong> L'IA analyse votre question, extrait les filtres (rôle, statut, email, dates), et construit automatiquement la requête pour trouver les utilisateurs correspondants.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('searchForm').addEventListener('submit', function() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+});
+
+// Ajoute l'overlay sur les formulaires d'exemple
+document.querySelectorAll('.example-form').forEach(form => {
+    form.addEventListener('submit', function() {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+    });
+});
+</script>
+{% endblock %}

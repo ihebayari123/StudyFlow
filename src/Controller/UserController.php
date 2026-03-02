@@ -206,4 +206,9 @@ final class UserController extends AbstractController
             'message' => 'Mot de passe hashé pour ' . $user->getEmail()
         ]);
     }
+    #[Route('/admin/natural-search', name: 'admin_natural_search')]
+    public function naturalSearchPage(): Response
+    {
+        return $this->render('user/natural_search.html.twig');
+    }
 }
