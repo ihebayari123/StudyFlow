@@ -35,7 +35,7 @@ Studyflow is a web application designed to help students manage stress by organi
 Developed at **Esprit School of Engineering – Tunisia**  
 PIDEV – 3A36 | Academic Year 2025–2026
 ## Getting Started 
-1. Clone the repository: git clone https://github.com/username/Esprit-PIDEV-3A36-2025-2026-Studyflow.git
+1. Clone the repository: git clone https://github.com/ihebayari123/StudyFlow.git
 2.  Install dependencies with Composer: composer install
 3. Configure database in .env file
 4. Run migrations to create tables: php bin/console doctrine:migrations:migrate
