@@ -30,9 +30,8 @@ Studyflow is a web application designed to help students manage stress by organi
 - Frontend interacts via API calls to manage tasks and data
 
 ## Contributors
-- Aziz Mhamdi – Project Lead / Backend Developer
-- [Autres membres de l’équipe si applicable]
-
+- Aziz Mhamdi 
+- 
 ## Academic Context
 Developed at **Esprit School of Engineering – Tunisia**  
 PIDEV – 3A36 | Academic Year 2025–2026
