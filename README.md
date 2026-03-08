@@ -9,7 +9,6 @@ Studyflow is a web application designed to help students manage stress by organi
 - Track progress and deadlines
 - Stress-reducing tips and reminders
 - Dashboard for productivity insights
-- Collaborative features for group work
 
 ## Tech Stack
 
