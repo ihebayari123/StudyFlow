@@ -96,7 +96,11 @@ final class ConsultationController extends AbstractController
             $em->persist($stresse);
             $em->flush();
             $this->addFlash('success', 'Consultation enregistrée avec succès dans la base de données ! (ID : ' . $stresse->getId() . ')');
+<<<<<<< HEAD
             return $this->redirectToRoute('app_showconsultation');
+=======
+            return $this->redirectToRoute('app_studyflow_affiche');
+>>>>>>> c3d903f9 (initial commit temporaire)
         }
 
         return $this->render('consultation/addconsultation.html.twig', [
