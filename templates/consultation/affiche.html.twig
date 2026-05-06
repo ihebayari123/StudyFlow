@@ -10,6 +10,35 @@
 
 <div class="bienetre-section">
     <div class="container">
+
+        {# ── Flash success ── #}
+        {% for message in app.flashes('success') %}
+        <div id="flashSuccess" style="
+            display:flex;align-items:center;gap:14px;
+            background:linear-gradient(135deg,#d1fae5,#a7f3d0);
+            border:2px solid #34d399;border-radius:14px;
+            padding:16px 22px;margin-bottom:24px;
+            box-shadow:0 6px 20px rgba(52,211,153,.3);
+            animation:slideDown .4s ease-out">
+            <i class="fas fa-check-circle" style="font-size:2rem;color:#059669;flex-shrink:0"></i>
+            <div style="flex:1;color:#065f46;font-size:.97rem">
+                <strong style="display:block;font-size:1.05rem;margin-bottom:2px">✅ Succès !</strong>
+                {{ message }}
+            </div>
+            <button onclick="document.getElementById('flashSuccess').style.display='none'"
+                style="background:none;border:none;color:#059669;font-size:1.1rem;cursor:pointer;padding:4px 8px;border-radius:8px">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <style>@keyframes slideDown{from{opacity:0;transform:translateY(-15px)}to{opacity:1;transform:translateY(0)}}</style>
+        <script>
+        setTimeout(function(){
+            var f=document.getElementById('flashSuccess');
+            if(f){f.style.transition='opacity .5s';f.style.opacity='0';setTimeout(function(){f.style.display='none'},500);}
+        },5000);
+        </script>
+        {% endfor %}
+
         <!-- Header avec titre et bouton A Propos -->
         <div class="header-with-button">
             <h1 class="section-title">Mon Espace Bien-Être</h1>
