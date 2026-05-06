@@ -166,7 +166,38 @@ tr:hover{
 
 <div class="page">
 
-    <!-- Header -->
+    <!-- Flash messages -->
+    {% for message in app.flashes('success') %}
+    <div id="flashMsg" style="
+        display:flex;align-items:center;gap:14px;
+        background:linear-gradient(135deg,#d1fae5,#a7f3d0);
+        border:2px solid #34d399;border-radius:12px;
+        padding:16px 22px;margin-bottom:20px;
+        box-shadow:0 6px 20px rgba(52,211,153,.3);
+        animation:slideDown .4s ease-out">
+        <i class="fas fa-check-circle" style="font-size:1.8rem;color:#059669;flex-shrink:0"></i>
+        <div style="flex:1;color:#065f46;font-size:.97rem">
+            <strong style="display:block;margin-bottom:2px">✅ Succès !</strong>{{ message }}
+        </div>
+        <button onclick="document.getElementById('flashMsg').style.display='none'"
+            style="background:none;border:none;color:#059669;font-size:1.1rem;cursor:pointer">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+    <div style="
+        display:flex;align-items:center;gap:14px;
+        background:#fef2f2;border:2px solid #fca5a5;border-radius:12px;
+        padding:16px 22px;margin-bottom:20px;
+        box-shadow:0 6px 20px rgba(239,68,68,.2)">
+        <i class="fas fa-exclamation-circle" style="font-size:1.8rem;color:#dc2626;flex-shrink:0"></i>
+        <div style="flex:1;color:#7f1d1d;font-size:.97rem">
+            <strong style="display:block;margin-bottom:2px">❌ Erreur !</strong>{{ message }}
+        </div>
+    </div>
+    {% endfor %}
     <div class="header">
         <h1>Gestion des Médecins</h1>
 
@@ -297,13 +328,15 @@ tr:hover{
                            Modifier
                         </a>
 
-                       
-
-                        {#<a href="{{ path('app_delete_medecin',{id:m.id}) }}"
-                           class="btn delete"
-                           onclick="return confirm('Supprimer ?')">
-                           Supprimer
-                        </a>#}
+                        <form method="post"
+                              action="{{ path('app_delete_medecin', {id: m.id}) }}"
+                              style="display:inline"
+                              onsubmit="return confirmDelete('{{ m.nom }} {{ m.prenom }}')">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="btn delete">
+                                <i class="fas fa-trash-alt"></i> Supprimer
+                            </button>
+                        </form>
 
                     </div>
 
@@ -326,5 +359,95 @@ tr:hover{
     </div>
 
 </div>
+
+<!-- ── Confirmation Modal ── -->
+<div id="deleteModal" style="
+    display:none;position:fixed;inset:0;z-index:9999;
+    background:rgba(0,0,0,.5);backdrop-filter:blur(4px);
+    align-items:center;justify-content:center">
+    <div style="
+        background:white;border-radius:20px;padding:36px 40px;
+        max-width:420px;width:90%;text-align:center;
+        box-shadow:0 20px 60px rgba(0,0,0,.3);
+        animation:popIn .3s ease-out">
+        <div style="font-size:3.5rem;margin-bottom:16px">🗑️</div>
+        <h3 style="color:#1f2937;font-size:1.3rem;font-weight:700;margin-bottom:10px">
+            Confirmer la suppression
+        </h3>
+        <p style="color:#6b7280;font-size:.95rem;margin-bottom:24px" id="modalText">
+            Voulez-vous vraiment supprimer ce médecin ?<br>
+            <strong id="modalName" style="color:#ef4444"></strong><br>
+            <span style="font-size:.85rem;color:#9ca3af">
+                ⚠️ Toutes ses consultations seront également supprimées.
+            </span>
+        </p>
+        <div style="display:flex;gap:12px;justify-content:center">
+            <button onclick="closeModal()"
+                style="padding:12px 28px;background:#f3f4f6;color:#374151;
+                       border:none;border-radius:10px;font-size:.95rem;
+                       font-weight:600;cursor:pointer;transition:all .2s">
+                Annuler
+            </button>
+            <button id="confirmBtn"
+                style="padding:12px 28px;background:linear-gradient(135deg,#ef4444,#dc2626);
+                       color:white;border:none;border-radius:10px;font-size:.95rem;
+                       font-weight:700;cursor:pointer;transition:all .2s;
+                       box-shadow:0 4px 15px rgba(239,68,68,.4)">
+                <i class="fas fa-trash-alt"></i> Oui, supprimer
+            </button>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+@keyframes slideDown{from{opacity:0;transform:translateY(-15px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+.btn.delete:hover{background:#b91c1c!important;transform:translateY(-1px)}
+.btn.edit:hover{background:#16a34a!important;transform:translateY(-1px)}
+</style>
+
+<script>
+var _pendingForm = null;
+
+function confirmDelete(name) {
+    document.getElementById('modalName').textContent = name;
+    document.getElementById('deleteModal').style.display = 'flex';
+    return false; // prevent immediate submit
+}
+
+document.getElementById('confirmBtn').addEventListener('click', function() {
+    if (_pendingForm) { _pendingForm.submit(); }
+});
+
+function closeModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+    _pendingForm = null;
+}
+
+// Intercept all delete forms to store reference
+document.querySelectorAll('form[onsubmit]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        _pendingForm = form;
+    });
+});
+
+// Close modal on backdrop click
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+// Auto-dismiss flash
+var flash = document.getElementById('flashMsg');
+if (flash) {
+    setTimeout(function() {
+        flash.style.transition = 'opacity .5s';
+        flash.style.opacity = '0';
+        setTimeout(function(){ flash.style.display='none'; }, 500);
+    }, 5000);
+}
+</script>
 
 {% endblock %}

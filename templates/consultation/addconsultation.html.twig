@@ -12,10 +12,23 @@
     <div class="container">
         <div class="header-with-button">
             <h1 class="section-title">Nouvelle Consultation</h1>
-            <a href="{{ path('app_studyflow') }}" class="add-course-btn">
+            <a href="{{ path('app_studyflow_affiche') }}" class="add-course-btn">
                 <i class="fas fa-arrow-left"></i> Retour 
             </a>
         </div>
+
+        {# ── Flash message success ── #}
+        {% for message in app.flashes('success') %}
+        <div class="alert-success-custom" id="flashSuccess">
+            <div class="alert-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="alert-body">
+                <strong>Succès !</strong> {{ message }}
+            </div>
+            <button class="alert-close" onclick="document.getElementById('flashSuccess').style.display='none'">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
 
         <!-- Formulaire dans une carte -->
         <div class="course-card form-card">
@@ -208,8 +221,7 @@
                             {{ form_widget(form.save, {
                                 'label': 'Enregistrer la Consultation',
                                 'attr': {
-                                    'class': 'add-course-btn',
-                                    'formaction': path('app_studyflow_affiche')
+                                    'class': 'add-course-btn'
                                 }
                             }) }}
                         </div>
@@ -237,6 +249,52 @@
 </div>
 
 <style>
+    /* ── Flash success message ── */
+    .alert-success-custom {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        border: 2px solid #34d399;
+        border-radius: 16px;
+        padding: 18px 24px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 25px rgba(52, 211, 153, 0.3);
+        animation: slideDown 0.4s ease-out;
+    }
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .alert-icon {
+        font-size: 2rem;
+        color: #059669;
+        flex-shrink: 0;
+    }
+    .alert-body {
+        flex: 1;
+        color: #065f46;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+    .alert-body strong {
+        font-size: 1.1rem;
+        display: block;
+        margin-bottom: 2px;
+    }
+    .alert-close {
+        background: none;
+        border: none;
+        color: #059669;
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 8px;
+        transition: background 0.2s;
+        flex-shrink: 0;
+    }
+    .alert-close:hover { background: rgba(5, 150, 105, 0.15); }
+
     * {
         margin: 0;
         padding: 0;
@@ -582,11 +640,7 @@
             if (!this.checkValidity()) {
                 event.preventDefault();
                 event.stopPropagation();
-                
-                // Ajouter la classe was-validated pour afficher les messages
                 this.classList.add('was-validated');
-                
-                // Faire défiler jusqu'au premier champ invalide
                 const firstInvalid = this.querySelector(':invalid');
                 if (firstInvalid) {
                     firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -594,6 +648,17 @@
                 }
             }
         }, false);
+    }
+
+    // Auto-dismiss flash message after 5 seconds
+    const flash = document.getElementById('flashSuccess');
+    if (flash) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(function() {
+            flash.style.transition = 'opacity 0.5s ease';
+            flash.style.opacity = '0';
+            setTimeout(function() { flash.style.display = 'none'; }, 500);
+        }, 5000);
     }
 </script>
 {% endblock %}
