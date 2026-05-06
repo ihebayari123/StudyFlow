@@ -48,6 +48,49 @@ final class WellBeingScoreController extends AbstractController
     //public function addWellBeingScore(ManagerRegistry $m, Request $request): Response
     //{
         //$em = $m->getManager();
+
+    /**
+     * Ajoute un WellBeingScore en attribuant automatiquement le premier StressSurvey sans score.
+     * Si tous les surveys ont déjà un score, l'ajout est bloqué avec un message d'erreur.
+     */
+    #[Route('/add_well_being_score', name: 'app_add_well_being_score')]
+    public function addWellBeingScore(ManagerRegistry $m, Request $request, StressSurveyRepository $surveyRepo, WellBeingScoreRepository $scoreRepo): Response
+    {
+        $em = $m->getManager();
+
+        // Trouver le premier StressSurvey sans WellBeingScore associé
+        $allSurveys = $surveyRepo->findAll();
+        $availableSurvey = null;
+        foreach ($allSurveys as $survey) {
+            if ($survey->getWellBeingScore() === null) {
+                $availableSurvey = $survey;
+                break;
+            }
+        }
+
+        if ($availableSurvey === null) {
+            $this->addFlash('error', 'Tous les sondages ont déjà un score de bien-être associé. Impossible d\'en ajouter un nouveau.');
+            return $this->redirectToRoute('app_showscore');
+        }
+
+        $wellBeingScore = new WellBeingScore();
+        $wellBeingScore->setSurvey($availableSurvey); // Attribution automatique
+
+        $form = $this->createForm(WellBeingScoreType::class, $wellBeingScore);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->persist($wellBeingScore);
+            $em->flush();
+            $this->addFlash('success', 'Score de bien-être ajouté avec succès pour le sondage #' . $availableSurvey->getId());
+            return $this->redirectToRoute('app_showscore');
+        }
+
+        return $this->render('well_being_score/addform.html.twig', [
+            'form' => $form->createView(),
+            'survey' => $availableSurvey,
+        ]);
+    }
         //$wellBeingScore = new WellBeingScore();
         //$form = $this->createForm(WellBeingScoreType::class, $wellBeingScore);
         //$form->handleRequest($request);

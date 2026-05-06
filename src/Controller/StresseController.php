@@ -11,6 +11,7 @@ use App\Repository\StressSurveyRepository;
 use App\Entity\StressSurvey;
 use App\Form\StressSurveyType;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 final class StresseController extends AbstractController
 {
@@ -41,9 +42,19 @@ final class StresseController extends AbstractController
         if (!$del) {
             throw $this->createNotFoundException('Sondage Stress non trouvé avec l\'ID: ' . $id);
         }
-        
-        $em->remove($del);
-        $em->flush();
+
+        try {
+            $em->beginTransaction();
+            // Les consultations et le WellBeingScore sont supprimés en cascade
+            $em->remove($del);
+            $em->flush();
+            $em->commit();
+        } catch (\Exception $e) {
+            $em->rollback();
+            $this->addFlash('error', 'Erreur lors de la suppression : ' . $e->getMessage());
+            return $this->redirectToRoute('app_showstresse');
+        }
+
         return $this->redirectToRoute('app_showstresse');
     }
 
@@ -58,7 +69,7 @@ final class StresseController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em->persist($stresse);
             $em->flush();
-            return $this->redirectToRoute('app_studyflow_score');
+            return $this->redirectToRoute('app_showstresse');
         }
         
         return $this->render('stresse/add.html.twig', [
@@ -2647,4 +2658,171 @@ public function getNearbyPsychiatrists(Request $request): Response
         'totalAvailable' => count($psychiatrists)
     ]);
 }
+
+    // =========================================================
+    // FRONT-END : Formulaire étudiant + Chatbot ML
+    // =========================================================
+
+    /**
+     * Page front-end : formulaire de sondage stress pour l'étudiant
+     * Accessible depuis /study_flow → Voir_score
+     */
+    #[Route('/stresse/add_stresse_etudiant', name: 'app_add_stresse_etudiant')]
+    public function addStresseEtudiant(ManagerRegistry $m, Request $request): Response
+    {
+        $em = $m->getManager();
+        $survey = new StressSurvey();
+
+        // Formulaire AVEC champ user visible (l'étudiant choisit son identifiant)
+        $form = $this->createForm(StressSurveyType::class, $survey, ['show_user' => true]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->persist($survey);
+            $em->flush();
+
+            $this->addFlash('success', 'Sondage enregistré avec succès ! ID: ' . $survey->getId());
+
+            // Rediriger vers le chatbot avec l'ID du survey
+            return $this->redirectToRoute('app_stresse_chatbot', ['id' => $survey->getId()]);
+        }
+
+        return $this->render('stresse/add_stresse_etudiant.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * Page chatbot ML : prédiction stress + caméra + PDF
+     */
+    #[Route('/stresse/chatbot/{id}', name: 'app_stresse_chatbot')]
+    public function chatbotStresse(int $id, StressSurveyRepository $repo): Response
+    {
+        $survey = $repo->find($id);
+        if (!$survey) {
+            throw $this->createNotFoundException('Sondage introuvable');
+        }
+
+        return $this->render('stresse/chatbot_stress.html.twig', [
+            'survey' => $survey,
+        ]);
+    }
+
+    /**
+     * API AJAX : prédiction ML via le modèle stress_model_complet
+     */
+    #[Route('/stresse/api/predict', name: 'app_stresse_api_predict', methods: ['POST'])]
+    public function apiPredict(Request $request): \Symfony\Component\HttpFoundation\JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $sleepHours  = floatval($data['sleep_hours']  ?? 7);
+        $studyHours  = floatval($data['study_hours']  ?? 4);
+        $coffeeCups  = intval($data['coffee_cups']    ?? 2);
+        $age         = intval($data['age']            ?? 20);
+        $sportHours  = floatval($data['sport_hours']  ?? 0);
+        $nom         = htmlspecialchars($data['nom']  ?? 'Étudiant');
+        $score       = intval($data['score']          ?? 50);
+
+        // Appel Python ML
+        $projectDir = $this->getParameter('kernel.project_dir');
+        $pythonPath = 'python';
+        $scriptPath = $projectDir . '/ml_models/predict_wellbeing.py';
+
+        $cmd = sprintf(
+            '%s %s --sleep_hours %s --study_hours %s --coffee_cups %s --age %s --sport_hours %s 2>&1',
+            escapeshellcmd($pythonPath),
+            escapeshellarg($scriptPath),
+            escapeshellarg((string)$sleepHours),
+            escapeshellarg((string)$studyHours),
+            escapeshellarg((string)$coffeeCups),
+            escapeshellarg((string)$age),
+            escapeshellarg((string)$sportHours)
+        );
+
+        $output = shell_exec($cmd);
+        $mlResult = null;
+        if ($output) {
+            // Extraire le JSON de la sortie
+            $jsonStart = strpos($output, '{');
+            if ($jsonStart !== false) {
+                $jsonStr = substr($output, $jsonStart);
+                $mlResult = json_decode($jsonStr, true);
+            }
+        }
+
+        // Générer recommandations personnalisées
+        $stressLevel = 'Moyen';
+        $stressPct   = 50;
+        $happinessLevel = 'Moyen';
+
+        if ($mlResult && isset($mlResult['predictions'])) {
+            $stressPct   = $mlResult['predictions']['stress']['percentage'] ?? 50;
+            $stressLevel = $mlResult['predictions']['stress']['level'] ?? 'Moyen';
+            $happinessLevel = $mlResult['predictions']['happiness']['level'] ?? 'Moyen';
+        }
+
+        // Recommandations basées sur le score et les prédictions
+        $recommendations = $this->generatePersonalizedRecommendations($score, $sleepHours, $studyHours, $stressPct);
+        $emploiDuTemps   = $this->generatePersonalizedSchedule($sleepHours, $studyHours, $sportHours);
+
+        return $this->json([
+            'success'         => true,
+            'nom'             => $nom,
+            'score'           => $score,
+            'stress_level'    => $stressLevel,
+            'stress_pct'      => round($stressPct, 1),
+            'happiness_level' => $happinessLevel,
+            'recommendations' => $recommendations,
+            'emploi_du_temps' => $emploiDuTemps,
+            'ml_raw'          => $mlResult,
+        ]);
+    }
+
+    private function generatePersonalizedRecommendations(int $score, float $sleep, float $study, float $stress): array
+    {
+        $recs = [];
+
+        if ($score < 30) {
+            $recs[] = '🚨 Votre niveau de bien-être est critique. Consultez un professionnel de santé dès que possible.';
+            $recs[] = '😴 Priorité absolue : dormez au moins 8h par nuit cette semaine.';
+            $recs[] = '🧘 Pratiquez 10 minutes de méditation chaque matin.';
+        } elseif ($score < 60) {
+            $recs[] = '⚠️ Votre bien-être nécessite attention. Adoptez une routine plus équilibrée.';
+            $recs[] = '🏃 Ajoutez 30 minutes d\'activité physique quotidienne.';
+            $recs[] = '📚 Limitez vos heures d\'étude à 6h max par jour avec des pauses régulières.';
+        } else {
+            $recs[] = '✅ Votre bien-être est satisfaisant. Continuez sur cette lancée !';
+            $recs[] = '🌟 Maintenez votre routine de sommeil et d\'exercice.';
+        }
+
+        if ($sleep < 6) {
+            $recs[] = '💤 Vous dormez trop peu (' . $sleep . 'h). Visez 7-9h pour optimiser vos performances.';
+        }
+        if ($study > 10) {
+            $recs[] = '📖 ' . $study . 'h d\'étude par jour est excessif. Utilisez la technique Pomodoro (25min/5min).';
+        }
+        if ($stress > 70) {
+            $recs[] = '🧠 Stress élevé détecté. Essayez la respiration 4-7-8 : inspirez 4s, retenez 7s, expirez 8s.';
+        }
+
+        return $recs;
+    }
+
+    private function generatePersonalizedSchedule(float $sleep, float $study, float $sport): array
+    {
+        $wakeHour = max(6, 24 - intval($sleep) - 1);
+        return [
+            ['heure' => sprintf('%02d:00', $wakeHour),     'activite' => '🌅 Réveil & routine matinale (hygiène, petit-déjeuner)'],
+            ['heure' => sprintf('%02d:00', $wakeHour + 1), 'activite' => '📚 Session d\'étude 1 (Pomodoro × 3)'],
+            ['heure' => sprintf('%02d:00', $wakeHour + 3), 'activite' => '☕ Pause active (marche, étirements)'],
+            ['heure' => sprintf('%02d:00', $wakeHour + 4), 'activite' => '📚 Session d\'étude 2 (Pomodoro × 3)'],
+            ['heure' => sprintf('%02d:00', $wakeHour + 6), 'activite' => '🍽️ Déjeuner & repos (30 min)'],
+            ['heure' => sprintf('%02d:00', $wakeHour + 7), 'activite' => '🏃 Sport & activité physique (' . intval($sport ?: 1) . 'h)'],
+            ['heure' => sprintf('%02d:00', $wakeHour + 8), 'activite' => '📚 Révision légère & lecture'],
+            ['heure' => sprintf('%02d:00', $wakeHour + 10),'activite' => '🍽️ Dîner & détente (famille, amis)'],
+            ['heure' => sprintf('%02d:00', $wakeHour + 12),'activite' => '🧘 Méditation / lecture calme (30 min)'],
+            ['heure' => sprintf('%02d:00', $wakeHour + 13),'activite' => '😴 Coucher — objectif ' . intval($sleep ?: 8) . 'h de sommeil'],
+        ];
+    }
 }

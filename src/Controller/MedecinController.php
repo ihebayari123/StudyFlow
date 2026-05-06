@@ -64,11 +64,19 @@ final class MedecinController extends AbstractController
         if (!$del) {
             throw $this->createNotFoundException('Médecin non trouvé');
         }
-        
-        $em->remove($del);
-        $em->flush();
-        
-        $this->addFlash('success', 'Médecin supprimé avec succès');
+
+        try {
+            $em->beginTransaction();
+            // Les consultations sont supprimées en cascade (cascade: ['remove'] dans l'entité)
+            $em->remove($del);
+            $em->flush();
+            $em->commit();
+            $this->addFlash('success', 'Médecin et ses consultations supprimés avec succès');
+        } catch (\Exception $e) {
+            $em->rollback();
+            $this->addFlash('error', 'Erreur lors de la suppression : ' . $e->getMessage());
+        }
+
         return $this->redirectToRoute('app_showmedecin');
     }
 #[Route('/add_medecin', name: 'app_add_medecin')]
