@@ -1,6 +1,4 @@
 <?php
-// src/Controller/NotificationController.php
-
 namespace App\Controller;
 
 use App\Service\NotificationService;
@@ -17,26 +15,29 @@ class NotificationController extends AbstractController
     {
         return $this->json($notificationService->getUnreadForAdmin());
     }
-    
-    // Pour le render controller dans le template
-    public function getUnreadForMenu(NotificationService $notificationService)
+
+    #[Route('/notifications/menu', name: 'app_notifications_menu')]
+    public function getUnreadForMenu(NotificationService $notificationService): Response
     {
-        return $notificationService->getUnreadForAdmin();
+        return $this->render('admin/Partials/_notifications_dropdown.html.twig', [
+            'notifications' => $notificationService->getUnreadForAdmin()
+        ]);
     }
 
+    #[Route('/notifications/count', name: 'app_notifications_count')]
     public function getUnreadCount(NotificationService $notificationService): Response
     {
         $count = count($notificationService->getUnreadForAdmin());
-        
-        // ⚠️ Il faut retourner un objet Response, pas un nombre
-        return new Response((string)$count);
+        return $this->render('admin/Partials/_notifications_count.html.twig', [
+            'count' => $count
+        ]);
     }
 
-    #[Route('/notifications/mark-all-read', name: 'app_notifications_mark_all_read')]  // ← supprime methods
-public function markAllAsRead(NotificationService $notificationService): RedirectResponse
-{
-    $notificationService->markAllAsRead();
-    $this->addFlash('success', 'Toutes les notifications ont été marquées comme lues');
-    return $this->redirectToRoute('app_admin_notifications');
-}
+    #[Route('/notifications/mark-all-read', name: 'app_notifications_mark_all_read')]
+    public function markAllAsRead(NotificationService $notificationService): RedirectResponse
+    {
+        $notificationService->markAllAsRead();
+        $this->addFlash('success', 'Toutes les notifications ont été marquées comme lues');
+        return $this->redirectToRoute('app_admin_notifications');
+    }
 }

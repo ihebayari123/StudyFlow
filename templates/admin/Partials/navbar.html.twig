@@ -3310,11 +3310,7 @@
             data-bs-auto-close="outside"
           >
             <i class="feather-bell"></i>
-            {% set unread_count =
-            render(controller('App\\Controller\\NotificationController::getUnreadCount'))
-            %} {% if unread_count > 0 %}
-            <span class="badge bg-danger nxl-h-badge">{{ unread_count }}</span>
-            {% endif %}
+            {{ render(controller('App\\Controller\\NotificationController::getUnreadCount')) }}
           </a>
           <div
             class="dropdown-menu dropdown-menu-end nxl-h-dropdown nxl-notifications-menu"
@@ -3333,74 +3329,7 @@
               <span>Mark all as Read</span>
             </a>
 
-            {# Notifications dynamiques depuis la base #} {% set notifications =
-            render(controller('App\\Controller\\NotificationController::getUnread'))
-            %} {% if notifications|length > 0 %} {% for notification in
-            notifications %}
-            <div class="notifications-item">
-              {# Icône différente selon le type de notification #} {% if
-              notification.type == 'danger' %}
-              <div class="rounded-circle bg-danger bg-opacity-10 p-2 me-3">
-                <i class="feather-alert-circle text-danger"></i>
-              </div>
-              {% elseif notification.type == 'warning' %}
-              <div class="rounded-circle bg-warning bg-opacity-10 p-2 me-3">
-                <i class="feather-alert-triangle text-warning"></i>
-              </div>
-              {% else %}
-              <div class="rounded-circle bg-info bg-opacity-10 p-2 me-3">
-                <i class="feather-info text-info"></i>
-              </div>
-              {% endif %}
-
-              <div class="notifications-desc">
-                <a
-                  href="javascript:void(0);"
-                  class="font-body text-truncate-2-line"
-                >
-                  <span class="fw-semibold text-dark">{{
-                    notification.title
-                  }}</span>
-                </a>
-                <p class="text-truncate-2-line small text-muted mb-1">
-                  {{ notification.message }}
-                </p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div
-                    class="notifications-date text-muted border-bottom border-bottom-dashed"
-                  >
-                    {{ notification.createdAt|date('d/m/Y H:i') }}
-                  </div>
-                  <div class="d-flex align-items-center float-end gap-2">
-                    <a
-                      href="{{
-                        path('app_notification_read', { id: notification.id })
-                      }}"
-                      class="d-block wd-8 ht-8 rounded-circle bg-gray-300"
-                      data-bs-toggle="tooltip"
-                      title="Marquer comme lu"
-                    >
-                    </a>
-                    <a
-                      href="javascript:void(0);"
-                      class="text-danger"
-                      data-bs-toggle="tooltip"
-                      title="Remove"
-                    >
-                      <i class="feather-x fs-12"></i>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {% endfor %} {% else %}
-            <div class="notifications-item">
-              <div class="text-center py-4">
-                <i class="feather-bell-off fs-3 text-muted mb-2"></i>
-                <p class="text-muted mb-0">Aucune nouvelle notification</p>
-              </div>
-            </div>
-            {% endif %}
+            {# Notifications dynamiques depuis la base #} {{ render(controller('App\\Controller\\NotificationController::getUnreadForMenu')) }}
 
             <div class="text-center notifications-footer">
               <a
